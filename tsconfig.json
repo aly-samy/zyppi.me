@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/domain" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/contracts" },
+    { "path": "./packages/runtime" },
+    { "path": "./packages/testing" },
+    { "path": "./apps/api" },
+    { "path": "./apps/web" },
+    { "path": "./edge/worker" }
+  ]
+}
