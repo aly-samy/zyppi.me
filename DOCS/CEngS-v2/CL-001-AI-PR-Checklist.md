@@ -1,4 +1,5 @@
 # CL-001 — AI Coding / PR Checklist
+
 **One page. Run this immediately before opening a PR. Full rules: CEngS-102.**
 
 - ☐ Mandate/Work Item followed exactly — no scope drift, no invented requirements

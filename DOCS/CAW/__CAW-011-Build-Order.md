@@ -12,18 +12,17 @@ Hierarchy: `Milestone → Implementation Task (IT-xxxx) → AI Mandate (AMS, sam
 ## M01 — Repository Foundation
 
 _(No dependencies — first milestone)_
-_Note: AMS-0101's mandate text included pnpm-workspace.yaml creation, overlapping IT-0102's scope. Both are marked complete as of AMS-0101's delivery — this is a documentation correction, not double-counted work. Future AMS mandates should stay strictly within their `IT-xxxx`'s stated scope to avoid this._
 
-| ID      | Title                             | Depends On | Size | AMS      | Status                                                                    |
-| ------- | --------------------------------- | ---------- | ---- | -------- | ------------------------------------------------------------------------- |
-| IT-0101 | Initialize monorepo               | —          | S    | AMS-0101 | ☑                                                                         |
-| IT-0102 | Configure pnpm workspaces         | IT-0101    | XS   | AMS-0102 | ☑ _(delivered inside AMS-0101 — mandate scoping overlap; see note below)_ |
-| IT-0103 | TypeScript project references     | IT-0102    | S    | AMS-0103 | ☑                                                                         |
-| IT-0104 | ESLint config                     | IT-0102    | XS   | AMS-0104 | ☑                                                                         |
-| IT-0105 | Prettier config                   | IT-0102    | XS   | AMS-0105 | ☑                                                                         |
-| IT-0106 | Vitest config                     | IT-0103    | S    | AMS-0106 | ☑                                                                         |
-| IT-0107 | GitHub Actions CI skeleton        | IT-0106    | S    | AMS-0107 | ☐                                                                         |
-| IT-0108 | Runtime purity CI check (CAW-004) | IT-0107    | S    | AMS-0108 | ☐                                                                         |
+| ID      | Title                             | Depends On | Size | AMS      | Status |
+| ------- | --------------------------------- | ---------- | ---- | -------- | ------ |
+| IT-0101 | Initialize monorepo               | —          | S    | AMS-0101 | ☐      |
+| IT-0102 | Configure pnpm workspaces         | IT-0101    | XS   | AMS-0102 | ☐      |
+| IT-0103 | TypeScript project references     | IT-0102    | S    | AMS-0103 | ☐      |
+| IT-0104 | ESLint config                     | IT-0102    | XS   | AMS-0104 | ☐      |
+| IT-0105 | Prettier config                   | IT-0102    | XS   | AMS-0105 | ☐      |
+| IT-0106 | Vitest config                     | IT-0103    | S    | AMS-0106 | ☐      |
+| IT-0107 | GitHub Actions CI skeleton        | IT-0106    | S    | AMS-0107 | ☐      |
+| IT-0108 | Runtime purity CI check (CAW-004) | IT-0107    | S    | AMS-0108 | ☐      |
 
 ## M02 — Constitutional Package Structure
 

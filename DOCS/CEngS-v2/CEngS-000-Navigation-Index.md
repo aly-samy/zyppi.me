@@ -1,7 +1,9 @@
 # CEngS-000 — Engineering Navigation Index
+
 **Version 2.0 · Status: RATIFIED · Supersedes CEngS-001–010 (v1.0 Draft), CES-005**
 
 ## Purpose
+
 This is the only document every AI agent reads first. It defines no rules itself — it tells you which of the other documents to load for the task in front of you, in what order, and when to stop reading.
 
 ## Corpus Map
@@ -39,17 +41,17 @@ IMPLEMENTATION GUIDES (product-specific — outside CEngS, load per feature area
 
 ## Task → Document Table
 
-| Task | Load (in addition to Core) |
-|---|---|
-| Any general coding task | Core only |
-| Writing or modifying tests | CEngS-101 |
-| Opening a Pull Request | CEngS-102, CL-001 |
-| Cutting a build or release | CEngS-102, CL-002 |
-| Optimization / profiling work | CEngS-103 |
-| Adding logs, metrics, traces, alerts | CEngS-104 |
-| Writing docs / READMEs / API references | CEngS-105 |
-| Implementing a specific product area | Core + relevant IG-xxx |
-| Reviewing someone else's (or AI's) PR | CEngS-102, CL-001 |
+| Task                                        | Load (in addition to Core)    |
+| ------------------------------------------- | ----------------------------- |
+| Any general coding task                     | Core only                     |
+| Writing or modifying tests                  | CEngS-101                     |
+| Opening a Pull Request                      | CEngS-102, CL-001             |
+| Cutting a build or release                  | CEngS-102, CL-002             |
+| Optimization / profiling work               | CEngS-103                     |
+| Adding logs, metrics, traces, alerts        | CEngS-104                     |
+| Writing docs / READMEs / API references     | CEngS-105                     |
+| Implementing a specific product area        | Core + relevant IG-xxx        |
+| Reviewing someone else's (or AI's) PR       | CEngS-102, CL-001             |
 | Deciding whether to migrate a package to Go | CEngS-103 §Migration Triggers |
 
 ## Governing Principle

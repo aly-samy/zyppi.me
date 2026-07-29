@@ -50,12 +50,12 @@ Observe commerce without imposing existing models, business terminology, standar
 
 The workshop consisted of four independent observation missions.
 
-| Mission | Purpose |
-|----------|---------|
-| CA-1A | Observe normal commercial activity across diverse environments |
-| CA-1B | Observe boundary interactions between independent systems |
-| CA-1C | Observe interruption, friction, failure, rejection, and dispute |
-| CA-1D | Observe recovery, correction, continuation, and successful resolution |
+| Mission | Purpose                                                               |
+| ------- | --------------------------------------------------------------------- |
+| CA-1A   | Observe normal commercial activity across diverse environments        |
+| CA-1B   | Observe boundary interactions between independent systems             |
+| CA-1C   | Observe interruption, friction, failure, rejection, and dispute       |
+| CA-1D   | Observe recovery, correction, continuation, and successful resolution |
 
 ---
 

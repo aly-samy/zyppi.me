@@ -5,19 +5,29 @@
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "vitest run",
     "test:replay": "pnpm -r test:replay",
     "test:conformance": "pnpm -r test:conformance",
-    "lint": "pnpm -r lint",
-    "format": "prettier --check .",
+    "lint": "eslint . --ext .ts,.tsx --ignore-pattern \"**/dist/**\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "bench": "pnpm -r bench",
-    "ci": "pnpm lint && pnpm build && pnpm test"
+    "ci": "pnpm lint && pnpm build && pnpm test",
+    "coverage": "vitest run --coverage"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "node": "20.19.0"
   },
+  "packageManager": "pnpm@10.30.3",
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "@eslint/eslintrc": "^3.3.6",
+    "@typescript-eslint/eslint-plugin": "8.65.0",
+    "@typescript-eslint/parser": "8.65.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.39.5",
+    "eslint-plugin-import": "2.32.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

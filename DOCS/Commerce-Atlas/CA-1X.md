@@ -49,12 +49,12 @@ Mission Summaries
 
 The workshop analyzed:
 
-| Mission | Focus | Observations |
-|----------|-------|-------------:|
-| CA-1A | Raw Commerce | 100 |
-| CA-1B | Boundary Observation | 100 |
-| CA-1C | Friction Observation | 100 |
-| CA-1D | Failure Observation | 100 |
+| Mission | Focus                | Observations |
+| ------- | -------------------- | -----------: |
+| CA-1A   | Raw Commerce         |          100 |
+| CA-1B   | Boundary Observation |          100 |
+| CA-1C   | Friction Observation |          100 |
+| CA-1D   | Failure Observation  |          100 |
 
 **Total Observations Reviewed:** **400**
 
@@ -85,21 +85,21 @@ No attempt was made to determine constitutional primitives or construct an ontol
 
 # Cross-Mission Validation Matrix
 
-| Cross-Mission Finding | CA-1A | CA-1B | CA-1C | CA-1D |
-|------------------------|:-----:|:-----:|:-----:|:-----:|
-| Participants repeatedly observed | ✓ | ✓ | ✓ | ✓ |
-| Things participate in interactions | ✓ | ✓ | ✓ | ✓ |
-| Observable actions drive interactions | ✓ | ✓ | ✓ | ✓ |
-| State changes occur | ✓ | ✓ | ✓ | ✓ |
-| Evidence is produced | ✓ | ✓ | ✓ | ✓ |
-| Boundaries are encountered | ✓ | ✓ | ✓ | ✓ |
-| Validation precedes transition | ✓ | ✓ | ✓ | ✓ |
-| Decisions determine outcomes | ✓ | ✓ | ✓ | ✓ |
-| Friction is observable | — | ✓ | ✓ | ✓ |
-| Failure is observable | — | — | ✓ | ✓ |
-| Recovery behaviors occur | — | — | ✓ | ✓ |
-| Evidence persists after interaction | ✓ | ✓ | ✓ | ✓ |
-| Interaction sequences recur | ✓ | ✓ | ✓ | ✓ |
+| Cross-Mission Finding                 | CA-1A | CA-1B | CA-1C | CA-1D |
+| ------------------------------------- | :---: | :---: | :---: | :---: |
+| Participants repeatedly observed      |   ✓   |   ✓   |   ✓   |   ✓   |
+| Things participate in interactions    |   ✓   |   ✓   |   ✓   |   ✓   |
+| Observable actions drive interactions |   ✓   |   ✓   |   ✓   |   ✓   |
+| State changes occur                   |   ✓   |   ✓   |   ✓   |   ✓   |
+| Evidence is produced                  |   ✓   |   ✓   |   ✓   |   ✓   |
+| Boundaries are encountered            |   ✓   |   ✓   |   ✓   |   ✓   |
+| Validation precedes transition        |   ✓   |   ✓   |   ✓   |   ✓   |
+| Decisions determine outcomes          |   ✓   |   ✓   |   ✓   |   ✓   |
+| Friction is observable                |   —   |   ✓   |   ✓   |   ✓   |
+| Failure is observable                 |   —   |   —   |   ✓   |   ✓   |
+| Recovery behaviors occur              |   —   |   —   |   ✓   |   ✓   |
+| Evidence persists after interaction   |   ✓   |   ✓   |   ✓   |   ✓   |
+| Interaction sequences recur           |   ✓   |   ✓   |   ✓   |   ✓   |
 
 ---
 

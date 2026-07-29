@@ -1,7 +1,36 @@
-node_modules
-dist
-.build
-*.log
-.DS_Store
+# Dependencies
+node_modules/
+
+# Build and generated output
+dist/
+build/
+.build/
+out/
+
+# Test and coverage output
+coverage/
+
+# TypeScript build information
 *.tsbuildinfo
 
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Editor and local tooling
+.vscode/
+.idea/
+
+# Local agent or temporary files
+*.tmp
+*.temp

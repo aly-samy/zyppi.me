@@ -1,4 +1,5 @@
 # CL-002 — Release Checklist
+
 **One page. Run this before any production release. Full rules: CEngS-102 §7–11.**
 
 - ☐ Compilation succeeds, zero warnings
