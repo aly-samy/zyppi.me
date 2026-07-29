@@ -20,15 +20,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js (Installer)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node.js (Cache Config)
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
           cache-dependency-path: "pnpm-lock.yaml"
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Install dependencies (frozen lockfile)
         run: pnpm install --frozen-lockfile
