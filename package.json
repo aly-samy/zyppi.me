@@ -1,0 +1,20 @@
+{
+  "name": "zyppi-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:replay": "pnpm -r test:replay",
+    "test:conformance": "pnpm -r test:conformance",
+    "lint": "pnpm -r lint",
+    "format": "prettier --check .",
+    "bench": "pnpm -r bench",
+    "ci": "pnpm lint && pnpm build && pnpm test"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
