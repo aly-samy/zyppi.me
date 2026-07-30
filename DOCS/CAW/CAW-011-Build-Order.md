@@ -32,7 +32,7 @@ _(Depends on M01)_
 | ID      | Title                                         | Depends On   | Size | AMS      | Status                                                                                                   |
 | ------- | --------------------------------------------- | ------------ | ---- | -------- | -------------------------------------------------------------------------------------------------------- |
 | IT-0201 | Create `packages/runtime`                     | IT-0108      | XS   | AMS-0201 | ☑ _(Note: package manifest originated as the M01 purity-validator boundary and was extended during M02)_ |
-| IT-0202 | Create `packages/domain`                      | IT-0108      | XS   | AMS-0202 | ☐                                                                                                        |
+| IT-0202 | Create `packages/domain`                      | IT-0108      | XS   | AMS-0202 | ☑                                                                                                        |
 | IT-0203 | Create `packages/contracts`                   | IT-0108      | XS   | AMS-0203 | ☐                                                                                                        |
 | IT-0204 | Create `packages/shared`                      | IT-0108      | XS   | AMS-0204 | ☐                                                                                                        |
 | IT-0205 | Create `packages/testing`                     | IT-0108      | XS   | AMS-0205 | ☐                                                                                                        |
