@@ -1,6 +1,6 @@
 # M01 Closure Record
 
-**Milestone: M01 — Repository Foundation · Status: PASSED AUDIT · Baseline commit/SHA: 7e960a3ec140272b43fa19d26568b72c1b599f53**
+**Milestone: M01 — Repository Foundation · Status: CLOSED AND RATIFIED · Baseline commit/SHA: 7e960a3ec140272b43fa19d26568b72c1b599f53**
 
 ## IT-0101–0103 (Repo init, pnpm workspace, TS project references)
 
