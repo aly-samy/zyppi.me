@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "verify": "node ../../tools/verify-package-boundary.mjs"
+    "verify": "node ../../tools/verify-package-boundary.mjs --package=packages/runtime"
   },
   "dependencies": {},
   "peerDependencies": {}
