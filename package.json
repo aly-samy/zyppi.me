@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "bench": "pnpm -r bench",
-    "ci": "pnpm lint && pnpm build && pnpm test",
+    "runtime:purity": "node tools/validate-runtime-purity.mjs",
+    "ci": "pnpm lint && pnpm build && pnpm runtime:purity && pnpm test",
     "coverage": "vitest run --coverage"
   },
   "engines": {

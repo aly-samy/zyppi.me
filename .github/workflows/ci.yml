@@ -47,5 +47,8 @@ jobs:
       - name: TypeScript project build
         run: pnpm exec tsc -b
 
+      - name: Run Runtime purity validation
+        run: pnpm runtime:purity
+
       - name: Run tests
         run: pnpm test

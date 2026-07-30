@@ -10,6 +10,8 @@ export default defineConfig({
       "apps/**/*.spec.ts",
       "edge/**/*.test.ts",
       "edge/**/*.spec.ts",
+      "tools/**/*.test.ts",
+      "tools/**/*.spec.ts",
     ],
     exclude: ["node_modules", "dist", "build", "coverage", ".git", "**/*.d.ts"],
     clearMocks: true,
