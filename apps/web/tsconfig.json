@@ -6,9 +6,5 @@
     "jsx": "preserve"
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../../packages/contracts" },
-    { "path": "../../packages/domain" },
-    { "path": "../../packages/shared" }
-  ]
+  "references": []
 }

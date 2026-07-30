@@ -37,6 +37,8 @@ importers:
 
   apps/api: {}
 
+  apps/web: {}
+
   packages/contracts: {}
 
   packages/domain: {}
