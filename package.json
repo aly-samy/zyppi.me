@@ -14,6 +14,7 @@
     "bench": "pnpm -r bench",
     "runtime:purity": "node tools/validate-runtime-purity.mjs",
     "runtime:boundary": "node tools/verify-package-boundary.mjs --package=packages/runtime",
+    "domain:boundary": "node tools/verify-package-boundary.mjs --package=packages/domain",
     "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm runtime:purity && pnpm runtime:boundary && pnpm test",
     "coverage": "vitest run --coverage"
   },
