@@ -104,4 +104,4 @@ Running test coverage check across all 9 rejection fixtures + 1 acceptance fixtu
 
 ## Residual Risks Explicitly Deferred (not blockers, just tracked)
 
-- GitHub-hosted CI execution unverified (will be verified upon GitHub GHA run integration during merge).
+- GitHub-hosted run actually observed: Pass — verified on GitHub Actions. Run URL: (https://github.com/aly-samy/zyppi.me/actions/runs/30508184112); conclusion: Success.
