@@ -43,6 +43,8 @@ importers:
 
   packages/shared: {}
 
+  packages/testing: {}
+
 packages:
   "@babel/helper-string-parser@7.29.7":
     resolution:
