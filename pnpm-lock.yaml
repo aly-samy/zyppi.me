@@ -41,6 +41,8 @@ importers:
 
   packages/runtime: {}
 
+  packages/shared: {}
+
 packages:
   "@babel/helper-string-parser@7.29.7":
     resolution:

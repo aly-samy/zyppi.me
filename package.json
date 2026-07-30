@@ -16,6 +16,7 @@
     "runtime:boundary": "node tools/verify-package-boundary.mjs --package=packages/runtime",
     "domain:boundary": "node tools/verify-package-boundary.mjs --package=packages/domain",
     "contracts:boundary": "node tools/verify-package-boundary.mjs --package=packages/contracts",
+    "shared:boundary": "node tools/verify-package-boundary.mjs --package=packages/shared",
     "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm runtime:purity && pnpm runtime:boundary && pnpm test",
     "coverage": "vitest run --coverage"
   },
