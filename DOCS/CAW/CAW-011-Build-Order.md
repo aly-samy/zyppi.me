@@ -29,16 +29,16 @@ _Note: AMS-0101's mandate text included pnpm-workspace.yaml creation, overlappin
 
 _(Depends on M01)_
 
-| ID      | Title                                         | Depends On   | Size | AMS      | Status |
-| ------- | --------------------------------------------- | ------------ | ---- | -------- | ------ |
-| IT-0201 | Create `packages/runtime`                     | IT-0108      | XS   | AMS-0201 | ☐      |
-| IT-0202 | Create `packages/domain`                      | IT-0108      | XS   | AMS-0202 | ☐      |
-| IT-0203 | Create `packages/contracts`                   | IT-0108      | XS   | AMS-0203 | ☐      |
-| IT-0204 | Create `packages/shared`                      | IT-0108      | XS   | AMS-0204 | ☐      |
-| IT-0205 | Create `packages/testing`                     | IT-0108      | XS   | AMS-0205 | ☐      |
-| IT-0206 | Create `apps/api`                             | IT-0108      | XS   | AMS-0206 | ☐      |
-| IT-0207 | Create `apps/web`                             | IT-0108      | XS   | AMS-0207 | ☐      |
-| IT-0208 | Enforce dependency boundaries (CAW-004 table) | IT-0201–0207 | S    | AMS-0208 | ☐      |
+| ID      | Title                                         | Depends On   | Size | AMS      | Status                                                                                                   |
+| ------- | --------------------------------------------- | ------------ | ---- | -------- | -------------------------------------------------------------------------------------------------------- |
+| IT-0201 | Create `packages/runtime`                     | IT-0108      | XS   | AMS-0201 | ☑ _(Note: package manifest originated as the M01 purity-validator boundary and was extended during M02)_ |
+| IT-0202 | Create `packages/domain`                      | IT-0108      | XS   | AMS-0202 | ☐                                                                                                        |
+| IT-0203 | Create `packages/contracts`                   | IT-0108      | XS   | AMS-0203 | ☐                                                                                                        |
+| IT-0204 | Create `packages/shared`                      | IT-0108      | XS   | AMS-0204 | ☐                                                                                                        |
+| IT-0205 | Create `packages/testing`                     | IT-0108      | XS   | AMS-0205 | ☐                                                                                                        |
+| IT-0206 | Create `apps/api`                             | IT-0108      | XS   | AMS-0206 | ☐                                                                                                        |
+| IT-0207 | Create `apps/web`                             | IT-0108      | XS   | AMS-0207 | ☐                                                                                                        |
+| IT-0208 | Enforce dependency boundaries (CAW-004 table) | IT-0201–0207 | S    | AMS-0208 | ☐                                                                                                        |
 
 ## M03 — Domain Foundation
 

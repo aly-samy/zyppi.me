@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "bench": "pnpm -r bench",
     "runtime:purity": "node tools/validate-runtime-purity.mjs",
-    "ci": "pnpm lint && pnpm build && pnpm runtime:purity && pnpm test",
+    "runtime:boundary": "node tools/verify-package-boundary.mjs",
+    "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm runtime:purity && pnpm runtime:boundary && pnpm test",
     "coverage": "vitest run --coverage"
   },
   "engines": {
