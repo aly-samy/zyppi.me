@@ -5,9 +5,5 @@
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../../packages/domain" },
-    { "path": "../../packages/contracts" },
-    { "path": "../../packages/runtime" }
-  ]
+  "references": []
 }
