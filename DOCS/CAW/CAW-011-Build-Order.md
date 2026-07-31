@@ -46,7 +46,7 @@ _(Depends on M02; may run parallel with M04 registry work once contracts stabili
 
 | ID      | Title                | Depends On   | Size | AMS      | Status |
 | ------- | -------------------- | ------------ | ---- | -------- | ------ |
-| IT-0301 | Identity model       | IT-0202      | S    | AMS-0301 | ☐      |
+| IT-0301 | Identity model       | IT-0202      | S    | AMS-0301 | ☑      |
 | IT-0302 | GS1 identifier model | IT-0202      | S    | AMS-0302 | ☐      |
 | IT-0303 | Evidence model       | IT-0202      | S    | AMS-0303 | ☐      |
 | IT-0304 | Authority model      | IT-0202      | S    | AMS-0304 | ☐      |
