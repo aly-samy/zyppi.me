@@ -1,6 +1,6 @@
 # CAW-004 — Repository Map & Bootstrap
 
-**Version 2.0 · Status: ACTIVE · Supersedes v1.0 (bootstrap details folded in per ratified decision: no CEngS-011 — one-time setup lives here, not in a permanent engineering standard)**
+**Version 2.1 · Status: ACTIVE · Supersedes v1.0 (bootstrap details folded in per ratified decision: no CEngS-011 — one-time setup lives here, not in a permanent engineering standard)**
 
 ## Workspace Layout
 
@@ -26,13 +26,24 @@ scripts/           CI validation, benchmark runners, conformance checks
 
 ## Ownership & Import Rules
 
-| Package              | May import from                                             | Must never import                                                                  |
-| -------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `packages/runtime`   | `packages/domain`, `packages/shared`                        | HTTP, DB, filesystem, cloud SDKs, `apps/*`, `edge/*` — CEngS-001 §4 / CEngS-002 §4 |
-| `packages/domain`    | nothing (leaf package)                                      | any infra, any other package                                                       |
-| `packages/contracts` | `packages/domain`                                           | `packages/runtime` internals                                                       |
-| `apps/api`           | `packages/runtime`, `packages/domain`, `packages/contracts` | direct DB access bypassing a repository interface                                  |
-| `edge/worker`        | `packages/contracts` (types only)                           | `packages/runtime` directly                                                        |
+**Version 2.1 note:** this table was incomplete in v2.0 — `packages/shared`, `packages/testing`, and `apps/web` were never formally specified, only described narratively. Completed here from what was already established elsewhere in the corpus (AMS-0103's review) before AMS-0208 (dependency-graph enforcement) can be built against it. This is the authoritative version — if AMS-0208 or any other document conflicts with this table, this table wins; report the conflict rather than resolving it in code.
+
+| Package              | May import from (production)                                | May import from (dev-only)                                                                                   | Must never import                                                                             |
+| -------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `packages/domain`    | nothing (leaf package)                                      | nothing                                                                                                      | any infra, any other package                                                                  |
+| `packages/shared`    | nothing (leaf package)                                      | nothing                                                                                                      | any infra, any other package                                                                  |
+| `packages/contracts` | `packages/domain`                                           | —                                                                                                            | `packages/runtime` internals                                                                  |
+| `packages/runtime`   | `packages/domain`, `packages/shared`                        | —                                                                                                            | HTTP, DB, filesystem, cloud SDKs, `apps/*`, `edge/*` — CEngS-001 §4 / CEngS-002 §4            |
+| `packages/testing`   | nothing in production (it's dev-only tooling itself)        | `packages/domain`, `packages/contracts`, `packages/runtime`, `packages/shared` — for building typed fixtures | production code in any package (testing is never a runtime dependency of anything)            |
+| `apps/api`           | `packages/runtime`, `packages/domain`, `packages/contracts` | `packages/testing`                                                                                           | direct DB access bypassing a repository interface                                             |
+| `apps/web`           | `packages/contracts`, `packages/domain`, `packages/shared`  | `packages/testing`                                                                                           | `packages/runtime` directly — Presentation must not skip the Application layer (CEngS-001 §3) |
+| `edge/worker`        | `packages/contracts` (types only)                           | —                                                                                                            | `packages/runtime` directly                                                                   |
+
+**Authorization is not obligation.** A permitted edge above may remain unused until an implementation actually requires it — this table defines the *ceiling* of what's allowed, not a checklist of imports that must exist.
+
+**Direct authorization is non-transitive.** `apps/api` may import `packages/domain` directly because the table says so — not because `packages/runtime` also imports `domain`. No package inherits import rights through another package's permissions.
+
+**No cycles, ever**, regardless of whether the individual edges are each independently authorized.
 
 Circular imports are prohibited and checked in CI.
 
@@ -54,11 +65,11 @@ This is what "the repository comes into existence" means concretely. It runs onc
 
 ## Repository Definition of Done (Bootstrap)
 
-- `pnpm install`, `pnpm run build`, `pnpm run lint`, `pnpm run test` all succeed (zero tests passing is fine at this stage)
-- `pnpm run ci` succeeds end to end
-- Forbidden-import check passes for `packages/runtime`
-- CI is green on `main`
-- README documents the layout above
+* `pnpm install`, `pnpm run build`, `pnpm run lint`, `pnpm run test` all succeed (zero tests passing is fine at this stage)
+* `pnpm run ci` succeeds end to end
+* Forbidden-import check passes for `packages/runtime`
+* CI is green on `main`
+* README documents the layout above
 
 ## Technology Stack
 
