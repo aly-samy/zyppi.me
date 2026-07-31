@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "verify": "node ../../tools/verify-package-boundary.mjs --package=packages/contracts"
+    "boundary": "node ../../tools/verify-package-boundary.mjs --package=packages/contracts"
   },
   "dependencies": {},
   "peerDependencies": {}

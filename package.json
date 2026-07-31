@@ -18,7 +18,9 @@
     "contracts:boundary": "node tools/verify-package-boundary.mjs --package=packages/contracts",
     "shared:boundary": "node tools/verify-package-boundary.mjs --package=packages/shared",
     "testing:boundary": "node tools/verify-package-boundary.mjs --package=packages/testing",
-    "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm runtime:purity && pnpm runtime:boundary && pnpm test",
+    "boundary:all": "pnpm --recursive --if-present run boundary",
+    "graph:validate": "node tools/verify-dependency-graph.mjs",
+    "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm runtime:purity && pnpm boundary:all && pnpm graph:validate && pnpm test",
     "coverage": "vitest run --coverage"
   },
   "engines": {

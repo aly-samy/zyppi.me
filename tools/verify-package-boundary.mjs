@@ -15,7 +15,20 @@ if (!packageDirArg) {
   process.exit(1);
 }
 
-const packageDir = path.resolve(packageDirArg);
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const monorepoRoot = path.dirname(__dirname);
+
+let packageDir = path.resolve(packageDirArg);
+if (!fs.existsSync(path.join(packageDir, "package.json"))) {
+  const rootRelativeDir = path.resolve(monorepoRoot, packageDirArg);
+  if (fs.existsSync(path.join(rootRelativeDir, "package.json"))) {
+    packageDir = rootRelativeDir;
+  }
+}
+
 const packageJsonPath = path.join(packageDir, "package.json");
 
 console.log(
