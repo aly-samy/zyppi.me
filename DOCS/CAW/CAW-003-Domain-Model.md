@@ -28,6 +28,15 @@ Only the entities this wedge actually uses. No future entities, no speculative f
 - Every entity supports canonical serialization (RI-001) — this is tested, not assumed.
 - Identity ≠ Referent. A Product Identity is not the physical product; it represents it. Don't collapse the distinction for convenience (see WS-03A.2/.3 if you need the full constitutional reasoning — not needed for this wedge's implementation).
 
-## Out of Scope for This Wedge
+## M03 Implementation Note — Cross-Entity Consistency
 
-Digital Twin, Digital Product Passport, Composite Referents, multi-identity convergence, full Authority Anchor delegation chains (WS-03D). These are real constitutional constructs but are not exercised by this slice — do not build them speculatively.
+This wedge's seven leaf entities (Identity, Referent, Evidence, Authority, Capability, Standing, Policy — IT-0301–0307) will likely be built across separate AI mandates. The real risk isn't ontological drift (this document already scopes each entity deliberately) — it's naming inconsistency between entities that reference each other. Two conventions, checked at each entity's review, not audited in advance:
+
+- Every entity's own identifier field is named `{entity}Id` (e.g., `identityId`, `evidenceId`, `authorityId`) — never a bare `id`.
+- A field referencing another entity uses that entity's exact identifier name (e.g., Standing references `identityId`, not `subjectId` or `actorId`).
+
+This is enforced at review time for each `IT-030x`, not by a separate pre-implementation audit.
+
+## Explicitly Rejected Scope Expansion (recorded so it isn't re-litigated per-entity)
+
+Full AI-agent delegation chain modeling (distinct Agent/Sponsor/Organization identity layers, cascading revocation, non-repudiable agent provenance) is real POL-001/SEC-001 territory but is **not** this wedge's job — CAW-001 §6 already excludes an authentication platform, and this document already excludes full Authority Anchor delegation chains (WS-03D). If a future milestone needs this, it's a new CAW series or an amendment to this one, not something to smuggle into IT-0304's acceptance criteria.
