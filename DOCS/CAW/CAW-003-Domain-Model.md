@@ -30,13 +30,19 @@ Only the entities this wedge actually uses. No future entities, no speculative f
 
 ## M03 Implementation Note — Cross-Entity Consistency
 
-This wedge's seven leaf entities (Identity, Referent, Evidence, Authority, Capability, Standing, Policy — IT-0301–0307) will likely be built across separate AI mandates. The real risk isn't ontological drift (this document already scopes each entity deliberately) — it's naming inconsistency between entities that reference each other. Two conventions, checked at each entity's review, not audited in advance:
+This wedge's foundational domain entities will likely be built across separate AI mandates. The real risk isn't ontological drift — this document already scopes each entity deliberately — it's naming inconsistency between entities that reference each other.
 
-- Every entity's own identifier field is named `{entity}Id` (e.g., `identityId`, `evidenceId`, `authorityId`) — never a bare `id`.
-- A field referencing another entity uses that entity's exact identifier name (e.g., Standing references `identityId`, not `subjectId` or `actorId`).
+Two conventions are checked during review of each applicable M03 implementation task:
 
-This is enforced at review time for each `IT-030x`, not by a separate pre-implementation audit.
+- Every entity's own identifier field is named `{entity}Id` (for example, `identityId`, `evidenceId`, `authorityId`) — never a bare `id`.
+- A field referencing another entity uses that entity's exact identifier name (for example, Standing references `identityId`, not `subjectId` or `actorId`).
 
-## Explicitly Rejected Scope Expansion (recorded so it isn't re-litigated per-entity)
+This is enforced at review time for each applicable M03 task, not by a separate pre-implementation audit.
 
-Full AI-agent delegation chain modeling (distinct Agent/Sponsor/Organization identity layers, cascading revocation, non-repudiable agent provenance) is real POL-001/SEC-001 territory but is **not** this wedge's job — CAW-001 §6 already excludes an authentication platform, and this document already excludes full Authority Anchor delegation chains (WS-03D). If a future milestone needs this, it's a new CAW series or an amendment to this one, not something to smuggle into IT-0304's acceptance criteria.
+The implementation-task mapping for **Referent** and the **GS1 identifier model** must remain consistent with CAW-011 and any ratified AMS scope clarification. This document defines the domain concepts; it does not silently resolve an ambiguity in task naming or expand a task's scope.
+
+## Explicitly Rejected Scope Expansion
+
+Full AI-agent delegation-chain modeling — distinct Agent/Sponsor/Organization identity layers, cascading revocation, and non-repudiable agent provenance — is real POL-001/SEC-001 territory but is **not** this wedge's job.
+
+CAW-001 §6 already excludes an authentication platform, and this wedge excludes full Authority Anchor delegation chains (WS-03D). If a future milestone needs this capability, it requires a new CAW series or an explicit amendment to this one. It must not be introduced implicitly through the acceptance criteria of an M03 entity task.
