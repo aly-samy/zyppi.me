@@ -42,7 +42,7 @@ _(Depends on M01)_
 
 ## M03 — Domain Foundation
 
-_(Depends on M02; may run parallel with M04 registry work once contracts stabilize)_
+_(Depends on M02; may run parallel with M04 registry work once contracts stabilize. Note: IT-0307 completes the planned Wave-A domain-foundation implementation set.)_
 
 | ID      | Title                | Depends On   | Size | AMS      | Status |
 | ------- | -------------------- | ------------ | ---- | -------- | ------ |
@@ -52,7 +52,7 @@ _(Depends on M02; may run parallel with M04 registry work once contracts stabili
 | IT-0304 | Authority model      | IT-0202      | S    | AMS-0304 | ☑      |
 | IT-0305 | Capability model     | IT-0202      | S    | AMS-0305 | ☑      |
 | IT-0306 | Standing model       | IT-0202      | S    | AMS-0306 | ☑      |
-| IT-0307 | Policy model         | IT-0202      | S    | AMS-0307 | ☐      |
+| IT-0307 | Policy model         | IT-0202      | S    | AMS-0307 | ☑      |
 | IT-0308 | ExecutionRequest     | IT-0301–0307 | S    | AMS-0308 | ☐      |
 | IT-0309 | ExecutionContext     | IT-0301–0307 | S    | AMS-0309 | ☐      |
 | IT-0310 | ExecutionReceipt     | IT-0301–0307 | S    | AMS-0310 | ☐      |
