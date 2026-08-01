@@ -565,6 +565,250 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
   return JSON.stringify(ordered);
 }
 
+export type PolicyDefinition =
+  | null
+  | boolean
+  | number
+  | string
+  | readonly PolicyDefinition[]
+  | { readonly [key: string]: PolicyDefinition };
+
+export type PolicyRecord = {
+  readonly policyId: string;
+  readonly policyType: string;
+  readonly version: string;
+  readonly definition: PolicyDefinition;
+  readonly active: boolean;
+};
+
+export type PolicyValidationErrorCode =
+  | "INVALID_POLICY_ID"
+  | "INVALID_POLICY_TYPE"
+  | "INVALID_VERSION"
+  | "INVALID_DEFINITION"
+  | "CYCLIC_DEFINITION"
+  | "INVALID_ACTIVE";
+
+export type PolicyValidationError = {
+  readonly code: PolicyValidationErrorCode;
+  readonly field: keyof PolicyRecord;
+  readonly message: string;
+};
+
+/**
+ * Validates raw input to produce a typed PolicyRecord or a ValidationResult error.
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validatePolicyRecord(
+  input: unknown,
+): ValidationResult<PolicyRecord, PolicyValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_POLICY_ID",
+        field: "policyId",
+        message: "Input must be a non-null object",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // Sequential validation order: policyId → policyType → version → definition → active
+
+  // 1. policyId validation
+  const policyId = raw.policyId;
+  if (typeof policyId !== "string" || policyId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_POLICY_ID",
+        field: "policyId",
+        message: "policyId must be a non-empty string",
+      },
+    };
+  }
+
+  // 2. policyType validation
+  const policyType = raw.policyType;
+  if (typeof policyType !== "string" || policyType.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_POLICY_TYPE",
+        field: "policyType",
+        message: "policyType must be a non-empty string",
+      },
+    };
+  }
+
+  // 3. version validation
+  const version = raw.version;
+  if (typeof version !== "string" || version.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VERSION",
+        field: "version",
+        message: "version must be a non-empty string",
+      },
+    };
+  }
+
+  // 4. definition validation
+  const definition = raw.definition;
+  const activePath = new Set<unknown>();
+  const defResult = checkDefinitionValid(definition, activePath);
+  if (defResult !== "OK") {
+    if (defResult === "CYCLIC") {
+      return {
+        ok: false,
+        error: {
+          code: "CYCLIC_DEFINITION",
+          field: "definition",
+          message: "definition contains cyclic references",
+        },
+      };
+    } else {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_DEFINITION",
+          field: "definition",
+          message: "definition is not a valid recursive finite JSON structure",
+        },
+      };
+    }
+  }
+
+  // 5. active validation
+  const active = raw.active;
+  if (typeof active !== "boolean") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE",
+        field: "active",
+        message: "active must be strictly boolean",
+      },
+    };
+  }
+
+  const record: PolicyRecord = {
+    policyId,
+    policyType,
+    version,
+    definition: definition as PolicyDefinition,
+    active,
+  };
+
+  return {
+    ok: true,
+    value: record,
+  };
+}
+
+function checkDefinitionValid(
+  val: unknown,
+  activePath: Set<unknown>,
+): "OK" | "INVALID" | "CYCLIC" {
+  if (val === null) {
+    return "OK";
+  }
+  const type = typeof val;
+  if (type === "boolean") {
+    return "OK";
+  }
+  if (type === "number") {
+    if (Number.isFinite(val)) {
+      return "OK";
+    }
+    return "INVALID";
+  }
+  if (type === "string") {
+    return "OK";
+  }
+  if (type === "object") {
+    if (Array.isArray(val)) {
+      if (activePath.has(val)) {
+        return "CYCLIC";
+      }
+      activePath.add(val);
+      for (const item of val) {
+        const res = checkDefinitionValid(item, activePath);
+        if (res !== "OK") {
+          activePath.delete(val);
+          return res;
+        }
+      }
+      activePath.delete(val);
+      return "OK";
+    }
+
+    // Must be a plain object: prototype must be Object.prototype or null
+    const proto = Object.getPrototypeOf(val as object);
+    if (proto !== Object.prototype && proto !== null) {
+      return "INVALID";
+    }
+
+    if (activePath.has(val)) {
+      return "CYCLIC";
+    }
+    activePath.add(val);
+
+    const keys = Reflect.ownKeys(val as object);
+    for (const key of keys) {
+      if (typeof key !== "string") {
+        activePath.delete(val);
+        return "INVALID";
+      }
+      const propValue = (val as Record<string, unknown>)[key];
+      const res = checkDefinitionValid(propValue, activePath);
+      if (res !== "OK") {
+        activePath.delete(val);
+        return res;
+      }
+    }
+
+    activePath.delete(val);
+    return "OK";
+  }
+
+  return "INVALID";
+}
+
+function canonicalizeDefinition(val: unknown): unknown {
+  if (val === null || typeof val !== "object") {
+    return val;
+  }
+  if (Array.isArray(val)) {
+    return val.map(canonicalizeDefinition);
+  }
+
+  const clean = Object.create(null);
+  const keys = Object.keys(val).sort();
+  for (const key of keys) {
+    clean[key] = canonicalizeDefinition((val as Record<string, unknown>)[key]);
+  }
+  return clean;
+}
+
+/**
+ * Canonically serializes a PolicyRecord deterministically.
+ * Alphabetic key order: active, definition, policyId, policyType, version
+ */
+export function serializePolicyRecord(record: PolicyRecord): string {
+  const cleanTop = Object.create(null);
+  cleanTop.active = record.active;
+  cleanTop.definition = canonicalizeDefinition(record.definition);
+  cleanTop.policyId = record.policyId;
+  cleanTop.policyType = record.policyType;
+  cleanTop.version = record.version;
+
+  return JSON.stringify(cleanTop);
+}
+
 /**
  * Validates raw input to produce a typed StandingRecord or a ValidationResult error.
  * Sequential validation of fields in StandingRecord declaration order:
