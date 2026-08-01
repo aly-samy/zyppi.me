@@ -122,6 +122,8 @@ The Domain validator strictly isolates model validity from behavioral evaluation
 
 Canonical serialization is implemented deterministically using explicit, sorted property key ordering for the top-level request and each nested record type. It preserves array element ordering and complies with the Domain leaf-package constraints.
 
+The serialization mechanism recursively handles all nested structures deterministically by parsing the output of the pre-existing, verified record serializers (e.g. `JSON.parse(serialize{Record}(r))`), which guarantees strict, non-duplicative alignment with existing canonical layout definitions. These formatted objects are then compiled into parent objects with top-level keys sorted alphabetically, and passed to standard native `JSON.stringify` to produce a byte-identical serialized JSON string.
+
 Top-level alphabetical field ordering:
 
 1. `activeConstitutionalView`
@@ -165,6 +167,28 @@ At review time, the following checks were executed successfully:
 
 ---
 
-## 13. Ambiguities and Resolutions
+## 13. Provenance and Resolutions
 
-No source ambiguities or implementation deviations were encountered. The requirements of the AMS-0308 mandate aligned perfectly with the existing Wave A Domain precedents and design constraints.
+The physical structure and validation details of the `ExecutionRequest` Domain model comprise a combination of direct requirements, explicitly authorized decisions, and inherited conventions:
+
+### A. Direct CAW Requirements:
+
+- **Six Top-Level Fields**: `requestId`, `identity`, `activeConstitutionalView`, `evidenceBundle`, `policyContext`, and `executionContext` are defined verbatim in `CAW-007 §Input`.
+- **`ExecutionContext` Fields**: The existence of `budget`, `entropy`, and `versions` is directly required to be handled explicitly as parameters per `CAW-007 §Input`.
+- **`ActiveConstitutionalView` Content Elements**: The list of seven categories (Identity, Relationships, Standing, Authorities, Capabilities, Evidence References, Applicable Policies) is defined verbatim in `CAW-007 §Input`.
+
+### B. Chair-Authorized Implementation Decisions (AMS-0308 Mandate):
+
+- **`Identity` Mapping**: Section 3.1 authorized mapping the abstract `Identity` concept to `IdentityRecord`.
+- **`budget` Validation**: `budget: number` non-negative and finite validation is a **Chair-authorized implementation decision**.
+- **`entropy` Validation**: `entropy: string` non-empty validation is a **Chair-authorized implementation decision**.
+- **`versions` Validation**: `versions: readonly string[]` non-empty item validation is a **Chair-authorized implementation decision**.
+- **Relationships Mapping**: `relationships → ReferentRecord[]` is a **Chair-authorized wedge mapping**, not a direct CAW statement that "Relationships" and "Referents" are universally identical.
+- **Evidence References Mapping**: `evidenceReferences → EvidenceRecord[]` is a **Chair-authorized composition decision**, not a direct CAW statement that an evidence reference must be a complete `EvidenceRecord`.
+- **Evidence Bundle Boundary**: `EvidenceBundle { evidenceRecords }` is a **bounded Chair-authorized implementation contract** created for the M03 ExecutionRequest composition boundary.
+- **Policy Context Boundary**: `PolicyContext { policies }` is a **bounded Chair-authorized implementation contract** created for the M03 ExecutionRequest composition boundary.
+
+### C. Inherited Wave A Conventions:
+
+- **Validation Abstraction**: Reused the `ValidationResult<T, E>` pattern, synchronous non-throwing validators, and structured, typed validation error objects.
+- **Canonical Serialization Pattern**: Reused the manual alphabetical key ordering and recursive object serialization of flat record types.
