@@ -1348,3 +1348,532 @@ export function serializeGS1Identifier(identifier: GS1Identifier): string {
   };
   return JSON.stringify(ordered);
 }
+
+export interface ActiveConstitutionalView {
+  readonly identity: IdentityRecord;
+  readonly relationships: readonly ReferentRecord[];
+  readonly standings: readonly StandingRecord[];
+  readonly authorities: readonly AuthorityRecord[];
+  readonly capabilities: readonly CapabilityRecord[];
+  readonly evidenceReferences: readonly EvidenceRecord[];
+  readonly applicablePolicies: readonly PolicyRecord[];
+}
+
+export interface EvidenceBundle {
+  readonly evidenceRecords: readonly EvidenceRecord[];
+}
+
+export interface PolicyContext {
+  readonly policies: readonly PolicyRecord[];
+}
+
+export interface ExecutionContext {
+  readonly budget: number;
+  readonly entropy: string;
+  readonly versions: readonly string[];
+}
+
+export interface ExecutionRequest {
+  readonly requestId: string;
+  readonly identity: IdentityRecord;
+  readonly activeConstitutionalView: ActiveConstitutionalView;
+  readonly evidenceBundle: EvidenceBundle;
+  readonly policyContext: PolicyContext;
+  readonly executionContext: ExecutionContext;
+}
+
+export type ExecutionRequestValidationErrorCode =
+  | "INVALID_REQUEST_ID"
+  | "INVALID_IDENTITY"
+  | "INVALID_ACTIVE_CONSTITUTIONAL_VIEW"
+  | "INVALID_EVIDENCE_BUNDLE"
+  | "INVALID_POLICY_CONTEXT"
+  | "INVALID_EXECUTION_CONTEXT";
+
+export type ExecutionRequestValidationError = {
+  readonly code: ExecutionRequestValidationErrorCode;
+  readonly field: keyof ExecutionRequest;
+  readonly message: string;
+};
+
+/**
+ * Validates raw input to produce a typed ExecutionRequest or a ValidationResult error.
+ * Sequential validation of fields: requestId -> identity -> activeConstitutionalView -> evidenceBundle -> policyContext -> executionContext
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateExecutionRequest(
+  input: unknown,
+): ValidationResult<ExecutionRequest, ExecutionRequestValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_REQUEST_ID",
+        field: "requestId",
+        message: "Input must be a non-null object",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. requestId validation
+  const requestId = raw.requestId;
+  if (typeof requestId !== "string" || requestId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_REQUEST_ID",
+        field: "requestId",
+        message: "requestId must be a non-empty string",
+      },
+    };
+  }
+
+  // 2. identity validation
+  const identityRes = validateIdentityRecord(raw.identity);
+  if (!identityRes.ok) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_IDENTITY",
+        field: "identity",
+        message: `Invalid identity: ${identityRes.error.message}`,
+      },
+    };
+  }
+
+  // 3. activeConstitutionalView validation
+  const acvRaw = raw.activeConstitutionalView;
+  if (!acvRaw || typeof acvRaw !== "object" || Array.isArray(acvRaw)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message: "activeConstitutionalView must be a non-null object",
+      },
+    };
+  }
+
+  const acvRawObj = acvRaw as Record<string, unknown>;
+
+  // 3.1 identity inside activeConstitutionalView
+  const acvIdentityRes = validateIdentityRecord(acvRawObj.identity);
+  if (!acvIdentityRes.ok) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message: `Invalid identity in activeConstitutionalView: ${acvIdentityRes.error.message}`,
+      },
+    };
+  }
+
+  // 3.2 relationships inside activeConstitutionalView
+  if (!Array.isArray(acvRawObj.relationships)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message: "relationships in activeConstitutionalView must be an array",
+      },
+    };
+  }
+  const relationships: ReferentRecord[] = [];
+  for (const rel of acvRawObj.relationships) {
+    const relRes = validateReferentRecord(rel);
+    if (!relRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+          field: "activeConstitutionalView",
+          message: `Invalid relationship in activeConstitutionalView: ${relRes.error.message}`,
+        },
+      };
+    }
+    relationships.push(relRes.value);
+  }
+
+  // 3.3 standings inside activeConstitutionalView
+  if (!Array.isArray(acvRawObj.standings)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message: "standings in activeConstitutionalView must be an array",
+      },
+    };
+  }
+  const standings: StandingRecord[] = [];
+  for (const s of acvRawObj.standings) {
+    const sRes = validateStandingRecord(s);
+    if (!sRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+          field: "activeConstitutionalView",
+          message: `Invalid standing in activeConstitutionalView: ${sRes.error.message}`,
+        },
+      };
+    }
+    standings.push(sRes.value);
+  }
+
+  // 3.4 authorities inside activeConstitutionalView
+  if (!Array.isArray(acvRawObj.authorities)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message: "authorities in activeConstitutionalView must be an array",
+      },
+    };
+  }
+  const authorities: AuthorityRecord[] = [];
+  for (const a of acvRawObj.authorities) {
+    const aRes = validateAuthorityRecord(a);
+    if (!aRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+          field: "activeConstitutionalView",
+          message: `Invalid authority in activeConstitutionalView: ${aRes.error.message}`,
+        },
+      };
+    }
+    authorities.push(aRes.value);
+  }
+
+  // 3.5 capabilities inside activeConstitutionalView
+  if (!Array.isArray(acvRawObj.capabilities)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message: "capabilities in activeConstitutionalView must be an array",
+      },
+    };
+  }
+  const capabilities: CapabilityRecord[] = [];
+  for (const c of acvRawObj.capabilities) {
+    const cRes = validateCapabilityRecord(c);
+    if (!cRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+          field: "activeConstitutionalView",
+          message: `Invalid capability in activeConstitutionalView: ${cRes.error.message}`,
+        },
+      };
+    }
+    capabilities.push(cRes.value);
+  }
+
+  // 3.6 evidenceReferences inside activeConstitutionalView
+  if (!Array.isArray(acvRawObj.evidenceReferences)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message:
+          "evidenceReferences in activeConstitutionalView must be an array",
+      },
+    };
+  }
+  const evidenceReferences: EvidenceRecord[] = [];
+  for (const ev of acvRawObj.evidenceReferences) {
+    const evRes = validateEvidenceRecord(ev);
+    if (!evRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+          field: "activeConstitutionalView",
+          message: `Invalid evidenceReference in activeConstitutionalView: ${evRes.error.message}`,
+        },
+      };
+    }
+    evidenceReferences.push(evRes.value);
+  }
+
+  // 3.7 applicablePolicies inside activeConstitutionalView
+  if (!Array.isArray(acvRawObj.applicablePolicies)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+        field: "activeConstitutionalView",
+        message:
+          "applicablePolicies in activeConstitutionalView must be an array",
+      },
+    };
+  }
+  const applicablePolicies: PolicyRecord[] = [];
+  for (const p of acvRawObj.applicablePolicies) {
+    const pRes = validatePolicyRecord(p);
+    if (!pRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_ACTIVE_CONSTITUTIONAL_VIEW",
+          field: "activeConstitutionalView",
+          message: `Invalid applicablePolicy in activeConstitutionalView: ${pRes.error.message}`,
+        },
+      };
+    }
+    applicablePolicies.push(pRes.value);
+  }
+
+  const activeConstitutionalView: ActiveConstitutionalView = {
+    identity: acvIdentityRes.value,
+    relationships,
+    standings,
+    authorities,
+    capabilities,
+    evidenceReferences,
+    applicablePolicies,
+  };
+
+  // 4. evidenceBundle validation
+  const ebRaw = raw.evidenceBundle;
+  if (!ebRaw || typeof ebRaw !== "object" || Array.isArray(ebRaw)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_BUNDLE",
+        field: "evidenceBundle",
+        message: "evidenceBundle must be a non-null object",
+      },
+    };
+  }
+
+  const ebRawObj = ebRaw as Record<string, unknown>;
+  if (!Array.isArray(ebRawObj.evidenceRecords)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_BUNDLE",
+        field: "evidenceBundle",
+        message: "evidenceRecords in evidenceBundle must be an array",
+      },
+    };
+  }
+  const evidenceRecords: EvidenceRecord[] = [];
+  for (const r of ebRawObj.evidenceRecords) {
+    const rRes = validateEvidenceRecord(r);
+    if (!rRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_EVIDENCE_BUNDLE",
+          field: "evidenceBundle",
+          message: `Invalid evidenceRecord in evidenceBundle: ${rRes.error.message}`,
+        },
+      };
+    }
+    evidenceRecords.push(rRes.value);
+  }
+
+  const evidenceBundle: EvidenceBundle = {
+    evidenceRecords,
+  };
+
+  // 5. policyContext validation
+  const pcRaw = raw.policyContext;
+  if (!pcRaw || typeof pcRaw !== "object" || Array.isArray(pcRaw)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_POLICY_CONTEXT",
+        field: "policyContext",
+        message: "policyContext must be a non-null object",
+      },
+    };
+  }
+
+  const pcRawObj = pcRaw as Record<string, unknown>;
+  if (!Array.isArray(pcRawObj.policies)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_POLICY_CONTEXT",
+        field: "policyContext",
+        message: "policies in policyContext must be an array",
+      },
+    };
+  }
+  const policies: PolicyRecord[] = [];
+  for (const p of pcRawObj.policies) {
+    const pRes = validatePolicyRecord(p);
+    if (!pRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_POLICY_CONTEXT",
+          field: "policyContext",
+          message: `Invalid policy in policyContext: ${pRes.error.message}`,
+        },
+      };
+    }
+    policies.push(pRes.value);
+  }
+
+  const policyContext: PolicyContext = {
+    policies,
+  };
+
+  // 6. executionContext validation
+  const ecRaw = raw.executionContext;
+  if (!ecRaw || typeof ecRaw !== "object" || Array.isArray(ecRaw)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EXECUTION_CONTEXT",
+        field: "executionContext",
+        message: "executionContext must be a non-null object",
+      },
+    };
+  }
+
+  const ecRawObj = ecRaw as Record<string, unknown>;
+  if (
+    typeof ecRawObj.budget !== "number" ||
+    !Number.isFinite(ecRawObj.budget) ||
+    ecRawObj.budget < 0
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EXECUTION_CONTEXT",
+        field: "executionContext",
+        message:
+          "budget in executionContext must be a non-negative finite number",
+      },
+    };
+  }
+  if (typeof ecRawObj.entropy !== "string" || ecRawObj.entropy.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EXECUTION_CONTEXT",
+        field: "executionContext",
+        message: "entropy in executionContext must be a non-empty string",
+      },
+    };
+  }
+  if (!Array.isArray(ecRawObj.versions)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EXECUTION_CONTEXT",
+        field: "executionContext",
+        message: "versions in executionContext must be an array of strings",
+      },
+    };
+  }
+  const versions: string[] = [];
+  for (const v of ecRawObj.versions) {
+    if (typeof v !== "string" || v.trim() === "") {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_EXECUTION_CONTEXT",
+          field: "executionContext",
+          message: "versions in executionContext must be non-empty strings",
+        },
+      };
+    }
+    versions.push(v);
+  }
+
+  const executionContext: ExecutionContext = {
+    budget: ecRawObj.budget,
+    entropy: ecRawObj.entropy,
+    versions,
+  };
+
+  const record: ExecutionRequest = {
+    requestId,
+    identity: identityRes.value,
+    activeConstitutionalView,
+    evidenceBundle,
+    policyContext,
+    executionContext,
+  };
+
+  return {
+    ok: true,
+    value: record,
+  };
+}
+
+/**
+ * Canonically serializes an ExecutionRequest deterministically.
+ * Alphabetic key order: activeConstitutionalView -> evidenceBundle -> executionContext -> identity -> policyContext -> requestId
+ */
+export function serializeExecutionRequest(request: ExecutionRequest): string {
+  const getOrderedIdentity = (r: IdentityRecord) =>
+    JSON.parse(serializeIdentityRecord(r));
+  const getOrderedReferent = (r: ReferentRecord) =>
+    JSON.parse(serializeReferentRecord(r));
+  const getOrderedStanding = (r: StandingRecord) =>
+    JSON.parse(serializeStandingRecord(r));
+  const getOrderedAuthority = (r: AuthorityRecord) =>
+    JSON.parse(serializeAuthorityRecord(r));
+  const getOrderedCapability = (r: CapabilityRecord) =>
+    JSON.parse(serializeCapabilityRecord(r));
+  const getOrderedEvidence = (r: EvidenceRecord) =>
+    JSON.parse(serializeEvidenceRecord(r));
+  const getOrderedPolicy = (r: PolicyRecord) =>
+    JSON.parse(serializePolicyRecord(r));
+
+  const acv = request.activeConstitutionalView;
+  const orderedACV = {
+    applicablePolicies: acv.applicablePolicies.map(getOrderedPolicy),
+    authorities: acv.authorities.map(getOrderedAuthority),
+    capabilities: acv.capabilities.map(getOrderedCapability),
+    evidenceReferences: acv.evidenceReferences.map(getOrderedEvidence),
+    identity: getOrderedIdentity(acv.identity),
+    relationships: acv.relationships.map(getOrderedReferent),
+    standings: acv.standings.map(getOrderedStanding),
+  };
+
+  const eb = request.evidenceBundle;
+  const orderedEvidenceBundle = {
+    evidenceRecords: eb.evidenceRecords.map(getOrderedEvidence),
+  };
+
+  const ec = request.executionContext;
+  const orderedExecutionContext = {
+    budget: ec.budget,
+    entropy: ec.entropy,
+    versions: ec.versions,
+  };
+
+  const pc = request.policyContext;
+  const orderedPolicyContext = {
+    policies: pc.policies.map(getOrderedPolicy),
+  };
+
+  const orderedRequest = {
+    activeConstitutionalView: orderedACV,
+    evidenceBundle: orderedEvidenceBundle,
+    executionContext: orderedExecutionContext,
+    identity: getOrderedIdentity(request.identity),
+    policyContext: orderedPolicyContext,
+    requestId: request.requestId,
+  };
+
+  return JSON.stringify(orderedRequest);
+}
