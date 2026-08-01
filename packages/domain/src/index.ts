@@ -73,6 +73,29 @@ export type GS1IdentifierValidationError = {
   readonly message: string;
 };
 
+export type EvidenceRecord = {
+  readonly evidenceId: string;
+  readonly identityId: string;
+  readonly evidenceType: string;
+  readonly hash: string;
+  readonly storageRef: string;
+  readonly retrievedAt: string;
+};
+
+export type EvidenceValidationErrorCode =
+  | "INVALID_EVIDENCE_ID"
+  | "INVALID_IDENTITY_ID"
+  | "INVALID_EVIDENCE_TYPE"
+  | "INVALID_HASH"
+  | "INVALID_STORAGE_REF"
+  | "INVALID_RETRIEVED_AT";
+
+export type EvidenceValidationError = {
+  readonly code: EvidenceValidationErrorCode;
+  readonly field: keyof EvidenceRecord;
+  readonly message: string;
+};
+
 // Strict UTC ISO-8601 validation regex
 // Matches e.g. "2026-07-28T14:30:00Z" or "2026-07-28T14:30:00.123Z"
 const ISO_8601_UTC_REGEX =
@@ -472,6 +495,136 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
     referentId: record.referentId,
     status: record.status,
     updatedAt: record.updatedAt,
+  };
+  return JSON.stringify(ordered);
+}
+
+/**
+ * Validates raw input to produce a typed EvidenceRecord or a ValidationResult error.
+ * Sequential validation of fields in EvidenceRecord declaration order.
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateEvidenceRecord(
+  input: unknown,
+): ValidationResult<EvidenceRecord, EvidenceValidationError> {
+  if (!input || typeof input !== "object") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_ID",
+        field: "evidenceId",
+        message: "Evidence record must be a non-null object.",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. evidenceId validation
+  const evidenceId = raw.evidenceId;
+  if (typeof evidenceId !== "string" || evidenceId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_ID",
+        field: "evidenceId",
+        message: "evidenceId must be a non-empty string",
+      },
+    };
+  }
+
+  // 2. identityId validation
+  const identityId = raw.identityId;
+  if (typeof identityId !== "string" || identityId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_IDENTITY_ID",
+        field: "identityId",
+        message: "identityId must be a non-empty string",
+      },
+    };
+  }
+
+  // 3. evidenceType validation
+  const evidenceType = raw.evidenceType;
+  if (typeof evidenceType !== "string" || evidenceType.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_TYPE",
+        field: "evidenceType",
+        message: "evidenceType must be a non-empty string",
+      },
+    };
+  }
+
+  // 4. hash validation
+  const hash = raw.hash;
+  if (typeof hash !== "string" || hash.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_HASH",
+        field: "hash",
+        message: "hash must be a non-empty string",
+      },
+    };
+  }
+
+  // 5. storageRef validation
+  const storageRef = raw.storageRef;
+  if (typeof storageRef !== "string" || storageRef.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_STORAGE_REF",
+        field: "storageRef",
+        message: "storageRef must be a non-empty string",
+      },
+    };
+  }
+
+  // 6. retrievedAt validation
+  const retrievedAt = raw.retrievedAt;
+  if (typeof retrievedAt !== "string" || !isValidIso8601Utc(retrievedAt)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_RETRIEVED_AT",
+        field: "retrievedAt",
+        message: "retrievedAt must be a valid ISO-8601 UTC timestamp",
+      },
+    };
+  }
+
+  const record: EvidenceRecord = {
+    evidenceId,
+    identityId,
+    evidenceType,
+    hash,
+    storageRef,
+    retrievedAt,
+  };
+
+  return {
+    ok: true,
+    value: record,
+  };
+}
+
+/**
+ * Canonically serializes an EvidenceRecord deterministically.
+ * Approved alphabetical key order: evidenceId, evidenceType, hash, identityId, retrievedAt, storageRef
+ */
+export function serializeEvidenceRecord(record: EvidenceRecord): string {
+  const ordered = {
+    evidenceId: record.evidenceId,
+    evidenceType: record.evidenceType,
+    hash: record.hash,
+    identityId: record.identityId,
+    retrievedAt: record.retrievedAt,
+    storageRef: record.storageRef,
   };
   return JSON.stringify(ordered);
 }
