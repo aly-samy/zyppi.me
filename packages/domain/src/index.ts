@@ -140,6 +140,28 @@ export type CapabilityValidationError = {
   readonly message: string;
 };
 
+export type StandingRecord = {
+  readonly standingId: string;
+  readonly subjectId: string;
+  readonly scope: string;
+  readonly validFrom: string;
+  readonly validTo: string;
+};
+
+export type StandingValidationErrorCode =
+  | "INVALID_STANDING_ID"
+  | "INVALID_SUBJECT_ID"
+  | "INVALID_SCOPE"
+  | "INVALID_VALID_FROM"
+  | "INVALID_VALID_TO"
+  | "VALID_TO_BEFORE_VALID_FROM";
+
+export type StandingValidationError = {
+  readonly code: StandingValidationErrorCode;
+  readonly field: keyof StandingRecord;
+  readonly message: string;
+};
+
 // Strict UTC ISO-8601 validation regex
 // Matches e.g. "2026-07-28T14:30:00Z" or "2026-07-28T14:30:00.123Z"
 const ISO_8601_UTC_REGEX =
@@ -539,6 +561,134 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
     referentId: record.referentId,
     status: record.status,
     updatedAt: record.updatedAt,
+  };
+  return JSON.stringify(ordered);
+}
+
+/**
+ * Validates raw input to produce a typed StandingRecord or a ValidationResult error.
+ * Sequential validation of fields in StandingRecord declaration order:
+ * standingId -> subjectId -> scope -> validFrom -> validTo -> chronological check
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateStandingRecord(
+  input: unknown,
+): ValidationResult<StandingRecord, StandingValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_STANDING_ID",
+        field: "standingId",
+        message: "Input must be a non-null object",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. standingId validation
+  const standingId = raw.standingId;
+  if (typeof standingId !== "string" || standingId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_STANDING_ID",
+        field: "standingId",
+        message: "standingId must be a non-empty string",
+      },
+    };
+  }
+
+  // 2. subjectId validation
+  const subjectId = raw.subjectId;
+  if (typeof subjectId !== "string" || subjectId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SUBJECT_ID",
+        field: "subjectId",
+        message: "subjectId must be a non-empty string",
+      },
+    };
+  }
+
+  // 3. scope validation (whitespace-only check with value preservation)
+  const scope = raw.scope;
+  if (typeof scope !== "string" || scope.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SCOPE",
+        field: "scope",
+        message: "scope must be a non-empty string",
+      },
+    };
+  }
+
+  // 4. validFrom validation
+  const validFrom = raw.validFrom;
+  if (typeof validFrom !== "string" || !isValidIso8601Utc(validFrom)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VALID_FROM",
+        field: "validFrom",
+        message: "validFrom must be a valid ISO-8601 UTC timestamp",
+      },
+    };
+  }
+
+  // 5. validTo validation
+  const validTo = raw.validTo;
+  if (typeof validTo !== "string" || !isValidIso8601Utc(validTo)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VALID_TO",
+        field: "validTo",
+        message: "validTo must be a valid ISO-8601 UTC timestamp",
+      },
+    };
+  }
+
+  // 6. Chronological validity-range check
+  if (new Date(validTo).getTime() < new Date(validFrom).getTime()) {
+    return {
+      ok: false,
+      error: {
+        code: "VALID_TO_BEFORE_VALID_FROM",
+        field: "validTo",
+        message: "validTo must not be chronologically before validFrom",
+      },
+    };
+  }
+
+  const record: StandingRecord = {
+    standingId,
+    subjectId,
+    scope,
+    validFrom,
+    validTo,
+  };
+
+  return {
+    ok: true,
+    value: record,
+  };
+}
+
+/**
+ * Canonically serializes a StandingRecord deterministically.
+ * Approved alphabetical key order: scope, standingId, subjectId, validFrom, validTo
+ */
+export function serializeStandingRecord(record: StandingRecord): string {
+  const ordered = {
+    scope: record.scope,
+    standingId: record.standingId,
+    subjectId: record.subjectId,
+    validFrom: record.validFrom,
+    validTo: record.validTo,
   };
   return JSON.stringify(ordered);
 }
