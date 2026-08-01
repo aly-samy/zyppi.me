@@ -96,6 +96,28 @@ export type EvidenceValidationError = {
   readonly message: string;
 };
 
+export type AuthorityRecord = {
+  readonly authorityId: string;
+  readonly subjectId: string;
+  readonly scope: string;
+  readonly validFrom: string;
+  readonly validTo: string;
+};
+
+export type AuthorityValidationErrorCode =
+  | "INVALID_AUTHORITY_ID"
+  | "INVALID_SUBJECT_ID"
+  | "INVALID_SCOPE"
+  | "INVALID_VALID_FROM"
+  | "INVALID_VALID_TO"
+  | "VALID_TO_BEFORE_VALID_FROM";
+
+export type AuthorityValidationError = {
+  readonly code: AuthorityValidationErrorCode;
+  readonly field: keyof AuthorityRecord;
+  readonly message: string;
+};
+
 // Strict UTC ISO-8601 validation regex
 // Matches e.g. "2026-07-28T14:30:00Z" or "2026-07-28T14:30:00.123Z"
 const ISO_8601_UTC_REGEX =
@@ -495,6 +517,134 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
     referentId: record.referentId,
     status: record.status,
     updatedAt: record.updatedAt,
+  };
+  return JSON.stringify(ordered);
+}
+
+/**
+ * Validates raw input to produce a typed AuthorityRecord or a ValidationResult error.
+ * Sequential validation of fields in AuthorityRecord declaration order:
+ * authorityId -> subjectId -> scope -> validFrom -> validTo -> chronological check
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateAuthorityRecord(
+  input: unknown,
+): ValidationResult<AuthorityRecord, AuthorityValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_AUTHORITY_ID",
+        field: "authorityId",
+        message: "Input must be a non-null object",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. authorityId validation
+  const authorityId = raw.authorityId;
+  if (typeof authorityId !== "string" || authorityId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_AUTHORITY_ID",
+        field: "authorityId",
+        message: "authorityId must be a non-empty string",
+      },
+    };
+  }
+
+  // 2. subjectId validation
+  const subjectId = raw.subjectId;
+  if (typeof subjectId !== "string" || subjectId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SUBJECT_ID",
+        field: "subjectId",
+        message: "subjectId must be a non-empty string",
+      },
+    };
+  }
+
+  // 3. scope validation
+  const scope = raw.scope;
+  if (typeof scope !== "string" || scope.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SCOPE",
+        field: "scope",
+        message: "scope must be a non-empty string",
+      },
+    };
+  }
+
+  // 4. validFrom validation
+  const validFrom = raw.validFrom;
+  if (typeof validFrom !== "string" || !isValidIso8601Utc(validFrom)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VALID_FROM",
+        field: "validFrom",
+        message: "validFrom must be a valid ISO-8601 UTC timestamp",
+      },
+    };
+  }
+
+  // 5. validTo validation
+  const validTo = raw.validTo;
+  if (typeof validTo !== "string" || !isValidIso8601Utc(validTo)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VALID_TO",
+        field: "validTo",
+        message: "validTo must be a valid ISO-8601 UTC timestamp",
+      },
+    };
+  }
+
+  // 6. Chronological validity-range check
+  if (new Date(validTo).getTime() < new Date(validFrom).getTime()) {
+    return {
+      ok: false,
+      error: {
+        code: "VALID_TO_BEFORE_VALID_FROM",
+        field: "validTo",
+        message: "validTo must not be chronologically before validFrom",
+      },
+    };
+  }
+
+  const record: AuthorityRecord = {
+    authorityId,
+    subjectId,
+    scope,
+    validFrom,
+    validTo,
+  };
+
+  return {
+    ok: true,
+    value: record,
+  };
+}
+
+/**
+ * Canonically serializes an AuthorityRecord deterministically.
+ * Approved alphabetical key order: authorityId, scope, subjectId, validFrom, validTo
+ */
+export function serializeAuthorityRecord(record: AuthorityRecord): string {
+  const ordered = {
+    authorityId: record.authorityId,
+    scope: record.scope,
+    subjectId: record.subjectId,
+    validFrom: record.validFrom,
+    validTo: record.validTo,
   };
   return JSON.stringify(ordered);
 }
