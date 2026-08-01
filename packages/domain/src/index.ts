@@ -1373,6 +1373,127 @@ export interface ExecutionContext {
   readonly versions: readonly string[];
 }
 
+export type ExecutionContextValidationErrorCode =
+  "INVALID_BUDGET" | "INVALID_ENTROPY" | "INVALID_VERSIONS";
+
+export interface ExecutionContextValidationError {
+  readonly code: ExecutionContextValidationErrorCode;
+  readonly field: keyof ExecutionContext;
+  readonly message: string;
+}
+
+/**
+ * Validates raw input to produce a typed ExecutionContext or a ValidationResult error.
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateExecutionContext(
+  input: unknown,
+): ValidationResult<ExecutionContext, ExecutionContextValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_BUDGET",
+        field: "budget",
+        message: "Input must be a non-null object",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. budget validation: must be finite, non-negative number, validated without coercion
+  const budget = raw.budget;
+  if (typeof budget !== "number" || !Number.isFinite(budget) || budget < 0) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_BUDGET",
+        field: "budget",
+        message: "budget must be a non-negative finite number",
+      },
+    };
+  }
+
+  // 2. entropy validation: must be a primitive string, non-empty, explicit, without coercion, whitespace-only rejected
+  const entropy = raw.entropy;
+  if (typeof entropy !== "string" || entropy.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_ENTROPY",
+        field: "entropy",
+        message: "entropy must be a non-empty, non-whitespace string",
+      },
+    };
+  }
+
+  // 3. versions validation: must be a non-empty array of non-empty, non-whitespace primitive strings
+  const versionsRaw = raw.versions;
+  if (!Array.isArray(versionsRaw)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VERSIONS",
+        field: "versions",
+        message: "versions must be an array",
+      },
+    };
+  }
+
+  if (versionsRaw.length === 0) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_VERSIONS",
+        field: "versions",
+        message: "versions array must contain at least one element",
+      },
+    };
+  }
+
+  const versions: string[] = [];
+  for (let i = 0; i < versionsRaw.length; i++) {
+    const v = versionsRaw[i];
+    if (typeof v !== "string" || v.trim() === "") {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_VERSIONS",
+          field: "versions",
+          message:
+            "versions elements must be non-empty, non-whitespace strings",
+        },
+      };
+    }
+    versions.push(v);
+  }
+
+  const context: ExecutionContext = {
+    budget,
+    entropy,
+    versions,
+  };
+
+  return {
+    ok: true,
+    value: context,
+  };
+}
+
+/**
+ * Canonically serializes an ExecutionContext deterministically.
+ * Alphabetical key order: budget -> entropy -> versions
+ */
+export function serializeExecutionContext(context: ExecutionContext): string {
+  const ordered = {
+    budget: context.budget,
+    entropy: context.entropy,
+    versions: context.versions,
+  };
+  return JSON.stringify(ordered);
+}
+
 export interface ExecutionRequest {
   readonly requestId: string;
   readonly identity: IdentityRecord;
@@ -1734,74 +1855,17 @@ export function validateExecutionRequest(
   };
 
   // 6. executionContext validation
-  const ecRaw = raw.executionContext;
-  if (!ecRaw || typeof ecRaw !== "object" || Array.isArray(ecRaw)) {
+  const ecRes = validateExecutionContext(raw.executionContext);
+  if (!ecRes.ok) {
     return {
       ok: false,
       error: {
         code: "INVALID_EXECUTION_CONTEXT",
         field: "executionContext",
-        message: "executionContext must be a non-null object",
+        message: `Invalid executionContext: ${ecRes.error.message}`,
       },
     };
   }
-
-  const ecRawObj = ecRaw as Record<string, unknown>;
-  if (
-    typeof ecRawObj.budget !== "number" ||
-    !Number.isFinite(ecRawObj.budget) ||
-    ecRawObj.budget < 0
-  ) {
-    return {
-      ok: false,
-      error: {
-        code: "INVALID_EXECUTION_CONTEXT",
-        field: "executionContext",
-        message:
-          "budget in executionContext must be a non-negative finite number",
-      },
-    };
-  }
-  if (typeof ecRawObj.entropy !== "string" || ecRawObj.entropy.trim() === "") {
-    return {
-      ok: false,
-      error: {
-        code: "INVALID_EXECUTION_CONTEXT",
-        field: "executionContext",
-        message: "entropy in executionContext must be a non-empty string",
-      },
-    };
-  }
-  if (!Array.isArray(ecRawObj.versions)) {
-    return {
-      ok: false,
-      error: {
-        code: "INVALID_EXECUTION_CONTEXT",
-        field: "executionContext",
-        message: "versions in executionContext must be an array of strings",
-      },
-    };
-  }
-  const versions: string[] = [];
-  for (const v of ecRawObj.versions) {
-    if (typeof v !== "string" || v.trim() === "") {
-      return {
-        ok: false,
-        error: {
-          code: "INVALID_EXECUTION_CONTEXT",
-          field: "executionContext",
-          message: "versions in executionContext must be non-empty strings",
-        },
-      };
-    }
-    versions.push(v);
-  }
-
-  const executionContext: ExecutionContext = {
-    budget: ecRawObj.budget,
-    entropy: ecRawObj.entropy,
-    versions,
-  };
 
   const record: ExecutionRequest = {
     requestId,
@@ -1809,7 +1873,7 @@ export function validateExecutionRequest(
     activeConstitutionalView,
     evidenceBundle,
     policyContext,
-    executionContext,
+    executionContext: ecRes.value,
   };
 
   return {
@@ -1854,13 +1918,6 @@ export function serializeExecutionRequest(request: ExecutionRequest): string {
     evidenceRecords: eb.evidenceRecords.map(getOrderedEvidence),
   };
 
-  const ec = request.executionContext;
-  const orderedExecutionContext = {
-    budget: ec.budget,
-    entropy: ec.entropy,
-    versions: ec.versions,
-  };
-
   const pc = request.policyContext;
   const orderedPolicyContext = {
     policies: pc.policies.map(getOrderedPolicy),
@@ -1869,7 +1926,9 @@ export function serializeExecutionRequest(request: ExecutionRequest): string {
   const orderedRequest = {
     activeConstitutionalView: orderedACV,
     evidenceBundle: orderedEvidenceBundle,
-    executionContext: orderedExecutionContext,
+    executionContext: JSON.parse(
+      serializeExecutionContext(request.executionContext),
+    ),
     identity: getOrderedIdentity(request.identity),
     policyContext: orderedPolicyContext,
     requestId: request.requestId,
