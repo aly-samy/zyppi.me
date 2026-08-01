@@ -1936,3 +1936,232 @@ export function serializeExecutionRequest(request: ExecutionRequest): string {
 
   return JSON.stringify(orderedRequest);
 }
+
+export interface ExecutionReceipt {
+  readonly receiptId: string;
+  readonly executionId: string;
+  readonly runtimeVersion: string;
+  readonly inputHash: string;
+  readonly outputHash: string;
+  readonly evidenceHash: string;
+  readonly policyVersion: string;
+  readonly decisionSummary: string;
+  readonly executionTime: number;
+  readonly deterministicHash: string;
+}
+
+export type ExecutionReceiptValidationErrorCode =
+  | "INVALID_RECEIPT_ID"
+  | "INVALID_EXECUTION_ID"
+  | "INVALID_RUNTIME_VERSION"
+  | "INVALID_INPUT_HASH"
+  | "INVALID_OUTPUT_HASH"
+  | "INVALID_EVIDENCE_HASH"
+  | "INVALID_POLICY_VERSION"
+  | "INVALID_DECISION_SUMMARY"
+  | "INVALID_EXECUTION_TIME"
+  | "INVALID_DETERMINISTIC_HASH";
+
+export interface ExecutionReceiptValidationError {
+  readonly code: ExecutionReceiptValidationErrorCode;
+  readonly field: keyof ExecutionReceipt;
+  readonly message: string;
+}
+
+/**
+ * Validates raw input to produce a typed ExecutionReceipt or a ValidationResult error.
+ * Sequential validation of fields:
+ * receiptId -> executionId -> runtimeVersion -> inputHash -> outputHash -> evidenceHash -> policyVersion -> decisionSummary -> executionTime -> deterministicHash
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateExecutionReceipt(
+  input: unknown,
+): ValidationResult<ExecutionReceipt, ExecutionReceiptValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_RECEIPT_ID",
+        field: "receiptId",
+        message: "receiptId must be a non-empty string",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. receiptId validation
+  const receiptId = raw.receiptId;
+  if (typeof receiptId !== "string" || receiptId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_RECEIPT_ID",
+        field: "receiptId",
+        message: "receiptId must be a non-empty string",
+      },
+    };
+  }
+
+  // 2. executionId validation
+  const executionId = raw.executionId;
+  if (typeof executionId !== "string" || executionId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EXECUTION_ID",
+        field: "executionId",
+        message: "executionId must be a non-empty string",
+      },
+    };
+  }
+
+  // 3. runtimeVersion validation
+  const runtimeVersion = raw.runtimeVersion;
+  if (typeof runtimeVersion !== "string" || runtimeVersion.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_RUNTIME_VERSION",
+        field: "runtimeVersion",
+        message: "runtimeVersion must be a non-empty string",
+      },
+    };
+  }
+
+  // 4. inputHash validation
+  const inputHash = raw.inputHash;
+  if (typeof inputHash !== "string" || inputHash.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_INPUT_HASH",
+        field: "inputHash",
+        message: "inputHash must be a non-empty string",
+      },
+    };
+  }
+
+  // 5. outputHash validation
+  const outputHash = raw.outputHash;
+  if (typeof outputHash !== "string" || outputHash.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_OUTPUT_HASH",
+        field: "outputHash",
+        message: "outputHash must be a non-empty string",
+      },
+    };
+  }
+
+  // 6. evidenceHash validation
+  const evidenceHash = raw.evidenceHash;
+  if (typeof evidenceHash !== "string" || evidenceHash.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_HASH",
+        field: "evidenceHash",
+        message: "evidenceHash must be a non-empty string",
+      },
+    };
+  }
+
+  // 7. policyVersion validation
+  const policyVersion = raw.policyVersion;
+  if (typeof policyVersion !== "string" || policyVersion.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_POLICY_VERSION",
+        field: "policyVersion",
+        message: "policyVersion must be a non-empty string",
+      },
+    };
+  }
+
+  // 8. decisionSummary validation
+  const decisionSummary = raw.decisionSummary;
+  if (typeof decisionSummary !== "string" || decisionSummary.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_DECISION_SUMMARY",
+        field: "decisionSummary",
+        message: "decisionSummary must be a non-empty string",
+      },
+    };
+  }
+
+  // 9. executionTime validation
+  const executionTime = raw.executionTime;
+  if (
+    typeof executionTime !== "number" ||
+    !Number.isFinite(executionTime) ||
+    executionTime < 0
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EXECUTION_TIME",
+        field: "executionTime",
+        message: "executionTime must be a non-negative finite number",
+      },
+    };
+  }
+
+  // 10. deterministicHash validation
+  const deterministicHash = raw.deterministicHash;
+  if (
+    typeof deterministicHash !== "string" ||
+    deterministicHash.trim() === ""
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_DETERMINISTIC_HASH",
+        field: "deterministicHash",
+        message: "deterministicHash must be a non-empty string",
+      },
+    };
+  }
+
+  const receipt: ExecutionReceipt = {
+    receiptId,
+    executionId,
+    runtimeVersion,
+    inputHash,
+    outputHash,
+    evidenceHash,
+    policyVersion,
+    decisionSummary,
+    executionTime,
+    deterministicHash,
+  };
+
+  return {
+    ok: true,
+    value: receipt,
+  };
+}
+
+/**
+ * Canonically serializes an ExecutionReceipt deterministically.
+ * Alphabetic key order: decisionSummary, deterministicHash, evidenceHash, executionId, executionTime, inputHash, outputHash, policyVersion, receiptId, runtimeVersion
+ */
+export function serializeExecutionReceipt(receipt: ExecutionReceipt): string {
+  const ordered = {
+    decisionSummary: receipt.decisionSummary,
+    deterministicHash: receipt.deterministicHash,
+    evidenceHash: receipt.evidenceHash,
+    executionId: receipt.executionId,
+    executionTime: receipt.executionTime,
+    inputHash: receipt.inputHash,
+    outputHash: receipt.outputHash,
+    policyVersion: receipt.policyVersion,
+    receiptId: receipt.receiptId,
+    runtimeVersion: receipt.runtimeVersion,
+  };
+  return JSON.stringify(ordered);
+}

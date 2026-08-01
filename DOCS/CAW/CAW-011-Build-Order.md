@@ -55,7 +55,7 @@ _(Depends on M02; may run parallel with M04 registry work once contracts stabili
 | IT-0307 | Policy model         | IT-0202      | S    | AMS-0307 | ☑      |
 | IT-0308 | ExecutionRequest     | IT-0301–0307 | S    | AMS-0308 | ☐      |
 | IT-0309 | ExecutionContext     | IT-0301–0307 | S    | AMS-0309 | ☐      |
-| IT-0310 | ExecutionReceipt     | IT-0301–0307 | S    | AMS-0310 | ☐      |
+| IT-0310 | ExecutionReceipt     | IT-0301–0307 | S    | AMS-0310 | ☑      |
 | IT-0311 | Outcome model        | IT-0301–0307 | S    | AMS-0311 | ☐      |
 
 ## M04 — Runtime Skeleton
