@@ -42,6 +42,7 @@ The validity window is checked at compile-time and validated sequentially:
 Because `AuthorityRecord` and `CapabilityRecord` are structurally near-identical, TypeScript's structural type system could otherwise allow them to be accidentally interchanged.
 
 To defend against this, distinct unique identifier field names are used:
+
 - `capabilityId` (never a bare `id`) for `CapabilityRecord`
 - `authorityId` (never a bare `id`) for `AuthorityRecord`
 
@@ -66,6 +67,7 @@ The monorepo-level static purity checker (`tools/validate-runtime-purity.mjs`) s
 ## 9. Explicitly Excluded Scopes
 
 The implementation rigorously excludes:
+
 - Any `authorityId` linkage or Capability-to-Authority relationship mapping.
 - Delegation, grantor, sponsor, or provenance fields.
 - Revocation status, revocation cascade, or lifecycle fields.
