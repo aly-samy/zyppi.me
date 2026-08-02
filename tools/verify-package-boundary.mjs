@@ -60,14 +60,92 @@ if (pkg.type !== "module") {
   process.exit(1);
 }
 
-// 4. Require dependencies to be exactly {} and peerDependencies to be exactly {}
-if (
-  !pkg.dependencies ||
-  typeof pkg.dependencies !== "object" ||
-  Object.keys(pkg.dependencies).length !== 0
-) {
-  console.error("Error: 'dependencies' must exist and be an empty object {}.");
+// 4. Validate dependencies according to the package's declared architectural layer
+const ALLOWED_LAYERS = ["foundation", "runtime", "contracts", "testing"];
+const layer = pkg.zyppi?.layer || "foundation";
+
+if (pkg.zyppi?.layer && !ALLOWED_LAYERS.includes(pkg.zyppi.layer)) {
+  console.error(
+    `Error: Invalid architectural layer '${pkg.zyppi.layer}'. Must be one of: ${ALLOWED_LAYERS.join(", ")}.`,
+  );
   process.exit(1);
+}
+
+if (layer === "foundation") {
+  if (
+    !pkg.dependencies ||
+    typeof pkg.dependencies !== "object" ||
+    Object.keys(pkg.dependencies).length !== 0
+  ) {
+    console.error(
+      "Error: Foundational packages must have an empty 'dependencies' object.",
+    );
+    process.exit(1);
+  }
+} else if (layer === "runtime") {
+  if (!pkg.dependencies || typeof pkg.dependencies !== "object") {
+    console.error("Error: 'dependencies' must be an object.");
+    process.exit(1);
+  }
+
+  for (const [depName, depVer] of Object.entries(pkg.dependencies)) {
+    // 1. Must be an internal workspace dependency
+    if (!depName.startsWith("@zyppi/")) {
+      console.error(
+        `Error: Runtime-layer package cannot depend on external package '${depName}'. Only internal workspace dependencies are permitted.`,
+      );
+      process.exit(1);
+    }
+    // 2. Must use the exact workspace:* protocol
+    if (depVer !== "workspace:*") {
+      console.error(
+        `Error: Dependency '${depName}' must use the exact 'workspace:*' protocol.`,
+      );
+      process.exit(1);
+    }
+    // 3. Must dynamically resolve to a package in the 'foundation' layer
+    const workspaceMemberDirName = depName.replace("@zyppi/", "");
+    const depPackageJsonPath = path.resolve(
+      monorepoRoot,
+      "packages",
+      workspaceMemberDirName,
+      "package.json",
+    );
+    if (!fs.existsSync(depPackageJsonPath)) {
+      console.error(
+        `Error: Dependency package.json not found at ${depPackageJsonPath}`,
+      );
+      process.exit(1);
+    }
+    let depPkg;
+    try {
+      depPkg = JSON.parse(fs.readFileSync(depPackageJsonPath, "utf8"));
+    } catch (err) {
+      console.error(
+        `Error: Failed to parse dependency package.json at ${depPackageJsonPath}: ${err.message}`,
+      );
+      process.exit(1);
+    }
+    const depLayer = depPkg.zyppi?.layer || "foundation";
+    if (depLayer !== "foundation") {
+      console.error(
+        `Error: Runtime-layer package cannot depend on package '${depName}' because it belongs to layer '${depLayer}'. Only 'foundation' layer packages are permitted.`,
+      );
+      process.exit(1);
+    }
+  }
+} else {
+  // Other layers (e.g., contracts, testing) default to requiring empty dependencies for strictness
+  if (
+    !pkg.dependencies ||
+    typeof pkg.dependencies !== "object" ||
+    Object.keys(pkg.dependencies).length !== 0
+  ) {
+    console.error(
+      `Error: Packages in layer '${layer}' must have an empty 'dependencies' object.`,
+    );
+    process.exit(1);
+  }
 }
 
 if (
