@@ -565,6 +565,45 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
   return JSON.stringify(ordered);
 }
 
+export type Outcome = "verified" | "unverified" | "rejected";
+
+export type OutcomeValidationErrorCode = "INVALID_OUTCOME";
+
+export interface OutcomeValidationError {
+  readonly code: OutcomeValidationErrorCode;
+  readonly message: string;
+}
+
+/**
+ * Validates raw input to produce a typed Outcome or a ValidationResult error.
+ * Does not throw exceptions, purely deterministic, non-coercive.
+ */
+export function validateOutcome(
+  input: unknown,
+): ValidationResult<Outcome, OutcomeValidationError> {
+  if (input === "verified" || input === "unverified" || input === "rejected") {
+    return {
+      ok: true,
+      value: input,
+    };
+  }
+
+  return {
+    ok: false,
+    error: {
+      code: "INVALID_OUTCOME",
+      message: "outcome must be one of: verified, unverified, rejected",
+    },
+  };
+}
+
+/**
+ * Canonically serializes an Outcome deterministically.
+ */
+export function serializeOutcome(outcome: Outcome): string {
+  return JSON.stringify(outcome);
+}
+
 export type PolicyDefinition =
   | null
   | boolean
