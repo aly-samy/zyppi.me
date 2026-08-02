@@ -12,7 +12,7 @@
 ## 1. Title and Status
 
 - **Document Title:** Milestone M03 Domain Foundation Closure Report
-- **Milestone Status:** **M03 CLOSED**. Following the successful relocation of the public-boundary test and final reverification, all verification gates have passed completely.
+- **Milestone Status:** **M03 CLOSED**. Following the successful relocation of the public-boundary test, recursive node_modules test exclusion, and final reverification, all verification gates have passed completely with 0 warnings.
 - **Disposition:** **Disposition A — M03 CLOSED**
   _«M03 is CLOSED and accepted as the Zyppi Domain Foundation.»_
 
@@ -38,7 +38,7 @@ Authorized scope of activities includes:
 - **Repository Name:** `zyppi-monorepo`
 - **Target Branch:** `jules-6806216608701487131-26a4427d`
 - **Target Commit SHA:** `468677fdc714fbbfeca4bbdb96c5e6704e0d82ac`
-- **Working Tree State:** Successfully completed M03 closure under the corrective authority of AMS-0314.
+- **Working Tree State:** Successfully completed M03 closure under the corrective authority of AMS-0314 and AMS-0315.
 - **Audit Execution Date:** August 2, 2026
 
 ---
@@ -222,15 +222,15 @@ No dead validator, unused type, or orphaned serializer exists.
 
 ## 24. Findings Register
 
-| ID         | Layer                      | Finding                                                                                                                                                                                                                                | Evidence                                         | Severity     | Constitutional Impact                                                           | Affected Contract                                     | Recommended Disposition                                                                       | Corrective Work Required?                            |
-| ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **F-0301** | Layer 3: Boundary Coverage | Strict dependency graph validation (`pnpm graph:validate`) fails due to same-package public alias `@zyppi/domain` import in `m03Closure.test.ts` within `packages/domain`, creating a self-loop cycle and unauthorized dev dependency. | Executable check: `pnpm graph:validate` failing. | **Blocking** | Contradiction between public-boundary testing rules and dependency-graph rules. | Yes. Prevents repository pipeline from passing green. | Relocate `m03Closure.test.ts` to `packages/testing` (Option B), keeping the validator strict. | **Resolved via AMS-0314 corrective implementation.** |
+| ID         | Layer                      | Finding                                                                                                                                                                                                                                | Evidence                                         | Severity     | Constitutional Impact                                                           | Affected Contract                                     | Recommended Disposition                                                                       | Corrective Work Required?                                                      |
+| ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **F-0301** | Layer 3: Boundary Coverage | Strict dependency graph validation (`pnpm graph:validate`) fails due to same-package public alias `@zyppi/domain` import in `m03Closure.test.ts` within `packages/domain`, creating a self-loop cycle and unauthorized dev dependency. | Executable check: `pnpm graph:validate` failing. | **Blocking** | Contradiction between public-boundary testing rules and dependency-graph rules. | Yes. Prevents repository pipeline from passing green. | Relocate `m03Closure.test.ts` to `packages/testing` (Option B), keeping the validator strict. | **Resolved via AMS-0314 corrective implementation and AMS-0315 verification.** |
 
 ---
 
 ## 25. Final Post-Remediation Verification Results
 
-Following the successful corrective implementation of AMS-0314, all repository gates are green:
+Following the successful corrective implementation of AMS-0314 and AMS-0315, all repository gates are green:
 
 - `pnpm format:check` — **PASS**
 - `pnpm lint` — **PASS**
@@ -238,40 +238,49 @@ Following the successful corrective implementation of AMS-0314, all repository g
 - `pnpm runtime:purity` — **PASS**
 - `pnpm boundary:all` — **PASS**
 - `pnpm graph:validate` — **PASS**
-- `pnpm test --run` — **PASS (653 tests passing)**
+- `pnpm test --run` — **PASS (355 tests passing)**
 
 ---
 
-## 26. Corrective Addendum (AMS-0314)
+## 26. Corrective Addendum (AMS-0314 & AMS-0315)
 
 ### 26.1 Corrective Mandate Identity
 
-- **Corrective Mandate:** AMS-0314
+- **Corrective Mandate:** AMS-0314 & AMS-0315
 - **Authority:** AMS-0313 Adjudication B ("Test Placement Defect Confirmed")
 - **Finding Reference:** F-0301
-- **Remediation:** Relocating the public-boundary closure test to `packages/testing`, configuring its devDependencies and TypeScript project references, preserving `@zyppi/domain` as a zero-dependency leaf package, and keeping `verify-dependency-graph.mjs` untouched and fully fail-closed.
+- **Remediation:** Relocating the public-boundary closure test to `packages/testing`, configuring its devDependencies and TypeScript project references, preserving `@zyppi/domain` as a zero-dependency leaf package, and resolving workspace symlink test duplication.
 
-### 26.2 Files Changed
+### 26.2 AMS-0315 Reconciliations & Discovery Adjudication
+
+1. **Reconciliation of Reviewer Finding (Claim A vs. Claim B):**
+   Factual inspection of the filesystem confirms that `packages/domain/src/m03Closure.test.ts` is **completely absent**. It was physically renamed on disk to `packages/testing/src/m03Closure.test.ts`. The reviewer's deletion finding was not reproduced against the final repository state; it arose as a false-positive in git's diff because the file was never committed to HEAD.
+2. **Test-Discovery Root Cause & Correction:**
+   The unexpected test-count increase from 355 to 653 was caused by a test-discovery configuration defect. The `exclude` array inside `vitest.config.ts` was hardcoded to `"node_modules"`, which only matches root-level folders. When `@zyppi/domain` was added to `packages/testing`'s devDependencies, pnpm symlinked it inside `packages/testing/node_modules/`. Vitest followed this symlink and executed all domain unit tests twice.
+   The issue was corrected by replacing `"node_modules"` with `"**/node_modules/**"` in `vitest.config.ts`. This successfully prevents Vitest from scanning nested workspace package directories, guaranteeing that each test file runs exactly once.
+
+### 26.3 Files Changed
 
 1. **Moved File:**
-   - `packages/domain/src/m03Closure.test.ts` moved to `packages/testing/src/m03Closure.test.ts`. This was a true relocation (with the old file deleted) to prevent duplicate active test suites.
-2. **Configuration Files Modified:**
-   - `packages/testing/package.json` — Added `"@zyppi/domain": "workspace:*"` to `devDependencies`.
-   - `packages/testing/tsconfig.json` — Added TypeScript project reference `{ "path": "../domain" }` to guarantee build ordering.
-   - `DOCS/CAW/CAW-011-Build-Order.md` — Factually updated the completed statuses of `IT-0308` and `IT-0309`.
+   - `packages/domain/src/m03Closure.test.ts` moved to `packages/testing/src/m03Closure.test.ts`.
+2. **Files Modified:**
+   - `packages/testing/package.json` — Added `@zyppi/domain` devDependency.
+   - `packages/testing/tsconfig.json` — Added reference to `../domain`.
+   - `vitest.config.ts` — Updated `exclude` pattern to `"**/node_modules/**"` (preventing duplicate test discovery).
+   - `DOCS/CAW/CAW-011-Build-Order.md` — Updated completed statuses of `IT-0308` and `IT-0309`.
    - `DOCS/CAW/AMS/M03-Closure-Report.md` — This report updated with corrective findings lifecycle.
    - `pnpm-lock.yaml` — Regenerated via `pnpm install` to link the new workspace devDependency.
 
-### 26.3 Files Explicitly Unchanged
+### 26.4 Files Explicitly Unchanged
 
 The following files remained completely untouched during the remediation, ensuring zero production, policy, or validator alterations:
 
-- `tools/verify-dependency-graph.mjs` (remains 100% strict and fail-closed)
+- `tools/verify-dependency-graph.mjs` (remains strict and fail-closed)
 - `packages/domain/package.json` (remains dependency-free)
 - `packages/domain/src/index.ts` (unmodified production interface)
 - All M03 production model schemas and validator scripts.
 
-### 26.4 Verification Table
+### 26.5 Verification Table
 
 | Verification     | Baseline Audit Result | Post-Remediation Result | Final Status                 |
 | ---------------- | --------------------- | ----------------------- | ---------------------------- |
@@ -281,7 +290,7 @@ The following files remained completely untouched during the remediation, ensuri
 | `runtime:purity` | PASS                  | PASS                    | PASS                         |
 | `boundary:all`   | PASS                  | PASS                    | PASS                         |
 | `graph:validate` | FAIL — F-0301         | PASS                    | **RESOLVED**                 |
-| `test --run`     | PASS                  | PASS                    | **PASS (653 tests passing)** |
+| `test --run`     | PASS                  | PASS                    | **PASS (355 tests passing)** |
 
 ---
 
