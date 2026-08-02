@@ -12,7 +12,7 @@
 ## 1. Title and Status
 
 - **Document Title:** Milestone M03 Domain Foundation Closure Report
-- **Milestone Status:** **M03 CLOSED**. Following the successful relocation of the public-boundary test, recursive node_modules test exclusion, and final reverification, all verification gates have passed completely with 0 warnings.
+- **Milestone Status:** **M03 CLOSED**. Following the successful relocation of the public-boundary test, recursive node_modules test exclusion, and final reverification, all verification gates have passed completely.
 - **Disposition:** **Disposition A — M03 CLOSED**
   _«M03 is CLOSED and accepted as the Zyppi Domain Foundation.»_
 
@@ -36,9 +36,9 @@ Authorized scope of activities includes:
 ## 3. Repository Identity and Audit Date
 
 - **Repository Name:** `zyppi-monorepo`
-- **Target Branch:** `jules-6806216608701487131-26a4427d`
-- **Target Commit SHA:** `468677fdc714fbbfeca4bbdb96c5e6704e0d82ac`
-- **Working Tree State:** Successfully completed M03 closure under the corrective authority of AMS-0314 and AMS-0315.
+- **Baseline Commit SHA:** `468677fdc714fbbfeca4bbdb96c5e6704e0d82ac`
+- **Final Verified Commit SHA:** `23224bf8c55754d187663ab4cbf26cc49bcb8abd`
+- **Final Working-Tree State:** Clean, with no uncommitted changes.
 - **Audit Execution Date:** August 2, 2026
 
 ---
@@ -69,21 +69,21 @@ The raw results of the 7 repository-established verification commands executed f
 
 ## 6. M03 Task-Completion Inventory
 
-A complete reconciliation of M03 tasks in `DOCS/CAW/CAW-011-Build-Order.md` was conducted:
+A complete reconciliation of M03 tasks in `DOCS/CAW/CAW-011-Build-Order.md` was conducted. M03 contains eleven implementation tasks and twelve audited public domain models/contracts (due to IT-0302 containing both the `GS1Identifier` and `ReferentRecord` domain constructs).
 
-| Task ID     | Model/Deliverable    | Status in CAW-011 (Pre-Audit) | Realized State in Repository | Note / Discrepancy                                                                                    |
-| ----------- | -------------------- | ----------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **IT-0301** | Identity model       | ☑ Complete                    | Complete                     | Shipped with `index.test.ts`.                                                                         |
-| **IT-0302** | GS1 identifier model | ☑ Complete                    | Complete                     | Shipped with `referent.test.ts`.                                                                      |
-| **IT-0303** | Evidence model       | ☑ Complete                    | Complete                     | Shipped with `evidence.test.ts`.                                                                      |
-| **IT-0304** | Authority model      | ☑ Complete                    | Complete                     | Shipped with `authority.test.ts`.                                                                     |
-| **IT-0305** | Capability model     | ☑ Complete                    | Complete                     | Shipped with `capability.test.ts`.                                                                    |
-| **IT-0306** | Standing model       | ☑ Complete                    | Complete                     | Shipped with `standing.test.ts`.                                                                      |
-| **IT-0307** | Policy model         | ☑ Complete                    | Complete                     | Shipped with `policy.test.ts`.                                                                        |
-| **IT-0308** | ExecutionRequest     | ☐ Planned                     | Complete                     | **Discrepancy:** Status was left open in CAW-011. This was factually corrected to ☑ during the audit. |
-| **IT-0309** | ExecutionContext     | ☐ Planned                     | Complete                     | **Discrepancy:** Status was left open in CAW-011. This was factually corrected to ☑ during the audit. |
-| **IT-0310** | ExecutionReceipt     | ☑ Complete                    | Complete                     | Shipped with `executionReceipt.test.ts`.                                                              |
-| **IT-0311** | Outcome model        | ☑ Complete                    | Complete                     | Shipped with `outcome.test.ts`.                                                                       |
+| Task ID     | Model/Deliverable         | Status in CAW-011 (Pre-Audit) | Realized State in Repository | Note / Discrepancy                                                                                    |
+| ----------- | ------------------------- | ----------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **IT-0301** | Identity model            | ☑ Complete                    | Complete                     | Shipped with `index.test.ts`.                                                                         |
+| **IT-0302** | GS1 identifier & Referent | ☑ Complete                    | Complete                     | Shipped with `referent.test.ts`. Contains two domain constructs.                                      |
+| **IT-0303** | Evidence model            | ☑ Complete                    | Complete                     | Shipped with `evidence.test.ts`.                                                                      |
+| **IT-0304** | Authority model           | ☑ Complete                    | Complete                     | Shipped with `authority.test.ts`.                                                                     |
+| **IT-0305** | Capability model          | ☑ Complete                    | Complete                     | Shipped with `capability.test.ts`.                                                                    |
+| **IT-0306** | Standing model            | ☑ Complete                    | Complete                     | Shipped with `standing.test.ts`.                                                                      |
+| **IT-0307** | Policy model              | ☑ Complete                    | Complete                     | Shipped with `policy.test.ts`.                                                                        |
+| **IT-0308** | ExecutionRequest          | ☐ Planned                     | Complete                     | **Discrepancy:** Status was left open in CAW-011. This was factually corrected to ☑ during the audit. |
+| **IT-0309** | ExecutionContext          | ☐ Planned                     | Complete                     | **Discrepancy:** Status was left open in CAW-011. This was factually corrected to ☑ during the audit. |
+| **IT-0310** | ExecutionReceipt          | ☑ Complete                    | Complete                     | Shipped with `executionReceipt.test.ts`.                                                              |
+| **IT-0311** | Outcome model             | ☑ Complete                    | Complete                     | Shipped with `outcome.test.ts`.                                                                       |
 
 ---
 
@@ -118,7 +118,7 @@ This matrix traces every completed M03 model back to its governing sources:
 
 ## 9. Cross-Model Dependency and Ownership Map
 
-All domain types compile as `readonly` structures with empty dependency maps in `package.json`, ensuring leaf-level safety.
+All domain types compile as `readonly` structures. The `@zyppi/domain` declares no production, peer, or development workspace dependencies and remains a zero-dependency leaf package under CAW-004.
 
 ---
 
@@ -173,7 +173,7 @@ In `m03Closure.test.ts`, `ExecutionRequest` validates nested structures. Any sub
 ## 17. Public-Boundary Consumer Evidence
 
 The test file `packages/testing/src/m03Closure.test.ts` acts as the public-boundary consumer proof layer. It imports **exclusively** from the public entry point `@zyppi/domain` (not relative file imports).
-All 31 adversarial tests in this file compile and pass successfully, confirming that M04 and later layers can fully consume M03 models without re-implementing logic.
+All 31 adversarial tests in this file compile and pass successfully, confirming that external packages can fully consume M03 models without re-implementing logic.
 
 ---
 
@@ -181,23 +181,23 @@ All 31 adversarial tests in this file compile and pass successfully, confirming 
 
 An evaluation of repository security enforcement tools:
 
-| Tool                  | M03 Boundary / Invariant Covered                          | Evidence of Coverage                                   | Known Limitation                                          | Audit Result        |
-| --------------------- | --------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- | ------------------- |
-| `pnpm runtime:purity` | No clock/network/random state access in `@zyppi/runtime`. | AST-node checks pass successfully.                     | Does not analyze `packages/domain` directly.              | **Pass**            |
-| `pnpm boundary:all`   | Public ESM exports match physically compiled files.       | Exports maps resolved via Node ESM resolution tests.   | Checks manifest structure, does not check source imports. | **Pass**            |
-| `pnpm graph:validate` | Restricts direct dependency edges based on CAW-004.       | AST-import checks reject unauthorized workspace edges. | None. Evaluates all source/test code fail-closedly.       | **Pass (RESOLVED)** |
+| Tool                  | M03 Boundary / Invariant Covered                          | Evidence of Coverage                                   | Known Limitation                                                                                                                                                                                                                  | Audit Result        |
+| --------------------- | --------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `pnpm runtime:purity` | No clock/network/random state access in `@zyppi/runtime`. | AST-node checks pass successfully.                     | Directly audits only the `@zyppi/runtime` package, not `@zyppi/domain`. Domain purity is supported by model-level implementation review, adversarial tests, and absence of prohibited behavior—not by this runtime-specific tool. | **Pass**            |
+| `pnpm boundary:all`   | Public ESM exports match physically compiled files.       | Exports maps resolved via Node ESM resolution tests.   | Checks manifest structure, does not check source imports.                                                                                                                                                                         | **Pass**            |
+| `pnpm graph:validate` | Restricts direct dependency edges based on CAW-004.       | AST-import checks reject unauthorized workspace edges. | None. Evaluates all source/test code fail-closedly.                                                                                                                                                                               | **Pass (RESOLVED)** |
 
 ---
 
 ## 19. M04 Runtime Readiness Assessment
 
-The M04 Runtime skeleton can successfully consume M03. Symmetry guarantees that runtime pipelines can serialize inputs for cross-process requests without loss of fidelity.
+- **Readiness Framing:** M03 is accepted as a stable downstream dependency surface for M04 and M05. This closure does not constitute readiness certification or completion of those milestones. Symmetry guarantees that runtime pipelines can serialize inputs for cross-process requests without loss of fidelity.
 
 ---
 
 ## 20. M05 Registry Readiness Assessment
 
-The M05 Registry layer is fully supported. Non-coercive UTC checks prevent malformed date insertion into persistence layers.
+- **Readiness Framing:** M03 is accepted as a stable downstream dependency surface for M04 and M05. This closure does not constitute readiness certification or completion of those milestones. Non-coercive UTC checks prevent malformed date insertion into persistence layers.
 
 ---
 
@@ -222,9 +222,9 @@ No dead validator, unused type, or orphaned serializer exists.
 
 ## 24. Findings Register
 
-| ID         | Layer                      | Finding                                                                                                                                                                                                                                | Evidence                                         | Severity     | Constitutional Impact                                                           | Affected Contract                                     | Recommended Disposition                                                                       | Corrective Work Required?                                                      |
-| ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| **F-0301** | Layer 3: Boundary Coverage | Strict dependency graph validation (`pnpm graph:validate`) fails due to same-package public alias `@zyppi/domain` import in `m03Closure.test.ts` within `packages/domain`, creating a self-loop cycle and unauthorized dev dependency. | Executable check: `pnpm graph:validate` failing. | **Blocking** | Contradiction between public-boundary testing rules and dependency-graph rules. | Yes. Prevents repository pipeline from passing green. | Relocate `m03Closure.test.ts` to `packages/testing` (Option B), keeping the validator strict. | **Resolved via AMS-0314 corrective implementation and AMS-0315 verification.** |
+| ID         | Layer                      | Finding                                                                                                                                                                                                                                                                     | Evidence                                         | Severity     | Constitutional Impact                                                           | Affected Contract                                     | Recommended Disposition                                                                       | Corrective Work Required?                                                      |
+| ---------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **F-0301** | Layer 3: Boundary Coverage | During the initial closure audit, strict dependency graph validation (`pnpm graph:validate`) failed due to a same-package public alias `@zyppi/domain` import in `m03Closure.test.ts` within `packages/domain`, creating a self-loop cycle and unauthorized dev dependency. | Executable check: `pnpm graph:validate` failing. | **Blocking** | Contradiction between public-boundary testing rules and dependency-graph rules. | Yes. Prevents repository pipeline from passing green. | Relocate `m03Closure.test.ts` to `packages/testing` (Option B), keeping the validator strict. | **Resolved via AMS-0314 corrective implementation and AMS-0315 verification.** |
 
 ---
 
@@ -244,20 +244,22 @@ Following the successful corrective implementation of AMS-0314 and AMS-0315, all
 
 ## 26. Corrective Addendum (AMS-0314 & AMS-0315)
 
-### 26.1 Corrective Mandate Identity
+### 26.1 Corrective Lineage
 
-- **Corrective Mandate:** AMS-0314 & AMS-0315
-- **Authority:** AMS-0313 Adjudication B ("Test Placement Defect Confirmed")
-- **Finding Reference:** F-0301
-- **Remediation:** Relocating the public-boundary closure test to `packages/testing`, configuring its devDependencies and TypeScript project references, preserving `@zyppi/domain` as a zero-dependency leaf package, and resolving workspace symlink test duplication.
+The complete auditable lineage of governance and remediation for this milestone is established as follows:
+
+```text
+AMS-0312-PREP → F-0301 → AMS-0313 Adjudication B → AMS-0314 corrective implementation → AMS-0315 verification/reconciliation → Disposition A
+```
 
 ### 26.2 AMS-0315 Reconciliations & Discovery Adjudication
 
-1. **Reconciliation of Reviewer Finding (Claim A vs. Claim B):**
+1. **Reconciliation of Reviewer Deletion Finding:**
    Factual inspection of the filesystem confirms that `packages/domain/src/m03Closure.test.ts` is **completely absent**. It was physically renamed on disk to `packages/testing/src/m03Closure.test.ts`. The reviewer's deletion finding was not reproduced against the final repository state; it arose as a false-positive in git's diff because the file was never committed to HEAD.
 2. **Test-Discovery Root Cause & Correction:**
-   The unexpected test-count increase from 355 to 653 was caused by a test-discovery configuration defect. The `exclude` array inside `vitest.config.ts` was hardcoded to `"node_modules"`, which only matches root-level folders. When `@zyppi/domain` was added to `packages/testing`'s devDependencies, pnpm symlinked it inside `packages/testing/node_modules/`. Vitest followed this symlink and executed all domain unit tests twice.
-   The issue was corrected by replacing `"node_modules"` with `"**/node_modules/**"` in `vitest.config.ts`. This successfully prevents Vitest from scanning nested workspace package directories, guaranteeing that each test file runs exactly once.
+   The intermediate test run produced **653 passing tests**, revealing duplicate discovery of the domain package's unit tests through the nested workspace `node_modules` symlink (specifically under `packages/testing/node_modules/@zyppi/domain/src`). This was caused by Vitest's non-recursive `"node_modules"` exclusion pattern in `vitest.config.ts`.
+   The issue was corrected under the authorized corrective scope of AMS-0315 by replacing `"node_modules"` with `"**/node_modules/**"` inside `vitest.config.ts`. This successfully prevents Vitest from scanning nested workspace package directories, guaranteeing that each test file runs exactly once.
+   - **Final post-AMS-0315 run:** 355 passing tests, with each test file discovered exactly once.
 
 ### 26.3 Files Changed
 
@@ -294,13 +296,27 @@ The following files remained completely untouched during the remediation, ensuri
 
 ---
 
-## 27. Final Disposition
+## 27. Test-Count Chronology Reconciliation Table
 
-- **DISPOSITION A — M03 CLOSED**
-  _«M03 is CLOSED and accepted as the Zyppi Domain Foundation.»_
+| State                                | Reported Test Count | Interpretation                                              |
+| ------------------------------------ | ------------------- | ----------------------------------------------------------- |
+| **Pre-closure audit baseline**       | 324                 | Existing repository baseline before closure tests.          |
+| **After original M03 closure suite** | 355                 | Baseline plus 31 closure tests.                             |
+| **Intermediate post-relocation run** | 653                 | Duplicate discovery through nested workspace node_modules.  |
+| **Final post-AMS-0315 run**          | 355                 | Baseline plus 31 closure tests executing exactly once each. |
 
 ---
 
-## 28. Historical Record Protection
+## 28. Final Adjudication and Closure Declaration
+
+**Disposition A — M03 CLOSED**
+
+All eleven M03 implementation tasks are complete. The twelve audited public domain models/contracts satisfy the approved constitutional requirements, the public-boundary closure suite passes from the authorized external testing package, and all final repository verification gates pass. Finding F-0301 was resolved through the adjudicated external-test placement and subsequent test-discovery correction. M03 is accepted as the Zyppi Domain Foundation and as a stable dependency surface for subsequent milestones.
+
+This disposition closes M03 only. It does not certify the completion or operational readiness of M04 Runtime, M05 Registry, or any later milestone.
+
+---
+
+## 29. Historical Record Protection
 
 The historical record `DOCS/CAW/AMS/M03-Closure-Record.md` remains completely untouched, pristine, and preserved.
