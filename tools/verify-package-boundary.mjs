@@ -60,14 +60,55 @@ if (pkg.type !== "module") {
   process.exit(1);
 }
 
-// 4. Require dependencies to be exactly {} and peerDependencies to be exactly {}
-if (
-  !pkg.dependencies ||
-  typeof pkg.dependencies !== "object" ||
-  Object.keys(pkg.dependencies).length !== 0
-) {
-  console.error("Error: 'dependencies' must exist and be an empty object {}.");
-  process.exit(1);
+// 4. Validate dependencies according to the package's declared architectural layer
+const layer = pkg.zyppi?.layer || "foundation";
+
+if (layer === "foundation") {
+  if (
+    !pkg.dependencies ||
+    typeof pkg.dependencies !== "object" ||
+    Object.keys(pkg.dependencies).length !== 0
+  ) {
+    console.error(
+      "Error: Foundational packages must have an empty 'dependencies' object.",
+    );
+    process.exit(1);
+  }
+} else if (layer === "runtime") {
+  if (!pkg.dependencies || typeof pkg.dependencies !== "object") {
+    console.error("Error: 'dependencies' must be an object.");
+    process.exit(1);
+  }
+
+  // Approved lower-layer foundation dependencies
+  const APPROVED_FOUNDATIONS = ["@zyppi/domain", "@zyppi/shared"];
+
+  for (const [depName, depVer] of Object.entries(pkg.dependencies)) {
+    if (!APPROVED_FOUNDATIONS.includes(depName)) {
+      console.error(
+        `Error: Runtime-layer package cannot depend on '${depName}'. Only '@zyppi/domain' and '@zyppi/shared' are permitted.`,
+      );
+      process.exit(1);
+    }
+    if (depVer !== "workspace:*") {
+      console.error(
+        `Error: Dependency '${depName}' must use the exact 'workspace:*' protocol.`,
+      );
+      process.exit(1);
+    }
+  }
+} else {
+  // Other layers (e.g., contracts, testing) default to requiring empty dependencies for strictness
+  if (
+    !pkg.dependencies ||
+    typeof pkg.dependencies !== "object" ||
+    Object.keys(pkg.dependencies).length !== 0
+  ) {
+    console.error(
+      `Error: Packages in layer '${layer}' must have an empty 'dependencies' object.`,
+    );
+    process.exit(1);
+  }
 }
 
 if (

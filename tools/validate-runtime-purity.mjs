@@ -75,17 +75,19 @@ export function validateManifest(
   }
 
   // Under Default Denial, dependencies must be explicitly approved.
-  // Since our initial external production allowlist is empty, any declared dependency fails.
+  // Approved internal workspace dependencies are allowed; other categories/packages are denied.
   if (manifest.dependencies && typeof manifest.dependencies === "object") {
-    for (const dep of Object.keys(manifest.dependencies)) {
-      violations.push({
-        ruleId: RTP_RULES.MANIFEST_DEPENDENCY,
-        path: manifestPath,
-        line: 1,
-        column: 1,
-        category: "RTP_MANIFEST",
-        description: `Unauthorized Runtime production dependency: "${dep}". Dependency categories default to denied under Default Denial.`,
-      });
+    for (const [dep, version] of Object.entries(manifest.dependencies)) {
+      if (!ALLOWED_INTERNAL_PACKAGES.has(dep) || version !== "workspace:*") {
+        violations.push({
+          ruleId: RTP_RULES.MANIFEST_DEPENDENCY,
+          path: manifestPath,
+          line: 1,
+          column: 1,
+          category: "RTP_MANIFEST",
+          description: `Unauthorized Runtime production dependency: "${dep}". Dependency categories default to denied under Default Denial.`,
+        });
+      }
     }
   }
 

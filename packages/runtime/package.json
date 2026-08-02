@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "zyppi": {
+    "layer": "runtime"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -15,6 +18,9 @@
     "build": "tsc -b",
     "boundary": "node ../../tools/verify-package-boundary.mjs --package=packages/runtime"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@zyppi/domain": "workspace:*",
+    "@zyppi/shared": "workspace:*"
+  },
   "peerDependencies": {}
 }

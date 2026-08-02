@@ -43,7 +43,14 @@ importers:
 
   packages/domain: {}
 
-  packages/runtime: {}
+  packages/runtime:
+    dependencies:
+      "@zyppi/domain":
+        specifier: workspace:*
+        version: link:../domain
+      "@zyppi/shared":
+        specifier: workspace:*
+        version: link:../shared
 
   packages/shared: {}
 
