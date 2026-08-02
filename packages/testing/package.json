@@ -16,5 +16,8 @@
     "boundary": "node ../../tools/verify-package-boundary.mjs --package=packages/testing"
   },
   "dependencies": {},
-  "peerDependencies": {}
+  "peerDependencies": {},
+  "devDependencies": {
+    "@zyppi/domain": "workspace:*"
+  }
 }
