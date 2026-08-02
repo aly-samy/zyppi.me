@@ -47,7 +47,11 @@ importers:
 
   packages/shared: {}
 
-  packages/testing: {}
+  packages/testing:
+    devDependencies:
+      "@zyppi/domain":
+        specifier: workspace:*
+        version: link:../domain
 
 packages:
   "@babel/helper-string-parser@7.29.7":
