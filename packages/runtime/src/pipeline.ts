@@ -1,4 +1,5 @@
 import { validateExecutionRequest } from "@zyppi/domain";
+import type { ExecutionContext } from "@zyppi/domain";
 import type {
   LifecycleStage,
   PipelineResult,
@@ -19,11 +20,13 @@ export function runInternalPipeline(
 ): PipelineResult {
   const trace: LifecycleStage[] = [];
 
-  // Helper function to handle a stage traversal and determine whether to proceed
-  function executeStage(
+  // Helper function to handle a stage traversal for post-Admission stages
+  function executePostAdmissionStage(
     stage: LifecycleStage,
-    performAction: () =>
-      { ok: true } | { ok: false; code: string; message: string },
+    performAction: (
+      context: ExecutionContext,
+    ) => { ok: true } | { ok: false; code: string; message: string },
+    context: ExecutionContext,
   ): { ok: true } | { ok: false; error: PipelineError } {
     trace.push(stage);
 
@@ -45,7 +48,7 @@ export function runInternalPipeline(
     }
 
     // Default execution logic
-    const result = performAction();
+    const result = performAction(context);
     if (result.ok) {
       return { ok: true };
     } else {
@@ -61,28 +64,57 @@ export function runInternalPipeline(
   }
 
   // 1. Admission
-  const admissionRes = executeStage("Admission", () => {
-    // Perform structural validation using the audited domain validator
-    const validation = validateExecutionRequest(input);
-    if (!validation.ok) {
-      return {
-        ok: false,
-        code: "INVALID_EXECUTION_REQUEST",
-        message: validation.error.message,
-      };
-    }
+  trace.push("Admission");
 
-    // Since no substantive admission engine or authorized implementation exists yet,
-    // the production/default execution path MUST fail closed at the Admission stage.
+  // Perform structural validation using the audited domain validator first
+  const validation = validateExecutionRequest(input);
+  if (!validation.ok) {
     return {
       ok: false,
+      error: {
+        stage: "Admission",
+        code: "INVALID_EXECUTION_REQUEST",
+        message: validation.error.message,
+      },
+      trace,
+    };
+  }
+
+  // Authoritative context extraction
+  const executionRequest = validation.value;
+  const context = executionRequest.executionContext;
+
+  // Process Admission stage outcome under overrides or default closed behavior
+  let admissionSucceeded = false;
+  let admissionError: PipelineError | undefined;
+
+  if (overrides && overrides["Admission"]) {
+    const stageOverride = overrides["Admission"];
+    if (stageOverride.ok) {
+      admissionSucceeded = true;
+    } else {
+      admissionError = {
+        stage: "Admission",
+        code: stageOverride.code,
+        message: stageOverride.message,
+      };
+    }
+  } else {
+    // Since no substantive admission engine or authorized implementation exists yet,
+    // the production/default execution path MUST fail closed at the Admission stage.
+    admissionError = {
+      stage: "Admission",
       code: "ADMISSION_UNAVAILABLE",
       message: "Substantive admission engine is not authorized or implemented.",
     };
-  });
+  }
 
-  if (!admissionRes.ok) {
-    return { ok: false, error: admissionRes.error, trace };
+  if (!admissionSucceeded && admissionError) {
+    return {
+      ok: false,
+      error: admissionError,
+      trace,
+    };
   }
 
   // Helper to standardise failing subsequent unimplemented stages
@@ -95,72 +127,80 @@ export function runInternalPipeline(
   }
 
   // 2. Bundle Discovery
-  const discoveryRes = executeStage(
+  const discoveryRes = executePostAdmissionStage(
     "Bundle Discovery",
     makeUnimplementedAction("Bundle Discovery"),
+    context,
   );
   if (!discoveryRes.ok) {
     return { ok: false, error: discoveryRes.error, trace };
   }
 
   // 3. Bundle Verification
-  const verificationRes = executeStage(
+  const verificationRes = executePostAdmissionStage(
     "Bundle Verification",
     makeUnimplementedAction("Bundle Verification"),
+    context,
   );
   if (!verificationRes.ok) {
     return { ok: false, error: verificationRes.error, trace };
   }
 
   // 4. Dependency Resolution
-  const dependencyRes = executeStage(
+  const dependencyRes = executePostAdmissionStage(
     "Dependency Resolution",
     makeUnimplementedAction("Dependency Resolution"),
+    context,
   );
   if (!dependencyRes.ok) {
     return { ok: false, error: dependencyRes.error, trace };
   }
 
   // 5. Compatibility Validation
-  const compatibilityRes = executeStage(
+  const compatibilityRes = executePostAdmissionStage(
     "Compatibility Validation",
     makeUnimplementedAction("Compatibility Validation"),
+    context,
   );
   if (!compatibilityRes.ok) {
     return { ok: false, error: compatibilityRes.error, trace };
   }
 
   // 6. ACV Activation
-  const acvRes = executeStage(
+  const acvRes = executePostAdmissionStage(
     "ACV Activation",
     makeUnimplementedAction("ACV Activation"),
+    context,
   );
   if (!acvRes.ok) {
     return { ok: false, error: acvRes.error, trace };
   }
 
   // 7. Resolution Graph Construction
-  const resGraphRes = executeStage(
+  const resGraphRes = executePostAdmissionStage(
     "Resolution Graph Construction",
     makeUnimplementedAction("Resolution Graph Construction"),
+    context,
   );
   if (!resGraphRes.ok) {
     return { ok: false, error: resGraphRes.error, trace };
   }
 
   // 8. Active Execution
-  const activeExecRes = executeStage(
+  const activeExecRes = executePostAdmissionStage(
     "Active Execution",
     makeUnimplementedAction("Active Execution"),
+    context,
   );
   if (!activeExecRes.ok) {
     return { ok: false, error: activeExecRes.error, trace };
   }
 
   // 9. Receipt Generation
-  const receiptRes = executeStage(
+  const receiptRes = executePostAdmissionStage(
     "Receipt Generation",
     makeUnimplementedAction("Receipt Generation"),
+    context,
   );
   if (!receiptRes.ok) {
     return { ok: false, error: receiptRes.error, trace };
