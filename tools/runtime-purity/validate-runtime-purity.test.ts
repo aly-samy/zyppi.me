@@ -282,4 +282,354 @@ describe("Zyppi Runtime Purity & Determinism Validator - Automated Verification 
       ).toHaveLength(0);
     });
   });
+
+  describe("AMS-0407 Extension - Rejection Coverage", () => {
+    it("should reject Math['random']()", () => {
+      const code = `Math["random"]();`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(RTP_RULES.DETERMINISM_MATH_RANDOM);
+    });
+
+    it("should reject Date['now']()", () => {
+      const code = `Date["now"]();`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(RTP_RULES.DETERMINISM_DATE_NOW);
+    });
+
+    it("should reject direct process.env", () => {
+      const code = `const x = process.env;`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(RTP_RULES.DETERMINISM_PROCESS_ENV);
+    });
+
+    it("should reject bracket-form process environment access", () => {
+      const code = `const x = process["env"];`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(RTP_RULES.DETERMINISM_PROCESS_ENV);
+    });
+
+    it("should reject direct eval(...)", () => {
+      const code = `eval("1 + 1");`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_DYNAMIC_EXECUTION,
+      );
+    });
+
+    it("should reject direct Function(...)", () => {
+      const code = `Function("return 1");`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_DYNAMIC_EXECUTION,
+      );
+    });
+
+    it("should reject new Function(...)", () => {
+      const code = `new Function("return 1");`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_DYNAMIC_EXECUTION,
+      );
+    });
+
+    it("should reject supported globalThis.eval(...) form", () => {
+      const code = `globalThis.eval("1 + 1");`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_DYNAMIC_EXECUTION,
+      );
+    });
+
+    it("should reject supported globalThis.Function(...) form", () => {
+      const code = `globalThis.Function("return 1");`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_DYNAMIC_EXECUTION,
+      );
+    });
+
+    it("should reject new WeakRef(...)", () => {
+      const code = `new WeakRef({});`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_WEAK_REF_FINALIZATION,
+      );
+    });
+
+    it("should reject new FinalizationRegistry(...)", () => {
+      const code = `new FinalizationRegistry(() => {});`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_WEAK_REF_FINALIZATION,
+      );
+    });
+
+    it("should reject dot-notation global mutation", () => {
+      const code = `globalThis.runtimeState = 42;`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(RTP_RULES.DETERMINISM_GLOBAL_MUTATION);
+    });
+
+    it("should reject bracket-notation global mutation", () => {
+      const code = `global["runtimeState"] = 42;`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(RTP_RULES.DETERMINISM_GLOBAL_MUTATION);
+    });
+
+    it("should reject top-level let", () => {
+      const code = `let state = 0;`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+      );
+    });
+
+    it("should reject top-level var", () => {
+      const code = `var state = 0;`;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+      );
+    });
+
+    it("should reject explicit mutation of a module-level constant object", () => {
+      const code = `
+        const cache = {};
+        cache.value = 123;
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+      );
+    });
+
+    it("should reject direct mutating method calls on module-level constant collection", () => {
+      const code = `
+        const entries = [];
+        entries.push("hello");
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(
+        RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+      );
+    });
+  });
+
+  describe("AMS-0407 Extension - Acceptance Coverage", () => {
+    it("should accept immutable module-level primitive constants", () => {
+      const code = `
+        const MAX_RETRIES = 3;
+        const MODE = "production";
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept immutable module-level as const configuration values", () => {
+      const code = `
+        const STAGE_ORDER = ["Admission", "Resolution"] as const;
+        const config = { active: true } as const;
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept function-local mutable variables", () => {
+      const code = `
+        export function process() {
+          let localValue = 1;
+          localValue++;
+          var another = 2;
+          return localValue + another;
+        }
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept function-local arrays or objects mutated only during one invocation", () => {
+      const code = `
+        export function compute() {
+          const arr = [];
+          arr.push(1);
+          const obj = { val: 0 };
+          obj.val = 2;
+          return { arr, obj };
+        }
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept WeakMap and WeakSet", () => {
+      const code = `
+        const map = new WeakMap();
+        const set = new WeakSet();
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept explicit input handling that does not access prohibited host capabilities", () => {
+      const code = `
+        export function processInput(input: any) {
+          return input.data;
+        }
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept approved imports and correct uses of process as a local variable/parameter spelling", () => {
+      const code = `
+        import { validateExecutionRequest } from "@zyppi/domain";
+        export function transform(process: string) {
+          return process.toUpperCase();
+        }
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept module-scope immutable destructuring declarations using const", () => {
+      const code = `
+        const immutableConfig = { a: 1, b: 2 };
+        const { a, b } = immutableConfig;
+        const [first, second] = [10, 20];
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should accept module-scope for...of and for...in loop-variable forms", () => {
+      const code = `
+        const items = [1, 2, 3];
+        for (let item of items) {
+          // loop-scoped let
+        }
+        const obj = { a: 1 };
+        for (const key in obj) {
+          // loop-scoped const
+        }
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should respect lexical shadowing of global process, eval, and Function", () => {
+      const code = `
+        function testShadowing() {
+          const process = { env: "local" };
+          const eval = () => "local_eval";
+          const Function = () => "local_func";
+
+          return {
+            p: process.env,
+            e: eval(),
+            f: Function()
+          };
+        }
+      `;
+      const violations = validateSourceFile(
+        code,
+        "packages/runtime/src/index.ts",
+      );
+      expect(violations).toHaveLength(0);
+    });
+  });
 });
