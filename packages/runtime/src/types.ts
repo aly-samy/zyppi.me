@@ -1,3 +1,5 @@
+import type { PolicyContext, ExecutionContext } from "@zyppi/domain";
+
 /**
  * Closed, internal union of all nine required constitutional lifecycle stages.
  */
@@ -41,6 +43,18 @@ export type PipelineResult =
  * Configuration options to control deterministic stage behavior during testing.
  */
 export interface StageOverrideConfig {
+  /**
+   * Internal Runtime evaluator seam.
+   *
+   * This exists only to deterministically control the evaluator in Runtime tests.
+   * It is not a production evaluator-registration mechanism and does not alter
+   * the production evaluator signature.
+   */
+  readonly policyEvaluator?: (
+    policyContext: PolicyContext,
+    executionContext: ExecutionContext,
+  ) => { readonly status: "authorized" | "denied" | "unavailable" };
+
   /**
    * Overrides Admission stage behavior. By default, Admission fails closed.
    */
