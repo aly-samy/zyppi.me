@@ -16,6 +16,11 @@ export const RTP_RULES = {
   DETERMINISM_MATH_RANDOM: "RTP-DETERMINISM-001",
   DETERMINISM_DATE_NOW: "RTP-DETERMINISM-002",
   DETERMINISM_NEW_DATE_ZERO_ARGS: "RTP-DETERMINISM-003",
+  DETERMINISM_PROCESS_ENV: "RTP-DETERMINISM-004",
+  DETERMINISM_DYNAMIC_EXECUTION: "RTP-DETERMINISM-005",
+  DETERMINISM_WEAK_REF_FINALIZATION: "RTP-DETERMINISM-006",
+  DETERMINISM_GLOBAL_MUTATION: "RTP-DETERMINISM-007",
+  DETERMINISM_MUTABLE_MODULE_STATE: "RTP-DETERMINISM-008",
 };
 
 // Required static disclaimers
@@ -110,6 +115,283 @@ export function validateManifest(
   return violations;
 }
 
+function getBindingNames(node, namesSet) {
+  if (!node) return;
+  if (ts.isIdentifier(node)) {
+    namesSet.add(node.text);
+  } else if (
+    ts.isObjectBindingPattern(node) ||
+    ts.isArrayBindingPattern(node)
+  ) {
+    for (const element of node.elements) {
+      if (ts.isBindingElement(element)) {
+        getBindingNames(element.name, namesSet);
+      }
+    }
+  }
+}
+
+function collectBindings(node, namesSet) {
+  if (!node) return;
+
+  function addDeclarationName(declNode) {
+    if (declNode && declNode.name) {
+      getBindingNames(declNode.name, namesSet);
+    }
+  }
+
+  if (
+    ts.isFunctionDeclaration(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node)
+  ) {
+    if (node.parameters) {
+      for (const param of node.parameters) {
+        addDeclarationName(param);
+      }
+    }
+    if (node.name) {
+      namesSet.add(node.name.text);
+    }
+  }
+
+  if (
+    ts.isForOfStatement(node) ||
+    ts.isForInStatement(node) ||
+    ts.isForStatement(node)
+  ) {
+    if (node.initializer && ts.isVariableDeclarationList(node.initializer)) {
+      for (const decl of node.initializer.declarations) {
+        addDeclarationName(decl);
+      }
+    }
+  }
+
+  node.forEachChild((child) => {
+    if (ts.isVariableStatement(child)) {
+      for (const decl of child.declarationList.declarations) {
+        addDeclarationName(decl);
+      }
+    } else if (ts.isFunctionDeclaration(child)) {
+      if (child.name) {
+        namesSet.add(child.name.text);
+      }
+    } else if (ts.isClassDeclaration(child)) {
+      if (child.name) {
+        namesSet.add(child.name.text);
+      }
+    } else if (ts.isInterfaceDeclaration(child)) {
+      if (child.name) {
+        namesSet.add(child.name.text);
+      }
+    } else if (ts.isTypeAliasDeclaration(child)) {
+      if (child.name) {
+        namesSet.add(child.name.text);
+      }
+    } else if (ts.isImportDeclaration(child)) {
+      const clause = child.importClause;
+      if (clause) {
+        if (clause.name) {
+          namesSet.add(clause.name.text);
+        }
+        if (clause.namedBindings) {
+          if (ts.isNamespaceImport(clause.namedBindings)) {
+            namesSet.add(clause.namedBindings.name.text);
+          } else if (ts.isNamedImports(clause.namedBindings)) {
+            for (const element of clause.namedBindings.elements) {
+              namesSet.add(element.name.text);
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function isVariableReference(node) {
+  const parent = node.parent;
+  if (!parent) return true;
+
+  if (ts.isPropertyAccessExpression(parent) && parent.name === node) {
+    return false;
+  }
+  if (ts.isPropertyAssignment(parent) && parent.name === node) {
+    return false;
+  }
+  if (ts.isBindingElement(parent) && parent.propertyName === node) {
+    return false;
+  }
+  if (ts.isImportSpecifier(parent)) {
+    return false;
+  }
+  if (ts.isExportSpecifier(parent)) {
+    return false;
+  }
+  if (
+    ts.isVariableDeclaration(parent) ||
+    ts.isFunctionDeclaration(parent) ||
+    ts.isClassDeclaration(parent) ||
+    ts.isInterfaceDeclaration(parent) ||
+    ts.isTypeAliasDeclaration(parent) ||
+    ts.isParameter(parent) ||
+    ts.isMethodDeclaration(parent) ||
+    ts.isPropertyDeclaration(parent) ||
+    ts.isPropertySignature(parent) ||
+    ts.isEnumMember(parent) ||
+    ts.isEnumDeclaration(parent)
+  ) {
+    if (parent.name === node) {
+      return false;
+    }
+  }
+
+  let cur = parent;
+  while (cur) {
+    if (
+      ts.isTypeNode(cur) ||
+      ts.isTypeReferenceNode(cur) ||
+      ts.isTypeQueryNode(cur)
+    ) {
+      return false;
+    }
+    cur = cur.parent;
+  }
+
+  return true;
+}
+
+const MUTATING_METHODS = new Set([
+  "push",
+  "pop",
+  "shift",
+  "unshift",
+  "splice",
+  "reverse",
+  "sort",
+  "fill",
+  "copyWithin",
+  "add",
+  "set",
+  "delete",
+  "clear",
+]);
+
+function isGlobalDynamicExecTarget(expr, currentShadowed) {
+  if (ts.isIdentifier(expr)) {
+    const name = expr.text;
+    if (
+      (name === "eval" || name === "Function") &&
+      !currentShadowed.has(name)
+    ) {
+      return true;
+    }
+  } else if (ts.isPropertyAccessExpression(expr)) {
+    const obj = expr.expression;
+    const prop = expr.name;
+    if (
+      ts.isIdentifier(obj) &&
+      (obj.text === "globalThis" || obj.text === "global") &&
+      !currentShadowed.has(obj.text) &&
+      ts.isIdentifier(prop) &&
+      (prop.text === "eval" || prop.text === "Function")
+    ) {
+      return true;
+    }
+  } else if (ts.isElementAccessExpression(expr)) {
+    const obj = expr.expression;
+    const arg = expr.argumentExpression;
+    if (
+      ts.isIdentifier(obj) &&
+      (obj.text === "globalThis" || obj.text === "global") &&
+      !currentShadowed.has(obj.text) &&
+      ts.isStringLiteral(arg) &&
+      (arg.text === "eval" || arg.text === "Function")
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isProhibitedGcConstructor(expr, currentShadowed) {
+  if (ts.isIdentifier(expr)) {
+    const name = expr.text;
+    if (
+      (name === "WeakRef" || name === "FinalizationRegistry") &&
+      !currentShadowed.has(name)
+    ) {
+      return true;
+    }
+  } else if (ts.isPropertyAccessExpression(expr)) {
+    const obj = expr.expression;
+    const prop = expr.name;
+    if (
+      ts.isIdentifier(obj) &&
+      (obj.text === "globalThis" || obj.text === "global") &&
+      !currentShadowed.has(obj.text) &&
+      ts.isIdentifier(prop) &&
+      (prop.text === "WeakRef" || prop.text === "FinalizationRegistry")
+    ) {
+      return true;
+    }
+  } else if (ts.isElementAccessExpression(expr)) {
+    const obj = expr.expression;
+    const arg = expr.argumentExpression;
+    if (
+      ts.isIdentifier(obj) &&
+      (obj.text === "globalThis" || obj.text === "global") &&
+      !currentShadowed.has(obj.text) &&
+      ts.isStringLiteral(arg) &&
+      (arg.text === "WeakRef" || arg.text === "FinalizationRegistry")
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getMutationTarget(node) {
+  if (
+    ts.isBinaryExpression(node) &&
+    ts.isAssignmentOperator(node.operatorToken.kind)
+  ) {
+    return node.left;
+  }
+  if (
+    ts.isPrefixUnaryExpression(node) &&
+    (node.operator === ts.SyntaxKind.PlusPlusToken ||
+      node.operator === ts.SyntaxKind.MinusMinusToken)
+  ) {
+    return node.operand;
+  }
+  if (
+    ts.isPostfixUnaryExpression(node) &&
+    (node.operator === ts.SyntaxKind.PlusPlusToken ||
+      node.operator === ts.SyntaxKind.MinusMinusToken)
+  ) {
+    return node.operand;
+  }
+  return null;
+}
+
+function getBaseIdentifierOfAccessChain(expr) {
+  let cur = expr;
+  while (
+    ts.isPropertyAccessExpression(cur) ||
+    ts.isElementAccessExpression(cur)
+  ) {
+    cur = cur.expression;
+  }
+  if (ts.isIdentifier(cur)) {
+    return cur;
+  }
+  return null;
+}
+
 /**
  * Validates a single source file AST
  */
@@ -130,6 +412,19 @@ export function validateSourceFile(fileContent, relativeFilePath) {
     const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
     return { line: line + 1, column: character + 1 };
   }
+
+  // Scan for top-level constants
+  const topLevelConsts = new Set();
+  sourceFile.forEachChild((child) => {
+    if (ts.isVariableStatement(child)) {
+      const isConst = (child.declarationList.flags & ts.NodeFlags.Const) !== 0;
+      if (isConst) {
+        for (const decl of child.declarationList.declarations) {
+          getBindingNames(decl.name, topLevelConsts);
+        }
+      }
+    }
+  });
 
   // 1. Audit Import / Export Module Specifiers
   function checkModuleSpecifier(specifierNode) {
@@ -243,7 +538,186 @@ export function validateSourceFile(fileContent, relativeFilePath) {
   }
 
   // Recursive AST traversal
-  function visit(node) {
+  function visit(node, shadowed = new Set(), innerShadowed = new Set()) {
+    let currentShadowed = shadowed;
+    let currentInnerShadowed = innerShadowed;
+
+    const isScopeNode =
+      ts.isSourceFile(node) ||
+      ts.isBlock(node) ||
+      ts.isFunctionDeclaration(node) ||
+      ts.isArrowFunction(node) ||
+      ts.isFunctionExpression(node) ||
+      ts.isMethodDeclaration(node) ||
+      ts.isConstructorDeclaration(node) ||
+      ts.isGetAccessorDeclaration(node) ||
+      ts.isSetAccessorDeclaration(node) ||
+      ts.isForOfStatement(node) ||
+      ts.isForInStatement(node) ||
+      ts.isForStatement(node);
+
+    if (isScopeNode) {
+      currentShadowed = new Set(shadowed);
+      collectBindings(node, currentShadowed);
+
+      if (!ts.isSourceFile(node)) {
+        currentInnerShadowed = new Set(innerShadowed);
+        collectBindings(node, currentInnerShadowed);
+      }
+    }
+
+    // Audit unshadowed global "process" identifier
+    if (ts.isIdentifier(node) && node.text === "process") {
+      if (!currentShadowed.has("process") && isVariableReference(node)) {
+        const loc = getLoc(node.getStart());
+        violations.push({
+          ruleId: RTP_RULES.DETERMINISM_PROCESS_ENV,
+          path: normalizedFile,
+          line: loc.line,
+          column: loc.column,
+          category: "RTP_DETERMINISM",
+          description:
+            "Prohibited process usage: Direct process/environment access is prohibited in Runtime production source.",
+        });
+      }
+    }
+
+    // Audit global dynamic code execution
+    if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
+      if (isGlobalDynamicExecTarget(node.expression, currentShadowed)) {
+        const loc = getLoc(node.getStart());
+        violations.push({
+          ruleId: RTP_RULES.DETERMINISM_DYNAMIC_EXECUTION,
+          path: normalizedFile,
+          line: loc.line,
+          column: loc.column,
+          category: "RTP_DETERMINISM",
+          description:
+            "Prohibited dynamic code execution: Use of global eval() or Function() is prohibited in Runtime production source.",
+        });
+      }
+    }
+
+    // Audit global GC-observability capabilities (WeakRef, FinalizationRegistry)
+    if (ts.isNewExpression(node)) {
+      if (isProhibitedGcConstructor(node.expression, currentShadowed)) {
+        const loc = getLoc(node.getStart());
+        violations.push({
+          ruleId: RTP_RULES.DETERMINISM_WEAK_REF_FINALIZATION,
+          path: normalizedFile,
+          line: loc.line,
+          column: loc.column,
+          category: "RTP_DETERMINISM",
+          description:
+            "Prohibited GC-observability capability: Construction of WeakRef or FinalizationRegistry is prohibited in Runtime production source.",
+        });
+      }
+    }
+
+    // Audit global namespace mutations
+    const mutTarget = getMutationTarget(node);
+    if (mutTarget) {
+      const baseIdent = getBaseIdentifierOfAccessChain(mutTarget);
+      if (
+        baseIdent &&
+        (baseIdent.text === "globalThis" || baseIdent.text === "global") &&
+        !currentShadowed.has(baseIdent.text)
+      ) {
+        const loc = getLoc(node.getStart());
+        violations.push({
+          ruleId: RTP_RULES.DETERMINISM_GLOBAL_MUTATION,
+          path: normalizedFile,
+          line: loc.line,
+          column: loc.column,
+          category: "RTP_DETERMINISM",
+          description: `Prohibited global namespace mutation: Mutation targeting global namespace "${baseIdent.text}" is prohibited in Runtime production source.`,
+        });
+      }
+    }
+
+    // Audit top-level let/var mutable declarations
+    if (ts.isVariableDeclaration(node)) {
+      const parentList = node.parent;
+      if (parentList && ts.isVariableDeclarationList(parentList)) {
+        const grandparent = parentList.parent;
+        if (grandparent && ts.isVariableStatement(grandparent)) {
+          const greatGrandparent = grandparent.parent;
+          if (greatGrandparent && ts.isSourceFile(greatGrandparent)) {
+            const isConst = (parentList.flags & ts.NodeFlags.Const) !== 0;
+            if (!isConst) {
+              const loc = getLoc(node.getStart());
+              violations.push({
+                ruleId: RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+                path: normalizedFile,
+                line: loc.line,
+                column: loc.column,
+                category: "RTP_DETERMINISM",
+                description: `Prohibited top-level mutable declaration: Use of top-level "let" or "var" is prohibited in Runtime production source. Use "const" instead.`,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Audit direct assignment or update to properties/elements of top-level const
+    if (mutTarget) {
+      const baseIdent = getBaseIdentifierOfAccessChain(mutTarget);
+      if (
+        baseIdent &&
+        topLevelConsts.has(baseIdent.text) &&
+        !currentInnerShadowed.has(baseIdent.text)
+      ) {
+        const loc = getLoc(node.getStart());
+        violations.push({
+          ruleId: RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+          path: normalizedFile,
+          line: loc.line,
+          column: loc.column,
+          category: "RTP_DETERMINISM",
+          description: `Prohibited module-level mutation: Mutation targeting top-level constant "${baseIdent.text}" is prohibited in Runtime production source.`,
+        });
+      }
+    }
+
+    // Audit direct calls to mutating methods on top-level const structures
+    if (ts.isCallExpression(node)) {
+      const expr = node.expression;
+      let base = null;
+      let methodName = null;
+
+      if (ts.isPropertyAccessExpression(expr)) {
+        base = expr.expression;
+        if (ts.isIdentifier(expr.name)) {
+          methodName = expr.name.text;
+        }
+      } else if (ts.isElementAccessExpression(expr)) {
+        base = expr.expression;
+        if (ts.isStringLiteral(expr.argumentExpression)) {
+          methodName = expr.argumentExpression.text;
+        }
+      }
+
+      if (base && methodName && MUTATING_METHODS.has(methodName)) {
+        const baseIdent = getBaseIdentifierOfAccessChain(base);
+        if (
+          baseIdent &&
+          topLevelConsts.has(baseIdent.text) &&
+          !currentInnerShadowed.has(baseIdent.text)
+        ) {
+          const loc = getLoc(node.getStart());
+          violations.push({
+            ruleId: RTP_RULES.DETERMINISM_MUTABLE_MODULE_STATE,
+            path: normalizedFile,
+            line: loc.line,
+            column: loc.column,
+            category: "RTP_DETERMINISM",
+            description: `Prohibited module-level mutation: Call to mutating method "${methodName}" on top-level constant "${baseIdent.text}" is prohibited in Runtime production source.`,
+          });
+        }
+      }
+    }
+
     // Audit module imports
     if (ts.isImportDeclaration(node)) {
       checkModuleSpecifier(node.moduleSpecifier);
@@ -302,6 +776,35 @@ export function validateSourceFile(fileContent, relativeFilePath) {
             });
           }
         }
+      } else if (ts.isElementAccessExpression(expression)) {
+        const obj = expression.expression;
+        const arg = expression.argumentExpression;
+
+        if (ts.isIdentifier(obj) && ts.isStringLiteral(arg)) {
+          if (obj.text === "Math" && arg.text === "random") {
+            const loc = getLoc(node.getStart());
+            violations.push({
+              ruleId: RTP_RULES.DETERMINISM_MATH_RANDOM,
+              path: normalizedFile,
+              line: loc.line,
+              column: loc.column,
+              category: "RTP_DETERMINISM",
+              description:
+                'Prohibited Math["random"]() usage: Direct entropy access is prohibited in Runtime production source.',
+            });
+          } else if (obj.text === "Date" && arg.text === "now") {
+            const loc = getLoc(node.getStart());
+            violations.push({
+              ruleId: RTP_RULES.DETERMINISM_DATE_NOW,
+              path: normalizedFile,
+              line: loc.line,
+              column: loc.column,
+              category: "RTP_DETERMINISM",
+              description:
+                'Prohibited Date["now"]() usage: Direct wall-clock time access is prohibited in Runtime production source.',
+            });
+          }
+        }
       }
     } else if (ts.isNewExpression(node)) {
       // 3. Audit Date constructor with ZERO arguments: new Date()
@@ -323,7 +826,9 @@ export function validateSourceFile(fileContent, relativeFilePath) {
       }
     }
 
-    ts.forEachChild(node, visit);
+    ts.forEachChild(node, (child) =>
+      visit(child, currentShadowed, currentInnerShadowed),
+    );
   }
 
   visit(sourceFile);
