@@ -18,6 +18,7 @@ import type {
   EvidenceRecord,
   PolicyRecord,
   ExecutionContext,
+  PolicyContext,
 } from "@zyppi/domain";
 
 const url = (import.meta as unknown as { url: string }).url;
@@ -468,5 +469,161 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     const result = runInternalPipeline(requestWithCustomBudget, overrides);
     expect(result.ok).toBe(true);
     expect(requestWithCustomBudget.executionContext.budget).toBe(testBudget);
+  });
+
+  // AMS-0404: Deterministic Authorization
+  it("proves deterministic authorization when evaluator returns authorized", () => {
+    let receivedPolicyContext: PolicyContext | null = null;
+    let receivedExecutionContext: ExecutionContext | null = null;
+
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: (policyContext, executionContext) => {
+        receivedPolicyContext = policyContext;
+        receivedExecutionContext = executionContext;
+        return { status: "authorized" };
+      },
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+
+    const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
+    const result = runInternalPipeline(inputCopy, overrides);
+
+    expect(result.ok).toBe(true);
+    expect(result.trace).toEqual([
+      "Admission",
+      "Bundle Discovery",
+      "Bundle Verification",
+      "Dependency Resolution",
+      "Compatibility Validation",
+      "ACV Activation",
+      "Resolution Graph Construction",
+      "Active Execution",
+      "Receipt Generation",
+    ]);
+
+    expect(receivedPolicyContext).toEqual(validRequestInput.policyContext);
+    expect(receivedExecutionContext).toEqual(
+      validRequestInput.executionContext,
+    );
+  });
+
+  // AMS-0404: Deterministic Denial
+  it("proves deterministic denial when evaluator returns denied, preventing all downstream stages", () => {
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: () => {
+        return { status: "denied" };
+      },
+      "Bundle Discovery": { ok: true },
+    };
+
+    const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
+    const result = runInternalPipeline(inputCopy, overrides);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.stage).toBe("Admission");
+      expect(result.error.code).toBe("ADMISSION_DENIED");
+      expect(result.error.message).toBe("Policy evaluation denied admission.");
+    }
+    // Downstream stages must not execute or be in trace
+    expect(result.trace).toEqual(["Admission"]);
+  });
+
+  // AMS-0404: Evaluation Cannot Be Silently Bypassed
+  it("proves evaluation cannot be silently bypassed even when Admission is overridden to true", () => {
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: () => {
+        return { status: "denied" };
+      },
+      Admission: { ok: true }, // attempting bypass
+      "Bundle Discovery": { ok: true },
+    };
+
+    const result = runInternalPipeline(validRequestInput, overrides);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.stage).toBe("Admission");
+      expect(result.error.code).toBe("ADMISSION_DENIED");
+    }
+    expect(result.trace).toEqual(["Admission"]);
+  });
+
+  // AMS-0404: Repeated Execution
+  it("proves structurally identical results on repeated execution without dependency on hidden state", () => {
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: () => {
+        return { status: "denied" };
+      },
+    };
+
+    const result1 = runInternalPipeline(validRequestInput, overrides);
+    const result2 = runInternalPipeline(validRequestInput, overrides);
+
+    expect(result1).toEqual(result2);
+  });
+
+  // AMS-0404: Input Immutability
+  it("proves evaluator and pipeline do not mutate inputs", () => {
+    const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
+    const frozenInput = deepFreeze(inputCopy);
+
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: (policyContext, executionContext) => {
+        // Assert input shape can be read but not mutated
+        expect(policyContext).toEqual(validRequestInput.policyContext);
+        expect(executionContext).toEqual(validRequestInput.executionContext);
+        return { status: "authorized" };
+      },
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+
+    const result = runInternalPipeline(frozenInput, overrides);
+    expect(result.ok).toBe(true);
+    expect(frozenInput).toEqual(validRequestInput);
+  });
+
+  // AMS-0404: Fail-Closed Evaluator Unavailability
+  it("proves evaluator unavailability fails closed with ADMISSION_UNAVAILABLE when no stage-override is present", () => {
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: () => {
+        return { status: "unavailable" };
+      },
+    };
+
+    const result = runInternalPipeline(validRequestInput, overrides);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.stage).toBe("Admission");
+      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
+      expect(result.error.message).toBe(
+        "Substantive admission engine is not authorized or implemented.",
+      );
+    }
+    expect(result.trace).toEqual(["Admission"]);
+  });
+
+  // AMS-0404: Default Evaluator behavior is unavailable
+  it("proves default/production evaluator fails closed as unavailable", () => {
+    // When no overrides or evaluator is provided
+    const result = runInternalPipeline(validRequestInput);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.stage).toBe("Admission");
+      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
+    }
   });
 });
