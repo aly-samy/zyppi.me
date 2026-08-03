@@ -42,7 +42,11 @@ importers:
 
   apps/web: {}
 
-  packages/contracts: {}
+  packages/contracts:
+    devDependencies:
+      "@zyppi/domain":
+        specifier: workspace:*
+        version: link:../domain
 
   packages/domain: {}
 
