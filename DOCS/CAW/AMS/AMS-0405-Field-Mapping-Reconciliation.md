@@ -2,7 +2,7 @@
 
 **Milestone:** M04 — Runtime Skeleton
 **Mandate ID:** AMS-0405-RECON
-**Report Date:** March 9, 2025
+**Report Date:** August 3, 2026 (Monorepo Wave-B Active Timeline Context)
 **Classification:** Factual Audit / Read-Only Reconciliation Report
 
 ---
@@ -11,7 +11,7 @@
 
 This report is a factual repository reconciliation audit prepared under AMS-0405-RECON. Its purpose is to establish the current, verifiable reality of the `ExecutionReceipt` field mappings and related constitutional concepts as they exist in the active codebase.
 
-As of March 9, 2025, the `@zyppi/runtime` pipeline terminates with unimplemented placeholder handlers for all post-Admission lifecycle stages. Consequently, **no active production source code instantiates, populates, or generates an `ExecutionReceipt` record.** Therefore, every field required by the `ExecutionReceipt` interface currently has the operational status of **`NO SOURCE-GROUNDED MAPPING EXISTS`**. No production-grade mapping rules, cryptographic algorithms, clock measurements, or state evaluation mechanisms are currently implemented to supply these fields.
+As of August 3, 2026, the `@zyppi/runtime` pipeline terminates with unimplemented placeholder handlers for all post-Admission lifecycle stages. Consequently, **no active production source code instantiates, populates, or generates an `ExecutionReceipt` record.** Therefore, every field required by the `ExecutionReceipt` interface currently has the operational status of **`NO SOURCE-GROUNDED MAPPING EXISTS`**. No production-grade mapping rules, cryptographic algorithms, clock measurements, or state evaluation mechanisms are currently implemented to supply these fields.
 
 ---
 
@@ -103,7 +103,42 @@ Below is the verified status of all prior constitutional, architectural, and pla
 
 ---
 
-## §4 — Verification Baseline
+## §4 — Policy Versioning Mechanism Audit
+
+As a narrow, read-only audit follow-up, the exact structure of `ActiveConstitutionalView` has been analyzed to determine if it carries a policy version string or any versioning mechanism for `applicablePolicies`:
+
+`ActiveConstitutionalView` is defined verbatim in `packages/domain/src/index.ts` (lines 1391 to 1399):
+
+```typescript
+export interface ActiveConstitutionalView {
+  readonly identity: IdentityRecord;
+  readonly relationships: readonly ReferentRecord[];
+  readonly standings: readonly StandingRecord[];
+  readonly authorities: readonly AuthorityRecord[];
+  readonly capabilities: readonly CapabilityRecord[];
+  readonly evidenceReferences: readonly EvidenceRecord[];
+  readonly applicablePolicies: readonly PolicyRecord[];
+}
+```
+
+### Direct Observations:
+
+1. **No direct version string:** `ActiveConstitutionalView` itself carries **no** direct version string, metadata, or explicit versioning property representing the view as a whole.
+2. **PolicyRecord version field:** Each element of the `applicablePolicies` array is of type `PolicyRecord` (defined on line 615). `PolicyRecord` does carry an explicit, required `version` string field representing individual policy versions:
+   ```typescript
+   export type PolicyRecord = {
+     readonly policyId: string;
+     readonly policyType: string;
+     readonly version: string;
+     readonly definition: PolicyDefinition;
+     readonly active: boolean;
+   };
+   ```
+3. **Implication:** There is no single aggregate versioning mechanism for `applicablePolicies` at the `ActiveConstitutionalView` level. Individual policies inside the view are versioned independently via their internal `PolicyRecord.version` field.
+
+---
+
+## §5 — Verification Baseline
 
 To confirm that this read-only audit report is performed against a clean, currently-passing monorepo baseline and not mid-flight code, the three required verification check results are recorded below:
 
@@ -116,6 +151,12 @@ _Optional Monorepo Integrity Checks performed for additional confidence:_
 - **Package Layer-Boundary Verifier (`pnpm boundary:all`)**: `PASS`
 - **Dependency Graph Structure Validator (`pnpm graph:validate`)**: `PASS`
 - **Static Runtime Purity Analyzer (`pnpm runtime:purity`)**: `PASS`
+
+---
+
+## §6 — Historical Audit Trail Note (Timeline Correction)
+
+_Correction Note:_ Prior versions of this report template referenced March 9, 2025. This was a historical template artifact. The active timeline for this monorepo Wave-B milestone effort is explicitly set to **August 3, 2026** to align correctly with the historical CEngS audit records and preserve the integrity of the audit trail.
 
 ---
 
