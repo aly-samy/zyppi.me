@@ -140,33 +140,33 @@ At lifecycle stage 9, `"Receipt Generation"`, the runtime pipeline currently has
 
 ## 4. Receipt Field Mapping
 
-Below is the factual mapping of every required field in the `ExecutionReceipt` against what is currently extractable/available at **Stage 9** in `packages/runtime/src/pipeline.ts` without fabricating data:
+Below is the factual, strict mapping of every required field in the `ExecutionReceipt` against what is currently extractable/available at **Stage 9** in `packages/runtime/src/pipeline.ts` without fabricating data, making assumptions, or inferring mapping rules from names/unimplemented concepts:
 
-| Required `ExecutionReceipt` Field | Current Runtime Source                                                                   | Available without invention? | Finding         |
-| :-------------------------------- | :--------------------------------------------------------------------------------------- | :--------------------------- | :-------------- |
-| **`receiptId`**                   | None                                                                                     | No                           | **MISSING**     |
-| **`executionId`**                 | `executionRequest.requestId` _(Assumed but undocumented)_                                | No                           | **AMBIGUOUS**   |
-| **`runtimeVersion`**              | `executionContext.versions` _(Array of strings; exact version select logic is absent)_   | No                           | **AMBIGUOUS**   |
-| **`inputHash`**                   | None (No hashing library or serialization input binding in runtime)                      | No                           | **UNSUPPORTED** |
-| **`outputHash`**                  | None (No output artifact exists at Stage 9)                                              | No                           | **MISSING**     |
-| **`evidenceHash`**                | None (No evidence assembly logic is implemented)                                         | No                           | **MISSING**     |
-| **`policyVersion`**               | `policyContext.policies` _(Needs extraction from records, version resolution is absent)_ | No                           | **AMBIGUOUS**   |
-| **`decisionSummary`**             | None (Evaluation result status is not retained or summarized)                            | No                           | **MISSING**     |
-| **`executionTime`**               | None (No timing mechanisms or clock hooks are present)                                   | No                           | **UNSUPPORTED** |
-| **`deterministicHash`**           | None (Cannot self-hash without hashing mechanisms or input fields)                       | No                           | **UNSUPPORTED** |
+| Required `ExecutionReceipt` Field | Existing Source Artifact | Exact Mapping Rule                     | Finding         |
+| :-------------------------------- | :----------------------- | :------------------------------------- | :-------------- |
+| **`receiptId`**                   | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`executionId`**                 | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`runtimeVersion`**              | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`inputHash`**                   | None                     | **No source-grounded mapping exists.** | **UNSUPPORTED** |
+| **`outputHash`**                  | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`evidenceHash`**                | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`policyVersion`**               | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`decisionSummary`**             | None                     | **No source-grounded mapping exists.** | **MISSING**     |
+| **`executionTime`**               | None                     | **No source-grounded mapping exists.** | **UNSUPPORTED** |
+| **`deterministicHash`**           | None                     | **No source-grounded mapping exists.** | **UNSUPPORTED** |
 
-### Detailed Findings Explanation:
+### Detailed Strict Mapping Analysis:
 
-- **`receiptId` [MISSING]:** No generator or ID format is defined in the pipeline.
-- **`executionId` [AMBIGUOUS]:** The incoming request has a `requestId`, but the pipeline does not explicitly define how `executionId` maps to it (or if it's generated).
-- **`runtimeVersion` [AMBIGUOUS]:** `executionContext.versions` contains a list of versions, but the active source does not establish which element represents the current executing `runtimeVersion`.
-- **`inputHash` [UNSUPPORTED]:** Calculating `inputHash` requires deterministic serializing of the input followed by cryptographic hashing. No hashing routines are imported or exposed in `@zyppi/runtime` (as it must remain pure and free from non-pure external/built-in I/O).
-- **`outputHash` [MISSING]:** Because there is no functional pipeline output, there is nothing to hash.
-- **`evidenceHash` [MISSING]:** Evidence verification is stubbed out. No gathered evidence assembly or hashing exists.
-- **`policyVersion` [AMBIGUOUS]:** The policy context contains policy records with individual versions, but there is no logic to select or compile a single `policyVersion` representational string.
-- **`decisionSummary` [MISSING]:** The result status of the policy evaluator is checked and discarded during `Admission` and cannot be read at Stage 9.
-- **`executionTime` [UNSUPPORTED]:** Since reading system clocks or using performance timers violates the strict static determinism rules of `validate-runtime-purity` (which blocks `Date` or `performance` calls), calculating actual execution time requires specific pure sandbox interfaces or passed-in parameters which are not yet established.
-- **`deterministicHash` [UNSUPPORTED]:** Cannot be generated without first populating the prior 9 fields and serializing the receipt to hash it deterministically.
+- **`receiptId` [MISSING]:** No generator, parameter, or mapping rule exists in `pipeline.ts` or any other runtime files. No source-grounded mapping exists.
+- **`executionId` [MISSING]:** While `executionRequest` carries a `requestId` parameter, there is **no active source code or mapping rule** stating that `executionId` is defined by `requestId`. Thus, no source-grounded mapping exists.
+- **`runtimeVersion` [MISSING]:** While `executionContext` contains a list of string `versions`, there is **no rule or selector** in active source mapping a single version string to the `runtimeVersion` field. Thus, no source-grounded mapping exists.
+- **`inputHash` [UNSUPPORTED]:** No cryptographic hashing utilities exist in `packages/runtime` or `@zyppi/shared` to serialize and hash the request. No source-grounded mapping exists.
+- **`outputHash` [MISSING]:** No pipeline output exists to hash, as stages 2-8 are unpopulated stubs. No source-grounded mapping exists.
+- **`evidenceHash` [MISSING]:** No evidence collection or hashing routines are implemented. No source-grounded mapping exists.
+- **`policyVersion` [MISSING]:** While individual policies have a version string inside `policyContext`, there is **no rule or logic** in source to combine or resolve them into a single `policyVersion`. No source-grounded mapping exists.
+- **`decisionSummary` [MISSING]:** The status returned by the `policyEvaluator` is evaluated in Stage 1 and discarded; it is not propagated or bound to any variable available at Stage 9. No source-grounded mapping exists.
+- **`executionTime` [UNSUPPORTED]:** No pure performance measuring seams, timers, or parameter configurations are mapped to this field. No source-grounded mapping exists.
+- **`deterministicHash` [UNSUPPORTED]:** Cannot be generated without populating and serializing the prior 9 fields, and requires a pure cryptographic hashing routine that does not exist in the source. No source-grounded mapping exists.
 
 ---
 
@@ -176,7 +176,7 @@ Below is the factual mapping of every required field in the `ExecutionReceipt` a
 
 ### Supporting Facts:
 
-1. **No Data Retention or Propagation:** The transient policy evaluation status (Stage 1 `Admission` status) is checked on admission and immediately discarded. It is not passed or bound to any variables accessible to Stage 9, making `decisionSummary` impossible to map.
+1. **Transient State Loss:** The pipeline discard pattern prevents down-funnel stages from knowing the admission status or policy details, blocking `decisionSummary` and `policyVersion`.
 2. **No Pure Timing/Hashing Seams:** To compute `inputHash`, `outputHash`, `evidenceHash`, `deterministicHash`, and `executionTime` purely and deterministically (obeying `tools/validate-runtime-purity.mjs`), the pipeline requires pre-validated, injected primitives or pure functional seams (e.g., a pure cryptographic SHA-256 routine and a sandbox-measured execution time argument) which are entirely absent in the `@zyppi/runtime` package.
 3. **No Target Mapping Rules:** There are zero rules in active source defining how to map `requestId` to `executionId`, or how to extract a single `runtimeVersion` or `policyVersion` from the list-based context inputs.
 4. **Substantive Stages Unimplemented:** Stages 2 through 8 are empty scaffolds. Generating an output hash or evidence trace is fundamentally blocked because no output data or verified evidence structures are ever constructed.
