@@ -38,17 +38,17 @@ The following sources were read fresh and analyzed without reliance on prior int
 
 The following matrix extracts every governing statement that defines, constrains, consumes, persists, or distinguishes `Outcome`:
 
-| Source        | Section         | Exact Quotation / Extraction                                                                                                                                                                     | Classification                                      | Implementation Consequence                     | Sufficient to Authorize Shape/Vocabulary?                                |
-| :------------ | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :--------------------------------------------- | :----------------------------------------------------------------------- |
-| **CAW-003**   | §Entities Table | `Outcome`                                                                                                                                                                                        | `The decision/result produced by policy evaluation` | Direct Requirement                             | Defines semantic role; maps to policy evaluation.                        | **No** — does not specify field names, type, or vocabulary. |
-| **CAW-003**   | §Entities Table | `Feeds into the Verified Response`                                                                                                                                                               | Direct Requirement                                  | Downstream relationship                        | **No** — does not specify internal structure.                            |
-| **CAW-006**   | §Response 200   | `"verificationStatus": "verified \| unverified \| rejected"`                                                                                                                                     | Direct Boundary / External Contract                 | API status contract                            | **No** — does not explicitly map 1:1 to internal Domain layer.           |
-| **CAW-006**   | §Response 200   | `"trustStatus": "definite \| probable \| possible \| uncertain \| speculative"`                                                                                                                  | Direct Boundary / External Contract                 | API trust contract                             | **No** — belongs to sibling `TrustResult`.                               |
-| **CAW-007**   | §Output         | `ExecutionOutput { outcome: Outcome; executionReceipt: ExecutionReceipt; evidenceReferences: string[]; trustResult: TrustResult; policyDecisions: PolicyDecision[]; diagnostics: Diagnostics; }` | Direct Structural Boundary                          | Defines siblings of `Outcome`                  | **No** — establishes what `Outcome` is _not_, but not what it _is_.      |
-| **CAW-008**   | §Tables         | _No `outcomes` table exists._                                                                                                                                                                    | Direct Absence                                      | No dedicated persistence schema                | **No** — indicates `Outcome` is in-memory or transient/nested in output. |
-| **CAW-011**   | §M03            | `IT-0311 \| Outcome model \| IT-0301–0307 \| S \| AMS-0311 \| ☐`                                                                                                                                 | Direct Planning Constraint                          | Role in M03 build order                        | **No** — task placement only.                                            |
-| **CEngS-001** | §4              | `The Constitutional Runtime (Layer 4) is a single, isolated package. ... Every Runtime function is deterministic. Identical inputs always produce identical outputs.`                            | Direct Engineering Constraint                       | Requires absolute purity & determinism         | **No** — governs execution behavior, not model semantics.                |
-| **CEngS-002** | §4              | `Forbidden imports: HTTP frameworks, database libraries, ORMs... Only pure computation is permitted.`                                                                                            | Direct Engineering Constraint                       | Restricts model to pure data + pure validation | **No** — limits placement, not content.                                  |
+| Source | Section | Exact Quotation / Extraction | Classification | Implementation Consequence | Sufficient to Authorize Shape/Vocabulary? |
+| :------------ | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :--------------------------------------------- | :----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| **CAW-003** | §Entities Table | `Outcome` | `The decision/result produced by policy evaluation` | Direct Requirement | Defines semantic role; maps to policy evaluation. | **No** — does not specify field names, type, or vocabulary. |
+| **CAW-003** | §Entities Table | `Feeds into the Verified Response` | Direct Requirement | Downstream relationship | **No** — does not specify internal structure. |
+| **CAW-006** | §Response 200 | `"verificationStatus": "verified \| unverified \| rejected"` | Direct Boundary / External Contract | API status contract | **No** — does not explicitly map 1:1 to internal Domain layer. |
+| **CAW-006** | §Response 200 | `"trustStatus": "definite \| probable \| possible \| uncertain \| speculative"` | Direct Boundary / External Contract | API trust contract | **No** — belongs to sibling `TrustResult`. |
+| **CAW-007** | §Output | `ExecutionOutput { outcome: Outcome; executionReceipt: ExecutionReceipt; evidenceReferences: string[]; trustResult: TrustResult; policyDecisions: PolicyDecision[]; diagnostics: Diagnostics; }` | Direct Structural Boundary | Defines siblings of `Outcome` | **No** — establishes what `Outcome` is _not_, but not what it _is_. |
+| **CAW-008** | §Tables | _No `outcomes` table exists._ | Direct Absence | No dedicated persistence schema | **No** — indicates `Outcome` is in-memory or transient/nested in output. |
+| **CAW-011** | §M03 | `IT-0311 \| Outcome model \| IT-0301–0307 \| S \| AMS-0311 \| ☐` | Direct Planning Constraint | Role in M03 build order | **No** — task placement only. |
+| **CEngS-001** | §4 | `The Constitutional Runtime (Layer 4) is a single, isolated package. ... Every Runtime function is deterministic. Identical inputs always produce identical outputs.` | Direct Engineering Constraint | Requires absolute purity & determinism | **No** — governs execution behavior, not model semantics. |
+| **CEngS-002** | §4 | `Forbidden imports: HTTP frameworks, database libraries, ORMs... Only pure computation is permitted.` | Direct Engineering Constraint | Restricts model to pure data + pure validation | **No** — limits placement, not content. |
 
 ---
 
@@ -228,18 +228,18 @@ The corpus authorizes only the _semantic_ role of `Outcome` (representing the ev
 
 To maintain extreme rigor, every potential property, status value, and rule is classified below:
 
-| Property / Concept / Rule                         | Classification                   | Source Basis / Explanation                           |
-| :------------------------------------------------ | :------------------------------- | :--------------------------------------------------- |
-| **`Outcome` exists as a distinct type**           | Direct CAW Requirement           | Explicitly listed in `CAW-003` and `CAW-007`.        |
-| **`Outcome` is a sibling of `TrustResult` etc.**  | Direct CAW Requirement           | Formally structured in the output of `CAW-007`.      |
-| **`Outcome` is pure and deterministic**           | Direct CEngS Constraint          | Mandatory for Layer 4 per `CEngS-001` §4.            |
-| **`Outcome` has no database representation**      | Necessary Structural Implication | Omitted from PostgreSQL schema in `CAW-008`.         |
-| **`Outcome` utilizes `ValidationResult<T, E>`**   | Inherited M03 Convention         | Established validation standard for all M03 models.  |
-| **Alphabetical serialization key ordering**       | Inherited M03 Convention         | Canonical serialization standard for all M03 models. |
-| **The status vocabulary `verified                 | unverified                       | rejected`**                                          | Chair-Authorized Decision Required | Unresolved if this API contract binds the Domain model. |
-| **Adding timestamps, versions, or execution IDs** | Explicitly Rejected Speculation  | Belongs to `ExecutionReceipt`, not `Outcome`.        |
-| **Embedding underlying policy decisions**         | Explicitly Rejected Speculation  | Belongs to `PolicyDecision[]`, not `Outcome`.        |
-| **Embedding diagnostic traces or messages**       | Explicitly Rejected Speculation  | Belongs to `Diagnostics`, not `Outcome`.             |
+| Property / Concept / Rule | Classification | Source Basis / Explanation |
+| :------------------------------------------------ | :------------------------------- | :--------------------------------------------------- | ---------------------------------- | ------------------------------------------------------- |
+| **`Outcome` exists as a distinct type** | Direct CAW Requirement | Explicitly listed in `CAW-003` and `CAW-007`. |
+| **`Outcome` is a sibling of `TrustResult` etc.** | Direct CAW Requirement | Formally structured in the output of `CAW-007`. |
+| **`Outcome` is pure and deterministic** | Direct CEngS Constraint | Mandatory for Layer 4 per `CEngS-001` §4. |
+| **`Outcome` has no database representation** | Necessary Structural Implication | Omitted from PostgreSQL schema in `CAW-008`. |
+| **`Outcome` utilizes `ValidationResult<T, E>`** | Inherited M03 Convention | Established validation standard for all M03 models. |
+| **Alphabetical serialization key ordering** | Inherited M03 Convention | Canonical serialization standard for all M03 models. |
+| \*\*The status vocabulary `verified               | unverified                       | rejected`\*\* | Chair-Authorized Decision Required | Unresolved if this API contract binds the Domain model. |
+| **Adding timestamps, versions, or execution IDs** | Explicitly Rejected Speculation | Belongs to `ExecutionReceipt`, not `Outcome`. |
+| **Embedding underlying policy decisions** | Explicitly Rejected Speculation | Belongs to `PolicyDecision[]`, not `Outcome`. |
+| **Embedding diagnostic traces or messages** | Explicitly Rejected Speculation | Belongs to `Diagnostics`, not `Outcome`. |
 
 ---
 

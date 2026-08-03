@@ -51,16 +51,16 @@
 
 ## IT-0107 (CI)
 
-| Check                                                                                 | Result     | Note                                                                          |
-| ------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
-| Confirmed: **R1** version is what's on `main` post-merge                              | Pass       | Confirmed `ci.yml` is R1 post-merge.                                          |
-| What triggered the R1 revision (asked directly)                                       | Pass       | Redundancies and caching sequence improvements to corepack.                   |
-| `.nvmrc` matches `package.json engines.node` exactly                                  | Pass       | Both set to `20.19.0` exactly.                                                |
-| Workflow permissions are `contents: read` only                                        | Pass       | Configured exactly in `ci.yml`.                                               |
-| Validation order: format → lint → tsc -b → runtime:purity → test                      | Pass       | Ordered exactly inside job steps.                                             |
-| No `continue-on-error`, no `                                                          |            | true` anywhere                                                                | Pass | Clean execution without failure masking. |
+| Check | Result | Note |
+| ------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------- | ---- | ---------------------------------------- |
+| Confirmed: **R1** version is what's on `main` post-merge | Pass | Confirmed `ci.yml` is R1 post-merge. |
+| What triggered the R1 revision (asked directly) | Pass | Redundancies and caching sequence improvements to corepack. |
+| `.nvmrc` matches `package.json engines.node` exactly | Pass | Both set to `20.19.0` exactly. |
+| Workflow permissions are `contents: read` only | Pass | Configured exactly in `ci.yml`. |
+| Validation order: format → lint → tsc -b → runtime:purity → test | Pass | Ordered exactly inside job steps. |
+| No `continue-on-error`, no `                                                          |            | true` anywhere | Pass | Clean execution without failure masking. |
 | **GitHub-hosted run actually observed** (URL/ID) — or explicitly stated as unverified | Unverified | Locally tested fully green; GitHub-hosted GHA verification pending post-push. |
-| Final diff matched expected minimal scope                                             | Pass       | Minimal scope respected without bloating branches.                            |
+| Final diff matched expected minimal scope | Pass | Minimal scope respected without bloating branches. |
 
 ## IT-0108 (Runtime purity validator)
 
