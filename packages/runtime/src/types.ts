@@ -1,13 +1,6 @@
 import type { PolicyContext, ExecutionContext } from "@zyppi/domain";
 
 /**
- * Internal Runtime-local evaluator result.
- */
-export type EvaluatorResult = {
-  readonly status: "authorized" | "denied" | "unavailable";
-};
-
-/**
  * Closed, internal union of all nine required constitutional lifecycle stages.
  */
 export type LifecycleStage =
@@ -52,11 +45,15 @@ export type PipelineResult =
 export interface StageOverrideConfig {
   /**
    * Internal Runtime evaluator seam.
+   *
+   * This exists only to deterministically control the evaluator in Runtime tests.
+   * It is not a production evaluator-registration mechanism and does not alter
+   * the production evaluator signature.
    */
   readonly policyEvaluator?: (
     policyContext: PolicyContext,
     executionContext: ExecutionContext,
-  ) => EvaluatorResult;
+  ) => { readonly status: "authorized" | "denied" | "unavailable" };
 
   /**
    * Overrides Admission stage behavior. By default, Admission fails closed.

@@ -5,8 +5,14 @@ import type {
   PipelineResult,
   PipelineError,
   StageOverrideConfig,
-  EvaluatorResult,
 } from "./types.js";
+
+/**
+ * Private, unexported implementation-local evaluator result type.
+ */
+type EvaluatorResult = {
+  readonly status: "authorized" | "denied" | "unavailable";
+};
 
 /**
  * Pure-deterministic unexported default policy evaluator.
