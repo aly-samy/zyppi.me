@@ -33,11 +33,21 @@ function defaultPolicyEvaluator(
  * @param input Raw ExecutionRequest input or similar
  * @param overrides Tightly constrained test override configurations (none in production)
  */
+/**
+ * Direct mapping of evaluator status to the decision summary.
+ */
+function summarizeEvaluatorResult(
+  status: "authorized" | "denied" | "unavailable",
+): "authorized" | "denied" | "unavailable" {
+  return status;
+}
+
 export function runInternalPipeline(
   input: unknown,
   overrides?: StageOverrideConfig,
 ): PipelineResult {
   const trace: LifecycleStage[] = [];
+  let retainedStatus: "authorized" | "denied" | "unavailable" = "unavailable";
 
   // Helper function to handle a stage traversal for post-Admission stages
   function executePostAdmissionStage(
@@ -107,6 +117,7 @@ export function runInternalPipeline(
   // Policy evaluation
   const evaluate = overrides?.policyEvaluator ?? defaultPolicyEvaluator;
   const evaluationResult = evaluate(policyContext, context);
+  retainedStatus = evaluationResult.status;
 
   // Process Admission stage outcome under evaluation results, overrides or default closed behavior
   let admissionSucceeded = false;
@@ -169,6 +180,9 @@ export function runInternalPipeline(
 
   // Helper to standardise failing subsequent unimplemented stages
   function makeUnimplementedAction(stageName: string) {
+    if (stageName === "Receipt Generation") {
+      return () => ({ ok: true as const });
+    }
     return () => ({
       ok: false as const,
       code: `${stageName.toUpperCase().replace(/\s+/g, "_")}_UNAVAILABLE`,
@@ -256,9 +270,26 @@ export function runInternalPipeline(
     return { ok: false, error: receiptRes.error, trace };
   }
 
+  const decisionSummary = summarizeEvaluatorResult(retainedStatus);
+
   return {
     ok: true,
     stage: "Receipt Generation",
     trace,
+    outcome: {
+      kind: "deferred",
+      decisionSummary,
+      unresolvedFields: [
+        "receiptId",
+        "executionId",
+        "runtimeVersion",
+        "inputHash",
+        "outputHash",
+        "evidenceHash",
+        "policyVersion",
+        "executionTime",
+        "deterministicHash",
+      ],
+    },
   };
 }

@@ -23,6 +23,28 @@ export interface PipelineError {
   readonly message: string;
 }
 
+export type ReceiptFieldName =
+  | "receiptId"
+  | "executionId"
+  | "runtimeVersion"
+  | "inputHash"
+  | "outputHash"
+  | "evidenceHash"
+  | "policyVersion"
+  | "executionTime"
+  | "deterministicHash";
+
+export type ReceiptOutcome =
+  | {
+      readonly kind: "deferred";
+      readonly decisionSummary: "authorized" | "denied" | "unavailable";
+      readonly unresolvedFields: readonly ReceiptFieldName[];
+    }
+  | {
+      readonly kind: "blocked";
+      readonly reason: string;
+    };
+
 /**
  * Discriminated union representing the outcome of a pipeline execution.
  * Does not contain any timestamps, random values, or system environment attributes.
@@ -32,6 +54,7 @@ export type PipelineResult =
       readonly ok: true;
       readonly stage: "Receipt Generation";
       readonly trace: readonly LifecycleStage[];
+      readonly outcome: ReceiptOutcome;
     }
   | {
       readonly ok: false;

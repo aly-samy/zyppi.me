@@ -626,4 +626,141 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
     }
   });
+
+  // AMS-0405: Evaluator-Result Retention & Decision-Summary Mapping
+  it("retains evaluator result and deterministically maps decisionSummary across authorized, denied, and unavailable", () => {
+    // Case A: authorized
+    const overridesAuthorized: StageOverrideConfig = {
+      policyEvaluator: () => ({ status: "authorized" }),
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+    const resAuth = runInternalPipeline(validRequestInput, overridesAuthorized);
+    expect(resAuth.ok).toBe(true);
+    if (resAuth.ok && resAuth.outcome.kind === "deferred") {
+      expect(resAuth.outcome.decisionSummary).toBe("authorized");
+    } else {
+      expect.fail("Expected outcome to be deferred");
+    }
+
+    // Case B: denied (halts at Admission)
+    const overridesDenied: StageOverrideConfig = {
+      policyEvaluator: () => ({ status: "denied" }),
+      Admission: { ok: true },
+      "Bundle Discovery": { ok: true },
+    };
+    const resDenied = runInternalPipeline(validRequestInput, overridesDenied);
+    expect(resDenied.ok).toBe(false);
+    if (!resDenied.ok) {
+      expect(resDenied.error.stage).toBe("Admission");
+      expect(resDenied.error.code).toBe("ADMISSION_DENIED");
+    }
+
+    // Case C: unavailable (using Admission override to proceed)
+    const overridesUnavailable: StageOverrideConfig = {
+      policyEvaluator: () => ({ status: "unavailable" }),
+      Admission: { ok: true },
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+    const resUnavail = runInternalPipeline(
+      validRequestInput,
+      overridesUnavailable,
+    );
+    expect(resUnavail.ok).toBe(true);
+    if (resUnavail.ok && resUnavail.outcome.kind === "deferred") {
+      expect(resUnavail.outcome.decisionSummary).toBe("unavailable");
+    } else {
+      expect.fail("Expected outcome to be deferred");
+    }
+  });
+
+  // AMS-0405: Receipt-Stage Deferred Outcome Unresolved Fields
+  it("reaches Receipt Generation, has deferred kind, and lists exactly the 9 unresolved fields", () => {
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: () => ({ status: "authorized" }),
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+
+    const result = runInternalPipeline(validRequestInput, overrides);
+    expect(result.ok).toBe(true);
+    if (result.ok && result.outcome.kind === "deferred") {
+      expect(result.trace).toContain("Receipt Generation");
+
+      const expectedUnresolved = [
+        "receiptId",
+        "executionId",
+        "runtimeVersion",
+        "inputHash",
+        "outputHash",
+        "evidenceHash",
+        "policyVersion",
+        "executionTime",
+        "deterministicHash",
+      ];
+      expect(result.outcome.unresolvedFields).toEqual(expectedUnresolved);
+    } else {
+      expect.fail("Expected outcome to be deferred");
+    }
+  });
+
+  // AMS-0405: No Fabricated Receipt Negative Test
+  it("proves the pipeline outcome does not construct or return a partial or completed ExecutionReceipt", () => {
+    const overrides: StageOverrideConfig = {
+      policyEvaluator: () => ({ status: "authorized" }),
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+
+    const result = runInternalPipeline(validRequestInput, overrides);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const outcomeKeys = Object.keys(result.outcome);
+      // The outcome must only have kind, decisionSummary, and unresolvedFields
+      expect(outcomeKeys).toContain("kind");
+      expect(outcomeKeys).toContain("decisionSummary");
+      expect(outcomeKeys).toContain("unresolvedFields");
+
+      // Negative check: none of the unresolved fields must exist as top-level properties on the outcome
+      const forbiddenKeys = [
+        "receiptId",
+        "executionId",
+        "runtimeVersion",
+        "inputHash",
+        "outputHash",
+        "evidenceHash",
+        "policyVersion",
+        "executionTime",
+        "deterministicHash",
+      ];
+      for (const k of forbiddenKeys) {
+        expect(result.outcome).not.toHaveProperty(k);
+      }
+    }
+  });
 });
