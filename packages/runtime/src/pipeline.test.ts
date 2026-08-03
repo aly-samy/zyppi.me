@@ -763,4 +763,327 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       }
     }
   });
+
+  describe("Deterministic replay proof — AMS-0406", () => {
+    // DR-01: authorized × 3 independent runs
+    it("DR-01: authorized x 3 -> structurally identical successful PipelineResults", () => {
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "authorized" }),
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        "Active Execution": { ok: true },
+        "Receipt Generation": { ok: true },
+      };
+
+      // Three independent runs with identical inputs and overrides
+      const input1 = JSON.parse(JSON.stringify(validRequestInput));
+      const input2 = JSON.parse(JSON.stringify(validRequestInput));
+      const input3 = JSON.parse(JSON.stringify(validRequestInput));
+
+      const res1 = runInternalPipeline(input1, overrides);
+      const res2 = runInternalPipeline(input2, overrides);
+      const res3 = runInternalPipeline(input3, overrides);
+
+      // Value-level structural equality checks
+      expect(res1.ok).toBe(true);
+      expect(res2.ok).toBe(true);
+      expect(res3.ok).toBe(true);
+
+      expect(res1).toEqual(res2);
+      expect(res1).toEqual(res3);
+
+      if (res1.ok && res1.outcome.kind === "deferred") {
+        expect(res1.stage).toBe("Receipt Generation");
+        expect(res1.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+          "Dependency Resolution",
+          "Compatibility Validation",
+          "ACV Activation",
+          "Resolution Graph Construction",
+          "Active Execution",
+          "Receipt Generation",
+        ]);
+        expect(res1.outcome.decisionSummary).toBe("authorized");
+        expect(res1.outcome.unresolvedFields).toEqual([
+          "receiptId",
+          "executionId",
+          "runtimeVersion",
+          "inputHash",
+          "outputHash",
+          "evidenceHash",
+          "policyVersion",
+          "executionTime",
+          "deterministicHash",
+        ]);
+      } else {
+        expect.fail("Outcome should be deferred with 9-stage completion");
+      }
+    });
+
+    // DR-02: denied × 3 independent runs
+    it("DR-02: denied x 3 -> structurally identical Admission failure results", () => {
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "denied" }),
+      };
+
+      const input1 = JSON.parse(JSON.stringify(validRequestInput));
+      const input2 = JSON.parse(JSON.stringify(validRequestInput));
+      const input3 = JSON.parse(JSON.stringify(validRequestInput));
+
+      const res1 = runInternalPipeline(input1, overrides);
+      const res2 = runInternalPipeline(input2, overrides);
+      const res3 = runInternalPipeline(input3, overrides);
+
+      expect(res1.ok).toBe(false);
+      expect(res2.ok).toBe(false);
+      expect(res3.ok).toBe(false);
+
+      expect(res1).toEqual(res2);
+      expect(res1).toEqual(res3);
+
+      if (!res1.ok) {
+        expect(res1.error.stage).toBe("Admission");
+        expect(res1.error.code).toBe("ADMISSION_DENIED");
+        expect(res1.trace).toEqual(["Admission"]);
+      }
+    });
+
+    // DR-03A: default unavailable × 3 independent runs (fails closed by default)
+    it("DR-03A: default unavailable x 3 -> structurally identical Admission failure results", () => {
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "unavailable" }),
+      };
+
+      const input1 = JSON.parse(JSON.stringify(validRequestInput));
+      const input2 = JSON.parse(JSON.stringify(validRequestInput));
+      const input3 = JSON.parse(JSON.stringify(validRequestInput));
+
+      const res1 = runInternalPipeline(input1, overrides);
+      const res2 = runInternalPipeline(input2, overrides);
+      const res3 = runInternalPipeline(input3, overrides);
+
+      expect(res1.ok).toBe(false);
+      expect(res2.ok).toBe(false);
+      expect(res3.ok).toBe(false);
+
+      expect(res1).toEqual(res2);
+      expect(res1).toEqual(res3);
+
+      if (!res1.ok) {
+        expect(res1.error.stage).toBe("Admission");
+        expect(res1.error.code).toBe("ADMISSION_UNAVAILABLE");
+        expect(res1.trace).toEqual(["Admission"]);
+      }
+    });
+
+    // DR-03B: override-enabled unavailable × 3 independent runs
+    it("DR-03B: override-enabled unavailable x 3 -> structurally identical successful deferred outcomes", () => {
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "unavailable" }),
+        Admission: { ok: true },
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        "Active Execution": { ok: true },
+        "Receipt Generation": { ok: true },
+      };
+
+      const input1 = JSON.parse(JSON.stringify(validRequestInput));
+      const input2 = JSON.parse(JSON.stringify(validRequestInput));
+      const input3 = JSON.parse(JSON.stringify(validRequestInput));
+
+      const res1 = runInternalPipeline(input1, overrides);
+      const res2 = runInternalPipeline(input2, overrides);
+      const res3 = runInternalPipeline(input3, overrides);
+
+      expect(res1.ok).toBe(true);
+      expect(res2.ok).toBe(true);
+      expect(res3.ok).toBe(true);
+
+      expect(res1).toEqual(res2);
+      expect(res1).toEqual(res3);
+
+      if (res1.ok && res1.outcome.kind === "deferred") {
+        expect(res1.stage).toBe("Receipt Generation");
+        expect(res1.outcome.decisionSummary).toBe("unavailable");
+        expect(res1.outcome.unresolvedFields).toEqual([
+          "receiptId",
+          "executionId",
+          "runtimeVersion",
+          "inputHash",
+          "outputHash",
+          "evidenceHash",
+          "policyVersion",
+          "executionTime",
+          "deterministicHash",
+        ]);
+      } else {
+        expect.fail("Outcome should be successful and deferred");
+      }
+    });
+
+    // DR-04: Exact nine-field membership and canonical order
+    it("DR-04: Exact nine-field membership and canonical order", () => {
+      const expectedFields = [
+        "receiptId",
+        "executionId",
+        "runtimeVersion",
+        "inputHash",
+        "outputHash",
+        "evidenceHash",
+        "policyVersion",
+        "executionTime",
+        "deterministicHash",
+      ];
+
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "authorized" }),
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        "Active Execution": { ok: true },
+        "Receipt Generation": { ok: true },
+      };
+
+      const result = runInternalPipeline(validRequestInput, overrides);
+      expect(result.ok).toBe(true);
+      if (result.ok && result.outcome.kind === "deferred") {
+        expect(result.outcome.unresolvedFields).toEqual(expectedFields);
+        expect(result.outcome.unresolvedFields.length).toBe(9);
+      } else {
+        expect.fail("Expected a successful deferred outcome");
+      }
+    });
+
+    // DR-05: A → B → A cross-invocation isolation
+    it("DR-05: A -> B -> A cross-invocation isolation", () => {
+      const overridesA: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "authorized" }),
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        "Active Execution": { ok: true },
+        "Receipt Generation": { ok: true },
+      };
+
+      const overridesB: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "denied" }),
+      };
+
+      // Distinct logical request objects
+      const requestA1 = JSON.parse(JSON.stringify(validRequestInput));
+      const requestB = {
+        ...JSON.parse(JSON.stringify(validRequestInput)),
+        requestId: "req-distinct-B-999",
+      };
+      const requestA2 = JSON.parse(JSON.stringify(validRequestInput));
+
+      // 1. Run A1
+      const resA1 = runInternalPipeline(requestA1, overridesA);
+      expect(resA1.ok).toBe(true);
+
+      // 2. Run B (intervening execution with distinct input and/or state)
+      const resB = runInternalPipeline(requestB, overridesB);
+      expect(resB.ok).toBe(false);
+
+      // 3. Run A2
+      const resA2 = runInternalPipeline(requestA2, overridesA);
+      expect(resA2.ok).toBe(true);
+
+      // Verify A1 and A2 are exactly identical (no state leakage from intervening run B)
+      expect(resA1).toEqual(resA2);
+    });
+
+    // DR-06: Explicit input immutability under repeated execution
+    it("DR-06: Explicit input immutability under repeated execution", () => {
+      const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
+      const frozenInput = deepFreeze(inputCopy);
+
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "authorized" }),
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        "Active Execution": { ok: true },
+        "Receipt Generation": { ok: true },
+      };
+
+      // Running the pipeline three consecutive times on the frozen object must not throw mutation exceptions
+      const res1 = runInternalPipeline(frozenInput, overrides);
+      const res2 = runInternalPipeline(frozenInput, overrides);
+      const res3 = runInternalPipeline(frozenInput, overrides);
+
+      expect(res1.ok).toBe(true);
+      expect(res2.ok).toBe(true);
+      expect(res3.ok).toBe(true);
+
+      // Ensure input structure remains absolutely unchanged
+      expect(frozenInput).toEqual(validRequestInput);
+    });
+
+    // DR-07: Behavioral confirmation that no ExecutionReceipt is constructed, returned, or populated
+    it("DR-07: Behavioral confirmation that no ExecutionReceipt is constructed, returned, or populated", () => {
+      const overrides: StageOverrideConfig = {
+        policyEvaluator: () => ({ status: "authorized" }),
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        "Active Execution": { ok: true },
+        "Receipt Generation": { ok: true },
+      };
+
+      const result = runInternalPipeline(validRequestInput, overrides);
+      expect(result.ok).toBe(true);
+
+      if (result.ok) {
+        // Must contain ONLY ReceiptOutcome fields, not ExecutionReceipt fields
+        const outcome = result.outcome;
+        expect(outcome.kind).toBe("deferred");
+
+        const keys = Object.keys(outcome);
+        // The outcomes keys are restricted strictly to ReceiptOutcome
+        expect(keys).toContain("kind");
+        expect(keys).toContain("decisionSummary");
+        expect(keys).toContain("unresolvedFields");
+        expect(keys.length).toBe(3);
+
+        // Verification of zero property leakage of the nine deferred receipt fields at top level of the outcome
+        const deferredFields = [
+          "receiptId",
+          "executionId",
+          "runtimeVersion",
+          "inputHash",
+          "outputHash",
+          "evidenceHash",
+          "policyVersion",
+          "executionTime",
+          "deterministicHash",
+        ];
+        for (const k of deferredFields) {
+          expect(outcome).not.toHaveProperty(k);
+        }
+      }
+    });
+  });
 });
