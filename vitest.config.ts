@@ -12,6 +12,7 @@ export default defineConfig({
       "edge/**/*.spec.ts",
       "tools/**/*.test.ts",
       "tools/**/*.spec.ts",
+      "infra/**/*.test.ts",
     ],
     exclude: [
       "**/node_modules/**",
