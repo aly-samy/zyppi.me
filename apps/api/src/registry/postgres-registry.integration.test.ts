@@ -146,7 +146,9 @@ describe("PostgreSQL Registry Adapter Integration Tests — IT-0503", () => {
   // B. Valid Identity Absence
   it("should return ok: true and value: null when identity is absent", async () => {
     const repo = new PostgresRegistryRepository(sql);
-    const identifier = createValidatedCanonicalIdentifier("non-existent-reference");
+    const identifier = createValidatedCanonicalIdentifier(
+      "non-existent-reference",
+    );
     expect(identifier.ok).toBe(true);
 
     if (identifier.ok) {
@@ -362,7 +364,9 @@ describe("PostgreSQL Registry Adapter Integration Tests — IT-0503", () => {
       expect(r.output_hash).toBe(validReceipt.outputHash);
       expect(r.evidence_hash).toBe(validReceipt.evidenceHash);
       expect(r.policy_version).toBe(validReceipt.policyVersion);
-      expect(r.decision_summary).toEqual(JSON.parse(validReceipt.decisionSummary));
+      expect(r.decision_summary).toEqual(
+        JSON.parse(validReceipt.decisionSummary),
+      );
       expect(r.execution_time_ms).toBe("33"); // Bigint in PG.js is integer string (truncated/rounded to integer)
       expect(r.deterministic_hash).toBe(validReceipt.deterministicHash);
       expect(r.created_at).toBeInstanceOf(Date);
