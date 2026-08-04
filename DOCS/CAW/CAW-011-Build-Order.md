@@ -22,8 +22,8 @@ _Note: AMS-0101's mandate text included pnpm-workspace.yaml creation, overlappin
 | IT-0104 | ESLint config                     | IT-0102    | XS   | AMS-0104 | ☑                                                                         |
 | IT-0105 | Prettier config                   | IT-0102    | XS   | AMS-0105 | ☑                                                                         |
 | IT-0106 | Vitest config                     | IT-0103    | S    | AMS-0106 | ☑                                                                         |
-| IT-0107 | GitHub Actions CI skeleton        | IT-0106    | S    | AMS-0107 | ☐                                                                         |
-| IT-0108 | Runtime purity CI check (CAW-004) | IT-0107    | S    | AMS-0108 | ☐                                                                         |
+| IT-0107 | GitHub Actions CI skeleton        | IT-0106    | S    | AMS-0107 | ☑                                                                         |
+| IT-0108 | Runtime purity CI check (CAW-004) | IT-0107    | S    | AMS-0108 | ☑                                                                         |
 
 ## M02 — Constitutional Package Structure — ☑ Complete
 
@@ -64,13 +64,13 @@ _(Depends on M03)_
 
 | ID      | Title                           | Depends On       | Size | AMS      | Status |
 | ------- | ------------------------------- | ---------------- | ---- | -------- | ------ |
-| IT-0401 | Runtime package bootstrap       | IT-0201, M03     | S    | AMS-0401 | ☐      |
-| IT-0402 | Runtime pipeline scaffold       | IT-0401          | M    | AMS-0402 | ☐      |
-| IT-0403 | ExecutionContext handling       | IT-0402, IT-0309 | S    | AMS-0403 | ☐      |
-| IT-0404 | Policy evaluator (stub)         | IT-0402, IT-0307 | S    | AMS-0404 | ☐      |
-| IT-0405 | Receipt generator               | IT-0402, IT-0310 | S    | AMS-0405 | ☐      |
-| IT-0406 | Replay framework                | IT-0405          | M    | AMS-0406 | ☐      |
-| IT-0407 | Entropy detector (CI lint rule) | IT-0402          | S    | AMS-0407 | ☐      |
+| IT-0401 | Runtime package bootstrap       | IT-0201, M03     | S    | AMS-0401 | ☑      |
+| IT-0402 | Runtime pipeline scaffold       | IT-0401          | M    | AMS-0402 | ☑      |
+| IT-0403 | ExecutionContext handling       | IT-0402, IT-0309 | S    | AMS-0403 | ☑      |
+| IT-0404 | Policy evaluator (stub)         | IT-0402, IT-0307 | S    | AMS-0404 | ☑      |
+| IT-0405 | Receipt generator               | IT-0402, IT-0310 | S    | AMS-0405 | ☑      |
+| IT-0406 | Replay framework                | IT-0405          | M    | AMS-0406 | ☑      |
+| IT-0407 | Entropy detector (CI lint rule) | IT-0402          | S    | AMS-0407 | ☑      |
 
 ## M05 — Registry Layer
 
@@ -78,9 +78,9 @@ _(Depends on M03; may run parallel with M04 and M06)_
 
 | ID      | Title                       | Depends On | Size | AMS      | Status |
 | ------- | --------------------------- | ---------- | ---- | -------- | ------ |
-| IT-0501 | PostgreSQL schema (CAW-008) | M03        | M    | AMS-0501 | ☐      |
-| IT-0502 | Repository interfaces       | IT-0501    | S    | AMS-0502 | ☐      |
-| IT-0503 | Registry adapter            | IT-0502    | M    | AMS-0503 | ☐      |
+| IT-0501 | PostgreSQL schema (CAW-008) | M03        | M    | AMS-0501 | ☑      |
+| IT-0502 | Repository interfaces       | IT-0501    | S    | AMS-0502 | ☑      |
+| IT-0503 | Registry adapter            | IT-0502    | M    | AMS-0503 | ☑      |
 | IT-0504 | Seed data                   | IT-0501    | S    | AMS-0504 | ☐      |
 | IT-0505 | Migration framework         | IT-0501    | S    | AMS-0505 | ☐      |
 
