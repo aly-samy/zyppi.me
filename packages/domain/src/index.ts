@@ -565,6 +565,16 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
   return JSON.stringify(ordered);
 }
 
+export type { RegistryRecord } from "./seed-helpers.js";
+export {
+  JcsError,
+  validateStrictJson,
+  canonicalizeJcs,
+  getRegistryRecordIdentity,
+  getRecordVariantType,
+  areRegistryRecordsEquivalent,
+} from "./seed-helpers.js";
+
 export type Outcome = "verified" | "unverified" | "rejected";
 
 export type OutcomeValidationErrorCode = "INVALID_OUTCOME";

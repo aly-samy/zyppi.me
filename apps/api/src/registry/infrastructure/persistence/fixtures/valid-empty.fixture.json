@@ -1,0 +1,19 @@
+{
+  "manifestId": "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1",
+  "manifestVersion": "1.0.0",
+  "authorityReference": "zyppi:council:registry-seed:test-authority",
+  "keyId": "zyppi-seed-ed25519-2026-v1",
+  "integrityAlgorithm": "SHA-256",
+  "integrityDigest": "45c33c470f38bdc64a39f00a5bb2c2bbc7258f03d89b31f35824227151651e14",
+  "signatureAlgorithm": "Ed25519",
+  "signature": "y5mrfGPzC1UETnHtVeAVephiAo5nvpKEmuq0Ulyrgs3TCYQ5Z7i6Jeh88y4IdwmZTmuhKD6WiQu6awb0vrDUCw==",
+  "records": {
+    "referents": [],
+    "identities": [],
+    "evidence": [],
+    "policies": [],
+    "authorities": [],
+    "capabilities": [],
+    "standings": []
+  }
+}
