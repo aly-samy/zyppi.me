@@ -4,7 +4,6 @@ import {
   getRegistryRecordIdentity,
   areRegistryRecordsEquivalent,
   JcsError,
-  type RegistryRecord,
 } from "./index.js";
 
 describe("RFC 8785 JCS Canonicalization and Seed Helpers", () => {
@@ -75,75 +74,86 @@ describe("RFC 8785 JCS Canonicalization and Seed Helpers", () => {
 
   describe("Registry Record Identity Extraction", () => {
     it("should extract identity for each supported RegistryRecord variant", () => {
-      const ref: RegistryRecord = {
+      const ref = {
         referentId: "ref-1",
-        referentType: "manufacturer",
+        referentType: "manufacturer" as const,
         name: "Aura Labs",
         parentReferentId: null,
         createdAt: "2026-08-04T00:00:00Z",
       };
-      expect(getRegistryRecordIdentity(ref)).toBe("ref-1");
+      expect(getRegistryRecordIdentity(ref, "referent")).toBe("ref-1");
 
-      const id: RegistryRecord = {
+      const id = {
         identityId: "id-1",
         identityType: "supplier",
         canonicalReference: "zyppi:supplier:1",
         referentId: null,
-        status: "active",
+        status: "active" as const,
         createdAt: "2026-08-04T00:00:00Z",
         updatedAt: "2026-08-04T00:00:00Z",
       };
-      expect(getRegistryRecordIdentity(id)).toBe("id-1");
+      expect(getRegistryRecordIdentity(id, "identity")).toBe("id-1");
     });
 
-    it("should fail on unsupported or invalid objects", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(() => getRegistryRecordIdentity({} as any)).toThrow();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(() => getRegistryRecordIdentity(null as any)).toThrow();
+    it("should fail compile-time validation for mismatched pairings", () => {
+      const ref = {
+        referentId: "ref-1",
+        referentType: "manufacturer" as const,
+        name: "Aura Labs",
+        parentReferentId: null,
+        createdAt: "2026-08-04T00:00:00Z",
+      };
+      // @ts-expect-error - Pairing ref record with "identity" type tag must cause compile-time failure
+      getRegistryRecordIdentity(ref, "identity");
     });
   });
 
   describe("Semantic Equivalence", () => {
-    const recordA: RegistryRecord = {
+    const recordA = {
       referentId: "ref-1",
-      referentType: "manufacturer",
+      referentType: "manufacturer" as const,
       name: "Aura Labs",
       parentReferentId: null,
       createdAt: "2026-08-04T00:00:00Z",
     };
 
     it("should match identical records", () => {
-      expect(areRegistryRecordsEquivalent(recordA, { ...recordA })).toBe(true);
+      expect(
+        areRegistryRecordsEquivalent(recordA, { ...recordA }, "referent"),
+      ).toBe(true);
     });
 
     it("should match records with different storage-only metadata (createdAt)", () => {
       const recordB = { ...recordA, createdAt: "2026-08-05T12:00:00Z" };
-      expect(areRegistryRecordsEquivalent(recordA, recordB)).toBe(true);
+      expect(areRegistryRecordsEquivalent(recordA, recordB, "referent")).toBe(
+        true,
+      );
     });
 
     it("should reject different record values", () => {
       const recordB = { ...recordA, name: "Other Name" };
-      expect(areRegistryRecordsEquivalent(recordA, recordB)).toBe(false);
+      expect(areRegistryRecordsEquivalent(recordA, recordB, "referent")).toBe(
+        false,
+      );
     });
 
     it("should strictly compare null vs undefined (not semantically equivalent)", () => {
-      const exp: RegistryRecord = {
+      const exp = {
         referentId: "ref-1",
-        referentType: "manufacturer",
+        referentType: "manufacturer" as const,
         name: "Aura Labs",
         parentReferentId: null,
         createdAt: "2026",
       };
-      const act: RegistryRecord = {
+      const act = {
         referentId: "ref-1",
-        referentType: "manufacturer",
+        referentType: "manufacturer" as const,
         name: "Aura Labs",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         parentReferentId: undefined as any,
         createdAt: "2026",
       };
-      expect(areRegistryRecordsEquivalent(exp, act)).toBe(false);
+      expect(areRegistryRecordsEquivalent(exp, act, "referent")).toBe(false);
     });
   });
 });
