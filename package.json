@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
+    "registry:seed": "pnpm build && node apps/api/dist/registry/seed/seed-cli.js",
     "test": "vitest run",
     "test:replay": "pnpm -r test:replay",
     "test:conformance": "pnpm -r test:conformance",
@@ -29,6 +30,7 @@
   "packageManager": "pnpm@10.30.3",
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
+    "@types/node": "^20.19.43",
     "@typescript-eslint/eslint-plugin": "8.65.0",
     "@typescript-eslint/parser": "8.65.0",
     "@vitest/coverage-v8": "^4.1.10",

@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-// @ts-expect-error fs has no typings in this package
 import * as fs from "fs";
-// @ts-expect-error path has no typings in this package
 import * as path from "path";
-// @ts-expect-error url has no typings in this package
 import { fileURLToPath } from "url";
 import postgres from "postgres";
 import { createValidatedCanonicalIdentifier } from "@zyppi/contracts";
