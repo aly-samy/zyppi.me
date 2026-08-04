@@ -2,8 +2,8 @@ import postgres from "postgres";
 import {
   areRegistryRecordsEquivalent,
   getRegistryRecordIdentity,
-  getRecordVariantType,
-  type RegistryRecord,
+  type RegistryRecordType,
+  type RegistryRecordMap,
 } from "@zyppi/domain";
 import {
   mapReferentRow,
@@ -27,25 +27,31 @@ import type { SeedManifest } from "./seed-manifest.js";
 import type { SeedExecutionOutcome } from "./seed-outcomes.js";
 
 /**
- * Checks if a specific record exists in the database and classifies its state.
+ * Checks if a specific record exists in the database and classifies its state
+ * using explicit contextual discrimination (Option A, strengthened).
  */
-async function inspectRecordState(
+async function inspectRecordState<K extends RegistryRecordType>(
   sql: postgres.Sql | postgres.TransactionSql,
-  record: RegistryRecord,
+  record: RegistryRecordMap[K],
+  type: K,
 ): Promise<"absent" | "equivalent" | "diverged" | "corrupted"> {
-  const recordId = getRegistryRecordIdentity(record);
-  const variant = getRecordVariantType(record);
+  const recordId = getRegistryRecordIdentity(record, type);
 
   try {
     let row: unknown = null;
+    const t: RegistryRecordType = type;
 
-    switch (variant) {
+    switch (t) {
       case "referent": {
         const rows = await sql`SELECT * FROM referents WHERE id = ${recordId}`;
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapReferentRow(row as ReferentRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
@@ -54,7 +60,11 @@ async function inspectRecordState(
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapIdentityRow(row as IdentityRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
@@ -63,7 +73,11 @@ async function inspectRecordState(
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapEvidenceRow(row as EvidenceRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
@@ -72,7 +86,11 @@ async function inspectRecordState(
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapPolicyRow(row as PolicyRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
@@ -82,7 +100,11 @@ async function inspectRecordState(
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapAuthorityRow(row as AuthorityRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
@@ -92,7 +114,11 @@ async function inspectRecordState(
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapCapabilityRow(row as CapabilityRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
@@ -101,12 +127,18 @@ async function inspectRecordState(
         if (rows.length === 0) return "absent";
         row = rows[0];
         const dbRecord = mapStandingRow(row as StandingRow);
-        return areRegistryRecordsEquivalent(record, dbRecord)
+        return areRegistryRecordsEquivalent(
+          record,
+          dbRecord as unknown as RegistryRecordMap[K],
+          type,
+        )
           ? "equivalent"
           : "diverged";
       }
-      default:
-        return "diverged";
+      default: {
+        const _exhaustive: never = t;
+        return _exhaustive;
+      }
     }
   } catch {
     // If a row fails to map/validate, treat as corrupted (which maps to InfrastructureFailure)
@@ -124,18 +156,14 @@ export async function executeSeedTransaction(
 ): Promise<SeedExecutionOutcome> {
   const manifestId = manifest.manifestId;
 
-  // Flatten all declared records in the manifest for verification and classification
-  const declaredRecords: RegistryRecord[] = [
-    ...manifest.records.referents,
-    ...manifest.records.identities,
-    ...manifest.records.evidence,
-    ...manifest.records.policies,
-    ...manifest.records.authorities,
-    ...manifest.records.capabilities,
-    ...manifest.records.standings,
-  ];
-
-  const totalDeclaredCount = declaredRecords.length;
+  const totalDeclaredCount =
+    manifest.records.referents.length +
+    manifest.records.identities.length +
+    manifest.records.evidence.length +
+    manifest.records.policies.length +
+    manifest.records.authorities.length +
+    manifest.records.capabilities.length +
+    manifest.records.standings.length;
 
   try {
     let outcome: SeedExecutionOutcome | null = null;
@@ -154,18 +182,31 @@ export async function executeSeedTransaction(
       let divergedCount = 0;
       let corruptedCount = 0;
 
-      for (const record of declaredRecords) {
-        const state = await inspectRecordState(tx, record);
-        if (state === "equivalent") {
-          presentCount++;
-        } else if (state === "diverged") {
-          divergedCount++;
-        } else if (state === "corrupted") {
-          corruptedCount++;
-        } else {
-          absentCount++;
+      async function checkCollection<K extends RegistryRecordType>(
+        records: readonly RegistryRecordMap[K][],
+        type: K,
+      ) {
+        for (const record of records) {
+          const state = await inspectRecordState(tx, record, type);
+          if (state === "equivalent") {
+            presentCount++;
+          } else if (state === "diverged") {
+            divergedCount++;
+          } else if (state === "corrupted") {
+            corruptedCount++;
+          } else {
+            absentCount++;
+          }
         }
       }
+
+      await checkCollection(manifest.records.referents, "referent");
+      await checkCollection(manifest.records.identities, "identity");
+      await checkCollection(manifest.records.evidence, "evidence");
+      await checkCollection(manifest.records.policies, "policy");
+      await checkCollection(manifest.records.authorities, "authority");
+      await checkCollection(manifest.records.capabilities, "capability");
+      await checkCollection(manifest.records.standings, "standing");
 
       // Precedence: Diverged -> PartialStateAnomaly -> AlreadyMaterialized -> Empty
       if (corruptedCount > 0) {

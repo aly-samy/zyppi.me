@@ -17,6 +17,25 @@ export type RegistryRecord =
   | CapabilityRecord
   | StandingRecord;
 
+export type RegistryRecordType =
+  | "referent"
+  | "identity"
+  | "evidence"
+  | "policy"
+  | "authority"
+  | "capability"
+  | "standing";
+
+export interface RegistryRecordMap {
+  readonly referent: ReferentRecord;
+  readonly identity: IdentityRecord;
+  readonly evidence: EvidenceRecord;
+  readonly policy: PolicyRecord;
+  readonly authority: AuthorityRecord;
+  readonly capability: CapabilityRecord;
+  readonly standing: StandingRecord;
+}
+
 export class JcsError extends Error {
   constructor(message: string) {
     super(message);
@@ -47,7 +66,6 @@ export function validateStrictJson(
     return;
   }
   if (typeof val === "object") {
-    // dates, buffers, maps, sets, typed arrays etc. must be rejected
     if (
       val instanceof Date ||
       (val.constructor && val.constructor.name === "Date")
@@ -169,47 +187,32 @@ export function canonicalizeJcs(value: unknown): string {
 }
 
 /**
- * Extracts the constitutional identity of a RegistryRecord.
+ * Extracts the constitutional identity of a RegistryRecord utilizing explicit contextual discrimination.
  */
-export function getRegistryRecordIdentity(record: RegistryRecord): string {
-  if (!record || typeof record !== "object") {
-    throw new Error("Invalid record object");
+export function getRegistryRecordIdentity<K extends RegistryRecordType>(
+  record: RegistryRecordMap[K],
+  type: K,
+): string {
+  switch (type) {
+    case "referent":
+      return (record as ReferentRecord).referentId;
+    case "identity":
+      return (record as IdentityRecord).identityId;
+    case "evidence":
+      return (record as EvidenceRecord).evidenceId;
+    case "policy":
+      return (record as PolicyRecord).policyId;
+    case "authority":
+      return (record as AuthorityRecord).authorityId;
+    case "capability":
+      return (record as CapabilityRecord).capabilityId;
+    case "standing":
+      return (record as StandingRecord).standingId;
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
   }
-
-  if ("evidenceId" in record && typeof record.evidenceId === "string") {
-    return record.evidenceId;
-  }
-  if ("identityId" in record && typeof record.identityId === "string") {
-    return record.identityId;
-  }
-  if ("referentId" in record && typeof record.referentId === "string") {
-    return record.referentId;
-  }
-  if ("policyId" in record && typeof record.policyId === "string") {
-    return record.policyId;
-  }
-  if ("authorityId" in record && typeof record.authorityId === "string") {
-    return record.authorityId;
-  }
-  if ("capabilityId" in record && typeof record.capabilityId === "string") {
-    return record.capabilityId;
-  }
-  if ("standingId" in record && typeof record.standingId === "string") {
-    return record.standingId;
-  }
-
-  throw new Error("Unsupported record type or missing identity field");
-}
-
-export function getRecordVariantType(record: RegistryRecord): string {
-  if ("evidenceId" in record) return "evidence";
-  if ("identityId" in record) return "identity";
-  if ("referentId" in record) return "referent";
-  if ("policyId" in record) return "policy";
-  if ("authorityId" in record) return "authority";
-  if ("capabilityId" in record) return "capability";
-  if ("standingId" in record) return "standing";
-  throw new Error("Unknown record variant");
 }
 
 function compareNullableString(
@@ -223,29 +226,14 @@ function compareNullableString(
 }
 
 /**
- * Pure Domain comparison for semantic equivalence of two RegistryRecords.
+ * Pure Domain comparison for semantic equivalence of two RegistryRecords utilizing explicit contextual discrimination.
  */
-export function areRegistryRecordsEquivalent(
-  expected: RegistryRecord,
-  actual: RegistryRecord,
+export function areRegistryRecordsEquivalent<K extends RegistryRecordType>(
+  expected: RegistryRecordMap[K],
+  actual: RegistryRecordMap[K],
+  type: K,
 ): boolean {
-  if (!expected || !actual) {
-    return false;
-  }
-
-  const expectedType = getRecordVariantType(expected);
-  const actualType = getRecordVariantType(actual);
-  if (expectedType !== actualType) {
-    return false;
-  }
-
-  const expectedId = getRegistryRecordIdentity(expected);
-  const actualId = getRegistryRecordIdentity(actual);
-  if (expectedId !== actualId) {
-    return false;
-  }
-
-  switch (expectedType) {
+  switch (type) {
     case "referent": {
       const exp = expected as ReferentRecord;
       const act = actual as ReferentRecord;
@@ -316,7 +304,9 @@ export function areRegistryRecordsEquivalent(
         exp.validTo === act.validTo
       );
     }
-    default:
-      return false;
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
   }
 }
