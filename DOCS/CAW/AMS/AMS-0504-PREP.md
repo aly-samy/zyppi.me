@@ -74,7 +74,7 @@ The seed system is a **controlled executor** of approved constitutional authorit
 
 ### 4.2 Separation of Semantic Definition and Database Enforcement
 
-The database enforces storage integrity (unique constraints, foreign-key ordering, check constraints). However, the definition of what constitutes "equivalent already-materialized state" or "divergence" must reside at the application layer using explicit Domain and contract logic. The database layer is a passive sink and must not be used as the primary location for resolving semantic correctness. `IMPLEMENTATION INFERENCE`
+The application layer owns the definition and evaluation of manifest validity, record identity, semantic equivalence, and permitted seed outcomes. The persistence adapter supplies authoritative stored facts and provides atomic commit and rollback. Database constraints may enforce physical integrity but do not define constitutional equivalence or seed authority. `IMPLEMENTATION INFERENCE`
 
 ---
 
@@ -108,87 +108,112 @@ A comprehensive audit of all files in the repository was executed. There is **no
 
 ## 6. Seed Manifest Structural Analysis
 
-To support a future authorized seed corpus, we define a precise, machine-readable seed manifest schema (JSON format). Since no approved corpus exists, this manifest is specified structurally.
+### 6.1 Proposed Shape — Chair Ratification Required
 
-### 6.1 Required Structural Fields
+The structure of a seed manifest represents a **PROPOSED IMPLEMENTATION SHAPE — CHAIR RATIFICATION REQUIRED**. It does not represent an approved seed-manifest contract and must not be implemented as a binding public interface without explicit Chair authorization.
 
-A valid manifest must declare:
+To analyze the separation of concerns:
 
-- **`manifestId`**: Unique UUID string identifying this specific manifest instance.
-- **`manifestVersion`**: Semantic version string representing the manifest version (e.g. `"1.0.0"`).
-- **`authorityReference`**: Explicit URI string referring to the ratifying Council or Chair decree (e.g. `"zyppi:council:m05-seed:ratified"`).
-- **`integrityDigest`**: Cryptographic digest (SHA-256) of the records payload, ensuring the manifest content has not been tampered with.
-- **`records`**: An ordered collection grouping the records to be inserted. To respect foreign-key constraints, the records must be ordered sequentially by dependency:
-  1. `referents`
-  2. `identities`
-  3. `evidence`
-  4. `policies`
-  5. `authorities`
-  6. `capabilities`
-  7. `standings`
+- **Constitutional Requirement:** Seed authority must be explicit, traceable, and attributable to a ratified Council decree.
+- **Architectural Requirement:** The seed executor must be a passive materialization tool; it must never invent or silently alter content.
+- **Proposed Technical Mechanism:** A structured JSON file.
+- **Proposed Fields:** `manifestId`, `manifestVersion`, `authorityReference`, `integrityDigest`, and `records` collection (sequential dependency ordering).
+
+These specific fields and semantic layouts are proposed conventions, not settled.
 
 ---
 
 ## 7. Provenance and Integrity Analysis
 
-To prevent manifest spoofing and tampering, the seed executor must verify authenticity and integrity before writing any record to storage:
+### 7.1 Provenance Verification Alternatives
 
-### 7.1 Provenance Verification
+The seed system must establish that a manifest originates from explicitly authorized constitutional authority. The concrete representation, storage, verification mechanism, and lifecycle of that authority binding remain unresolved. The following technical alternatives must be evaluated:
 
-- **Authority Binding:** The manifest must carry an explicit, non-forgeable `authorityReference` representing Council ratification. `CONSTITUTIONALLY SETTLED`
-- **Verification Rule:** The executor must match this reference against a statically defined, pre-approved list of authorized seed URIs. Any unrecognized or blank authority reference must cause immediate execution refusal. `IMPLEMENTATION INFERENCE`
+1. **Statically Compiled Allow-List**
+   - _Governance:_ Governed by hardcoded configurations inside the API codebase.
+   - _Impacts:_ Introduces code-level trust roots; creates configuration drift between environments; can be verified deterministically in-code; requires no new database tables.
+2. **Externally Configured Authority Registry**
+   - _Governance:_ Governed by environment variables or deployment secrets.
+   - _Impacts:_ Trust root is moved to environment orchestrator; prone to deployment drift; easily verifiable; requires external configuration management.
+3. **Signed Manifest with an Authorized Public Key**
+   - _Governance:_ Cryptographic signature verification using public keys.
+   - _Impacts:_ Introduces public-key infrastructure (PKI) trust roots; highly secure and immune to database drift; highly deterministic; requires a signature validation module.
+4. **Chair- or Council-Ratified Manifest Identifier**
+   - _Governance:_ Database table recording approved manifest hashes.
+   - _Impacts:_ Relies on database-side bootstrap records; eliminates code coupling; easily audited; requires database write access during bootstrap.
 
-### 7.2 Integrity Verification
+Each alternative requires a separate, explicit architectural decision.
 
-- **Cryptographic Hashing:** The manifest's records collection must be checked against the declared `integrityDigest` using a pure-JS implementation of SHA-256 (matching Runtime hashing standards). `IMPLEMENTATION INFERENCE`
-- **Mismatched Digests:** If the computed hash of the records does not match the `integrityDigest` exactly, the executor must fail-closed immediately with a terminal `IntegrityVerificationFailed` outcome. `IMPLEMENTATION INFERENCE`
+### 7.2 Integrity Verification and Canonicalization Gaps
+
+Integrity verification is a **proposed control**, not yet a settled implementation requirement. Before SHA-256 can be adopted, several canonicalization questions must be resolved:
+
+- **Hash Scope:** Does the digest cover only the `records` payload or the entire manifest excluding the digest field?
+- **Key & Array Ordering:** How are keys sorted recursively? Are array elements sorted?
+- **Text & Numeric Encoding:** Is UTF-8 standard? How are numbers represented (finite float formats vs integers)?
+- **Whitespace & Newlines:** Does formatting or indentation alter the digest?
+- **Digest Format:** Hexadecimal vs Base64 encoding.
+
+#### Reuse Evaluation
+
+The `@zyppi/domain` package implements flat record canonicalization (`serializeIdentityRecord`, etc.) by sorting top-level keys alphabetically and using `JSON.stringify`. However, it lacks a generic recursive object canonicalization standard.
+
+- **Disposition:** Relying on standard `JSON.stringify()` on arbitrary nested objects is fragile. If recursive JSON canonicalization is required, it must be declared as a missing Domain-layer capability rather than inventing a seed-specific canonicalization standard inside the adapter.
 
 ---
 
 ## 8. Determinism and Idempotency Analysis
 
-A core mandate of the seeding system is safe, deterministic re-execution (idempotency).
+### 8.1 Definition of Semantic Equivalence
 
-### 8.1 Equivalent Already-Materialized State
+Storage-level equality is not automatically constitutional equivalence.
 
-The seed executor must distinguish between a fresh execution and a re-run where the database has already been successfully seeded.
+- **Mapping Gaps:** A database field might represent bigint numbers (which postgres.js returns as strings), while the Domain model represents them as primitive numbers. Similarly, Timestamps are retrieved as JS `Date` objects but represent ISO-8601 UTC strings in the Domain.
+- **Verification Rule:** Direct byte-level or column-level database comparison is insufficient. Semantic equivalence must be calculated after the database rows are loaded, mapped, and parsed through their respective Domain validators.
+- **Missing Capability:** The current Domain layer does not provide a canonical equivalence comparator. Defining this algorithm inside the database adapter is prohibited; it remains a design dependency on `@zyppi/domain`.
 
-- **Definition of Equivalence:** If every record declared in the manifest already exists in the database with _identical values_ in all fields (ignoring storage-only `created_at` and `updated_at` columns), the state is considered **equivalent already-materialized**.
-- **Outcome:** The executor must complete with a successful, non-modifying outcome (e.g. `AlreadyMaterialized`). It must not perform any write operations. `IMPLEMENTATION INFERENCE`
+### 8.2 Safe Re-Execution and Concurrency Models
 
-### 8.2 Safe Re-Execution Semantics
+The application seeder must coordinate state inspection, equivalence verification, and row insertion safely under concurrency:
 
-If the executor is re-run:
-
-- **Empty Registry:** Performs a complete transaction write.
-- **Partially Materialized:** If some records exist and match, but others are missing, it must insert the missing records safely. `IMPLEMENTATION INFERENCE`
-- **Interrupted/Failed Prior Run:** Re-running the seed must resume and complete cleanly without creating duplicate records or throwing constraint errors. `IMPLEMENTATION INFERENCE`
+- **Transaction Flow:**
+  1. Open a Read-Write transaction block.
+  2. Query existing records for all candidate manifest IDs.
+  3. Load and map rows to Domain records; perform semantic equivalence comparison.
+  4. Perform dependency-ordered inserts of missing records.
+  5. Commit transaction.
+- **Concurrency Risks:** If another registry mutation occurs concurrently between step 2 and step 4, insertions might fail with duplicate key constraint violations. The transaction closure ensures these trigger automatic rollbacks, preventing partial materialization.
 
 ---
 
 ## 9. Divergence and Rerun Analysis
 
-### 9.1 Definition of Divergence
+### 9.1 State Model and Dispositions
 
-Divergence occurs when a record in the database matches a manifest record's primary key (such as `identityId` or `referentId`), but their _fields do not match_. Examples include:
+We establish a source-grounded state model for seed re-runs:
 
-- The same UUID exists in the database but carries a different status, scope, or canonical reference.
-- A concurrent modification has occurred on a seeded record.
-
-### 9.2 Divergence Disposition
-
-- **Forced Overwrite Prohibited:** The executor must **never** perform `UPDATE` or `DELETE` operations to reconcile database records with the manifest. No unapproved modifications are allowed. `RATIFIED PLANNING DECISION`
-- **Fail-Closed Refusal:** When divergence is detected, the executor must abort the transaction, leave existing rows untouched, and return a terminal `StateDiverged` refusal outcome. Reconciling diverged state requires separately authorized database migrations or a revised manifest, never silent overwrites. `IMPLEMENTATION INFERENCE`
+1. **Empty State**
+   - _Condition:_ No manifest records exist in the database.
+   - _Disposition:_ Perform a complete atomic insertion of all records.
+2. **Fully Equivalent State**
+   - _Condition:_ Every record in the manifest exists in the database with semantically equivalent values.
+   - _Disposition:_ No-op; complete successfully with `AlreadyMaterialized` outcome.
+3. **Unexpected Partial State**
+   - _Condition:_ Some records from the manifest exist in the database while others are missing.
+   - _Disposition:_ **Fail closed as an integrity anomaly; perform no automatic completion, reconciliation, UPDATE, or DELETE operation.** Because the seeder runs atomically, a prior successful run should not have left partial state.
+4. **Diverged State**
+   - _Condition:_ A record with a matching primary key exists in the database but contains non-equivalent values.
+   - _Disposition:_ Fail closed immediately with `StateDiverged` refusal. Database `UPDATE` and `DELETE` on seed re-runs are strictly prohibited under current authority.
 
 ---
 
 ## 10. Seeded-Record Lifecycle Analysis
 
-### 10.1 Core Record Distinctness
+### 10.1 Invariance and Lifecycle Limits
 
 Under current Domain and schema models:
 
-- **No Hybrid Flags:** There are no columns (like `is_seed` or `source`) in the physical PostgreSQL schema, and no properties in the pure Domain models, to distinguish seeded records from ordinary operational records.
+- **No Hybrid Metadata:** There are no columns (like `is_seed` or `source`) in the physical PostgreSQL schema, and no properties in the pure Domain models, to distinguish seeded records from ordinary operational records.
 - **State Invariance:** Seeded records are treated as standard constitutional facts. Their lifecycle is governed strictly by their domain status (e.g. `status: "active"` or `"decommissioned"`) and chronological timestamps (`validFrom`/`validTo`). `CURRENT SOURCE FACT`
 - **Evolution Restriction:** Any update to a seeded record must occur through an authorized database migration or separate transaction channel, preserving the immutable guarantees of the seed executor. `IMPLEMENTATION INFERENCE`
 
@@ -196,33 +221,33 @@ Under current Domain and schema models:
 
 ## 11. Runtime, Genesis, and Execution Receipt Analysis
 
-### 11.1 Runtime Execution Model Separation
+### 11.1 Seeder-Runtime Isolation
 
-- **Seeding is Administrative:** Registry seeding is a data-bootstrapping operation that materializes initial state in storage. It does not evaluate request inputs, verify evidence bundles, or check policy context.
-- **No Runtime Invocation:** Seeding must remain strictly separate from the synchronous, pure determinism Runtime pipeline scaffold (`packages/runtime/src/pipeline.ts`). It must not invoke the Runtime pipeline. `RATIFIED PLANNING DECISION`
+Seeding is a passive administrative data-bootstrapping process that populates initial facts. It remains strictly separate from the synchronous, pure determinism Runtime pipeline scaffold (`packages/runtime/src/pipeline.ts`). It must not invoke the Runtime pipeline. `RATIFIED PLANNING DECISION`
 
-### 11.2 The "Genesis Execution Receipt" Paradox
+### 11.2 Audit Evidence Alternatives
 
-- **Receipts Model Transactions:** An `ExecutionReceipt` is generated exclusively by `@zyppi/runtime` to represent a single validation decision on an individual request.
-- **Unresolved Bootstrap Dependency:** Seeding is not a request-driven execution and has no inputs or outputs in the `ExecutionRequest` format. Generating an `ExecutionReceipt` for seed data (a "Genesis Receipt") is **unresolved and unsupported** by current Domain models and validators.
-- **Recommendation:** No Genesis Receipt should be created during seeding. The Registry seed system must remain a passive state-populating tool. `CHAIR DECISION REQUIRED`
+Generating an `ExecutionReceipt` (a "Genesis Receipt") for seed bootstrapping is unresolved and unsupported by current Domain contracts. We identify three distinct alternatives for administrative audit evidence:
+
+1. **Runtime Execution Receipt (Unresolved Dependency)**
+   - _Mechanism:_ Creating a pseudo-execution request to force the seeder through `ExecutionReceipt` structures.
+   - _Impact:_ Highly coupled; violates the request-driven model of the Runtime; requires major Domain changes.
+2. **Administrative Seed Audit Evidence (Proposed Artifact)**
+   - _Mechanism:_ Storing seeder-specific audit records (e.g., seeder manifest execution logs) in a separate administrative database table.
+   - _Impact:_ Decoupled from the Runtime; provides clean bootstrap audit trails; requires a separate table schema.
+3. **No New Audit Artifact (Baseline)**
+   - _Mechanism:_ Rely on manifest provenance signatures, deterministic execution logs, git history, and deployment/container logs.
+   - _Impact:_ Zero code complexity; fully compliant with current models.
 
 ---
 
 ## 12. PostgreSQL and Persistence Boundary Analysis
 
-### 12.1 Transaction and Atomicity Model
+### 12.1 Transaction boundaries and Row Encoders
 
-- **Single Transaction:** All record insertions for a single manifest must be wrapped inside a single, read-write transaction using `postgres.js`'s `sql.begin(async tx => { ... })` closure.
-- **Rollback on Failure:** Any single record mapping failure, integrity mismatch, or database constraint violation must trigger an immediate rollback of the entire transaction, leaving the database in a pristine, unmodified state. `IMPLEMENTATION INFERENCE`
-- **Dependency-Ordered Insertion:** Records must be written strictly in order of their foreign-key dependencies:
-  1. `referents` (parent-referent relations must be written parent-first)
-  2. `identities` (referencing referents)
-  3. `evidence` (referencing identities)
-  4. `policies`
-  5. `authorities` (referencing identities)
-  6. `capabilities` (referencing identities)
-  7. `standings` (referencing identities)
+- **Atomic Transactions:** Seeder insertions must be wrapped inside a single read-write transaction using `postgres.js`'s `sql.begin` closure.
+- **Directional Encoders Required:** The row mappers defined in `mappers.ts` are strictly **one-way decoders** (Row -> Domain). Seeder execution requires inserting records, which requires **Domain-to-Row encoders** (encoding Domain types into database-compatible columns, serializing JSON, etc.).
+- **Unnecessary Coupling:** Creating a generic, shared "bidirectional mapper" should be avoided as it tightly couples retrieval mappers with writing mappers. Direct parameterized SQL inside the seeder module remains the cleanest and most robust persistence pattern. `IMPLEMENTATION INFERENCE`
 
 ---
 
@@ -230,73 +255,84 @@ Under current Domain and schema models:
 
 ### 13.1 Isolated Infrastructure Verification Context
 
-To test the seed executor safely without contaminating production databases or falsely establishing unapproved files as constitutional truth, we define a strict verification context:
+To test the seeder safely, we recommend a defense-in-depth isolation strategy rather than relying solely on file name extensions:
 
-- **Physical Isolation:** Test fixtures (containing synthetic, dummy registry graphs) must reside strictly under `apps/api/src/registry/infrastructure/persistence/fixtures/` and carry a `.fixture.json` extension.
-- **Discovery Prevention:** The production seed loader must strictly locate manifests matching `.manifest.json` in authorized production paths. It must be physically blocked from loading `.fixture.json` files. `IMPLEMENTATION INFERENCE`
-- **CI Safety:** CI runs will execute seeding tests using only `.fixture.json` inputs against the test database `zyppi_test`. No synthetic test fixture may ever be inserted into a production or live registry context. `IMPLEMENTATION INFERENCE`
+- **Isolated Directory Paths:** Test-only fixtures must reside strictly under `apps/api/src/registry/infrastructure/persistence/fixtures/` and carry a `.fixture.json` extension. Production manifests reside in distinct production paths.
+- **Execution Entry Points:** The CLI or test-runner must use distinct execution commands that cannot resolve production paths during test suites.
+- **Environment Safeguards:** The loader must check the database connection. If `PGDATABASE` is not `zyppi_test` during a fixture test run, the execution must fail-closed immediately.
+- **Explicit Loader Allow-Listing:** The seeder loader must be physically blocked from loading `.fixture.json` files when running in non-test environments.
 
 ---
 
 ## 14. Future Implementation Placement and Dependency Analysis
 
-### 14.1 Placement of Seed Mechanics
+### 14.1 Responsibility Separation
 
-- **Application Layer:** The seed execution logic belongs under `apps/api/src/registry/seeder.ts` or a dedicated entry point (like `apps/api/src/registry/seed-runner.ts`). It must remain outside `@zyppi/domain`, `@zyppi/contracts`, and `@zyppi/runtime`. `RATIFIED PLANNING DECISION`
-- **Reusability:** The seeder must reuse the explicit row mappers and mappers logic from `mappers.ts` to ensure consistency. It must not bypass validators. `IMPLEMENTATION INFERENCE`
+The seed system comprises several distinct responsibilities:
 
-### 14.2 Dependency Boundaries
+- **Orchestration:** Manifest loading, provenance verification, integrity hashing, Domain validation, semantic state comparison.
+- **Persistence:** Database transaction execution, ordered SQL insertions.
 
-- **Permitted:** `apps/api/src/registry/` can import `@zyppi/domain` (for validators/records) and `@zyppi/contracts` (for ports).
-- **Prohibited:** No seeder logic or database clients may ever enter `packages/domain/`, `packages/contracts/`, or `packages/runtime/`. `CONSTITUTIONALLY SETTLED`
+To maintain strict modular boundaries:
+
+- **Application Orchestration:** Belongs under a dedicated command-line/runtime entry point, such as `apps/api/src/registry/seed-runner.ts` or `apps/api/src/registry/seeder.ts`.
+- **Infrastructure Persistence:** Belongs in the database adapter module.
+- **Prohibited:** No seeder logic, file system I/O, or database clients may ever enter `packages/domain/`, `packages/contracts/`, or `packages/runtime/`. `CONSTITUTIONALLY SETTLED`
 
 ---
 
 ## 15. Decision Register
 
-| Decision ID           | Topic                             | Current Source Position                 | Proposed Disposition                                                                            | Provenance Classification    | Chair Decision Required |
-| :-------------------- | :-------------------------------- | :-------------------------------------- | :---------------------------------------------------------------------------------------------- | :--------------------------- | :---------------------- |
-| **AMS-0504-PREP-D01** | Seed Authority Boundary           | Seeder must not author truth.           | Seeder strictly executes approved manifest; fails-closed on any validation or constraint error. | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D02** | Existing Seed Corpus Status       | No approved corpus exists in repo.      | Record that production seed data is currently absent/deferred. Prohibit "Aura" promotion.       | `M05 PLANNING DECISION`      | No                      |
-| **AMS-0504-PREP-D03** | Seed Manifest Location and Format | None exist.                             | Standardize versioned JSON files using `.manifest.json` extension.                              | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D04** | Manifest Provenance Requirements  | None exist.                             | Validate `authorityReference` against pre-approved Council URI list.                            | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D05** | Manifest Integrity Requirements   | None exist.                             | Match records payload against `integrityDigest` using SHA-256.                                  | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D06** | Deterministic Execution Semantics | None exist.                             | Define exact outcomes: `Success`, `AlreadyMaterialized`, `StateDiverged`, `Refused`.            | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D07** | Idempotency Ownership             | None exist.                             | Idempotency logic is evaluated at the application layer; DB enforces unique constraints.        | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D08** | Divergence Handling               | None exist.                             | Prohibit database `UPDATE` and `DELETE` on seed re-runs; fail-closed on mismatch.               | `RATIFIED PLANNING DECISION` | No                      |
-| **AMS-0504-PREP-D09** | Seeded-Record Lifecycle           | No distinct lifecycle properties exist. | Seeded records are treated as standard operational facts; updates require migration.            | `CURRENT SOURCE FACT`        | No                      |
-| **AMS-0504-PREP-D10** | Runtime and Receipt Relationship  | Seeder does not invoke runtime.         | Seeder is an administrative bootstrapper; does not create or write an ExecutionReceipt.         | `RATIFIED PLANNING DECISION` | No                      |
-| **AMS-0504-PREP-D11** | Storage Transaction Model         | None exist.                             | Wrap entire manifest insertion inside a single read-write transaction with rollback.            | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D12** | Future Implementation Placement   | None exist.                             | Place seeder logic inside `apps/api/src/registry/seeder.ts`.                                    | `M05 PLANNING DECISION`      | No                      |
-| **AMS-0504-PREP-D13** | Storage-Independent Semantics     | None exist.                             | Domain-level record meaning is preserved; DB tables act as passive targets.                     | `CURRENT SOURCE FACT`        | No                      |
-| **AMS-0504-PREP-D14** | Genesis Manifest Template         | None exist.                             | Provide empty structural manifest template (Appendix C) for future Chair authorship.            | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D15** | Isolated Verification Context     | None exist.                             | Constrain test-only fixtures to `.fixture.json` and block production seeder from loading them.  | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D16** | Existing Repository Sufficiency   | Repos are lookup-only.                  | Seeder should use direct raw SQL transaction instead of lookups to enforce atomicity.           | `IMPLEMENTATION INFERENCE`   | No                      |
-| **AMS-0504-PREP-D17** | Future Implementation Readiness   | Seeding mechanics defined.              | Seeder mechanics are ready; seed content is blocked pending Council ratification.               | `M05 PLANNING DECISION`      | No                      |
+| Decision ID           | Topic                             | Current Source Position                 | Proposed Disposition                                                                            | Provenance Classification         | Chair Decision Required |
+| :-------------------- | :-------------------------------- | :-------------------------------------- | :---------------------------------------------------------------------------------------------- | :-------------------------------- | :---------------------- |
+| **AMS-0504-PREP-D01** | Seed Authority Boundary           | Seeder must not author truth.           | Seeder strictly executes approved manifest; fails-closed on any validation or constraint error. | `IMPLEMENTATION INFERENCE`        | No                      |
+| **AMS-0504-PREP-D02** | Existing Seed Corpus Status       | No approved corpus exists in repo.      | Record that production seed data is currently absent/deferred. Prohibit "Aura" promotion.       | `M05 PLANNING DECISION`           | No                      |
+| **AMS-0504-PREP-D03** | Seed Manifest Location and Format | None exist.                             | **CHAIR DECISION REQUIRED** (Proposed: versioned JSON manifests).                               | `CHAIR DECISION REQUIRED`         | Yes                     |
+| **AMS-0504-PREP-D04** | Manifest Provenance Requirements  | None exist.                             | **CHAIR DECISION REQUIRED** (Review PKI vs static Allow-lists).                                 | `CHAIR DECISION REQUIRED`         | Yes                     |
+| **AMS-0504-PREP-D05** | Manifest Integrity Requirements   | None exist.                             | **ARCHITECTURAL DECISION REQUIRED** (Define canonical bytes/digests).                           | `ARCHITECTURAL DECISION REQUIRED` | Yes                     |
+| **AMS-0504-PREP-D06** | Seed Outcome Taxonomy             | None exist.                             | **CHAIR DECISION REQUIRED** (Define terminal and partial outcomes).                             | `CHAIR DECISION REQUIRED`         | Yes                     |
+| **AMS-0504-PREP-D07** | Idempotency Ownership             | None exist.                             | Application layer defines validity and equivalence; DB transaction enforces atomic commits.     | `IMPLEMENTATION INFERENCE`        | No                      |
+| **AMS-0504-PREP-D08** | Divergence Handling               | None exist.                             | Prohibit database `UPDATE` and `DELETE` on seed re-runs; fail-closed on mismatch.               | `RATIFIED PLANNING DECISION`      | No                      |
+| **AMS-0504-PREP-D09** | Seeded-Record Lifecycle           | No distinct lifecycle properties exist. | Seeded records are treated as standard operational facts; updates require migration.            | `CURRENT SOURCE FACT`             | No                      |
+| **AMS-0504-PREP-D10** | Runtime and Receipt Relationship  | Seeder does not invoke runtime.         | **CHAIR DECISION REQUIRED** (Verify Genesis Receipt necessity).                                 | `CHAIR DECISION REQUIRED`         | Yes                     |
+| **AMS-0504-PREP-D11** | Storage Transaction Model         | None exist.                             | Wrap entire manifest insertion inside a single read-write transaction with rollback.            | `IMPLEMENTATION INFERENCE`        | No                      |
+| **AMS-0504-PREP-D12** | File Placement                    | None exist.                             | **ARCHITECTURAL DECISION REQUIRED** (Orchestration vs Persistence split).                       | `ARCHITECTURAL DECISION REQUIRED` | Yes                     |
+| **AMS-0504-PREP-D13** | Storage-Independent Semantics     | None exist.                             | Domain-level record meaning is preserved; DB tables act as passive targets.                     | `CURRENT SOURCE FACT`             | No                      |
+| **AMS-0504-PREP-D14** | Genesis Manifest Template         | None exist.                             | Provide empty structural manifest template (Appendix C) for future Chair authorship.            | `IMPLEMENTATION INFERENCE`        | No                      |
+| **AMS-0504-PREP-D15** | Verification Isolation            | None exist.                             | **PROPOSED CONTROL — IMPLEMENTATION REVIEW REQUIRED**                                           | `IMPLEMENTATION INFERENCE`        | Yes                     |
+| **AMS-0504-PREP-D16** | Mapper & SQL Reuse                | Repos are lookup-only.                  | **REQUIRES SOURCE INSPECTION** (Mappers are decoders; requires encoders).                       | `IMPLEMENTATION INFERENCE`        | Yes                     |
+| **AMS-0504-PREP-D17** | Seeder Readiness                  | Seeding mechanics defined.              | Seeder mechanics are ready; seed content is blocked pending Council ratification.               | `M05 PLANNING DECISION`           | No                      |
+| **AMS-0504-PREP-D18** | Partial-State Handling            | None exist.                             | Unexpected partial state fails-closed as an integrity anomaly; perform no automatic completion. | `IMPLEMENTATION INFERENCE`        | No                      |
+| **AMS-0504-PREP-D19** | Canonical Equivalence             | None exist.                             | Identify canonical record comparator inside `@zyppi/domain` as a design dependency.             | `IMPLEMENTATION INFERENCE`        | Yes                     |
+| **AMS-0504-PREP-D20** | Manifest Canonicalization         | None exist.                             | Define exact bytes, spacing, key sort order, and whitespace rules for SHA-256 digests.          | `IMPLEMENTATION INFERENCE`        | Yes                     |
+| **AMS-0504-PREP-D21** | Authority Trust Root              | None exist.                             | Select public key vs statically compiled trust roots for Council authentication.                | `CHAIR DECISION REQUIRED`         | Yes                     |
+| **AMS-0504-PREP-D22** | Seed Audit Evidence               | None exist.                             | Determine whether administrative seed runs require separate tables or logs.                     | `CHAIR DECISION REQUIRED`         | Yes                     |
+| **AMS-0504-PREP-D23** | Concurrency Model                 | None exist.                             | Evaluate Read-Write locks or transaction rollback boundaries to prevent partial writes.         | `IMPLEMENTATION INFERENCE`        | No                      |
 
 ---
 
 ## 16. Risk Register
 
-| Risk ID          | Risk                                  | Constitutional or Architectural Impact                                        | Control or Required Decision                                                       | Status |
-| :--------------- | :------------------------------------ | :---------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- | :----- |
-| **AMS-0504-R01** | Unauthorized seed-content fabrication | Invented database records contaminate the constitutional registry.            | The seeder must strictly refuse to execute unless a signed manifest is loaded.     | Active |
-| **AMS-0504-R02** | Promotion of historical Aura examples | Unratified illustrative data becomes production truth.                        | Strictly enforce the prohibition on "Aura Labs" seed materialization.              | Active |
-| **AMS-0504-R03** | Manifest tampering                    | Modified records bypass Council intention.                                    | Enforce SHA-256 `integrityDigest` validation before parsing records.               | Active |
-| **AMS-0504-R04** | Nondeterministic/Partial execution    | Database is left in an incomplete, corrupted state on failure.                | Wrap seeder inside a single transaction with automatic rollback on any error.      | Active |
-| **AMS-0504-R05** | Unsafe rerun overrides                | Seed re-runs overwrite concurrent operational registry changes.               | Forbid `UPDATE` and `DELETE` on seed rerun; return `StateDiverged` on mismatch.    | Active |
-| **AMS-0504-R06** | Test-fixture contamination            | Test-only dummy graphs are loaded in production.                              | Constrain test fixtures to `.fixture.json` and block the seeder from loading them. | Active |
-| **AMS-0504-R07** | Genesis Receipt circularity           | Attempting to build an execution receipt during seeding causes runtime crash. | Confirm that seeding is passive bootstrapping and does not produce a receipt.      | Active |
+| Risk ID          | Risk                                  | Constitutional or Architectural Impact                                        | Control or Required Decision                                                           | Status |
+| :--------------- | :------------------------------------ | :---------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :----- |
+| **AMS-0504-R01** | Unauthorized seed-content fabrication | Invented database records contaminate the constitutional registry.            | The seeder must strictly refuse to execute unless a signed manifest is loaded.         | Active |
+| **AMS-0504-R02** | Promotion of historical Aura examples | Unratified illustrative data becomes production truth.                        | Strictly enforce the prohibition on "Aura Labs" seed materialization.                  | Active |
+| **AMS-0504-R03** | Manifest tampering                    | Modified records bypass Council intention.                                    | Enforce SHA-256 `integrityDigest` validation before parsing records.                   | Active |
+| **AMS-0504-R04** | Nondeterministic/Partial execution    | Database is left in an incomplete, corrupted state on failure.                | Wrap seeder inside a single transaction with automatic rollback on any error.          | Active |
+| **AMS-0504-R05** | Unsafe rerun overrides                | Seed re-runs overwrite concurrent operational registry changes.               | Forbid `UPDATE` and `DELETE` on seed rerun; return `StateDiverged` on mismatch.        | Active |
+| **AMS-0504-R06** | Test-fixture contamination            | Test-only dummy graphs are loaded in production.                              | Constrain test fixtures to `.fixture.json` and block the seeder from loading them.     | Active |
+| **AMS-0504-R07** | Genesis Receipt circularity           | Attempting to build an execution receipt during seeding causes runtime crash. | Confirm that seeding is passive bootstrapping and does not produce a receipt.          | Active |
+| **AMS-0504-R08** | Inexact JSON stringification          | Different JS runtimes yield distinct SHA-256 digests on identical objects.    | Explicitly define canonical byte sorting, encoding, and numbers spacing.               | Active |
+| **AMS-0504-R09** | Unexpected partial state              | Operational database contains partial state from an unlogged run.             | Fail-closed immediately on unexpected partial states; do not perform partial recovery. | Active |
 
 ---
 
 ## 17. Unresolved Questions and Chair Decisions
 
-### 17.1 Genesis Receipt and Bootstrap Dependency
-
-- **Issue:** Does the initial materialization of the Registry require an administrative "Genesis Execution Receipt" to authenticate the system state?
-- **Current Position:** The current `ExecutionReceipt` model only represents runtime verification transactions on individual requests.
-- **Chair Decision Required:** Confirm whether seed bootstrapping is purely administrative (no receipt written) or if a future milestone must define a custom "Genesis Receipt" model.
+- **Seed Manifest Schema:** What is the final ratified JSON structure of the seed manifest?
+- **Authority Trust Root:** Should the seeder use PKI signature verification or compile-time allow-lists to authorize the `authorityReference`?
+- **Equivalence Model:** Does `@zyppi/domain` need to provide a canonical comparison algorithm before seeder implementation?
+- **Audit Trails:** Is administrative seed execution logged as system provenance, or is transaction-level database state sufficient?
 
 ---
 
@@ -321,13 +357,13 @@ The future implementation of **AMS-0504** shall authorize:
 
 ## 19. Readiness Verdict
 
-### **VERDICT:** `B. MECHANICS ARCHITECTURALLY DEFINED, AUTHORITY CORPUS MISSING`
+### **VERDICT:** `OUTCOME B — MECHANICS PARTIALLY SPECIFIED; CHAIR DECISIONS REQUIRED`
 
 ### Justification:
 
-- Seeding mechanics (idempotency, transaction safety, dependency-ordered insertions, and validation) are fully specified and ready for implementation.
-- However, **no approved production seed corpus currently exists** in the repository. Implementation of production seeding remains blocked until the Council ratifies and signs an authoritative manifest.
-- The next step may proceed with implementing the seeder _mechanics_ and verifying them using test-only fixtures, keeping production materialization blocked.
+- Seeding mechanics (idempotency, transaction safety, dependency-ordered insertions, and validation) are specified conceptually.
+- However, the concrete manifest contract, authority trust root, equivalence model, and audit model still require explicit Chair ratification and Council decisions before production code can be written.
+- Seeding content remains blocked pending Council ratification of approved manifests.
 
 ---
 
@@ -347,13 +383,13 @@ The following files were inspected on August 4, 2026:
 - **RATIFIED PLANNING DECISION:** M05 placement rules, raw parameterized SQL selection, and seeder-runtime isolation.
 - **CURRENT SOURCE FACT:** Existence of domain models, validators, and database schema tables.
 - **IMPLEMENTATION INFERENCE:** SHA-256 digest checks, repeatable-read read-only queries, and seeder transaction rollback closures.
-- **CHAIR DECISION REQUIRED:** Genesis Receipt necessity and authority approval reference structures.
+- **CHAIR DECISION REQUIRED:** Genesis Receipt necessity, manifest schemas, trust roots, and outcomes.
 
 ---
 
 ## 22. Appendix C — Empty Seed Manifest Template
 
-This structural template is a drafting aid for future Chair authorship. It carries no approved constitutional truth.
+This structural template is a non-authoritative drafting template. It is not yet an approved seed-manifest contract and must not be implemented as a binding public interface without explicit Chair authorization.
 
 ```json
 {
