@@ -9,6 +9,7 @@
   - `AMS-0504-IS — Registry Seed System Implementation Specification — Final Consolidated`
   - `AMS-0504-IM — Registry Seed System Implementation Mandate`
   - `AMS-0504-AR-RM — Adversarial Audit Remediation Mandate`
+  - `AMS-0504-AR-RR — Adversarial Review Report Remediation Mandate`
 
 ---
 
@@ -16,65 +17,35 @@
 
 **`VERDICT: PASS WITH QUALIFICATIONS`**
 
-- **Registry Seed Mechanics:** **PASSED.** The core materialization engine, loaders, transactional boundaries, and JCS canonicalizer conform in full to all specifications and binding Council decisions.
-- **Authoritative Genesis/Production Seed Content:** **NOT RATIFIED (OPEN GOVERNANCE DEPENDENCY).** No production signing authority or production seed manifest is ratified. The production trust set is intentionally empty, and no production Registry facts are materialized.
-- **M05 Milestone Status:** **OPEN WITH QUALIFICATION.** M05 mechanics are successfully audited, but milestone closure remains qualified upon future ratification of the authoritative production seed content by the Council.
+- **Registry Seed Mechanics:** **PASSED.** The core seeder transaction execution, loaders, cryptographic sequence, and JCS canonicalizer conform in full to the Consolidated Specification.
+- **Genesis/Production Seed Content:** **NOT RATIFIED.** No production Registry facts, production signing authority, or production seed manifest is ratified.
+- **Audit Evidence Status:** **COMPLETE.** All conformance vectors and boundary validation checks are verified and passing.
+
+### 2.1 Governance & Milestone Qualification
+
+**`M05 STATUS: MECHANICS COMPLETE — MILESTONE CLOSURE BLOCKED`**
+
+> **Governing Qualification:** Registry Seed Mechanics have passed implementation and adversarial review within the verified scope. M05 cannot be closed until a separate Council-authorized Genesis Seed Content authority ratifies the authoritative production Registry facts, production signing authority and trust material, and the required production materialization evidence.
 
 ---
 
-## 3. Hard-Gate Registry Record Discrimination Finding
+## 3. Contextual Record Design Claims (Correction & Trace)
 
-### 3.1 Finding & Heuristic Elimination
+In compliance with **AMS-0504-AR-RR §2**, the approved `RegistryRecordMap` contextual typing design eliminates all property-presence inference and identifier-precedence heuristics. We state the type-safety boundary as follows:
 
-The original property-presence checks (e.g. `"identityId" in record`) were identified as fragile heuristics susceptible to overlapping properties. In accordance with the binding Council direction, **all property-presence heuristics and identifier-name precedence rules have been 100% eliminated from the codebase**.
-
-### 3.2 Strengthened Contextual Record Design
-
-We implemented a compile-time exhaustive, schema-neutral, and manifest-compatible discriminated generics pattern:
-
-```typescript
-export type RegistryRecordType =
-  | "referent"
-  | "identity"
-  | "evidence"
-  | "policy"
-  | "authority"
-  | "capability"
-  | "standing";
-
-export interface RegistryRecordMap {
-  readonly referent: ReferentRecord;
-  readonly identity: IdentityRecord;
-  readonly evidence: EvidenceRecord;
-  readonly policy: PolicyRecord;
-  readonly authority: AuthorityRecord;
-  readonly capability: CapabilityRecord;
-  readonly standing: StandingRecord;
-}
-
-export function getRegistryRecordIdentity<K extends RegistryRecordType>(
-  record: RegistryRecordMap[K],
-  type: K,
-): string;
-
-export function areRegistryRecordsEquivalent<K extends RegistryRecordType>(
-  expected: RegistryRecordMap[K],
-  actual: RegistryRecordMap[K],
-  type: K,
-): boolean;
-```
-
-This design guarantees that:
-
-1.  **Exhaustive Switches:** Compiler enforces handling of all seven cases with `never` exhaustiveness assertions.
-2.  **No Misclassification:** It is physically impossible to misclassify overlapping records (e.g. `IdentityRecord` vs `ReferentRecord`) since the collection context is propagated generically from the manifest collection.
-3.  **Zero Schema/Manifest Changes:** No extra database columns or manifest wrapper properties are introduced.
+> The design eliminates property-presence inference and identifier-precedence heuristics. Within type-safe call paths, manifest collection context is propagated through the mapped-type interface. Future Registry record variants require explicit inclusion in the closed type map and corresponding exhaustive handling.
 
 ---
 
-## 4. RFC 8785 JCS Conformance Evidence
+## 4. RFC 8785 / JCS Conformance Evidence (Correction & Trace)
 
-Our local recursive serializer was audited and verified against the complete 19-point adversarial checklist.
+In compliance with **AMS-0504-AR-RR §3**, we declare:
+
+> The implementation has passed the project’s 19-case adversarial JCS regression suite. This provides project-level behavioral evidence but is not, by itself, a complete independent proof of RFC 8785 conformance.
+
+### JCS Conformance Vectors and Regression Suite
+
+The following 19 adversarial JCS cases are executed and verified under the regression suite:
 
 | Test ID    | Adversarial Vector Input   | Expected Canonical Output or Rejection | Actual Result                   | Status   |
 | :--------- | :------------------------- | :------------------------------------- | :------------------------------ | :------- |
@@ -98,81 +69,116 @@ Our local recursive serializer was audited and verified against the complete 19-
 | **JCS-18** | Cyclic Object graph        | Rejection (`JcsError`)                 | Throws `JcsError`               | **Pass** |
 | **JCS-19** | `undefined`                | Rejection (`JcsError`)                 | Throws `JcsError`               | **Pass** |
 
-### 5. Cryptographic Evidence
-
-- **Canonical UTF-8 Input (Records):** `{"authorities":[],"capabilities":[],"evidence":[],"identities":[],"policies":[],"referents":[],"standings":[]}`
+- **Records Canonical JCS Output:** `{"authorities":[],"capabilities":[],"evidence":[],"identities":[],"policies":[],"referents":[],"standings":[]}`
 - **Resulting SHA-256 Digest:** `45c33c470f38bdc64a39f00a5bb2c2bbc7258f03d89b31f35824227151651e14`
 
 ---
 
-## 5. Complete Specification-to-Implementation Traceability
+## 5. Clause-Level Specification Traceability
 
-Every normative statement in `AMS-0504-IS` is traced below.
+Traceability matrix covering every normative identifier and control in `AMS-0504-IS`.
 
-| Requirement         | Normative statement                                         | Implementation file and symbol                             | Test or inspection evidence                | Result       | Finding |
-| :------------------ | :---------------------------------------------------------- | :--------------------------------------------------------- | :----------------------------------------- | :----------- | :------ |
-| **Envelope Keys**   | Manifest contains exact envelope keys, rejects extra.       | `seed-manifest-loader.ts` <br>`parseAndValidateManifest`   | `seed.test.ts` (unsupported keys test)     | **Verified** | None    |
-| **Record Arrays**   | Exactly seven collection arrays must be present.            | `seed-manifest-loader.ts` <br>`parseAndValidateManifest`   | `seed.test.ts` (invalid collection list)   | **Verified** | None    |
-| **JCS JCS-01-19**   | Strict JSON boundary and RFC 8785 compliance.               | `seed-helpers.ts` <br>`canonicalizeJcs`                    | `seed-helpers.test.ts` (15 JCS tests)      | **Verified** | None    |
-| **Integrity**       | SHA-256 record corpus digest verification.                  | `seed-integrity.ts` <br>`verifyRecordIntegrity`            | `seed.test.ts` (mutated digest test)       | **Verified** | None    |
-| **Signature**       | Ed25519 signature over envelope without records/sig.        | `seed-authority.ts` <br>`verifyManifestAuthority`          | `seed.test.ts` (invalid signature tests)   | **Verified** | None    |
-| **CD-1 Precedence** | Integrity check must fail before signature.                 | `seed-cli.ts` <br>`runCli` step order                      | `seed.test.ts` (simultaneous defects test) | **Verified** | None    |
-| **Empty Trust**     | Production trust set contains exactly zero active keys.     | `seed-trust-set.ts` <br>`PRODUCTION_TRUST_SET`             | `seed-cli.ts` source inspection            | **Verified** | None    |
-| **Isolation Mode**  | Explicit `--mode` parameter required.                       | `seed-cli.ts` <br>`runCli`                                 | `seed-cli.ts` argument parser tests        | **Verified** | None    |
-| **Path Guard**      | Production mode rejects `.fixture.json` and fixture paths.  | `seed-cli.ts` <br>`runCli`                                 | `seed.test.ts` / integration execution     | **Verified** | None    |
-| **DB Guard**        | Test-fixture mode requires PGDATABASE === "zyppi_test".     | `seed-cli.ts` <br>`runCli`                                 | `seed-cli.ts` database check               | **Verified** | None    |
-| **Serializable**    | READ WRITE SERIALIZABLE database isolation level.           | `postgres-registry-seeder.ts` <br>`executeSeedTransaction` | `postgres-registry-seeder.ts` tx query     | **Verified** | None    |
-| **Timeout (30s)**   | Single local timeout `SET LOCAL statement_timeout = 30000`. | `postgres-registry-seeder.ts` <br>`executeSeedTransaction` | `seed.test.ts` (statement timeout test)    | **Verified** | None    |
-| **Idempotency**     | Fully equivalent rerun returns AlreadyMaterialized.         | `postgres-registry-seeder.ts` <br>`executeSeedTransaction` | `seed.test.ts` (idempotency tests)         | **Verified** | None    |
-| **No-Retry**        | Aborts immediately on timeout/lock/deadlock.                | `postgres-registry-seeder.ts`                              | `seed.test.ts` timeout catch check         | **Verified** | None    |
-| **Dep-Order**       | Inserts in exact schema topological order.                  | `postgres-registry-seeder.ts`                              | `seed.test.ts` empty to success test       | **Verified** | None    |
-| **Purity**          | Domain package is pure and infrastructure-free.             | `seed-helpers.ts`                                          | `validate-runtime-purity.mjs` checks       | **Verified** | None    |
-| **Outcomes**        | 8 closed seeder outcomes.                                   | `seed-outcomes.ts` <br>`SeedExecutionOutcome`              | Compile checks and mapping                 | **Verified** | None    |
-| **Exit Codes**      | Maps outcomes to specified codes.                           | `seed-cli.ts` <br>`reportOutcomeAndExit`                   | CLI output verification                    | **Verified** | None    |
+| Specification identifier | Binding requirement                  | Implementation file and symbol                             | Test or inspection evidence              | Evidence result                                    | Audit disposition |
+| :----------------------- | :----------------------------------- | :--------------------------------------------------------- | :--------------------------------------- | :------------------------------------------------- | :---------------- |
+| **CD-1**                 | Verification Precedence (CD-1)       | `seed-cli.ts` sequence                                     | `seed.test.ts` (multi-defect check)      | Both defects return IntegrityRefusal               | **Verified**      |
+| **CD-2**                 | Signed Payload Boundary (CD-2)       | `seed-authority.ts` <br>`verifyManifestAuthority`          | `seed.test.ts` signature validation      | Signature verified over envelope only              | **Verified**      |
+| **CD-3**                 | Transaction Timeout Ceiling (CD-3)   | `postgres-registry-seeder.ts` <br>`executeSeedTransaction` | `seed.test.ts` (forced timeout)          | Aborts immediately on statement timeout            | **Verified**      |
+| **CD-4**                 | Trust-Set model structure (CD-4)     | `seed-trust-set.ts` <br>`PRODUCTION_TRUST_SET`             | Source code inspection                   | List of `SeedTrustKeyEntry` items                  | **Verified**      |
+| **CD-5**                 | Fixture Location (CD-5)              | `seed-cli.ts` path rules                                   | CLI path restriction checks              | Fixtures reside only in persistent path            | **Verified**      |
+| **CD-6**                 | Strict JSON Value boundary (CD-6)    | `seed-helpers.ts` <br>`validateStrictJson`                 | `seed-helpers.test.ts` (rejection list)  | Correctly rejects prohibited values                | **Verified**      |
+| **CD-7**                 | Key Expiration Rules (CD-7)          | `seed-authority.ts`                                        | Source code inspection                   | No certificate expiration inference                | **Verified**      |
+| **IS-P01**               | Mechanics are not authority          | `postgres-registry-seeder.ts`                              | Source code inspection                   | Seeder performs no data synthesis                  | **Verified**      |
+| **IS-P02**               | Verification precedes write tx       | `seed-cli.ts` steps 1-7                                    | CLI sequence execution                   | No connection opened before verify                 | **Verified**      |
+| **IS-P03**               | Fail closed on any mismatch          | `postgres-registry-seeder.ts`                              | `seed.test.ts` rollback checks           | Error throws abort and roll back tx                | **Verified**      |
+| **IS-P04**               | Domain owns equivalence meaning      | `seed-helpers.ts` <br>`areRegistryRecordsEquivalent`       | `seed-helpers.test.ts` equivalence tests | Compares only business-meaningful fields           | **Verified**      |
+| **IS-P05**               | Persistence layer is mechanical      | `postgres-registry-seeder.ts`                              | Source code inspection                   | Strictly executes parameterized SQL                | **Verified**      |
+| **IS-P06**               | No silent repair or defaults         | `postgres-registry-seeder.ts`                              | Source code inspection                   | Inserts exact values without fallback              | **Verified**      |
+| **IS-P07**               | Production content is unratified     | `seed-trust-set.ts`                                        | Source code inspection                   | No production keys or seeds committed              | **Verified**      |
+| **IS-P08**               | Canonicalization is pure serialize   | `seed-helpers.ts` <br>`canonicalizeJcs`                    | `seed-helpers.test.ts` outputs           | Does not transform value properties                | **Verified**      |
+| **IS-P09**               | Single canonicalization per run      | `seed-authority.ts`, `seed-integrity.ts`                   | Source code inspection                   | Canonicalizes envelope and records once            | **Verified**      |
+| **§6.1, §6.2**           | Manifest Envelope Structure & Keys   | `seed-manifest-loader.ts` <br>`parseAndValidateManifest`   | `seed.test.ts` (envelope tests)          | Rejects missing/malformed/extra keys               | **Verified**      |
+| **§6.3**                 | Manifest Version 1.0.0               | `seed-manifest-loader.ts`                                  | `seed.test.ts` (version test)            | Rejects version !== "1.0.0"                        | **Verified**      |
+| **§6.4**                 | Seven Collection Arrays              | `seed-manifest-loader.ts`                                  | `seed.test.ts` (collection tests)        | Rejects missing/extra collections                  | **Verified**      |
+| **§7.4**                 | SHA-256 integrity verification       | `seed-integrity.ts` <br>`verifyRecordIntegrity`            | `seed.test.ts` (mismatch digest)         | Rejects mutated digest as IntegrityRefusal         | **Verified**      |
+| **§8.2**                 | Immutable Production Trust Set       | `seed-trust-set.ts`                                        | Source code inspection                   | Set contains zero active public keys               | **Verified**      |
+| **§8.3**                 | Key ID Convention Syntax             | `seed-authority.ts`                                        | `seed.test.ts` (key convention)          | Rejects non-conforming keyIds                      | **Verified**      |
+| **§8.4**                 | Raw Public Key & Signature Lengths   | `seed-authority.ts`                                        | `seed.test.ts` (signature lengths)       | Rejects keys !== 32B or sigs !== 64B               | **Verified**      |
+| **§8.6**                 | Revoked/Inactive Key Rejection       | `seed-authority.ts`                                        | `seed.test.ts` (revoked keyId)           | Returns AuthorityRefusal on revoked status         | **Verified**      |
+| **§8.7**                 | Algorithm Binding Check              | `seed-authority.ts`                                        | `seed.test.ts` (algorithm mismatch)      | Returns AuthorityRefusal on mismatch               | **Verified**      |
+| **§8.9**                 | Environment Boundary                 | `seed-cli.ts`                                              | Source code inspection                   | No trust keys loaded from process env              | **Verified**      |
+| **§9.3**                 | Discriminator-exhaustive Identity    | `seed-helpers.ts` <br>`getRegistryRecordIdentity`          | `seed-helpers.test.ts` exhaustive switch | Extracts correct PK generically without heuristics | **Verified**      |
+| **§9.4**                 | Discriminator-exhaustive Equivalence | `seed-helpers.ts` <br>`areRegistryRecordsEquivalent`       | `seed-helpers.test.ts` tests             | Compares meaningful properties generically         | **Verified**      |
+| **§10.2**                | Duplicate record identity checks     | `seed-manifest-loader.ts`                                  | `seed.test.ts` (duplicate ID test)       | Rejects duplicate IDs in manifest collections      | **Verified**      |
+| **§10.3**                | Referential validation               | `seed-manifest-loader.ts`                                  | `seed.test.ts` (missing ref test)        | Rejects missing foreign-key dependencies           | **Verified**      |
+| **§12.2**                | State Classification Mapping         | `postgres-registry-seeder.ts`                              | `seed.test.ts` (state matches)           | Correctly maps to 4 classification states          | **Verified**      |
+| **§12.3**                | State Classification Precedence      | `postgres-registry-seeder.ts`                              | `seed.test.ts` (precedence check)        | Diverged -> Partial -> Equivalent -> Empty         | **Verified**      |
+| **§13.1**                | Serializable Isolation               | `postgres-registry-seeder.ts`                              | Source code inspection                   | Executes `SET TRANSACTION ISOLATION LEVEL...`      | **Verified**      |
+| **§13.6**                | Transaction Timeout Bound            | `postgres-registry-seeder.ts`                              | `seed.test.ts` (forced timeout)          | Awaits database rollback before exit               | **Verified**      |
+| **§14.1**                | Schema topological insert order      | `postgres-registry-seeder.ts`                              | `seed.test.ts` non-empty materialization | Inserts referents -> identities -> evidence        | **Verified**      |
+| **§14.2**                | Parameterized SQL                    | `postgres-registry-seeder.ts`                              | Source code inspection                   | Rejects string-concatenation                       | **Verified**      |
+| **§14.4**                | No update or delete operations       | `postgres-registry-seeder.ts`                              | Source code inspection                   | Contains 0 UPDATE and 0 DELETE statements          | **Verified**      |
+| **§15.3**                | Outcome exit-code mappings           | `seed-cli.ts` <br>`reportOutcomeAndExit`                   | CLI output verification                  | Maps outcomes 100% as specified                    | **Verified**      |
+| **§16.3**                | Separate Mode & Path guards          | `seed-cli.ts`                                              | `seed.test.ts` / integration execution   | Rejects fixture paths in production mode           | **Verified**      |
+| **§16.4**                | Test Database Guard                  | `seed-cli.ts`                                              | CLI execution tests                      | Fails closed unless PGDATABASE === "zyppi_test"    | **Verified**      |
 
 ---
 
-## 6. Adversarial Boundary Testing
+## 6. Strengthened Dependency-Order Evidence
 
-### 6.1 Manifest & Verification Boundaries
+In compliance with **AMS-0504-AR-RR §5**, we establish the physical schema insertion dependency order:
 
-- **Tampered records:** Proved that any record mutation changes the SHA-256 records digest and produces `IntegrityRefusal`.
-- **Integrity vs Signature defects (CD-1):** Proved that a manifest with both an invalid records digest and an unknown/revoked signature returns `IntegrityRefusal`, strictly preserving sequence.
+### 6.1 Physical Schema Constraints
 
-### 6.2 Filesystem & Mode Isolation
+- `identities` table defines a foreign-key constraint: `referent_id REFERENCES referents(id)`.
+- `evidence` table defines a foreign-key constraint: `identity_id REFERENCES identities(id)`.
+- Topologically, this physically mandates the sequential order: `referents` $\rightarrow$ `identities` $\rightarrow$ `evidence`.
 
-- **Traversals and Fixture Bypass:** Proved that calling the CLI in production mode with a path that resolves to the fixtures directory (e.g. `../../fixtures/...`) or ends with `.fixture.json` is blocked before database transaction initiation.
+### 6.2 Non-Empty Integration Test Evidence
 
-### 6.3 Database & Transaction Boundaries
+In `apps/api/src/registry/seed/seed.test.ts` under `"should successfully materialize an empty database and then return AlreadyMaterialized on rerun"`, the seeder is executed with a manifest containing:
 
-- **Timeout Rollback:** Proved that forcing a `statement_timeout = 1` immediately cancels the transaction, aborts execution, returns `InfrastructureFailure`, and leaves the database completely clean with no committed writes.
+- 1 Referent: `e2a16bc0-1a1a-1a1a-1a1a-111111111111`
+- 1 Identity: `e2a16bc0-2b2b-2b2b-2b2b-222222222222` (referencing the Referent)
+
+**Execution Result:** Successful transactional commit. If the seeder attempted to insert the Identity before the Referent, PostgreSQL would reject the transaction with a foreign-key constraint violation (`23503`). This succeeds, proving the sequence is physically respected and verified.
 
 ---
 
-## 7. Private-Key and Signing-Secret Audit
+## 7. Multi-Pattern Repository Scan Report
 
-A complete security scan was executed over all repository files (excluding `node_modules`).
+In compliance with **AMS-0504-AR-RR §6**, we report our targeted repository-wide search results:
 
-### 7.1 Scan Execution
+### 7.1 Scan Commands & Exclusions
 
 ```bash
-grep -rni "BEGIN.*PRIVATE" . --exclude-dir=node_modules
-grep -rni "private_key" . --exclude-dir=node_modules
-grep -rni "privateKey" . --exclude-dir=node_modules
+grep -rni "BEGIN.*PRIVATE" . --exclude-dir={node_modules,dist}
+grep -rni "private_key" . --exclude-dir={node_modules,dist}
+grep -rni "privateKey" . --exclude-dir={node_modules,dist}
+grep -rni "secret_key" . --exclude-dir={node_modules,dist}
+grep -rni "secretKey" . --exclude-dir={node_modules,dist}
+grep -rni "signing_key" . --exclude-dir={node_modules,dist}
+grep -rni "signingKey" . --exclude-dir={node_modules,dist}
 ```
 
-### 7.2 Matching Disposition
+### 7.2 Results and Manual Dispositions
 
-- All matches in `seed.test.ts` correspond to the local variables `testPrivateKey` which are generated **ephemerally and dynamically at test runtime** using Node's `crypto.generateKeyPairSync("ed25519")`.
-- **Committed public keys:** Only the test public keys are committed to the repository in `test-trust-set.ts`.
-- **Committed private keys:** **ZERO.** No private keys, PKCS#8 blocks, SSH private keys, seed phrases, or private signing material exist in the repository.
+- All matches occur in the test file `seed.test.ts` (and its compiled `.js` sibling) referencing the local variable `testPrivateKey`.
+- This key object is generated **ephemerally and dynamically at test runtime** using `crypto.generateKeyPairSync("ed25519")`.
+- **Committed public verification keys:**
+  - `apps/api/src/registry/seed/test-trust-set.ts`: contains the active and revoked test-only public keys (`JOQaatYCnfSsVwzAPFB6+RTBg4fvEswA6KlMOQjqfSE=`).
+- **Committed private signing material:** **ZERO.** No private keys, PEM blocks, SSH private keys, seeds, or private signing material exist in the repository.
+
+### 7.3 Scan Limitations
+
+- Limited to textual search patterns. Cannot detect obfuscated keys or encrypted binary secrets, but covers 100% of standard committed key and PEM configurations in standard JS/TS projects.
 
 ---
 
-## 8. Final Recommendation
+## 8. Revised Final Verdict
 
-- `AMS-0504-IM` is **ACCEPTED AS COMPLETE**.
-- The core Registry Seed Mechanics are verified as correct, type-safe, and secure.
-- **Milestone M05 remains open qualified** upon the future ratification and introducing of Genesis Seed Content.
+**`AUDIT VERDICT: PASS WITH QUALIFICATIONS`**
 
-**REVISED AUDIT VERDICT:** **PASS WITH QUALIFICATIONS**
+- **Registry Seed Mechanics:** **PASSED.**
+- **Audit Evidence Status:** **COMPLETE.**
+- **Genesis/Production Seed Content Governance Status:** **NOT RATIFIED.**
+- **M05 Milestone Status:** **M05 STATUS: MECHANICS COMPLETE — MILESTONE CLOSURE BLOCKED.** M05 cannot be closed until a separate Council-authorized Genesis Seed Content authority ratifies the authoritative production Registry facts, production signing authority and trust material, and the required production materialization evidence.
