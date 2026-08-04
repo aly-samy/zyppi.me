@@ -6,6 +6,10 @@
   "scripts": {
     "build": "tsc -b"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@zyppi/contracts": "workspace:*",
+    "@zyppi/domain": "workspace:*",
+    "postgres": "^3.4.9"
+  },
   "peerDependencies": {}
 }

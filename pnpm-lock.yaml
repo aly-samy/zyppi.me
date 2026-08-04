@@ -38,7 +38,17 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(@vitest/coverage-v8@4.1.10)(vite@8.1.5)
 
-  apps/api: {}
+  apps/api:
+    dependencies:
+      "@zyppi/contracts":
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      "@zyppi/domain":
+        specifier: workspace:*
+        version: link:../../packages/domain
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
 
   apps/web: {}
 
