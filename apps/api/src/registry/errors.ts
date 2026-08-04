@@ -37,10 +37,7 @@ export function translateError(err: unknown): RegistryError {
   // - Any MappingError is already caught above.
   // - Decollation / JSON parsing issues can occur if database contains invalid JSON string in columns we parse.
   // - If any domain validator failed, it would throw MappingError.
-  if (
-    message.toLowerCase().includes("json") ||
-    err instanceof SyntaxError
-  ) {
+  if (message.toLowerCase().includes("json") || err instanceof SyntaxError) {
     return { kind: "DataCorruption" };
   }
 

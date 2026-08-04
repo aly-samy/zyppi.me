@@ -67,7 +67,9 @@ export function mapIdentityRow(row: IdentityRow): IdentityRecord {
 
   const validation = validateIdentityRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Identity validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Identity validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;
@@ -91,7 +93,9 @@ export function mapReferentRow(row: ReferentRow): ReferentRecord {
 
   const validation = validateReferentRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Referent validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Referent validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;
@@ -116,7 +120,9 @@ export function mapEvidenceRow(row: EvidenceRow): EvidenceRecord {
 
   const validation = validateEvidenceRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Evidence validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Evidence validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;
@@ -140,7 +146,9 @@ export function mapPolicyRow(row: PolicyRow): PolicyRecord {
 
   const validation = validatePolicyRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Policy validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Policy validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;
@@ -164,7 +172,9 @@ export function mapStandingRow(row: StandingRow): StandingRecord {
 
   const validation = validateStandingRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Standing validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Standing validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;
@@ -188,7 +198,9 @@ export function mapCapabilityRow(row: CapabilityRow): CapabilityRecord {
 
   const validation = validateCapabilityRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Capability validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Capability validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;
@@ -212,7 +224,9 @@ export function mapAuthorityRow(row: AuthorityRow): AuthorityRecord {
 
   const validation = validateAuthorityRecord(rawMapped);
   if (!validation.ok) {
-    throw new MappingError(`Authority validation failed: ${validation.error.message}`);
+    throw new MappingError(
+      `Authority validation failed: ${validation.error.message}`,
+    );
   }
 
   return validation.value;

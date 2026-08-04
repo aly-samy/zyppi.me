@@ -1,11 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
+// @ts-expect-error fs has no typings in this package
+import * as fs from "fs";
+// @ts-expect-error path has no typings in this package
+import * as path from "path";
+// @ts-expect-error url has no typings in this package
+import { fileURLToPath } from "url";
 import postgres from "postgres";
 import { createValidatedCanonicalIdentifier } from "@zyppi/contracts";
 import type { ExecutionReceipt } from "@zyppi/domain";
 import { PostgresRegistryRepository } from "./postgres-registry-repository.js";
 import { PostgresReceiptRepository } from "./postgres-receipt-repository.js";
+
+const importUrl = (import.meta as unknown as { url: string }).url;
+const __filename = fileURLToPath(importUrl);
+const __dirname = path.dirname(__filename);
 
 describe("PostgreSQL Registry Adapter Integration Tests — IT-0503", () => {
   let sql: postgres.Sql;
