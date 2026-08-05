@@ -23,8 +23,9 @@ async function main() {
   let config;
   try {
     config = parseAndValidateDbConfig();
-  } catch (err: any) {
-    console.error(`Database Configuration Error: ${err.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Database Configuration Error: ${message}`);
     process.exit(1);
   }
 
@@ -67,8 +68,9 @@ async function main() {
         );
       }
       process.exit(0);
-    } catch (err: any) {
-      console.error(`Migration Failed: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`Migration Failed: ${message}`);
       process.exit(1);
     } finally {
       if (lockAcquired) {
@@ -120,8 +122,9 @@ async function main() {
       } else {
         process.exit(0);
       }
-    } catch (err: any) {
-      console.error(`Status check failed: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`Status check failed: ${message}`);
       process.exit(1);
     } finally {
       await sql.end();
@@ -134,9 +137,10 @@ async function main() {
       await verifyMigrations(sql, corpus);
       console.log("Migration integrity verification: PASS");
       process.exit(0);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       console.error(
-        `Migration integrity verification: FAIL\nDiagnostics: ${err.message}`,
+        `Migration integrity verification: FAIL\nDiagnostics: ${message}`,
       );
       process.exit(1);
     } finally {
@@ -145,7 +149,8 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(`Fatal Execution Error: ${err.message}`);
+main().catch((err: unknown) => {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(`Fatal Execution Error: ${message}`);
   process.exit(1);
 });

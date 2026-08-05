@@ -48,7 +48,7 @@ export function parseAndValidateDbConfig(): DbConfig {
  */
 export function createPostgresClient(
   config: DbConfig,
-  options: postgres.Options<any> = {},
+  options: Record<string, unknown> = {},
 ): postgres.Sql {
   return postgres({
     host: config.host,

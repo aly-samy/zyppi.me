@@ -15,7 +15,7 @@ import {
   verifyMigrations,
   runMigrations,
   calculateSha256,
-  ZYPPI_REGISTRY_MIGRATION_LOCK_KEY,
+  Migration,
 } from "../runner.js";
 
 describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
@@ -215,7 +215,7 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     fs.unlinkSync(path.join(tempDir, "001_test.sql"));
 
     // Attempting to run again should fail closed because an applied version's file is missing
-    const corpus2: any[] = [];
+    const corpus2: Migration[] = [];
     await expect(runMigrations(sql, corpus2)).rejects.toThrow(
       'Applied migration "001" is missing its file',
     );

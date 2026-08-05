@@ -79,7 +79,6 @@ export function discoverMigrations(migrationsDir: string): Migration[] {
     }
 
     const version = match[1];
-    const description = match[2];
 
     if (seenVersions.has(version)) {
       throw new Error(
@@ -129,9 +128,10 @@ export async function acquireAdvisoryLock(
       if (result && result[0] && result[0].acquired === true) {
         return true;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Fail closed on query errors
-      throw new Error(`Advisory lock query failure: ${err.message}`);
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Advisory lock query failure: ${message}`);
     }
 
     if (Date.now() - start >= timeoutMs) {
@@ -152,7 +152,7 @@ export async function releaseAdvisoryLock(
     await sql`
       SELECT pg_advisory_unlock(${key});
     `;
-  } catch (err: any) {
+  } catch {
     // Suppress release errors or log gently, but we want to prevent crashing finally block
   }
 }
