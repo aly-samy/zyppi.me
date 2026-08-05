@@ -45,7 +45,7 @@ No concrete, evidence-supported implementation or integration blockers remain. A
 
 ### READY FOR CHAIR CLOSURE
 
-The final integrated M05 Registry Layer implementation, test suites, and documentation are complete, validated, and meet all constitutional and mandate expectations.
+The final integrated M05 Registry Layer implementation, approved fixture authority and execution evidence, test suites, and required documentation are complete and validated. No concrete implementation, integration, evidence, or repository blocker remains.
 
 ## 7. Recommended Chair Action
 
