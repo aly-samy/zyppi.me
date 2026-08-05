@@ -25,7 +25,12 @@ export interface MigrationStatus {
   readonly details: {
     readonly version: string;
     readonly filename: string;
-    readonly status: "applied" | "pending" | "missing_file" | "checksum_mismatch" | "unknown_applied";
+    readonly status:
+      | "applied"
+      | "pending"
+      | "missing_file"
+      | "checksum_mismatch"
+      | "unknown_applied";
     readonly recordedChecksum?: string;
     readonly currentChecksum?: string;
   }[];
@@ -35,7 +40,11 @@ export interface MigrationStatus {
  * Calculates a deterministic lowercase SHA-256 checksum from the exact raw file content.
  */
 export function calculateSha256(content: string): string {
-  return crypto.createHash("sha256").update(content, "utf8").digest("hex").toLowerCase();
+  return crypto
+    .createHash("sha256")
+    .update(content, "utf8")
+    .digest("hex")
+    .toLowerCase();
 }
 
 /**
@@ -64,14 +73,18 @@ export function discoverMigrations(migrationsDir: string): Migration[] {
 
     const match = file.match(migrationRegex);
     if (!match) {
-      throw new Error(`Malformed migration filename detected: "${file}". Filenames must strictly follow the NNN_lowercase_snake_case.sql format.`);
+      throw new Error(
+        `Malformed migration filename detected: "${file}". Filenames must strictly follow the NNN_lowercase_snake_case.sql format.`,
+      );
     }
 
     const version = match[1];
     const description = match[2];
 
     if (seenVersions.has(version)) {
-      throw new Error(`Duplicate migration version detected: "${version}" (found in "${file}")`);
+      throw new Error(
+        `Duplicate migration version detected: "${version}" (found in "${file}")`,
+      );
     }
     seenVersions.add(version);
 
@@ -93,7 +106,9 @@ export function discoverMigrations(migrationsDir: string): Migration[] {
   }
 
   // Deterministically sort by numeric version
-  return migrations.sort((a, b) => parseInt(a.version, 10) - parseInt(b.version, 10));
+  return migrations.sort(
+    (a, b) => parseInt(a.version, 10) - parseInt(b.version, 10),
+  );
 }
 
 /**
@@ -172,7 +187,9 @@ export async function bootstrapLedger(sql: postgres.Sql): Promise<void> {
 /**
  * Reads all applied migrations from the ledger.
  */
-export async function getAppliedMigrations(sql: postgres.Sql): Promise<AppliedMigration[]> {
+export async function getAppliedMigrations(
+  sql: postgres.Sql,
+): Promise<AppliedMigration[]> {
   const rows = await sql`
     SELECT version, filename, checksum, applied_at
     FROM schema_migrations
@@ -190,7 +207,10 @@ export async function getAppliedMigrations(sql: postgres.Sql): Promise<AppliedMi
  * Evaluates the current migration corpus against the database ledger.
  * This function remains completely read-only and does NOT create the ledger or mutate any state.
  */
-export async function getMigrationStatus(sql: postgres.Sql, corpus: Migration[]): Promise<MigrationStatus> {
+export async function getMigrationStatus(
+  sql: postgres.Sql,
+  corpus: Migration[],
+): Promise<MigrationStatus> {
   const exists = await checkLedgerExists(sql);
   if (!exists) {
     // Read-only boundary: return status with empty applied list, all corpus migrations pending
@@ -221,7 +241,12 @@ export async function getMigrationStatus(sql: postgres.Sql, corpus: Migration[])
   const details: {
     version: string;
     filename: string;
-    status: "applied" | "pending" | "missing_file" | "checksum_mismatch" | "unknown_applied";
+    status:
+      | "applied"
+      | "pending"
+      | "missing_file"
+      | "checksum_mismatch"
+      | "unknown_applied";
     recordedChecksum?: string;
     currentChecksum?: string;
   }[] = [];
@@ -229,7 +254,9 @@ export async function getMigrationStatus(sql: postgres.Sql, corpus: Migration[])
   const appliedVersions: string[] = [];
 
   const allVersions = new Set([...appliedMap.keys(), ...corpusMap.keys()]);
-  const sortedVersions = Array.from(allVersions).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+  const sortedVersions = Array.from(allVersions).sort(
+    (a, b) => parseInt(a, 10) - parseInt(b, 10),
+  );
 
   for (const v of sortedVersions) {
     const app = appliedMap.get(v);
@@ -292,7 +319,10 @@ export async function getMigrationStatus(sql: postgres.Sql, corpus: Migration[])
  * Verifies repository-to-ledger integrity and throws an error on any divergence.
  * Completely read-only.
  */
-export async function verifyMigrations(sql: postgres.Sql, corpus: Migration[]): Promise<void> {
+export async function verifyMigrations(
+  sql: postgres.Sql,
+  corpus: Migration[],
+): Promise<void> {
   const exists = await checkLedgerExists(sql);
   if (!exists) {
     // If database has no ledger, it's valid if we have no applied records.
@@ -302,13 +332,19 @@ export async function verifyMigrations(sql: postgres.Sql, corpus: Migration[]): 
   const status = await getMigrationStatus(sql, corpus);
   for (const d of status.details) {
     if (d.status === "missing_file") {
-      throw new Error(`Migration verification failure: Applied migration "${d.version}" is missing its file "${d.filename}" in repository corpus.`);
+      throw new Error(
+        `Migration verification failure: Applied migration "${d.version}" is missing its file "${d.filename}" in repository corpus.`,
+      );
     }
     if (d.status === "checksum_mismatch") {
-      throw new Error(`Migration verification failure: Checksum divergence detected for migration "${d.version}". Recorded: "${d.recordedChecksum}", Current: "${d.currentChecksum}".`);
+      throw new Error(
+        `Migration verification failure: Checksum divergence detected for migration "${d.version}". Recorded: "${d.recordedChecksum}", Current: "${d.currentChecksum}".`,
+      );
     }
     if (d.status === "unknown_applied") {
-      throw new Error(`Migration verification failure: Unknown applied migration record in ledger: version "${d.version}".`);
+      throw new Error(
+        `Migration verification failure: Unknown applied migration record in ledger: version "${d.version}".`,
+      );
     }
   }
 }
@@ -317,7 +353,10 @@ export async function verifyMigrations(sql: postgres.Sql, corpus: Migration[]): 
  * Runs pending migrations sequentially and transactionally.
  * Creates the ledger idempotently and applies atomic transactions.
  */
-export async function runMigrations(sql: postgres.Sql, corpus: Migration[]): Promise<{ applied: string[] }> {
+export async function runMigrations(
+  sql: postgres.Sql,
+  corpus: Migration[],
+): Promise<{ applied: string[] }> {
   // 1. Idempotent bootstrap under lock (lock must already be held)
   await bootstrapLedger(sql);
 
@@ -338,13 +377,19 @@ export async function runMigrations(sql: postgres.Sql, corpus: Migration[]): Pro
   for (const a of applied) {
     const c = corpusMap.get(a.version);
     if (!c) {
-      throw new Error(`Historical integrity failure: Applied migration "${a.version}" is missing its file "${a.filename}" in corpus.`);
+      throw new Error(
+        `Historical integrity failure: Applied migration "${a.version}" is missing its file "${a.filename}" in corpus.`,
+      );
     }
     if (a.filename !== c.filename) {
-      throw new Error(`Historical integrity failure: Filename mismatch for version "${a.version}". Recorded: "${a.filename}", Current: "${c.filename}".`);
+      throw new Error(
+        `Historical integrity failure: Filename mismatch for version "${a.version}". Recorded: "${a.filename}", Current: "${c.filename}".`,
+      );
     }
     if (a.checksum !== c.checksum) {
-      throw new Error(`Historical integrity failure: Checksum mismatch for version "${a.version}". Recorded: "${a.checksum}", Current: "${c.checksum}".`);
+      throw new Error(
+        `Historical integrity failure: Checksum mismatch for version "${a.version}". Recorded: "${a.checksum}", Current: "${c.checksum}".`,
+      );
     }
   }
 

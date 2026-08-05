@@ -41,10 +41,17 @@ async function main() {
       const corpus = discoverMigrations(migrationsDir);
 
       // B. Acquire PostgreSQL advisory lock
-      console.log(`Attempting to acquire database advisory lock (key: ${ZYPPI_REGISTRY_MIGRATION_LOCK_KEY})...`);
-      lockAcquired = await acquireAdvisoryLock(sql, ZYPPI_REGISTRY_MIGRATION_LOCK_KEY);
+      console.log(
+        `Attempting to acquire database advisory lock (key: ${ZYPPI_REGISTRY_MIGRATION_LOCK_KEY})...`,
+      );
+      lockAcquired = await acquireAdvisoryLock(
+        sql,
+        ZYPPI_REGISTRY_MIGRATION_LOCK_KEY,
+      );
       if (!lockAcquired) {
-        console.error("Migration Lock Contention: Failed to acquire database advisory lock within 10 seconds. Concurrent migration execution blocked.");
+        console.error(
+          "Migration Lock Contention: Failed to acquire database advisory lock within 10 seconds. Concurrent migration execution blocked.",
+        );
         process.exit(1);
       }
 
@@ -55,7 +62,9 @@ async function main() {
       if (result.applied.length === 0) {
         console.log("No pending migrations. Database is up-to-date.");
       } else {
-        console.log(`Successfully applied ${result.applied.length} migration(s): ${result.applied.join(", ")}`);
+        console.log(
+          `Successfully applied ${result.applied.length} migration(s): ${result.applied.join(", ")}`,
+        );
       }
       process.exit(0);
     } catch (err: any) {
@@ -86,19 +95,27 @@ async function main() {
         } else if (d.status === "pending") {
           console.log(`[PENDING] ${d.filename}`);
         } else if (d.status === "missing_file") {
-          console.error(`[ERROR]   Missing applied file: ${d.filename} (Version ${d.version} applied but file is missing in repository)`);
+          console.error(
+            `[ERROR]   Missing applied file: ${d.filename} (Version ${d.version} applied but file is missing in repository)`,
+          );
           hasIntegrityError = true;
         } else if (d.status === "checksum_mismatch") {
-          console.error(`[ERROR]   Checksum Mismatch: ${d.filename} (Version ${d.version} has modified contents)`);
+          console.error(
+            `[ERROR]   Checksum Mismatch: ${d.filename} (Version ${d.version} has modified contents)`,
+          );
           hasIntegrityError = true;
         } else if (d.status === "unknown_applied") {
-          console.error(`[ERROR]   Unknown applied record: Version ${d.version} is recorded in DB but is unrecognized in repository`);
+          console.error(
+            `[ERROR]   Unknown applied record: Version ${d.version} is recorded in DB but is unrecognized in repository`,
+          );
           hasIntegrityError = true;
         }
       }
 
       if (hasIntegrityError) {
-        console.error("\nDatabase migration history is historically inconsistent with the repository corpus.");
+        console.error(
+          "\nDatabase migration history is historically inconsistent with the repository corpus.",
+        );
         process.exit(1);
       } else {
         process.exit(0);
@@ -118,7 +135,9 @@ async function main() {
       console.log("Migration integrity verification: PASS");
       process.exit(0);
     } catch (err: any) {
-      console.error(`Migration integrity verification: FAIL\nDiagnostics: ${err.message}`);
+      console.error(
+        `Migration integrity verification: FAIL\nDiagnostics: ${err.message}`,
+      );
       process.exit(1);
     } finally {
       await sql.end();

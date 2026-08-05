@@ -40,7 +40,10 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
 
   // Helper to create disposable migrations
   function createTempDir(): string {
-    const dir = path.join(os.tmpdir(), `zyppi-temp-migrations-${Math.random().toString(36).slice(2)}`);
+    const dir = path.join(
+      os.tmpdir(),
+      `zyppi-temp-migrations-${Math.random().toString(36).slice(2)}`,
+    );
     fs.mkdirSync(dir, { recursive: true });
     return dir;
   }
@@ -82,7 +85,11 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     const migrationContent = `
       CREATE TABLE test_table (id SERIAL PRIMARY KEY, val TEXT);
     `;
-    fs.writeFileSync(path.join(tempDir, "001_initial_table.sql"), migrationContent, "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_initial_table.sql"),
+      migrationContent,
+      "utf8",
+    );
 
     const corpus = discoverMigrations(tempDir);
     expect(corpus.length).toBe(1);
@@ -132,18 +139,30 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     fs.writeFileSync(path.join(tempDir, "001_a.sql"), "SELECT 1;", "utf8");
     fs.writeFileSync(path.join(tempDir, "001_b.sql"), "SELECT 2;", "utf8");
 
-    expect(() => discoverMigrations(tempDir)).toThrow("Duplicate migration version detected");
+    expect(() => discoverMigrations(tempDir)).toThrow(
+      "Duplicate migration version detected",
+    );
 
     cleanupTempDir(tempDir);
   });
 
   it("MF-07: should reject malformed filenames and not silently ignore them", () => {
     const tempDir = createTempDir();
-    fs.writeFileSync(path.join(tempDir, "001_initial.sql"), "SELECT 1;", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_initial.sql"),
+      "SELECT 1;",
+      "utf8",
+    );
     // Malformed: uppercase letters in name description (must be lowercase snake case)
-    fs.writeFileSync(path.join(tempDir, "002_BadName.sql"), "SELECT 2;", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "002_BadName.sql"),
+      "SELECT 2;",
+      "utf8",
+    );
 
-    expect(() => discoverMigrations(tempDir)).toThrow("Malformed migration filename detected");
+    expect(() => discoverMigrations(tempDir)).toThrow(
+      "Malformed migration filename detected",
+    );
 
     cleanupTempDir(tempDir);
   });
@@ -162,7 +181,11 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
   it("MF-09: should detect historical mutation/checksum divergence and fail closed", async () => {
     const tempDir = createTempDir();
     const originalContent = "SELECT 1;";
-    fs.writeFileSync(path.join(tempDir, "001_test.sql"), originalContent, "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_test.sql"),
+      originalContent,
+      "utf8",
+    );
 
     // 1. Run original migration
     const corpus1 = discoverMigrations(tempDir);
@@ -173,7 +196,9 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
 
     // 3. Trying to run/verify should fail closed
     const corpus2 = discoverMigrations(tempDir);
-    await expect(runMigrations(sql, corpus2)).rejects.toThrow("Checksum mismatch");
+    await expect(runMigrations(sql, corpus2)).rejects.toThrow(
+      "Checksum mismatch",
+    );
 
     cleanupTempDir(tempDir);
   });
@@ -191,7 +216,9 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
 
     // Attempting to run again should fail closed because an applied version's file is missing
     const corpus2: any[] = [];
-    await expect(runMigrations(sql, corpus2)).rejects.toThrow("Applied migration \"001\" is missing its file");
+    await expect(runMigrations(sql, corpus2)).rejects.toThrow(
+      'Applied migration "001" is missing its file',
+    );
 
     cleanupTempDir(tempDir);
   });
@@ -211,16 +238,26 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     `;
 
     // Attempting to run should fail closed due to unknown applied record in ledger
-    await expect(runMigrations(sql, corpus)).rejects.toThrow("Applied migration \"002\" is missing its file");
+    await expect(runMigrations(sql, corpus)).rejects.toThrow(
+      'Applied migration "002" is missing its file',
+    );
 
     cleanupTempDir(tempDir);
   });
 
   it("MF-12: should verify failed migration atomicity (rolls back both SQL and ledger record)", async () => {
     const tempDir = createTempDir();
-    fs.writeFileSync(path.join(tempDir, "001_good.sql"), "CREATE TABLE good_table (id INT);", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_good.sql"),
+      "CREATE TABLE good_table (id INT);",
+      "utf8",
+    );
     // Malformed SQL that causes syntax error
-    fs.writeFileSync(path.join(tempDir, "002_bad.sql"), "CREATE TABLE bad_table (id INT); INTENTIONAL SYNTAX ERROR;", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "002_bad.sql"),
+      "CREATE TABLE bad_table (id INT); INTENTIONAL SYNTAX ERROR;",
+      "utf8",
+    );
 
     const corpus = discoverMigrations(tempDir);
 
@@ -229,7 +266,7 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
 
     // Verify 001 was recorded and good_table exists
     const applied = await getAppliedMigrations(sql);
-    expect(applied.map(a => a.version)).toEqual(["001"]);
+    expect(applied.map((a) => a.version)).toEqual(["001"]);
 
     const goodTableExists = await sql`
       SELECT EXISTS (
@@ -253,7 +290,11 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
 
   it("MF-13: should verify that db:status is read-only", async () => {
     const tempDir = createTempDir();
-    fs.writeFileSync(path.join(tempDir, "001_status_check.sql"), "CREATE TABLE status_test (id INT);", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_status_check.sql"),
+      "CREATE TABLE status_test (id INT);",
+      "utf8",
+    );
 
     const corpus = discoverMigrations(tempDir);
 
@@ -276,7 +317,11 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
 
   it("MF-14: should verify that db:verify is read-only and validates checksums", async () => {
     const tempDir = createTempDir();
-    fs.writeFileSync(path.join(tempDir, "001_verify_check.sql"), "SELECT 1;", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_verify_check.sql"),
+      "SELECT 1;",
+      "utf8",
+    );
 
     const corpus = discoverMigrations(tempDir);
 
@@ -290,11 +335,17 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     await expect(verifyMigrations(sql, corpus)).resolves.not.toThrow();
 
     // Mutate file to cause checksum divergence
-    fs.writeFileSync(path.join(tempDir, "001_verify_check.sql"), "SELECT 2;", "utf8");
+    fs.writeFileSync(
+      path.join(tempDir, "001_verify_check.sql"),
+      "SELECT 2;",
+      "utf8",
+    );
     const mutatedCorpus = discoverMigrations(tempDir);
 
     // Verify should fail on divergence
-    await expect(verifyMigrations(sql, mutatedCorpus)).rejects.toThrow("Checksum divergence detected");
+    await expect(verifyMigrations(sql, mutatedCorpus)).rejects.toThrow(
+      "Checksum divergence detected",
+    );
 
     // Ensure verification check is read-only (did not change the recorded checksum)
     const applied = await getAppliedMigrations(sql);
@@ -315,14 +366,24 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     const concurrentSql = createPostgresClient(config);
 
     // Attempting to acquire the same lock in session B with a short timeout should fail/timeout
-    const secondAcquired = await acquireAdvisoryLock(concurrentSql, lockKey, 1000, 200);
+    const secondAcquired = await acquireAdvisoryLock(
+      concurrentSql,
+      lockKey,
+      1000,
+      200,
+    );
     expect(secondAcquired).toBe(false);
 
     // Release the lock in session A
     await releaseAdvisoryLock(sql, lockKey);
 
     // Attempting to acquire in session B now should succeed
-    const afterReleaseAcquired = await acquireAdvisoryLock(concurrentSql, lockKey, 1000, 200);
+    const afterReleaseAcquired = await acquireAdvisoryLock(
+      concurrentSql,
+      lockKey,
+      1000,
+      200,
+    );
     expect(afterReleaseAcquired).toBe(true);
 
     // Cleanup session B
@@ -335,7 +396,10 @@ describe("Registry Migration Framework Integration Tests — AMS-0505", () => {
     const files = fs.readdirSync(path.resolve(__dirname, ".."));
     for (const file of files) {
       if (file.endsWith(".ts")) {
-        const content = fs.readFileSync(path.resolve(__dirname, "..", file), "utf8");
+        const content = fs.readFileSync(
+          path.resolve(__dirname, "..", file),
+          "utf8",
+        );
         expect(content).not.toContain("@zyppi/runtime");
       }
     }

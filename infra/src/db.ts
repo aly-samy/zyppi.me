@@ -18,8 +18,15 @@ export function parseAndValidateDbConfig(): DbConfig {
 
   const rawPort = process.env.PGPORT || "5432";
   const port = parseInt(rawPort, 10);
-  if (isNaN(port) || port <= 0 || port > 65535 || String(port) !== rawPort.trim()) {
-    throw new Error(`Invalid PostgreSQL port configuration: "${rawPort}". Port must be a valid numeric value.`);
+  if (
+    isNaN(port) ||
+    port <= 0 ||
+    port > 65535 ||
+    String(port) !== rawPort.trim()
+  ) {
+    throw new Error(
+      `Invalid PostgreSQL port configuration: "${rawPort}". Port must be a valid numeric value.`,
+    );
   }
 
   const database = process.env.PGDATABASE || "zyppi_test";
@@ -39,7 +46,10 @@ export function parseAndValidateDbConfig(): DbConfig {
  * Creates an instance of a postgres.js client configured with the parsed database properties.
  * All client connection details remain internal to the @zyppi/infra package.
  */
-export function createPostgresClient(config: DbConfig, options: postgres.Options<any> = {}): postgres.Sql {
+export function createPostgresClient(
+  config: DbConfig,
+  options: postgres.Options<any> = {},
+): postgres.Sql {
   return postgres({
     host: config.host,
     port: config.port,

@@ -70,9 +70,14 @@ export function runValidation(workspaceRoot = process.cwd()) {
       devOnly: ["packages/testing"],
     },
     "edge/worker": { production: ["packages/contracts"], devOnly: [] },
-    "infra": {
+    infra: {
       production: [],
-      devOnly: ["packages/domain", "packages/contracts", "packages/testing", "packages/shared"]
+      devOnly: [
+        "packages/domain",
+        "packages/contracts",
+        "packages/testing",
+        "packages/shared",
+      ],
     },
   };
 
