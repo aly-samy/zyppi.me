@@ -30,6 +30,7 @@ export function runValidation(workspaceRoot = process.cwd()) {
     "apps/api",
     "apps/web",
     "edge/worker",
+    "infra",
   ];
 
   const PACKAGE_TO_NODE = {
@@ -40,6 +41,7 @@ export function runValidation(workspaceRoot = process.cwd()) {
     "@zyppi/testing": "packages/testing",
     "@zyppi/api": "apps/api",
     "@zyppi/web": "apps/web",
+    "@zyppi/infra": "infra",
   };
 
   const POLICY = {
@@ -68,6 +70,15 @@ export function runValidation(workspaceRoot = process.cwd()) {
       devOnly: ["packages/testing"],
     },
     "edge/worker": { production: ["packages/contracts"], devOnly: [] },
+    infra: {
+      production: [],
+      devOnly: [
+        "packages/domain",
+        "packages/contracts",
+        "packages/testing",
+        "packages/shared",
+      ],
+    },
   };
 
   const isTransitivelyReachable = (source, target) => {
@@ -609,7 +620,7 @@ export function runValidation(workspaceRoot = process.cwd()) {
     });
   }
 
-  return { violations, fileCount };
+  return { violations, fileCount, nodeCount: NODES.length };
 }
 
 // Execute when invoked directly as a CLI script
@@ -620,7 +631,7 @@ if (
       path.resolve(new URL(import.meta.url).pathname))
 ) {
   const workspaceRoot = process.cwd();
-  const { violations, fileCount } = runValidation(workspaceRoot);
+  const { violations, fileCount, nodeCount } = runValidation(workspaceRoot);
 
   if (violations.length > 0) {
     const sorted = [...violations].sort((a, b) => {
@@ -652,7 +663,7 @@ if (
 
   console.log("Zyppi Constitutional Dependency Graph Validator: PASS");
   console.log(`- Graph layout: Valid (conforms to CAW-004 v2.1)`);
-  console.log(`- Workspace members analyzed: 8`);
+  console.log(`- Workspace members analyzed: ${nodeCount}`);
   console.log(`- Source files scanned: ${fileCount}\n`);
   process.exit(0);
 }

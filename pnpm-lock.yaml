@@ -55,6 +55,19 @@ importers:
 
   apps/web: {}
 
+  infra:
+    dependencies:
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
+    devDependencies:
+      "@zyppi/contracts":
+        specifier: workspace:*
+        version: link:../packages/contracts
+      "@zyppi/domain":
+        specifier: workspace:*
+        version: link:../packages/domain
+
   packages/contracts:
     devDependencies:
       "@zyppi/domain":
