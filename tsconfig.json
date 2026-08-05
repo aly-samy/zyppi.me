@@ -8,6 +8,7 @@
     { "path": "./packages/testing" },
     { "path": "./apps/api" },
     { "path": "./apps/web" },
-    { "path": "./edge/worker" }
+    { "path": "./edge/worker" },
+    { "path": "./infra" }
   ]
 }
