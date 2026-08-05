@@ -72,7 +72,7 @@ _(Depends on M03)_
 | IT-0406 | Replay framework                | IT-0405          | M    | AMS-0406 | ☑      |
 | IT-0407 | Entropy detector (CI lint rule) | IT-0402          | S    | AMS-0407 | ☑      |
 
-## M05 — Registry Layer
+## M05 — Registry Layer — ☑ Complete
 
 _(Depends on M03; may run parallel with M04 and M06)_
 
@@ -81,8 +81,8 @@ _(Depends on M03; may run parallel with M04 and M06)_
 | IT-0501 | PostgreSQL schema (CAW-008) | M03        | M    | AMS-0501 | ☑      |
 | IT-0502 | Repository interfaces       | IT-0501    | S    | AMS-0502 | ☑      |
 | IT-0503 | Registry adapter            | IT-0502    | M    | AMS-0503 | ☑      |
-| IT-0504 | Seed data                   | IT-0501    | S    | AMS-0504 | ☐      |
-| IT-0505 | Migration framework         | IT-0501    | S    | AMS-0505 | ☐      |
+| IT-0504 | Seed data                   | IT-0501    | S    | AMS-0504 | ☑      |
+| IT-0505 | Migration framework         | IT-0501    | S    | AMS-0505 | ☑      |
 
 ## M06 — GS1 Digital Link Resolution
 
