@@ -1,30 +1,30 @@
 # M06-PLAN v0.2 — GS1 Digital Link Resolution Constitutional Plan
 
-| Field | Value |
-|---|---|
-| **Document ID** | `M06-PLAN` |
-| **Revision** | `v0.2 — Targeted Revision per Chair Rulings` |
-| **Title** | GS1 Digital Link Resolution Constitutional Plan |
-| **Program** | `CAW-011 — Commerce Atlas Wedge` |
-| **Milestone** | `M06 — GS1 Digital Link Resolution` |
-| **Status** | `DRAFT — REVISED PER CHAIR RULINGS — EVIDENCE VERIFICATION INCOMPLETE — NOT READY FOR RATIFICATION` |
-| **Authority** | Zyppi Constitutional Council |
-| **Implementation Authority** | `NONE` |
-| **Predecessor Authorities** | `CAW-003`, `CAW-008`, `CAW-011`, `M05-PLAN`, `M06-ADR`, `CCR-06-01`, `CRR-06-01`, `G-06-03 Rev.3` |
-| **Repository Evidence** | `JRM-06-03 — Repository Evidence Package for G-06-03` |
-| **Downstream Artifacts** | `AMS-0601 … AMS-0606` (one IT each) |
-| **Date** | August 5, 2026 |
+| Field                        | Value                                                                                               |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Document ID**              | `M06-PLAN`                                                                                          |
+| **Revision**                 | `v0.2 — Targeted Revision per Chair Rulings`                                                        |
+| **Title**                    | GS1 Digital Link Resolution Constitutional Plan                                                     |
+| **Program**                  | `CAW-011 — Commerce Atlas Wedge`                                                                    |
+| **Milestone**                | `M06 — GS1 Digital Link Resolution`                                                                 |
+| **Status**                   | `DRAFT — REVISED PER CHAIR RULINGS — EVIDENCE VERIFICATION INCOMPLETE — NOT READY FOR RATIFICATION` |
+| **Authority**                | Zyppi Constitutional Council                                                                        |
+| **Implementation Authority** | `NONE`                                                                                              |
+| **Predecessor Authorities**  | `CAW-003`, `CAW-008`, `CAW-011`, `M05-PLAN`, `M06-ADR`, `CCR-06-01`, `CRR-06-01`, `G-06-03 Rev.3`   |
+| **Repository Evidence**      | `JRM-06-03 — Repository Evidence Package for G-06-03`                                               |
+| **Downstream Artifacts**     | `AMS-0601 … AMS-0606` (one IT each)                                                                 |
+| **Date**                     | August 5, 2026                                                                                      |
 
 ## 0. Revision Note (v0.1 → v0.2)
 
 This revision incorporates the Chair's calibrated rulings on the roundtable review. It does **not** adopt Gemini's proposed fixes verbatim. Specifically:
 
-- **F-1** → added §8 *Temporal Lifecycle Neutrality*.
+- **F-1** → added §8 _Temporal Lifecycle Neutrality_.
 - **F-2** → §22 RM-06-01 verification statement is **conditional**, not asserted.
 - **F-3** → §13 Gate Status uses the Chair's exact wording; no self-declared gate closure.
 - **F-4** → §12 defines AMS-0601 as **IT-0601 only** with one-IT-per-AMS discipline.
 - **RT-01** → no Zyppi host allowlist; carrier syntax follows the pinned GS1 standard + approved profile.
-- **RT-02 / RT-03** → §9 *AI 17 Structural Boundary* (no century, no Gregorian conversion, not auto-routed to Policy).
+- **RT-02 / RT-03** → §9 _AI 17 Structural Boundary_ (no century, no Gregorian conversion, not auto-routed to Policy).
 - **RT-04** → typed qualifiers are included in the M06 interpretation result, separate from the Registry outcome and from K1.
 - **RT-05** → uniqueness invariant preserved; enforcement mechanism deferred to Registry/schema authority.
 - **RT-06** → recognized-but-unsupported AIs preserved as explicitly typed unsupported context.
@@ -47,6 +47,7 @@ M06 establishes the constitutional plan for resolving a supported GS1 Digital Li
 M06 is a resolution and interpretation milestone. It does not redefine Identity, alter the Registry's constitutional role, create a new identity model, authorize instance-level identity, interpret lifecycle state, perform calendar semantics, or become a Runtime evidence subsystem.
 
 **Constitutional division of labor this plan preserves:**
+
 > Identity interprets (M06); M05 resolves; Policy governs; Runtime executes and evidences; Security establishes trust.
 
 ## 2. Constitutional Position
@@ -93,12 +94,12 @@ M06 shall not bypass the Registry, query Registry storage directly, or duplicate
 
 The approved support profile (ratified per G-06-02) is:
 
-| AI | Meaning | M06 role |
-|---|---|---|
-| `01` | GTIN | Primary identity-bearing identifier; source of K1 |
-| `10` | Batch/Lot | Optional typed interpretation context; not part of K1 |
+| AI   | Meaning         | M06 role                                                               |
+| ---- | --------------- | ---------------------------------------------------------------------- |
+| `01` | GTIN            | Primary identity-bearing identifier; source of K1                      |
+| `10` | Batch/Lot       | Optional typed interpretation context; not part of K1                  |
 | `17` | Expiration date | Optional typed interpretation context; structural only; not part of K1 |
-| `21` | Serial number | Optional typed interpretation context; not part of K1 |
+| `21` | Serial number   | Optional typed interpretation context; not part of K1                  |
 
 No other AI is implicitly supported. Recognized-but-unsupported AIs are handled per §10.
 
@@ -122,7 +123,7 @@ The implementation specification shall define, or provide constitutionally equiv
 - **7.4 REGISTRY_FAILURE** — K1 derived successfully but M05 cannot complete the lookup due to a Registry/storage failure. Shall not be converted to `NOT_FOUND`.
 - **7.5 INCOMPLETE_CONSTITUTIONAL_STATE** — M05 reports the identity exists but associated Registry state is incomplete/invalid. Preserved as distinct; M06 shall not reconstruct, repair, or supplement Registry state.
 
-## 8. Temporal Lifecycle Neutrality *(new per F-1)*
+## 8. Temporal Lifecycle Neutrality _(new per F-1)_
 
 M06 SHALL NOT infer, create, alter, or reinterpret identity lifecycle state.
 
@@ -130,7 +131,7 @@ After deriving the normalized K1 registry key, M06 SHALL invoke the M05 Registry
 
 M06 SHALL NOT treat a registry key as permanently bound to one identity across all time. Temporal identity continuity and lifecycle meaning remain governed by `G-06-03` and the M05 Registry contract.
 
-## 9. AI 17 Structural Boundary *(new per RT-02 / RT-03)*
+## 9. AI 17 Structural Boundary _(new per RT-02 / RT-03)_
 
 The initial M06 wedge SHALL NOT determine a Gregorian century and SHALL NOT convert AI 17 `YYMMDD` into a full calendar date.
 
@@ -138,7 +139,7 @@ M06 SHALL apply only the structural and standards-derived interpretation require
 
 M06 SHALL NOT invent a generic Gregorian interpretation for AI 17 day `00`. The structurally interpreted AI 17 value SHALL be preserved as typed interpretation context.
 
-## 10. Interpretation Result and Context Boundary *(new per RT-04 / Gemini receipt ruling)*
+## 10. Interpretation Result and Context Boundary _(new per RT-04 / Gemini receipt ruling)_
 
 M06 SHALL produce a deterministic, typed interpretation result.
 
@@ -152,7 +153,7 @@ The M06 interpretation result may be consumed by the Runtime for execution prove
 
 No permanent-retention, aggregation, or disposal rule for any M06 outcome (including `INVALID_INPUT`) is established by this plan; that belongs to Runtime/evidence governance.
 
-## 11. Carrier and Registry-Key Normalization *(new per RT-01 / RT-07)*
+## 11. Carrier and Registry-Key Normalization _(new per RT-01 / RT-07)_
 
 M06 SHALL NOT require canonicalization of the complete external GS1 Digital Link URI for Registry lookup.
 
@@ -162,7 +163,7 @@ Equivalent supported carrier representations SHALL produce the same normalized K
 
 No Zyppi-specific host allowlist, resolver-host policy, or alternative carrier grammar is established by this plan. Accepted carrier syntax is governed by the pinned GS1 standard and the approved support profile.
 
-## 12. AMS and CAW-011 Task Mapping *(new per F-4)*
+## 12. AMS and CAW-011 Task Mapping _(new per F-4)_
 
 AMS-0601 SHALL correspond exclusively to `CAW-011` task **IT-0601 — GS1 Parser**.
 
@@ -170,20 +171,20 @@ AMS-0601 SHALL NOT authorize the complete M06 milestone and SHALL NOT combine mu
 
 Subsequent implementation tasks receive separate mandates in dependency order:
 
-| AMS | CAW-011 Task |
-|---|---|
-| `AMS-0601` | IT-0601 — GS1 Parser |
-| `AMS-0602` | IT-0602 — GS1 Validator |
+| AMS        | CAW-011 Task                      |
+| ---------- | --------------------------------- |
+| `AMS-0601` | IT-0601 — GS1 Parser              |
+| `AMS-0602` | IT-0602 — GS1 Validator           |
 | `AMS-0603` | IT-0603 — Digital Link Normalizer |
-| `AMS-0604` | IT-0604 — Identity Resolver |
-| `AMS-0605` | IT-0605 — Parser Benchmarks |
-| `AMS-0606` | IT-0606 — Replay Validation |
+| `AMS-0604` | IT-0604 — Identity Resolver       |
+| `AMS-0605` | IT-0605 — Parser Benchmarks       |
+| `AMS-0606` | IT-0606 — Replay Validation       |
 
 Each mandate remains independently scoped, evidenced, verified, and closed under `CEngS-003`.
 
-## 13. Gate Status *(verbatim per F-3)*
+## 13. Gate Status _(verbatim per F-3)_
 
-- **G-06-01 — Standards Authority Verification:** CLOSED by the ratified `CRR-06-01` disposition, *subject to the evidence-package verification conditions recorded therein*.
+- **G-06-01 — Standards Authority Verification:** CLOSED by the ratified `CRR-06-01` disposition, _subject to the evidence-package verification conditions recorded therein_.
 - **G-06-02 — Support Profile Ratification:** CLOSED by the ratified governing support-profile decision.
 - **G-06-03 — Canonical Registry-Key Contract:** CLOSED by `G-06-03 Rev.3`.
 - **G-06-04 — Detailed M06 Execution Plan:** PENDING. This gate may close only through Chair ratification of the final M06-PLAN.
@@ -200,7 +201,7 @@ Unchanged from v0.1. M05 storage remains responsible for Registry records. M06 i
 
 Unchanged in principle from v0.1: independently authored tests; standards-conformance and Zyppi constitutional-behavior suites kept as separate evidence classes; external-fixture import prohibited pending rights verification; no representation of internal tests as official GS1 assets.
 
-## 17. Uniqueness Invariant — Enforcement Deferred *(per RT-05)*
+## 17. Uniqueness Invariant — Enforcement Deferred _(per RT-05)_
 
 The registry-key uniqueness invariant (one normalized K1 resolves to at most one authoritative identity within scope and time) is preserved per `G-06-03 Rev.3`.
 
@@ -222,9 +223,9 @@ Before any AMS is issued, this plan must be ratified. Each AMS (one IT each, §1
 
 Carried from v0.1, updated to reflect: K1 stated as the exact cross-milestone contract; normalization exclusively in the pure interpretation layer; M05 strict equality unchanged; qualifiers and unsupported context typed and excluded from K1; lifecycle neutrality; AI 17 structural-only handling; interpretation result immutable-by-value and not Runtime-persisted by M06; AMS↔IT one-to-one mapping; uniqueness invariant present with mechanism deferred.
 
-## 22. RM-06-01 Evidence-Package Verification — CONDITIONAL *(per F-2)*
+## 22. RM-06-01 Evidence-Package Verification — CONDITIONAL _(per F-2)_
 
-> The RM-06-01 evidence-package verification is **CONDITIONAL and not yet complete**. This plan does **not** assert that the Release 26.0 source locations, normative extracts, AI registry retrieval record (URL, UTC timestamp, HTTP status, payload reference, SHA-256), or the AI 01/10/17/21 verifications are present and conformant. A focused evidence verification against the `CRR-06-01` closure conditions must be completed and recorded before this plan may be submitted for ratification. Until then, G-06-01 remains *closed-subject-to-evidence-conditions* and G-06-04 remains PENDING.
+> The RM-06-01 evidence-package verification is **CONDITIONAL and not yet complete**. This plan does **not** assert that the Release 26.0 source locations, normative extracts, AI registry retrieval record (URL, UTC timestamp, HTTP status, payload reference, SHA-256), or the AI 01/10/17/21 verifications are present and conformant. A focused evidence verification against the `CRR-06-01` closure conditions must be completed and recorded before this plan may be submitted for ratification. Until then, G-06-01 remains _closed-subject-to-evidence-conditions_ and G-06-04 remains PENDING.
 
 ## 23. Downstream Authorization State
 
@@ -241,4 +242,3 @@ M06 implementation  NOT AUTHORIZED
 `RATIFICATION - CLOSED by Chair ratification of M06-PLAN v0.2`
 
 ---
-
