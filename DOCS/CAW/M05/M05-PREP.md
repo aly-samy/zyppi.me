@@ -9,7 +9,7 @@ This document is a formal repository reconnaissance report and planning-readines
 - **Mandate Type:** Read-only architectural reconnaissance and planning-readiness assessment.
 - **Milestone:** M05 — Registry Layer.
 - **Authority basis:** CAW-007, CAW-008, CAW-011, CAW-004, active engineering standards (including CEngS-001, CEngS-002, and CEngS-102), and the verified repository state.
-- **Status:** **AUTHORIZED FOR RECONNAISSANCE ONLY**.
+- **Status:** **RATIFIED**.
 - **Implementation Authority:** **NONE** (No code changes may be made beyond writing this report).
 
 ### 1.2 Strict Read-Only Boundaries

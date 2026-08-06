@@ -1,6 +1,6 @@
 # M05-PLAN — Registry Layer Constitutional Plan
 
-**Plan ID:** M05-PLAN **Milestone:** M05 — Registry Layer **Status:** COUNCIL PLAN — READY FOR CHAIR RATIFICATION **Authority Level:** CAW Planning Artifact **Roadmap Authority:** `DOCS/CAW/CAW-011-Build-Order.md` **Primary Implementation Targets:** `packages/contracts`, `apps/api/src/registry`, `infra/` **Predecessor:** M03 — Domain Foundation **Parallel Milestones:** M04 — Runtime Skeleton; M06 — GS1 Digital Link Resolution **Primary Downstream Consumer:** M08 — Runtime Verification Pipeline **Prepared From:** `DOCS/CAW/M05/M05-PREP.md`, ratified CAW authority, current repository baseline, and Chair-authorized planning decisions **Date:** August 3, 2026
+**Plan ID:** M05-PLAN **Milestone:** M05 — Registry Layer **Status:** RATIFIED **Authority Level:** CAW Planning Artifact **Roadmap Authority:** `DOCS/CAW/CAW-011-Build-Order.md` **Primary Implementation Targets:** `packages/contracts`, `apps/api/src/registry`, `infra/` **Predecessor:** M03 — Domain Foundation **Parallel Milestones:** M04 — Runtime Skeleton; M06 — GS1 Digital Link Resolution **Primary Downstream Consumer:** M08 — Runtime Verification Pipeline **Prepared From:** `DOCS/CAW/M05/M05-PREP.md`, ratified CAW authority, current repository baseline, and Chair-authorized planning decisions **Date:** August 3, 2026
 
 # 1. Purpose
 
