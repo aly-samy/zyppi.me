@@ -8,3 +8,10 @@ export {
   type RegistryRepository,
   type ReceiptRepository,
 } from "./registry.js";
+
+export {
+  type GS1ResolutionErrorCode,
+  type GS1ResolutionError,
+  type ResolvedGs1DigitalLink,
+  resolveGs1DigitalLink,
+} from "./gs1Resolver.js";
