@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 import postgres from "postgres";
 import { canonicalizeJcs } from "@zyppi/domain";
 import { parseAndValidateManifest } from "./seed-manifest-loader.js";
@@ -8,6 +11,10 @@ import { verifyManifestAuthority } from "./seed-authority.js";
 import { executeSeedTransaction } from "./postgres-registry-seeder.js";
 import type { SeedManifest } from "./seed-manifest.js";
 import type { SeedTrustKeyEntry } from "./seed-trust-set.js";
+
+const importUrl = (import.meta as unknown as { url: string }).url;
+const __filename = fileURLToPath(importUrl);
+const __dirname = path.dirname(__filename);
 
 // Helper to sign a mock envelope dynamically at test runtime
 function createSignedTestManifest(
@@ -62,6 +69,17 @@ describe("Registry Seed System Mechanics — AMS-0504", () => {
       password: "zyppi_test",
       onnotice: () => {},
     });
+
+    // Run migration script to establish the required clean schema state
+    await sql`DROP SCHEMA public CASCADE;`;
+    await sql`CREATE SCHEMA public;`;
+
+    const migrationPath = path.resolve(
+      __dirname,
+      "../../../../../infra/migrations/001_initial_registry_schema.sql",
+    );
+    const sqlContent = fs.readFileSync(migrationPath, "utf8");
+    await sql.unsafe(sqlContent);
 
     // Generate ephemeral Ed25519 keypair for tests
     const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");

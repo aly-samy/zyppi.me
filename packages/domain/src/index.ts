@@ -566,6 +566,16 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
 }
 
 export type {
+  Gs1DigitalLinkComponentSource,
+  ParsedGs1DigitalLinkComponent,
+  ParsedGs1DigitalLink,
+  GS1ParseErrorCode,
+  GS1ParseError,
+} from "./gs1Parser.js";
+
+export { parseGs1DigitalLink } from "./gs1Parser.js";
+
+export type {
   RegistryRecord,
   RegistryRecordType,
   RegistryRecordMap,
