@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  parseGs1DigitalLink,
-  type ParsedGs1DigitalLink,
-  type GS1ParseError,
-} from "./index.js";
+import { parseGs1DigitalLink } from "./index.js";
 
 describe("GS1 Digital Link Parser (IT-0601)", () => {
   describe("1. Successful Structural Parsing", () => {
@@ -172,13 +168,19 @@ describe("GS1 Digital Link Parser (IT-0601)", () => {
 
         // Attempting to modify should throw in strict mode
         expect(() => {
-          (value as any).scheme = "ftp";
+          (value as unknown as Record<string, unknown>).scheme = "ftp";
         }).toThrow();
         expect(() => {
-          (value.applicationIdentifiers as any)[0] = {} as any;
+          (value.applicationIdentifiers as unknown as unknown[])[0] =
+            {} as unknown;
         }).toThrow();
         expect(() => {
-          (value.applicationIdentifiers[0] as any).value = "newVal";
+          (
+            value.applicationIdentifiers[0] as unknown as Record<
+              string,
+              unknown
+            >
+          ).value = "newVal";
         }).toThrow();
       }
     });
@@ -303,7 +305,9 @@ describe("GS1 Digital Link Parser (IT-0601)", () => {
         // Value remains unpadded
         expect(result.value.applicationIdentifiers[0].value).toBe("123456");
         // No K1 derived property is present in the output
-        expect((result.value as any).k1).toBeUndefined();
+        expect(
+          (result.value as unknown as Record<string, unknown>).k1,
+        ).toBeUndefined();
       }
     });
 
@@ -424,10 +428,10 @@ describe("GS1 Digital Link Parser (IT-0601)", () => {
 
     it("does not throw raw exceptions across the public parser boundary", () => {
       const badInputs = [
-        null as any,
-        undefined as any,
-        123 as any,
-        {},
+        null as unknown as string,
+        undefined as unknown as string,
+        123 as unknown as string,
+        {} as unknown as string,
         "",
         "https://",
         "https://example.com/%",

@@ -42,7 +42,7 @@ function isParseableAiCode(ai: string): boolean {
 function safeDecode(val: string): ValidationResult<string, GS1ParseError> {
   try {
     return { ok: true, value: decodeURIComponent(val) };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
       error: {
@@ -76,7 +76,7 @@ export function parseGs1DigitalLink(
   let url: URL;
   try {
     url = new URL(input);
-  } catch (err) {
+  } catch {
     // If it starts with http:// or https:// but fails URL parsing, it has a malformed carrier structure
     const isHttpOrHttps = /^https?:\/\//i.test(input);
     if (isHttpOrHttps) {
