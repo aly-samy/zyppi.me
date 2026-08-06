@@ -89,6 +89,9 @@ importers:
 
   packages/testing:
     devDependencies:
+      "@zyppi/contracts":
+        specifier: workspace:*
+        version: link:../contracts
       "@zyppi/domain":
         specifier: workspace:*
         version: link:../domain
