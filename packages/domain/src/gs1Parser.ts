@@ -67,7 +67,8 @@ export function parseGs1DigitalLink(
       ok: false,
       error: {
         code: "UNSUPPORTED_CARRIER_FORM",
-        message: "Input must be a non-empty string representing an absolute HTTP(S) URI.",
+        message:
+          "Input must be a non-empty string representing an absolute HTTP(S) URI.",
       },
     };
   }
@@ -125,7 +126,8 @@ export function parseGs1DigitalLink(
       ok: false,
       error: {
         code: "MISSING_REQUIRED_STRUCTURE",
-        message: "The URI path contains no parseable GS1 Application Identifier structure.",
+        message:
+          "The URI path contains no parseable GS1 Application Identifier structure.",
       },
     };
   }
@@ -136,7 +138,8 @@ export function parseGs1DigitalLink(
       ok: false,
       error: {
         code: "MISSING_REQUIRED_STRUCTURE",
-        message: "The URI path does not begin with a parseable GS1 Application Identifier structure.",
+        message:
+          "The URI path does not begin with a parseable GS1 Application Identifier structure.",
       },
     };
   }

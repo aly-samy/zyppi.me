@@ -122,7 +122,9 @@ describe("GS1 Digital Link Parser (IT-0601)", () => {
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value.applicationIdentifiers[0].value).toBe("00012345678905");
+        expect(result.value.applicationIdentifiers[0].value).toBe(
+          "00012345678905",
+        );
       }
     });
 
@@ -197,7 +199,9 @@ describe("GS1 Digital Link Parser (IT-0601)", () => {
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value.applicationIdentifiers[0].value).toBe("09506000134352");
+        expect(result.value.applicationIdentifiers[0].value).toBe(
+          "09506000134352",
+        );
         expect(result.value.applicationIdentifiers[1].value).toBe("SER 123");
         expect(result.value.applicationIdentifiers[2].value).toBe("LOT/456");
       }
@@ -261,7 +265,9 @@ describe("GS1 Digital Link Parser (IT-0601)", () => {
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        expect(result.value.applicationIdentifiers[0].value).toBe("09506000134359");
+        expect(result.value.applicationIdentifiers[0].value).toBe(
+          "09506000134359",
+        );
       }
     });
 
