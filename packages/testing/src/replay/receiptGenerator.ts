@@ -47,7 +47,7 @@ export function generateAndSaveReceipt(
   }
 
   const targetPath = path.join(targetDir, "latest.json");
-  fs.writeFileSync(targetPath, JSON.stringify(receipt, null, 2), "utf8");
+  fs.writeFileSync(targetPath, JSON.stringify(receipt, null, 2) + "\n", "utf8");
 
   return receipt;
 }
