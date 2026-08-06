@@ -1,0 +1,63 @@
+{
+  "replayVersion": "1.0.0",
+  "corpusVersion": "1.0.0",
+  "corpusHash": "be349cf754182eb607dcb71a15dd3082f378c46e87aff2b4d401ca62bfc9d5a9",
+  "registrySnapshotVersion": "1.0.0",
+  "registrySnapshotHash": "43a77dd08ce3617b65711eba04a978d264ec83ee765c359f83bf283e06701514",
+  "gitCommitSha": "3650701d33ae1d5f8a8cd7005e91046a24efec84",
+  "nodeVersion": "v22.22.1",
+  "digestBefore": "6fa8b0a1d81ab223402652bcc8730c88118a5c3bd05f95a818af009b8a3c6f5d",
+  "digestAfter": "6fa8b0a1d81ab223402652bcc8730c88118a5c3bd05f95a818af009b8a3c6f5d",
+  "replayStatus": "IDENTICAL",
+  "diagnostics": [
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-01-SUCCESS matches expected output perfectly.",
+      "caseId": "CASE-01-SUCCESS"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-02-QUALIFIERS matches expected output perfectly.",
+      "caseId": "CASE-02-QUALIFIERS"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-03-UNSUPPORTED-AI matches expected output perfectly.",
+      "caseId": "CASE-03-UNSUPPORTED-AI"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-04-NOT-FOUND matches expected output perfectly.",
+      "caseId": "CASE-04-NOT-FOUND"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-05-PARSE-FAILURE matches expected output perfectly.",
+      "caseId": "CASE-05-PARSE-FAILURE"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-06-VALIDATION-FAILURE matches expected output perfectly.",
+      "caseId": "CASE-06-VALIDATION-FAILURE"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-07-REGISTRY-FAILURE matches expected output perfectly.",
+      "caseId": "CASE-07-REGISTRY-FAILURE"
+    },
+    {
+      "severity": "INFO",
+      "code": "CASE_SUCCESS",
+      "message": "Case CASE-08-INCOMPLETE-STATE matches expected output perfectly.",
+      "caseId": "CASE-08-INCOMPLETE-STATE"
+    }
+  ],
+  "executionTimestamp": "2026-08-06T10:12:28.249Z"
+}

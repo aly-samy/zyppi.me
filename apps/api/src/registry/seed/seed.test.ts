@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 import postgres from "postgres";
 import { canonicalizeJcs } from "@zyppi/domain";
+
+const importUrl = (import.meta as unknown as { url: string }).url;
+const __filename = fileURLToPath(importUrl);
+const __dirname = path.dirname(__filename);
 import { parseAndValidateManifest } from "./seed-manifest-loader.js";
 import { verifyRecordIntegrity } from "./seed-integrity.js";
 import { verifyManifestAuthority } from "./seed-authority.js";
@@ -62,6 +69,17 @@ describe("Registry Seed System Mechanics — AMS-0504", () => {
       password: "zyppi_test",
       onnotice: () => {},
     });
+
+    // Recreate schema to ensure a completely clean slate before this suite
+    await sql`DROP SCHEMA public CASCADE;`;
+    await sql`CREATE SCHEMA public;`;
+
+    const migrationPath = path.resolve(
+      __dirname,
+      "../../../../../infra/migrations/001_initial_registry_schema.sql",
+    );
+    const sqlContent = fs.readFileSync(migrationPath, "utf8");
+    await sql.unsafe(sqlContent);
 
     // Generate ephemeral Ed25519 keypair for tests
     const { publicKey, privateKey } = crypto.generateKeyPairSync("ed25519");

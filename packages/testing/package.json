@@ -18,6 +18,7 @@
   "dependencies": {},
   "peerDependencies": {},
   "devDependencies": {
-    "@zyppi/domain": "workspace:*"
+    "@zyppi/domain": "workspace:*",
+    "@zyppi/contracts": "workspace:*"
   }
 }
