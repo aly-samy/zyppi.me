@@ -1,0 +1,18 @@
+{
+  "benchmarkVersion": "1.0.0",
+  "corpusVersion": "1.0.0",
+  "expectedHashes": {
+    "canonical": "d7749367c11912eb30f02910caea2332a9fe929418a2560c1a6368b713c6da47",
+    "synthetic": "de772c661e4df7778277224b19c611a153d2854185bb0b22069a65156810223a"
+  },
+  "settings": {
+    "warmupIterations": 1000,
+    "benchmarkIterations": 5000,
+    "pathologicalIterations": 100,
+    "exposeGc": true
+  },
+  "thresholds": {
+    "maxPathologicalExecutionDurationMs": 25.0,
+    "maxRetainedHeapGrowthBytes": 5242880
+  }
+}

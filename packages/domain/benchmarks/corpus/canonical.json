@@ -1,0 +1,16 @@
+[
+  "https://id.gs1.org/01/09506000134352",
+  "https://id.gs1.org/01/09506000134352?10=LOT123",
+  "https://id.gs1.org/01/09506000134352/17/260831",
+  "https://id.gs1.org/01/09506000134352/21/SER123",
+  "https://id.gs1.org/01/09506000134352/21/SER123?10=LOT123&17=260831",
+  "https://id.gs1.org/01/00012345678905",
+  "https://id.gs1.org/01/09506000134352/21/123456",
+  "https://id.gs1.org/01/09506000134352/21/SER123?17=260831&10=LOT123",
+  "https://id.gs1.org/01/09506%30%30%30134352/21/SER%20123?10=LOT%2F456",
+  "https://id.gs1.org/01/09506000134352?10=&17",
+  "https://id.gs1.org/01/09506000134352?linkType=all&10=LOT123&customParam=value",
+  "https://my-custom-host.com/01/09506000134352/21/SER123",
+  "https://example.com/01/09501101234567",
+  "https://example.com/01/00012345678905/17/251231/10/ABCD"
+]

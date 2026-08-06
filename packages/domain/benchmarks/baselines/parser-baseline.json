@@ -1,0 +1,13 @@
+{
+  "benchmarkVersion": "1.0.0",
+  "corpusVersion": "1.0.0",
+  "metrics": {
+    "throughputOpsPerSec": 10000.0,
+    "averageLatencyMs": 0.1,
+    "medianLatencyMs": 0.1,
+    "p95LatencyMs": 0.2,
+    "p99LatencyMs": 0.5,
+    "pathologicalExecutionDurationMs": 25.0,
+    "retainedHeapGrowthBytes": 1048576
+  }
+}

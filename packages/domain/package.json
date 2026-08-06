@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "boundary": "node ../../tools/verify-package-boundary.mjs --package=packages/domain"
+    "boundary": "node ../../tools/verify-package-boundary.mjs --package=packages/domain",
+    "benchmark:parser": "tsc -p benchmarks/tsconfig.json && node --expose-gc benchmarks/dist/parserBenchmarkRunner.js"
   },
   "dependencies": {},
   "peerDependencies": {}
