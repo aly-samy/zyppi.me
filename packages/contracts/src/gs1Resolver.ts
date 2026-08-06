@@ -1,7 +1,4 @@
-import type {
-  ValidationResult,
-  NormalizedGs1DigitalLink,
-} from "@zyppi/domain";
+import type { ValidationResult, NormalizedGs1DigitalLink } from "@zyppi/domain";
 import {
   createValidatedCanonicalIdentifier,
   type RetrievedRegistryState,
@@ -9,9 +6,7 @@ import {
 } from "./registry.js";
 
 export type GS1ResolutionErrorCode =
-  | "INVALID_NORMALIZED_INPUT"
-  | "REFERENT_NOT_FOUND"
-  | "REGISTRY_FAILURE";
+  "INVALID_NORMALIZED_INPUT" | "REFERENT_NOT_FOUND" | "REGISTRY_FAILURE";
 
 export interface GS1ResolutionError {
   readonly code: GS1ResolutionErrorCode;
