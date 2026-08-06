@@ -31,7 +31,10 @@ function isRegistryStateIncomplete(state: unknown): boolean {
     const relationships = stateObj.relationships;
     if (!Array.isArray(relationships)) return true;
     const hasReferent = relationships.some(
-      (r) => r && typeof r === "object" && (r as Record<string, unknown>).referentId === identity.referentId,
+      (r) =>
+        r &&
+        typeof r === "object" &&
+        (r as Record<string, unknown>).referentId === identity.referentId,
     );
     if (!hasReferent) {
       return true;
