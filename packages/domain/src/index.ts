@@ -576,6 +576,14 @@ export type {
 export { parseGs1DigitalLink } from "./gs1Parser.js";
 
 export type {
+  GS1ValidationErrorCode,
+  GS1ValidationError,
+  ValidatedGs1DigitalLink,
+} from "./gs1Validator.js";
+
+export { validateGs1DigitalLink } from "./gs1Validator.js";
+
+export type {
   RegistryRecord,
   RegistryRecordType,
   RegistryRecordMap,
