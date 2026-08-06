@@ -205,7 +205,9 @@ describe("normalizeGs1DigitalLink — AMS-0603", () => {
 
   describe("Defensive Contract Assertions", () => {
     it("should return GS1NormalizationError if validated object is null/undefined", () => {
-      const result = normalizeGs1DigitalLink(null as unknown as ValidatedGs1DigitalLink);
+      const result = normalizeGs1DigitalLink(
+        null as unknown as ValidatedGs1DigitalLink,
+      );
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("INVALID_VALIDATED_INPUT");
@@ -401,9 +403,13 @@ describe("normalizeGs1DigitalLink — AMS-0603", () => {
 
       if (res1.ok && res2.ok) {
         expect(res1.value.k1).toBe(res2.value.k1);
-        expect(res1.value.supportedQualifiers).toEqual(res2.value.supportedQualifiers);
+        expect(res1.value.supportedQualifiers).toEqual(
+          res2.value.supportedQualifiers,
+        );
         // They differ only in unsupportedContext
-        expect(res1.value.unsupportedContext).not.toEqual(res2.value.unsupportedContext);
+        expect(res1.value.unsupportedContext).not.toEqual(
+          res2.value.unsupportedContext,
+        );
       }
     });
   });
