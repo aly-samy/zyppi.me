@@ -584,6 +584,14 @@ export type {
 export { validateGs1DigitalLink } from "./gs1Validator.js";
 
 export type {
+  GS1NormalizationErrorCode,
+  GS1NormalizationError,
+  NormalizedGs1DigitalLink,
+} from "./gs1Normalizer.js";
+
+export { normalizeGs1DigitalLink } from "./gs1Normalizer.js";
+
+export type {
   RegistryRecord,
   RegistryRecordType,
   RegistryRecordMap,
