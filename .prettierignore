@@ -3,3 +3,4 @@ node_modules/
 build/
 coverage/
 *.tsbuildinfo
+packages/domain/benchmarks/receipts/latest.json
