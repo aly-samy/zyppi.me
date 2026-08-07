@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { FrozenRegistryRepository } from "@zyppi/testing";
-import { serializeEvidenceBundle } from "@zyppi/domain";
+import { serializeEvidenceBundle, type EvidenceRecord } from "@zyppi/domain";
 import type { RetrievedRegistryState, RegistryResult } from "@zyppi/contracts";
 import { RegistryEvidenceResolver } from "./evidenceResolver.js";
 
@@ -153,7 +153,9 @@ describe("Evidence Reference Resolver (AMS-0702 / IT-0702)", () => {
     it("should return RESOLVER_FAILURE if the underlying repository lookup fails", async () => {
       const failingRepo = {
         lookup: async () => ({ ok: true as const, value: null }),
-        lookupEvidenceByIds: async (): Promise<RegistryResult<any>> => {
+        lookupEvidenceByIds: async (): Promise<
+          RegistryResult<readonly EvidenceRecord[]>
+        > => {
           return {
             ok: false as const,
             error: { kind: "InfrastructureUnavailable" },
@@ -174,12 +176,14 @@ describe("Evidence Reference Resolver (AMS-0702 / IT-0702)", () => {
     it("should return RESOLVER_FAILURE if repository throws an unexpected exception", async () => {
       const explodingRepo = {
         lookup: async () => ({ ok: true as const, value: null }),
-        lookupEvidenceByIds: async (): Promise<any> => {
+        lookupEvidenceByIds: async (): Promise<readonly EvidenceRecord[]> => {
           throw new Error("Unexpected postgres connection crash");
         },
       };
 
-      const resolver = new RegistryEvidenceResolver(explodingRepo);
+      const resolver = new RegistryEvidenceResolver(
+        explodingRepo as unknown as RegistryRepository,
+      );
       const result = await resolver.resolve(["ev-1"]);
 
       expect(result.ok).toBe(false);
@@ -195,13 +199,13 @@ describe("Evidence Reference Resolver (AMS-0702 / IT-0702)", () => {
       const repo = new FrozenRegistryRepository(TEST_SNAPSHOT);
       const resolver = new RegistryEvidenceResolver(repo);
 
-      const res1 = await resolver.resolve(null as any);
+      const res1 = await resolver.resolve(null as unknown as readonly string[]);
       expect(res1.ok).toBe(false);
       if (!res1.ok) {
         expect(res1.error.code).toBe("RESOLVER_FAILURE");
       }
 
-      const res2 = await resolver.resolve(["ev-1", 123 as any]);
+      const res2 = await resolver.resolve(["ev-1", 123 as unknown as string]);
       expect(res2.ok).toBe(false);
       if (!res2.ok) {
         expect(res2.error.code).toBe("RESOLVER_FAILURE");

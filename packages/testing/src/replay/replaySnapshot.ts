@@ -161,14 +161,12 @@ export class FrozenRegistryRepository implements RegistryRepository {
   ): Promise<RegistryResult<readonly EvidenceRecord[]>> {
     const results: EvidenceRecord[] = [];
     for (const id of evidenceIds) {
-      let found = false;
       for (const state of Object.values(this.snapshot)) {
         const record = state.evidenceReferences.find(
           (r) => r.evidenceId === id,
         );
         if (record) {
           results.push(record);
-          found = true;
           break;
         }
       }
