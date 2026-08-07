@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { FrozenRegistryRepository } from "@zyppi/testing";
 import { serializeEvidenceBundle, type EvidenceRecord } from "@zyppi/domain";
-import type { RetrievedRegistryState, RegistryResult } from "@zyppi/contracts";
+import type {
+  RetrievedRegistryState,
+  RegistryResult,
+  RegistryRepository,
+} from "@zyppi/contracts";
 import { RegistryEvidenceResolver } from "./evidenceResolver.js";
 
 // Setup helper snapshots with valid and invalid evidence metadata for testing
