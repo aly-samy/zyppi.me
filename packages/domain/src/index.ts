@@ -591,6 +591,8 @@ export type {
 
 export { normalizeGs1DigitalLink } from "./gs1Normalizer.js";
 
+import { canonicalizeJcs } from "./seed-helpers.js";
+
 export type {
   RegistryRecord,
   RegistryRecordType,
@@ -1437,8 +1439,156 @@ export interface ActiveConstitutionalView {
   readonly applicablePolicies: readonly PolicyRecord[];
 }
 
+export type EvidenceBundleValidationErrorCode =
+  | "INVALID_BUNDLE"
+  | "INVALID_SCHEMA_VERSION"
+  | "INVALID_EVIDENCE_RECORDS"
+  | "INVALID_EVIDENCE_RECORD"
+  | "DUPLICATE_EVIDENCE_REFERENCE";
+
+export interface EvidenceBundleValidationError {
+  readonly code: EvidenceBundleValidationErrorCode;
+  readonly field: keyof EvidenceBundle | "bundle";
+  readonly message: string;
+}
+
 export interface EvidenceBundle {
+  readonly schemaVersion: string;
   readonly evidenceRecords: readonly EvidenceRecord[];
+}
+
+/**
+ * Validates raw input to produce a typed EvidenceBundle or a ValidationResult error.
+ * Does not throw exceptions, purely deterministic.
+ */
+export function validateEvidenceBundle(
+  input: unknown,
+): ValidationResult<EvidenceBundle, EvidenceBundleValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_BUNDLE",
+        field: "bundle",
+        message: "Evidence bundle must be a non-null object",
+      },
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  // 1. schemaVersion validation: must exist, be string, and equal "1.0"
+  const schemaVersion = raw.schemaVersion;
+  if (schemaVersion === undefined || schemaVersion === null) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SCHEMA_VERSION",
+        field: "schemaVersion",
+        message: "schemaVersion is missing",
+      },
+    };
+  }
+  if (typeof schemaVersion !== "string") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SCHEMA_VERSION",
+        field: "schemaVersion",
+        message: "schemaVersion must be a string",
+      },
+    };
+  }
+  if (schemaVersion !== "1.0") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_SCHEMA_VERSION",
+        field: "schemaVersion",
+        message: "Unsupported schemaVersion. Only '1.0' is supported",
+      },
+    };
+  }
+
+  // 2. evidenceRecords validation: must be an array
+  const rawRecords = raw.evidenceRecords;
+  if (!Array.isArray(rawRecords)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EVIDENCE_RECORDS",
+        field: "evidenceRecords",
+        message: "evidenceRecords must be an array",
+      },
+    };
+  }
+
+  const evidenceRecords: EvidenceRecord[] = [];
+  const seenIds = new Set<string>();
+
+  for (let i = 0; i < rawRecords.length; i++) {
+    const recordInput = rawRecords[i];
+    const res = validateEvidenceRecord(recordInput);
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_EVIDENCE_RECORD",
+          field: "evidenceRecords",
+          message: `Invalid EvidenceRecord at index ${i}: ${res.error.message}`,
+        },
+      };
+    }
+
+    const rec = res.value;
+    if (seenIds.has(rec.evidenceId)) {
+      return {
+        ok: false,
+        error: {
+          code: "DUPLICATE_EVIDENCE_REFERENCE",
+          field: "evidenceRecords",
+          message: `Duplicate evidence reference detected: ${rec.evidenceId}`,
+        },
+      };
+    }
+    seenIds.add(rec.evidenceId);
+    evidenceRecords.push(rec);
+  }
+
+  const bundle: EvidenceBundle = {
+    schemaVersion,
+    evidenceRecords,
+  };
+
+  return {
+    ok: true,
+    value: bundle,
+  };
+}
+
+/**
+ * Canonically serializes an EvidenceBundle deterministically.
+ * Evidence records are sorted by evidenceId in ascending lexical order.
+ * Follows RFC 8785 JSON Canonicalization Scheme (JCS).
+ */
+export function serializeEvidenceBundle(bundle: EvidenceBundle): string {
+  // Sort evidence records by evidenceId in ascending lexical order
+  const sortedRecords = [...bundle.evidenceRecords].sort((a, b) => {
+    if (a.evidenceId < b.evidenceId) return -1;
+    if (a.evidenceId > b.evidenceId) return 1;
+    return 0;
+  });
+
+  // Reconstruct bundle object to ensure sorted records
+  // JCS handles alphabetical sorting of top-level keys
+  const orderedBundle = {
+    evidenceRecords: sortedRecords.map((r) =>
+      JSON.parse(serializeEvidenceRecord(r)),
+    ),
+    schemaVersion: bundle.schemaVersion,
+  };
+
+  return canonicalizeJcs(orderedBundle);
 }
 
 export interface PolicyContext {
@@ -1845,48 +1995,18 @@ export function validateExecutionRequest(
   };
 
   // 4. evidenceBundle validation
-  const ebRaw = raw.evidenceBundle;
-  if (!ebRaw || typeof ebRaw !== "object" || Array.isArray(ebRaw)) {
+  const ebRes = validateEvidenceBundle(raw.evidenceBundle);
+  if (!ebRes.ok) {
     return {
       ok: false,
       error: {
         code: "INVALID_EVIDENCE_BUNDLE",
         field: "evidenceBundle",
-        message: "evidenceBundle must be a non-null object",
+        message: `Invalid evidenceBundle: ${ebRes.error.message}`,
       },
     };
   }
-
-  const ebRawObj = ebRaw as Record<string, unknown>;
-  if (!Array.isArray(ebRawObj.evidenceRecords)) {
-    return {
-      ok: false,
-      error: {
-        code: "INVALID_EVIDENCE_BUNDLE",
-        field: "evidenceBundle",
-        message: "evidenceRecords in evidenceBundle must be an array",
-      },
-    };
-  }
-  const evidenceRecords: EvidenceRecord[] = [];
-  for (const r of ebRawObj.evidenceRecords) {
-    const rRes = validateEvidenceRecord(r);
-    if (!rRes.ok) {
-      return {
-        ok: false,
-        error: {
-          code: "INVALID_EVIDENCE_BUNDLE",
-          field: "evidenceBundle",
-          message: `Invalid evidenceRecord in evidenceBundle: ${rRes.error.message}`,
-        },
-      };
-    }
-    evidenceRecords.push(rRes.value);
-  }
-
-  const evidenceBundle: EvidenceBundle = {
-    evidenceRecords,
-  };
+  const evidenceBundle = ebRes.value;
 
   // 5. policyContext validation
   const pcRaw = raw.policyContext;
@@ -1992,9 +2112,7 @@ export function serializeExecutionRequest(request: ExecutionRequest): string {
   };
 
   const eb = request.evidenceBundle;
-  const orderedEvidenceBundle = {
-    evidenceRecords: eb.evidenceRecords.map(getOrderedEvidence),
-  };
+  const orderedEvidenceBundle = JSON.parse(serializeEvidenceBundle(eb));
 
   const pc = request.policyContext;
   const orderedPolicyContext = {
