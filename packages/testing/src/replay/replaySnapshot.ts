@@ -3,6 +3,7 @@ import type {
   RetrievedRegistryState,
   RegistryResult,
 } from "@zyppi/contracts";
+import type { EvidenceRecord } from "@zyppi/domain";
 import type { ReplayRegistrySnapshot } from "./replayTypes.js";
 
 // Frozen mock data for our deterministic registry snapshot
@@ -153,5 +154,23 @@ export class FrozenRegistryRepository implements RegistryRepository {
       return { ok: true, value: matched };
     }
     return { ok: true, value: null };
+  }
+
+  async lookupEvidenceByIds(
+    evidenceIds: readonly string[],
+  ): Promise<RegistryResult<readonly EvidenceRecord[]>> {
+    const results: EvidenceRecord[] = [];
+    for (const id of evidenceIds) {
+      let found = false;
+      for (const state of Object.values(this.snapshot)) {
+        const record = state.evidenceReferences.find((r) => r.evidenceId === id);
+        if (record) {
+          results.push(record);
+          found = true;
+          break;
+        }
+      }
+    }
+    return { ok: true, value: results };
   }
 }

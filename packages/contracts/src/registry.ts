@@ -65,6 +65,10 @@ export interface RegistryRepository {
   lookup(
     identifier: ValidatedCanonicalIdentifier,
   ): Promise<RegistryResult<RetrievedRegistryState | null>>;
+
+  lookupEvidenceByIds(
+    evidenceIds: readonly string[],
+  ): Promise<RegistryResult<readonly EvidenceRecord[]>>;
 }
 
 export interface ReceiptRepository {

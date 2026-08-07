@@ -384,4 +384,55 @@ describe("PostgreSQL Registry Adapter Integration Tests — IT-0503", () => {
       }
     });
   });
+
+  describe("PostgresRegistryRepository lookupEvidenceByIds Integration", () => {
+    it("should successfully batch-retrieve multiple EvidenceRecords by ID", async () => {
+      const identityId = "22222222-2222-2222-2222-222222222222";
+      const evidenceId1 = "33333333-3333-3333-3333-333333333333";
+      const evidenceId2 = "33333333-3333-3333-3333-444444444444";
+
+      // Insert parent identity
+      await sql`
+        INSERT INTO identities (id, identity_type, canonical_reference, referent_id, status, created_at, updated_at)
+        VALUES (${identityId}, 'gtin', '00860000000123', NULL, 'active', '2026-07-28T12:00:00Z', '2026-07-28T12:00:00Z');
+      `;
+
+      // Insert evidence records
+      await sql`
+        INSERT INTO evidence (id, identity_id, evidence_type, hash, storage_ref, retrieved_at)
+        VALUES
+          (${evidenceId1}, ${identityId}, 'cert1', 'sha256-111', 'storage-1', '2026-07-28T14:30:00Z'),
+          (${evidenceId2}, ${identityId}, 'cert2', 'sha256-222', 'storage-2', '2026-07-28T14:30:00Z');
+      `;
+
+      const repo = new PostgresRegistryRepository(sql);
+      const res = await repo.lookupEvidenceByIds([evidenceId1, evidenceId2]);
+
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.value).toHaveLength(2);
+        const map = new Map(res.value.map(r => [r.evidenceId, r]));
+        expect(map.get(evidenceId1)).toBeDefined();
+        expect(map.get(evidenceId2)).toBeDefined();
+        expect(map.get(evidenceId1)!.evidenceType).toBe("cert1");
+        expect(map.get(evidenceId2)!.evidenceType).toBe("cert2");
+      }
+    });
+
+    it("should gracefully handle empty input or invalid UUID formats and return empty list", async () => {
+      const repo = new PostgresRegistryRepository(sql);
+
+      const resEmpty = await repo.lookupEvidenceByIds([]);
+      expect(resEmpty.ok).toBe(true);
+      if (resEmpty.ok) {
+        expect(resEmpty.value).toEqual([]);
+      }
+
+      const resInvalid = await repo.lookupEvidenceByIds(["not-a-uuid", "another-bad-one"]);
+      expect(resInvalid.ok).toBe(true);
+      if (resInvalid.ok) {
+        expect(resInvalid.value).toEqual([]);
+      }
+    });
+  });
 });

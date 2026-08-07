@@ -250,6 +250,9 @@ describe("Registry Repository Contracts — IT-0502", () => {
           }
           return { ok: true, value: null };
         },
+        lookupEvidenceByIds: async () => {
+          return { ok: true, value: [] };
+        },
       };
 
       const idResult = createValidatedCanonicalIdentifier(

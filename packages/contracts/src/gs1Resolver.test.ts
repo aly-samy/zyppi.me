@@ -34,6 +34,7 @@ const createMockRepository = (
 ): RegistryRepository => {
   return {
     lookup: vi.fn(lookupFn),
+    lookupEvidenceByIds: vi.fn(async () => ({ ok: true as const, value: [] })),
   };
 };
 
