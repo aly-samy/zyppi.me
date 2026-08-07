@@ -11,5 +11,8 @@
     "@zyppi/domain": "workspace:*",
     "postgres": "^3.4.9"
   },
+  "devDependencies": {
+    "@zyppi/testing": "workspace:*"
+  },
   "peerDependencies": {}
 }

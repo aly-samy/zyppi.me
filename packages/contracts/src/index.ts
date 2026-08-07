@@ -15,3 +15,9 @@ export {
   type ResolvedGs1DigitalLink,
   resolveGs1DigitalLink,
 } from "./gs1Resolver.js";
+
+export {
+  type EvidenceResolutionErrorCode,
+  type EvidenceResolutionError,
+  type EvidenceReferenceResolver,
+} from "./evidenceResolver.js";

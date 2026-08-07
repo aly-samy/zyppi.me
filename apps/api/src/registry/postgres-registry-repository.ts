@@ -5,6 +5,7 @@ import type {
   RetrievedRegistryState,
   ValidatedCanonicalIdentifier,
 } from "@zyppi/contracts";
+import type { EvidenceRecord } from "@zyppi/domain";
 import { translateError } from "./errors.js";
 import {
   mapIdentityRow,
@@ -139,6 +140,42 @@ export class PostgresRegistryRepository implements RegistryRepository {
         };
 
         return state;
+      });
+
+      return { ok: true, value: result };
+    } catch (err) {
+      return { ok: false, error: translateError(err) };
+    }
+  }
+
+  async lookupEvidenceByIds(
+    evidenceIds: readonly string[],
+  ): Promise<RegistryResult<readonly EvidenceRecord[]>> {
+    try {
+      if (evidenceIds.length === 0) {
+        return { ok: true, value: [] };
+      }
+
+      // Filter to only include valid UUID strings defensively
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const validIds = evidenceIds.filter((id) => uuidRegex.test(id));
+
+      if (validIds.length === 0) {
+        return { ok: true, value: [] };
+      }
+
+      const result = await this.sql.begin(async (tx) => {
+        // Enforce explicit read-only repeatable read snapshot consistency
+        await tx`SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY`;
+
+        const evidenceRows = await tx<EvidenceRow[]>`
+          SELECT id, identity_id, evidence_type, hash, storage_ref, retrieved_at, created_at
+          FROM evidence
+          WHERE id = ANY(${validIds})
+        `;
+
+        return evidenceRows.map(mapEvidenceRow);
       });
 
       return { ok: true, value: result };

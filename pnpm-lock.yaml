@@ -52,6 +52,10 @@ importers:
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
+    devDependencies:
+      "@zyppi/testing":
+        specifier: workspace:*
+        version: link:../../packages/testing
 
   apps/web: {}
 
