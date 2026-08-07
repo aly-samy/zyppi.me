@@ -2,12 +2,12 @@
 
 ## 1. Executive Summary
 
-This report presents a strictly factual repository readiness assessment performed on the Zyppi repository as of August 7, 2026. The mandate of this investigation (Mandate ID: `M07-PREP-INV-001`) is strictly read-only and evidentiary. No evaluation, design recommendations, compliance grading, or constitutional interpretations have been performed. All findings are derived directly from observable file paths, package structures, code comments, database definitions, and test runs.
+This report presents a strictly factual repository assessment performed on the Zyppi repository as of August 7, 2026. The mandate of this investigation (Mandate ID: `M07-PREP-INV-001`) is strictly read-only and evidentiary. No evaluation, design recommendations, compliance grading, or constitutional interpretations are performed. All findings are derived directly from observable file paths, package structures, code comments, database definitions, and test runs.
 
 ### Core Metrics Summary
 
 - **Verification Baseline Run**: `pnpm exec vitest run --fileParallelism=false` succeeded with **27/27 test files passed** and **564/564 individual tests passed**.
-- **Evidence Domain State**: The baseline representation of an `EvidenceRecord` metadata-only model exists in the domain library (`packages/domain`). However, the components required to resolve, fetch, verify, or ingest raw evidence payloads are absent.
+- **Evidence Domain State**: The repository contains an `EvidenceRecord` metadata-only model representation inside `@zyppi/domain`. No implementation was observed in the repository for evidence reference resolution, and no object storage client exists.
 - **Repository Health**: The repository builds cleanly with `pnpm build` (ESM target), and custom validation suites (such as the Static Runtime Purity Validator) run cleanly. The dependency graph validator fails due to a self-import cycle in `packages/domain` benchmark files.
 
 ---
@@ -34,7 +34,7 @@ The Zyppi workspace is configured as a private pnpm monorepo containing nine wor
 
 ### Section A — Evidence Domain
 
-The Evidence domain's core representation is restricted to a **metadata-only** record. It does not handle actual binary payloads or files.
+The Evidence domain's core representation is restricted to a metadata-only record. It does not handle actual binary payloads or files.
 
 - **File Location**:
   - Source: `packages/domain/src/index.ts`
@@ -67,7 +67,7 @@ The Evidence domain's core representation is restricted to a **metadata-only** r
 
 ### Section B — Evidence Bundle Model
 
-The codebase contains a structural model for the `EvidenceBundle`, but lacks any runtime resolution or processing capabilities.
+The codebase contains a structural model for the `EvidenceBundle`. No runtime resolution or processing capabilities are present.
 
 - **Location**: `packages/domain/src/index.ts` (and corresponding build outputs).
 - **Public API / Data Structure**:
@@ -88,7 +88,7 @@ The codebase contains a structural model for the `EvidenceBundle`, but lacks any
 
 ### Section C — Evidence Reference Resolution
 
-Components or drivers to resolve actual evidence records from references are **absent** from the contracts layer.
+No components or drivers to resolve actual evidence records from references are observed in the codebase.
 
 - **Interfaces**: None found.
 - **Implementations**: None found.
@@ -122,7 +122,7 @@ The PostgreSQL database schema includes a fast lookup mechanism to retrieve meta
 
 ### Section E — Cryptographic Infrastructure
 
-The codebase features a custom canonicalization scheme and standard Node.js cryptographic bindings, but lacks high-level evidence-focused signature libraries.
+The codebase features a custom JCS canonicalization scheme and standard Node.js cryptographic bindings, but lacks high-level evidence-focused signature libraries.
 
 - **SHA-256 / Hashing Utilities**:
   - Core Node.js `crypto` is used.
@@ -140,7 +140,7 @@ The codebase features a custom canonicalization scheme and standard Node.js cryp
 
 ### Section F — Storage Infrastructure
 
-Concrete object storage integration, R2 drivers, or binary blob retrieval abstractions are **absent**.
+Concrete object storage integration, R2 drivers, or binary blob retrieval abstractions are not present in the repository.
 
 - **Object Storage / R2 Support**: None found.
 - **Blob Storage / Binary Assets**: None found.
@@ -177,7 +177,7 @@ The pure execution pipeline structurally includes `EvidenceRecord` fields inside
 - **Imported Symbols**: `ExecutionContext`, `PolicyContext`, `validateExecutionRequest`, `ExecutionRequest` from `@zyppi/domain`.
 - **Exported Symbols**: None (the public entrypoint `packages/runtime/src/index.ts` contains `export {};`).
 - **Package Relationships**: `@zyppi/runtime` depends on `@zyppi/domain` and `@zyppi/shared` under the `workspace:*` protocol.
-- _Factual Summary_: The runtime pipeline defaults to failing-closed. While it receives an `ExecutionRequest` which contains an `EvidenceBundle`, it performs no custom operations, resolution, or evaluation on the evidence records.
+- _Factual Summary_: Runtime accepts `ExecutionRequest` containing `EvidenceBundle` and performs no observable Evidence-specific processing.
 
 ---
 
@@ -189,11 +189,11 @@ The pure execution pipeline structurally includes `EvidenceRecord` fields inside
 
 ### Section J — Existing API Dependencies
 
-The API layer references evidence records purely for the purpose of seeding initial demo configurations and mapping database rows.
+The API layer references evidence records purely for the purpose of seeding initial configurations and mapping database rows.
 
 - **File**: `apps/api/src/registry/seed/postgres-registry-seeder.ts`
   - Imports: `validateEvidenceRecord` from `@zyppi/domain`.
-  - Behavior: Maps and inserts initial `EvidenceRecord` seed records into the transactional database sequentially.
+  - Behavior: Maps and inserts initial `EvidenceRecord` seed records into the database sequentially.
 - **File**: `apps/api/src/registry/postgres-registry-repository.ts`
   - Imports: `mapEvidenceRow` from `apps/api/src/registry/mappers.ts`.
   - Behavior: Maps SQL `EvidenceRow` entries directly to domain-validated `EvidenceRecord` models.
@@ -220,7 +220,7 @@ Factual summary of documentation containing keywords relevant to Evidence:
 1. **`DOCS/CAW/CAW-009-Evidence-Model.md`**:
    - _Summary_: Explains the architectural division of evidence. Fast-lookup metadata is stored in the PostgreSQL `evidence` table, and actual raw binary blobs are stored in Cloudflare R2 (addressed deterministically by hash).
 2. **`DOCS/CAW/AMS/AMS-0303-Evidence-Model-Implementation-Notes.md`**:
-   - _Summary_: Documents that hash generation, key resolution, and binary payload fetches are completely deferred to M07. Confirms that `hash` and `storageRef` are treated as opaque strings in the foundation layer.
+   - _Summary_: Documents that hash generation, key resolution, and binary payload fetches are deferred to a future implementation milestone. Confirms that `hash` and `storageRef` are treated as opaque strings in the foundation layer.
 3. **`DOCS/CAW/CAW-008-Registry-Schema.md`**:
    - _Summary_: Defines table fields, types, and primary-key indexes for the `evidence` database ledger.
 
@@ -261,19 +261,69 @@ Below are the exact public exports found in the repository related to Evidence:
 
 ---
 
-## 6. Dependency Inventory
+## 6. Dependency Map & Inventory
 
-The following factual dependencies exist in the repository relative to `@zyppi/domain`:
+### Repository Dependency Map
 
 ```
-@zyppi/contracts (DevDependency) -> @zyppi/domain (Workspace Link)
-@zyppi/runtime (Dependency)    -> @zyppi/domain (Workspace Link)
-@zyppi/testing (DevDependency) -> @zyppi/domain (Workspace Link)
-@zyppi/infra (DevDependency)   -> @zyppi/domain (Workspace Link)
-@zyppi/api (Dependency)        -> @zyppi/domain (Workspace Link)
+                    ┌─────────────────┐
+                    │  @zyppi/shared  │
+                    └────────┬────────┘
+                             │ (Link)
+                             ▼
+┌────────────────┐  Link  ┌──────────────────┐  Link  ┌─────────────┐
+│ @zyppi/domain  │◀───────┤  @zyppi/runtime  ├───────▶│ @zyppi/api  │
+└───────┬────────┘        └──────────────────┘        └──────┬──────┘
+        │                                                    │
+        │ Link (Dev)                                         │ Link
+        ▼                                                    ▼
+┌──────────────────┐  Link (Dev)                  ┌─────────────┐
+│ @zyppi/contracts │◀─────────────────────────────┤ @zyppi/api  │
+└───────┬──────────┘                              └─────────────┘
+        │
+        │ Link (Dev)
+        ▼
+┌──────────────────┐
+│  @zyppi/testing  │
+└──────────────────┘
 ```
 
-No external cryptographic libraries or file storage APIs are referenced in production `dependencies` files.
+#### Factual Monorepo Member Specification
+
+1. **`@zyppi/domain`** (`packages/domain`)
+   - _Imports_: None (leaf package).
+   - _Exports_: `validateIdentityRecord`, `validateReferentRecord`, `validateGS1Identifier`, `validateEvidenceRecord`, `validatePolicyRecord`, `validateStandingRecord`, `validateCapabilityRecord`, `validateAuthorityRecord`, `validateExecutionContext`, `validateExecutionRequest`, `validateOutcome`, `serializeIdentityRecord`, `serializeReferentRecord`, `serializeGS1Identifier`, `serializeEvidenceRecord`, `serializePolicyRecord`, `serializeStandingRecord`, `serializeCapabilityRecord`, `serializeAuthorityRecord`, `serializeExecutionContext`, `serializeExecutionRequest`, `serializeOutcome`, `parseGs1DigitalLink`, `validateGs1DigitalLink`, `normalizeGs1DigitalLink`, `canonicalizeJcs`, `areRegistryRecordsEquivalent`.
+   - _Workspace Dependencies_: None.
+
+2. **`@zyppi/shared`** (`packages/shared`)
+   - _Imports_: None.
+   - _Exports_: `export {};` (Placeholder).
+   - _Workspace Dependencies_: None.
+
+3. **`@zyppi/contracts`** (`packages/contracts`)
+   - _Imports_: `@zyppi/domain` (in source/tests).
+   - _Exports_: `ValidatedCanonicalIdentifier`, `createValidatedCanonicalIdentifier`, `RegistryRepository`, `ReceiptRepository`, `resolveGs1DigitalLink`.
+   - _Workspace Dependencies (Dev)_: `@zyppi/domain`.
+
+4. **`@zyppi/runtime`** (`packages/runtime`)
+   - _Imports_: `@zyppi/domain`, `@zyppi/shared` (in source/tests).
+   - _Exports_: `export {};` (Placeholder).
+   - _Workspace Dependencies (Production)_: `@zyppi/domain`, `@zyppi/shared`.
+
+5. **`@zyppi/testing`** (`packages/testing`)
+   - _Imports_: `@zyppi/domain`, `@zyppi/contracts`.
+   - _Exports_: `validateReplayDeterminism`, `replayDeterminismSuite`.
+   - _Workspace Dependencies (Dev)_: `@zyppi/domain`, `@zyppi/contracts`.
+
+6. **`@zyppi/api`** (`apps/api`)
+   - _Imports_: `@zyppi/domain`, `@zyppi/contracts`.
+   - _Exports_: `export {};` (Placeholder application target).
+   - _Workspace Dependencies (Production)_: `@zyppi/domain`, `@zyppi/contracts`.
+
+7. **`@zyppi/infra`** (`infra`)
+   - _Imports_: `@zyppi/domain`, `@zyppi/contracts` (in tests only).
+   - _Exports_: `export {};` (CLI binary runner).
+   - _Workspace Dependencies (Dev)_: `@zyppi/domain`, `@zyppi/contracts`.
 
 ---
 
@@ -305,19 +355,36 @@ No external cryptographic libraries or file storage APIs are referenced in produ
 
 ---
 
-## 9. Observable Gaps
+## 9. Repository Components Not Present
 
-The following expected M07 components were investigated and identified as **absent / Not Found** in the current repository:
+The following components were investigated and identified as **not present** in the current repository:
 
-1. **Evidence Reference Resolver (IT-0702)**: No interfaces, classes, or lookup handlers to resolve references are implemented.
-2. **Hash Verification Module (IT-0703)**: No cryptographic functions exist to perform matching or validation of actual evidence assets against metadata hash pointers.
-3. **Cloudflare R2 Object Storage Integration (IT-0704)**: No R2 client, bindings, storage configurations, or Cloudflare worker integrations exist.
-4. **Binary Assets / Payloads Handling**: No binary parser or payload handling logic is declared.
-5. **Dynamic Evidence Retrieval Pipeline**: The Runtime pipeline passes evidence records unmodified and performs no retrieval logic.
+1. **Evidence Reference Resolver**: No implementation was found during repository inspection.
+2. **Hash Verification Module**: No implementation was found during repository inspection.
+3. **Cloudflare R2 Object Storage Integration / Client**: No implementation was found during repository inspection.
+4. **Binary Assets / Payloads Handling**: No implementation was found during repository inspection.
+5. **Dynamic Evidence Retrieval Pipeline**: No implementation was found during repository inspection.
 
 ---
 
-## 10. Verification & CI Appendix
+## 10. Repository Evidence Index
+
+| Evidence Target                       | Repository Status | Location of Verification / Source Evidence                    |
+| :------------------------------------ | :---------------- | :------------------------------------------------------------ |
+| `EvidenceRecord`                      | Present           | `packages/domain/src/index.ts`                                |
+| `EvidenceBundle`                      | Present           | `packages/domain/src/index.ts`                                |
+| Validation (`validateEvidenceRecord`) | Present           | `packages/domain/src/index.ts`                                |
+| Registry `evidence` table             | Present           | `infra/migrations/001_initial_registry_schema.sql`            |
+| PostgreSQL mapper (`mapEvidenceRow`)  | Present           | `apps/api/src/registry/mappers.ts`                            |
+| Runtime Evidence execution            | Not observed      | `packages/runtime/src/pipeline.ts` (passes bundle unmodified) |
+| Reference resolver                    | Not observed      | None found in codebase                                        |
+| Object storage client                 | Not observed      | None found in codebase                                        |
+| Hash verification service             | Not observed      | None found in codebase                                        |
+| Binary retrieval                      | Not observed      | None found in codebase                                        |
+
+---
+
+## 11. Verification & CI Appendix
 
 This section contains complete evidence of the baseline check, database health, migration verification, and final working tree status.
 
@@ -397,7 +464,7 @@ A dry-run git check shows no uncommitted code changes other than the expected ad
 
 ---
 
-## 11. Appendix: Complete Reference File List
+## 12. Appendix: Complete Reference File List
 
 The following files represent the complete evidentiary codebase footprint reviewed for this report:
 
