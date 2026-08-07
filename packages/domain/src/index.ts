@@ -566,6 +566,17 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
 }
 
 export type {
+  BundleVerificationReport,
+  EvidenceRecordVerificationResult,
+  VerifyEvidenceBundleOptions,
+} from "./evidenceVerification.js";
+
+export {
+  DEFAULT_MAX_BUNDLE_SIZE,
+  verifyEvidenceBundle,
+} from "./evidenceVerification.js";
+
+export type {
   Gs1DigitalLinkComponentSource,
   ParsedGs1DigitalLinkComponent,
   ParsedGs1DigitalLink,

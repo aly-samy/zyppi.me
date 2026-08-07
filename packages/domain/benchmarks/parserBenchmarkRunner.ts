@@ -4,7 +4,7 @@ import * as crypto from "node:crypto";
 import * as os from "node:os";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { parseGs1DigitalLink } from "@zyppi/domain";
+import { parseGs1DigitalLink } from "../src/index.js";
 
 interface BenchmarkConfig {
   benchmarkVersion: string;
