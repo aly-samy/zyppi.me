@@ -21,3 +21,10 @@ export {
   type EvidenceResolutionError,
   type EvidenceReferenceResolver,
 } from "./evidenceResolver.js";
+
+export {
+  type ObjectStorageClient,
+  type PayloadProviderError,
+  type PayloadProviderResult,
+  type EvidencePayloadProvider,
+} from "./evidencePayloadProvider.js";
