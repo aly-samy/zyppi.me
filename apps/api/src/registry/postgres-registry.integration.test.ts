@@ -411,7 +411,7 @@ describe("PostgreSQL Registry Adapter Integration Tests — IT-0503", () => {
       expect(res.ok).toBe(true);
       if (res.ok) {
         expect(res.value).toHaveLength(2);
-        const map = new Map(res.value.map(r => [r.evidenceId, r]));
+        const map = new Map(res.value.map((r) => [r.evidenceId, r]));
         expect(map.get(evidenceId1)).toBeDefined();
         expect(map.get(evidenceId2)).toBeDefined();
         expect(map.get(evidenceId1)!.evidenceType).toBe("cert1");
@@ -428,7 +428,10 @@ describe("PostgreSQL Registry Adapter Integration Tests — IT-0503", () => {
         expect(resEmpty.value).toEqual([]);
       }
 
-      const resInvalid = await repo.lookupEvidenceByIds(["not-a-uuid", "another-bad-one"]);
+      const resInvalid = await repo.lookupEvidenceByIds([
+        "not-a-uuid",
+        "another-bad-one",
+      ]);
       expect(resInvalid.ok).toBe(true);
       if (resInvalid.ok) {
         expect(resInvalid.value).toEqual([]);

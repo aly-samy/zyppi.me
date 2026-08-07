@@ -157,7 +157,8 @@ export class PostgresRegistryRepository implements RegistryRepository {
       }
 
       // Filter to only include valid UUID strings defensively
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const validIds = evidenceIds.filter((id) => uuidRegex.test(id));
 
       if (validIds.length === 0) {
