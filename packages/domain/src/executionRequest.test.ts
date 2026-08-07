@@ -89,6 +89,7 @@ describe("ExecutionRequest Domain Model", () => {
       applicablePolicies: [validPolicy],
     },
     evidenceBundle: {
+      schemaVersion: "1.0",
       evidenceRecords: [validEvidence],
     },
     policyContext: {
@@ -266,6 +267,7 @@ describe("ExecutionRequest Domain Model", () => {
       const inputInvalidRecord = {
         ...validRequestInput,
         evidenceBundle: {
+          schemaVersion: "1.0",
           evidenceRecords: [{ ...validEvidence, evidenceId: "" }],
         },
       };

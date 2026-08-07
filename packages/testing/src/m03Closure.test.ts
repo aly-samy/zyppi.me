@@ -122,6 +122,7 @@ describe("M03 Domain Foundation — Adversarial Closure Audit Suite", () => {
       applicablePolicies: [validPolicy],
     },
     evidenceBundle: {
+      schemaVersion: "1.0",
       evidenceRecords: [validEvidence],
     },
     policyContext: {

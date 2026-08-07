@@ -112,6 +112,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       applicablePolicies: [validPolicy],
     },
     evidenceBundle: {
+      schemaVersion: "1.0",
       evidenceRecords: [validEvidence],
     },
     policyContext: {
@@ -387,6 +388,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         applicablePolicies: [{ ...validPolicy }],
       },
       evidenceBundle: {
+        schemaVersion: "1.0",
         evidenceRecords: [{ ...validEvidence }],
       },
       policyContext: {
