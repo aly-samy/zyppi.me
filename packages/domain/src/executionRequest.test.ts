@@ -96,6 +96,8 @@ describe("ExecutionRequest Domain Model", () => {
       policies: [validPolicy],
     },
     executionContext: {
+      executionId: "exec-456",
+      constitutionalTimestamp: "2026-08-08T14:30:00Z",
       budget: 1000,
       entropy: "random_entropy_string",
       versions: ["1.0.0", "1.1.0"],

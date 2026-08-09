@@ -244,6 +244,8 @@ describe("EvidenceBundle Domain Model", () => {
   describe("ExecutionContext Non-Regression Check", () => {
     it("verify that existing ExecutionContext validation remains unchanged", () => {
       const validECInput = {
+        executionId: "exec-123",
+        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 500,
         entropy: "some_entropy_value",
         versions: ["1.0", "1.1"],
