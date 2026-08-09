@@ -233,16 +233,7 @@ export function runInternalPipeline(
   // 6. ACV Activation
   const acvRes = executePostAdmissionStage(
     "ACV Activation",
-    () => {
-      if (!executionRequest || !executionRequest.activeConstitutionalView) {
-        return {
-          ok: false,
-          code: "MISSING_ACV",
-          message: "Active Constitutional View is missing.",
-        };
-      }
-      return { ok: true };
-    },
+    makeUnimplementedAction("ACV Activation"),
     context,
   );
   if (!acvRes.ok) {

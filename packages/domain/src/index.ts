@@ -1607,19 +1607,13 @@ export interface PolicyContext {
 }
 
 export interface ExecutionContext {
-  readonly executionId: string;
-  readonly constitutionalTimestamp: string;
   readonly budget: number;
   readonly entropy: string;
   readonly versions: readonly string[];
 }
 
 export type ExecutionContextValidationErrorCode =
-  | "INVALID_EXECUTION_ID"
-  | "INVALID_CONSTITUTIONAL_TIMESTAMP"
-  | "INVALID_BUDGET"
-  | "INVALID_ENTROPY"
-  | "INVALID_VERSIONS";
+  "INVALID_BUDGET" | "INVALID_ENTROPY" | "INVALID_VERSIONS";
 
 export interface ExecutionContextValidationError {
   readonly code: ExecutionContextValidationErrorCode;
@@ -1638,8 +1632,8 @@ export function validateExecutionContext(
     return {
       ok: false,
       error: {
-        code: "INVALID_EXECUTION_ID",
-        field: "executionId",
+        code: "INVALID_BUDGET",
+        field: "budget",
         message: "Input must be a non-null object",
       },
     };
@@ -1647,36 +1641,7 @@ export function validateExecutionContext(
 
   const raw = input as Record<string, unknown>;
 
-  // 1. executionId validation: must be non-empty string, supplied by upstream
-  const executionId = raw.executionId;
-  if (typeof executionId !== "string" || executionId.trim() === "") {
-    return {
-      ok: false,
-      error: {
-        code: "INVALID_EXECUTION_ID",
-        field: "executionId",
-        message: "executionId must be a non-empty string",
-      },
-    };
-  }
-
-  // 2. constitutionalTimestamp validation: must be a valid ISO-8601 UTC string
-  const constitutionalTimestamp = raw.constitutionalTimestamp;
-  if (
-    typeof constitutionalTimestamp !== "string" ||
-    !isValidIso8601Utc(constitutionalTimestamp)
-  ) {
-    return {
-      ok: false,
-      error: {
-        code: "INVALID_CONSTITUTIONAL_TIMESTAMP",
-        field: "constitutionalTimestamp",
-        message: "constitutionalTimestamp must be a valid ISO-8601 UTC timestamp",
-      },
-    };
-  }
-
-  // 3. budget validation: must be finite, non-negative number, validated without coercion
+  // 1. budget validation: must be finite, non-negative number, validated without coercion
   const budget = raw.budget;
   if (typeof budget !== "number" || !Number.isFinite(budget) || budget < 0) {
     return {
@@ -1689,7 +1654,7 @@ export function validateExecutionContext(
     };
   }
 
-  // 4. entropy validation: must be a primitive string, non-empty, explicit, without coercion, whitespace-only rejected
+  // 2. entropy validation: must be a primitive string, non-empty, explicit, without coercion, whitespace-only rejected
   const entropy = raw.entropy;
   if (typeof entropy !== "string" || entropy.trim() === "") {
     return {
@@ -1702,7 +1667,7 @@ export function validateExecutionContext(
     };
   }
 
-  // 5. versions validation: must be a non-empty array of non-empty, non-whitespace primitive strings
+  // 3. versions validation: must be a non-empty array of non-empty, non-whitespace primitive strings
   const versionsRaw = raw.versions;
   if (!Array.isArray(versionsRaw)) {
     return {
@@ -1744,8 +1709,6 @@ export function validateExecutionContext(
   }
 
   const context: ExecutionContext = {
-    executionId,
-    constitutionalTimestamp,
     budget,
     entropy,
     versions,
@@ -1759,14 +1722,12 @@ export function validateExecutionContext(
 
 /**
  * Canonically serializes an ExecutionContext deterministically.
- * Alphabetical key order: budget -> constitutionalTimestamp -> entropy -> executionId -> versions
+ * Alphabetical key order: budget -> entropy -> versions
  */
 export function serializeExecutionContext(context: ExecutionContext): string {
   const ordered = {
     budget: context.budget,
-    constitutionalTimestamp: context.constitutionalTimestamp,
     entropy: context.entropy,
-    executionId: context.executionId,
     versions: context.versions,
   };
   return JSON.stringify(ordered);

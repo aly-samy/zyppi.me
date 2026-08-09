@@ -7,8 +7,6 @@ import {
 
 describe("ExecutionContext Domain Model", () => {
   const validContext: ExecutionContext = {
-    executionId: "exec-456",
-    constitutionalTimestamp: "2026-08-08T14:30:00Z",
     budget: 1000,
     entropy: "explicit-entropy-string",
     versions: ["1.0.0", "2.0.0-rc.1"],
@@ -51,72 +49,6 @@ describe("ExecutionContext Domain Model", () => {
       expect(validateExecutionContext("string").ok).toBe(false);
       expect(validateExecutionContext(42).ok).toBe(false);
       expect(validateExecutionContext([]).ok).toBe(false);
-    });
-
-    it("rejects missing executionId", () => {
-      const rest = { ...validContext } as unknown as Record<string, unknown>;
-      delete rest.executionId;
-      const result = validateExecutionContext(rest);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.code).toBe("INVALID_EXECUTION_ID");
-        expect(result.error.field).toBe("executionId");
-      }
-    });
-
-    it("rejects non-string executionId", () => {
-      const result = validateExecutionContext({
-        ...validContext,
-        executionId: 12345 as unknown,
-      });
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.code).toBe("INVALID_EXECUTION_ID");
-      }
-    });
-
-    it("rejects empty executionId string", () => {
-      const result = validateExecutionContext({
-        ...validContext,
-        executionId: "",
-      });
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.code).toBe("INVALID_EXECUTION_ID");
-      }
-    });
-
-    it("rejects missing constitutionalTimestamp", () => {
-      const rest = { ...validContext } as unknown as Record<string, unknown>;
-      delete rest.constitutionalTimestamp;
-      const result = validateExecutionContext(rest);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.code).toBe("INVALID_CONSTITUTIONAL_TIMESTAMP");
-        expect(result.error.field).toBe("constitutionalTimestamp");
-      }
-    });
-
-    it("rejects non-string constitutionalTimestamp", () => {
-      const result = validateExecutionContext({
-        ...validContext,
-        constitutionalTimestamp: 12345 as unknown,
-      });
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.code).toBe("INVALID_CONSTITUTIONAL_TIMESTAMP");
-      }
-    });
-
-    it("rejects invalid format constitutionalTimestamp", () => {
-      const result = validateExecutionContext({
-        ...validContext,
-        constitutionalTimestamp: "2026-08-08 14:30:00",
-      });
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.error.code).toBe("INVALID_CONSTITUTIONAL_TIMESTAMP");
-      }
     });
 
     it("rejects missing budget", () => {
@@ -300,8 +232,6 @@ describe("ExecutionContext Domain Model", () => {
 
     it("does not mutate the input", () => {
       const input = {
-        executionId: "exec-456",
-        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 50,
         entropy: "test-entropy",
         versions: ["1.0.0", "1.1.0"],
@@ -313,8 +243,6 @@ describe("ExecutionContext Domain Model", () => {
 
     it("does not trim or normalize accepted strings in the returned output", () => {
       const input = {
-        executionId: " exec-456 ",
-        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 50,
         entropy: " test-entropy ",
         versions: [" 1.0.0 "],
@@ -337,13 +265,7 @@ describe("ExecutionContext Domain Model", () => {
   describe("Canonical Serialization (serializeExecutionContext)", () => {
     it("serializes deterministically in exact alphabetical key order", () => {
       const serialized = serializeExecutionContext(validContext);
-      const expectedKeys = [
-        "budget",
-        "constitutionalTimestamp",
-        "entropy",
-        "executionId",
-        "versions",
-      ];
+      const expectedKeys = ["budget", "entropy", "versions"];
       expect(Object.keys(JSON.parse(serialized))).toEqual(expectedKeys);
 
       // Shuffle key order in JS object and ensure identical output
@@ -351,16 +273,12 @@ describe("ExecutionContext Domain Model", () => {
         versions: validContext.versions,
         budget: validContext.budget,
         entropy: validContext.entropy,
-        executionId: validContext.executionId,
-        constitutionalTimestamp: validContext.constitutionalTimestamp,
       };
       expect(serializeExecutionContext(shuffled)).toBe(serialized);
     });
 
     it("does not mutate the input object or its nested array during serialization", () => {
       const context = {
-        executionId: "exec-456",
-        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 10,
         entropy: "immutable",
         versions: ["a", "b"],
@@ -372,8 +290,6 @@ describe("ExecutionContext Domain Model", () => {
 
     it("preserves versions array order during serialization", () => {
       const context = {
-        executionId: "exec-456",
-        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 10,
         entropy: "immutable",
         versions: ["z", "a", "m"],
@@ -385,8 +301,6 @@ describe("ExecutionContext Domain Model", () => {
 
     it("preserves accepted string values (does not trim)", () => {
       const context = {
-        executionId: " exec-with-spaces ",
-        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 10,
         entropy: " whitespace preserved ",
         versions: [" ver with space "],
