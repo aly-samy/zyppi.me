@@ -49,6 +49,9 @@ importers:
       "@zyppi/domain":
         specifier: workspace:*
         version: link:../../packages/domain
+      "@zyppi/runtime":
+        specifier: workspace:*
+        version: link:../../packages/runtime
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
