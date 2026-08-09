@@ -104,6 +104,8 @@ describe("M03 Domain Foundation — Adversarial Closure Audit Suite", () => {
   };
 
   const validExecutionContext: ExecutionContext = {
+    executionId: "exec-123",
+    constitutionalTimestamp: "2026-08-08T14:30:00Z",
     budget: 1000,
     entropy: "random-entropy-seed",
     versions: ["1.0.0"],

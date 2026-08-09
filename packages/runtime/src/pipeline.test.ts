@@ -119,6 +119,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       policies: [validPolicy],
     },
     executionContext: {
+      executionId: "exec-456",
+      constitutionalTimestamp: "2026-08-08T14:30:00Z",
       budget: 1000,
       entropy: "random_entropy_string",
       versions: ["1.0.0", "1.1.0"],
@@ -276,7 +278,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       "Bundle Verification",
       "Dependency Resolution",
       "Compatibility Validation",
-      "ACV Activation",
       "Resolution Graph Construction",
       "Active Execution",
       "Receipt Generation",
@@ -298,6 +299,13 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
       expect(hasMatch).toBe(true);
     }
+
+    // Verify ACV Activation specifically (which is implemented in AMS-0801)
+    const acvPattern = `executePostAdmissionStage(\n    "ACV Activation",\n    () => {`;
+    const acvPattern2 = `executePostAdmissionStage( "ACV Activation", () => {`;
+    const acvCleaned = source.replace(/\s+/g, " ");
+    const hasAcvMatch = source.includes(acvPattern) || acvCleaned.includes(acvPattern2) || acvCleaned.includes("executePostAdmissionStage( \"ACV Activation\", () => {");
+    expect(hasAcvMatch).toBe(true);
   });
 
   // 12.2: Input Immutability Test
@@ -395,6 +403,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         policies: [{ ...validPolicy }],
       },
       executionContext: {
+        executionId: "exec-456",
+        constitutionalTimestamp: "2026-08-08T14:30:00Z",
         budget: 1000,
         entropy: "random_entropy_string",
         versions: ["1.0.0", "1.1.0"],
