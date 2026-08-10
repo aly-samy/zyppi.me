@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   materializeResolutionGraph,
   evaluatePolicies,
-  type PolicyDecision,
   type ExecutionSequence,
 } from "./evaluator.js";
 import type {
