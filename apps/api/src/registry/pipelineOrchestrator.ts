@@ -47,7 +47,7 @@ export async function composeAndRunPipeline(options: {
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
   readonly evidencePayloads?: ReadonlyMap<string, unknown>;
-  readonly resolvedPolicyGraph?: ResolvedPolicyGraph;
+  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
 }): Promise<OrchestratorResult> {
   const {
     registryRepository,
@@ -187,7 +187,7 @@ export async function composeAndRunPipeline(options: {
       entropy,
       versions,
     },
-    resolvedPolicyGraph: resolvedPolicyGraph ?? { edges: [] },
+    resolvedPolicyGraph,
   };
 
   // Invoke the pure, zero-I/O Runtime pipeline with explicitly transported evidence payloads
