@@ -102,6 +102,9 @@ describe("ExecutionRequest Domain Model", () => {
       entropy: "random_entropy_string",
       versions: ["1.0.0", "1.1.0"],
     },
+    resolvedPolicyGraph: {
+      edges: [],
+    },
   };
 
   describe("Validation", () => {
@@ -389,12 +392,13 @@ describe("ExecutionRequest Domain Model", () => {
           policyContext: req.policyContext,
           evidenceBundle: req.evidenceBundle,
           identity: req.identity,
+          resolvedPolicyGraph: req.resolvedPolicyGraph,
         };
         const serializedShuffled = serializeExecutionRequest(shuffledReq);
         expect(serialized).toBe(serializedShuffled);
 
         // Verify alphabetic order of top level fields:
-        // activeConstitutionalView -> evidenceBundle -> executionContext -> identity -> policyContext -> requestId
+        // activeConstitutionalView -> evidenceBundle -> executionContext -> identity -> policyContext -> requestId -> resolvedPolicyGraph
         const parsedKeys = Object.keys(JSON.parse(serialized));
         expect(parsedKeys).toEqual([
           "activeConstitutionalView",
@@ -403,6 +407,7 @@ describe("ExecutionRequest Domain Model", () => {
           "identity",
           "policyContext",
           "requestId",
+          "resolvedPolicyGraph",
         ]);
       }
     });

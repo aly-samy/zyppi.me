@@ -6,6 +6,11 @@ import type {
   PipelineError,
   StageOverrideConfig,
 } from "./types.js";
+import {
+  materializeResolutionGraph,
+  evaluatePolicies,
+  type ExecutionSequence,
+} from "./evaluator.js";
 
 /**
  * Private, unexported implementation-local evaluator result type.
@@ -278,10 +283,26 @@ export function runInternalPipeline(
     return { ok: false, error: acvRes.error, trace };
   }
 
+  let executionSequence: ExecutionSequence | undefined;
+
   // 7. Resolution Graph Construction
   const resGraphRes = executePostAdmissionStage(
     "Resolution Graph Construction",
-    makeUnimplementedAction("Resolution Graph Construction"),
+    () => {
+      const result = materializeResolutionGraph(
+        executionRequest.activeConstitutionalView.applicablePolicies,
+        executionRequest.resolvedPolicyGraph,
+      );
+      if (!result.ok) {
+        return {
+          ok: false,
+          code: result.code,
+          message: result.message,
+        };
+      }
+      executionSequence = result.sequence;
+      return { ok: true };
+    },
     context,
   );
   if (!resGraphRes.ok) {
@@ -291,7 +312,24 @@ export function runInternalPipeline(
   // 8. Active Execution
   const activeExecRes = executePostAdmissionStage(
     "Active Execution",
-    makeUnimplementedAction("Active Execution"),
+    () => {
+      const seq = executionSequence || {
+        orderedPolicies:
+          executionRequest.activeConstitutionalView.applicablePolicies,
+      };
+      const result = evaluatePolicies(seq, policyContext, context);
+
+      // Update retainedStatus based on aggregate policy result
+      if (result.aggregateResult === "ALLOW") {
+        retainedStatus = "authorized";
+      } else if (result.aggregateResult === "DENY") {
+        retainedStatus = "denied";
+      } else {
+        retainedStatus = "unavailable"; // maps INDETERMINATE to unavailable
+      }
+
+      return { ok: true };
+    },
     context,
   );
   if (!activeExecRes.ok) {
