@@ -1773,6 +1773,15 @@ export function serializeExecutionContext(context: ExecutionContext): string {
   return JSON.stringify(ordered);
 }
 
+export interface PolicyDependencyEdge {
+  readonly dependeeId: string;
+  readonly dependentId: string;
+}
+
+export interface ResolvedPolicyGraph {
+  readonly edges: readonly PolicyDependencyEdge[];
+}
+
 export interface ExecutionRequest {
   readonly requestId: string;
   readonly identity: IdentityRecord;
@@ -1780,6 +1789,7 @@ export interface ExecutionRequest {
   readonly evidenceBundle: EvidenceBundle;
   readonly policyContext: PolicyContext;
   readonly executionContext: ExecutionContext;
+  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
 }
 
 export type ExecutionRequestValidationErrorCode =
@@ -1788,7 +1798,132 @@ export type ExecutionRequestValidationErrorCode =
   | "INVALID_ACTIVE_CONSTITUTIONAL_VIEW"
   | "INVALID_EVIDENCE_BUNDLE"
   | "INVALID_POLICY_CONTEXT"
-  | "INVALID_EXECUTION_CONTEXT";
+  | "INVALID_EXECUTION_CONTEXT"
+  | "INVALID_RESOLVED_POLICY_GRAPH";
+
+export type PolicyDependencyEdgeValidationErrorCode =
+  "INVALID_DEPENDEE_ID" | "INVALID_DEPENDENT_ID";
+
+export interface PolicyDependencyEdgeValidationError {
+  readonly code: PolicyDependencyEdgeValidationErrorCode;
+  readonly field: keyof PolicyDependencyEdge;
+  readonly message: string;
+}
+
+export function validatePolicyDependencyEdge(
+  input: unknown,
+): ValidationResult<PolicyDependencyEdge, PolicyDependencyEdgeValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_DEPENDEE_ID",
+        field: "dependeeId",
+        message: "Policy dependency edge must be a non-null object",
+      },
+    };
+  }
+  const raw = input as Record<string, unknown>;
+  const dependeeId = raw.dependeeId;
+  if (typeof dependeeId !== "string" || dependeeId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_DEPENDEE_ID",
+        field: "dependeeId",
+        message: "dependeeId must be a non-empty string",
+      },
+    };
+  }
+  const dependentId = raw.dependentId;
+  if (typeof dependentId !== "string" || dependentId.trim() === "") {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_DEPENDENT_ID",
+        field: "dependentId",
+        message: "dependentId must be a non-empty string",
+      },
+    };
+  }
+  return {
+    ok: true,
+    value: { dependeeId, dependentId },
+  };
+}
+
+export type ResolvedPolicyGraphValidationErrorCode = "INVALID_EDGES";
+
+export interface ResolvedPolicyGraphValidationError {
+  readonly code: ResolvedPolicyGraphValidationErrorCode;
+  readonly field: keyof ResolvedPolicyGraph;
+  readonly message: string;
+}
+
+export function validateResolvedPolicyGraph(
+  input: unknown,
+): ValidationResult<ResolvedPolicyGraph, ResolvedPolicyGraphValidationError> {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EDGES",
+        field: "edges",
+        message: "resolvedPolicyGraph must be a non-null object",
+      },
+    };
+  }
+  const raw = input as Record<string, unknown>;
+  const rawEdges = raw.edges;
+  if (!Array.isArray(rawEdges)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_EDGES",
+        field: "edges",
+        message: "edges must be an array",
+      },
+    };
+  }
+  const edges: PolicyDependencyEdge[] = [];
+  for (let i = 0; i < rawEdges.length; i++) {
+    const res = validatePolicyDependencyEdge(rawEdges[i]);
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_EDGES",
+          field: "edges",
+          message: `Invalid PolicyDependencyEdge at index ${i}: ${res.error.message}`,
+        },
+      };
+    }
+    edges.push(res.value);
+  }
+  return {
+    ok: true,
+    value: { edges },
+  };
+}
+
+export function serializePolicyDependencyEdge(
+  edge: PolicyDependencyEdge,
+): string {
+  const ordered = {
+    dependeeId: edge.dependeeId,
+    dependentId: edge.dependentId,
+  };
+  return JSON.stringify(ordered);
+}
+
+export function serializeResolvedPolicyGraph(
+  graph: ResolvedPolicyGraph,
+): string {
+  const ordered = {
+    edges: graph.edges.map((e) => JSON.parse(serializePolicyDependencyEdge(e))),
+  };
+  return JSON.stringify(ordered);
+}
 
 export type ExecutionRequestValidationError = {
   readonly code: ExecutionRequestValidationErrorCode;
@@ -2116,6 +2251,19 @@ export function validateExecutionRequest(
     };
   }
 
+  // 7. resolvedPolicyGraph validation
+  const rpgRes = validateResolvedPolicyGraph(raw.resolvedPolicyGraph);
+  if (!rpgRes.ok) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_RESOLVED_POLICY_GRAPH",
+        field: "resolvedPolicyGraph",
+        message: `Invalid resolvedPolicyGraph: ${rpgRes.error.message}`,
+      },
+    };
+  }
+
   const record: ExecutionRequest = {
     requestId,
     identity: identityRes.value,
@@ -2123,6 +2271,7 @@ export function validateExecutionRequest(
     evidenceBundle,
     policyContext,
     executionContext: ecRes.value,
+    resolvedPolicyGraph: rpgRes.value,
   };
 
   return {
@@ -2179,6 +2328,9 @@ export function serializeExecutionRequest(request: ExecutionRequest): string {
     identity: getOrderedIdentity(request.identity),
     policyContext: orderedPolicyContext,
     requestId: request.requestId,
+    resolvedPolicyGraph: JSON.parse(
+      serializeResolvedPolicyGraph(request.resolvedPolicyGraph),
+    ),
   };
 
   return JSON.stringify(orderedRequest);

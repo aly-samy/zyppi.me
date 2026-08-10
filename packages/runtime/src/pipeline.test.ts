@@ -125,6 +125,9 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       entropy: "random_entropy_string",
       versions: ["1.0.0", "1.1.0"],
     },
+    resolvedPolicyGraph: {
+      edges: [],
+    },
   };
 
   // 10.1: Exact sequential ordering
@@ -278,8 +281,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       "Bundle Verification",
       "Dependency Resolution",
       "Compatibility Validation",
-      "Resolution Graph Construction",
-      "Active Execution",
       "Receipt Generation",
     ];
 
@@ -311,6 +312,30 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         'executePostAdmissionStage( "ACV Activation", () => {',
       );
     expect(hasAcvMatch).toBe(true);
+
+    // Verify Resolution Graph Construction specifically (implemented in AMS-0804)
+    const rgcPattern = `executePostAdmissionStage(\n    "Resolution Graph Construction",\n    () => {`;
+    const rgcPattern2 = `executePostAdmissionStage( "Resolution Graph Construction", () => {`;
+    const rgcCleaned = source.replace(/\s+/g, " ");
+    const hasRgcMatch =
+      source.includes(rgcPattern) ||
+      rgcCleaned.includes(rgcPattern2) ||
+      rgcCleaned.includes(
+        'executePostAdmissionStage( "Resolution Graph Construction", () => {',
+      );
+    expect(hasRgcMatch).toBe(true);
+
+    // Verify Active Execution specifically (implemented in AMS-0804)
+    const aePattern = `executePostAdmissionStage(\n    "Active Execution",\n    () => {`;
+    const aePattern2 = `executePostAdmissionStage( "Active Execution", () => {`;
+    const aeCleaned = source.replace(/\s+/g, " ");
+    const hasAeMatch =
+      source.includes(aePattern) ||
+      aeCleaned.includes(aePattern2) ||
+      aeCleaned.includes(
+        'executePostAdmissionStage( "Active Execution", () => {',
+      );
+    expect(hasAeMatch).toBe(true);
   });
 
   // 12.2: Input Immutability Test
@@ -413,6 +438,9 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         budget: 1000,
         entropy: "random_entropy_string",
         versions: ["1.0.0", "1.1.0"],
+      },
+      resolvedPolicyGraph: {
+        edges: [],
       },
     };
 

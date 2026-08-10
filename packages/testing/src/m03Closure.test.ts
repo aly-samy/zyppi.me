@@ -131,6 +131,9 @@ describe("M03 Domain Foundation — Adversarial Closure Audit Suite", () => {
       policies: [validPolicy],
     },
     executionContext: validExecutionContext,
+    resolvedPolicyGraph: {
+      edges: [],
+    },
   };
 
   const validExecutionReceipt: ExecutionReceipt = {

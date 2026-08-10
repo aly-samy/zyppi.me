@@ -54,6 +54,7 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
       evidenceBundle: validEvidenceBundle,
       policyContext: validPolicyContext,
       overrides,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(true);
@@ -91,6 +92,7 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
       evidenceBundle: validEvidenceBundle,
       policyContext: validPolicyContext,
       overrides,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(true);
@@ -122,6 +124,7 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
       versions: ["1.0.0"],
       evidenceBundle: validEvidenceBundle,
       policyContext: validPolicyContext,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(false);
@@ -147,6 +150,7 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
       versions: ["1.0.0"],
       evidenceBundle: validEvidenceBundle,
       policyContext: validPolicyContext,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(false);
@@ -169,6 +173,7 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
       versions: ["1.0.0"],
       evidenceBundle: validEvidenceBundle,
       policyContext: validPolicyContext,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(true);
@@ -195,6 +200,7 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
       versions: ["1.0.0"],
       evidenceBundle: validEvidenceBundle,
       policyContext: validPolicyContext,
+      resolvedPolicyGraph: { edges: [] },
     };
 
     const res1 = await composeAndRunPipeline(options);
@@ -311,6 +317,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       policyContext: { policies: [] },
       overrides,
       objectStorageClient: storageClient,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(true);
@@ -347,6 +354,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       policyContext: { policies: [] },
       objectStorageClient: storageClient,
       evidenceResolver: failingResolver,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     // Resolver failure must return a failed OrchestratorResult and not call the Runtime
@@ -388,6 +396,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       versions: ["1.0.0"],
       policyContext: { policies: [] },
       objectStorageClient: storageClient,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     // Hard storage failure must return immediately
@@ -413,6 +422,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       versions: ["1.0.0"],
       policyContext: { policies: [] },
       objectStorageClient: storageClient,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(false);
@@ -441,6 +451,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       versions: ["1.0.0"],
       policyContext: { policies: [] },
       objectStorageClient: storageClient,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(false);
@@ -502,6 +513,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       overrides,
       evidenceBundle: validResolverBundle,
       evidencePayloads: corruptedPayloads,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(result.ok).toBe(true);
@@ -549,6 +561,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       policyContext: { policies: [] },
       overrides,
       objectStorageClient: clientOrderA,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     const resB = await composeAndRunPipeline({
@@ -563,6 +576,7 @@ describe("Pipeline Orchestrator Evidence Loading Integration Tests — AMS-0802"
       policyContext: { policies: [] },
       overrides,
       objectStorageClient: clientOrderB,
+      resolvedPolicyGraph: { edges: [] },
     });
 
     expect(resA).toEqual(resB);

@@ -16,6 +16,7 @@ import {
   type PolicyContext,
   type ExecutionRequest,
   verifyEvidenceBundle,
+  type ResolvedPolicyGraph,
 } from "@zyppi/domain";
 import { RegistryEvidenceResolver } from "./evidenceResolver.js";
 import { ObjectStorageEvidencePayloadProvider } from "../evidence/objectStorageEvidencePayloadProvider.js";
@@ -46,6 +47,7 @@ export async function composeAndRunPipeline(options: {
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
   readonly evidencePayloads?: ReadonlyMap<string, unknown>;
+  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
 }): Promise<OrchestratorResult> {
   const {
     registryRepository,
@@ -63,6 +65,7 @@ export async function composeAndRunPipeline(options: {
     evidencePayloadProvider,
     objectStorageClient,
     evidencePayloads: explicitEvidencePayloads,
+    resolvedPolicyGraph,
   } = options;
 
   const lookupResult = await registryRepository.lookup(identifier);
@@ -184,6 +187,7 @@ export async function composeAndRunPipeline(options: {
       entropy,
       versions,
     },
+    resolvedPolicyGraph,
   };
 
   // Invoke the pure, zero-I/O Runtime pipeline with explicitly transported evidence payloads
