@@ -565,6 +565,12 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
   return JSON.stringify(ordered);
 }
 
+export {
+  cleanForJcs,
+  computeSha256,
+  generateReceiptHashes,
+} from "./receiptHash.js";
+
 export type {
   BundleVerificationReport,
   EvidenceRecordVerificationResult,

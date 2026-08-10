@@ -1,4 +1,11 @@
-import type { PolicyContext, ExecutionContext } from "@zyppi/domain";
+import type {
+  PolicyContext,
+  ExecutionContext,
+  Outcome,
+  EvidenceRecord,
+  ExecutionReceipt,
+} from "@zyppi/domain";
+import type { PolicyDecision } from "./evaluator.js";
 
 /**
  * Closed, internal union of all nine required constitutional lifecycle stages.
@@ -34,6 +41,23 @@ export type ReceiptFieldName =
   | "executionTime"
   | "deterministicHash";
 
+export type TrustStatus =
+  "definite" | "probable" | "possible" | "uncertain" | "speculative";
+
+export interface TrustResult {
+  readonly trustStatus: TrustStatus;
+  readonly degradationFactors: readonly string[];
+}
+
+export interface ExecutionOutput {
+  readonly outcome: Outcome;
+  readonly executionReceipt: ExecutionReceipt;
+  readonly evidenceReferences: readonly EvidenceRecord[];
+  readonly trustResult: TrustResult;
+  readonly policyDecisions: readonly PolicyDecision[];
+  readonly diagnostics: readonly string[];
+}
+
 export type ReceiptOutcome =
   | {
       readonly kind: "deferred";
@@ -43,6 +67,10 @@ export type ReceiptOutcome =
   | {
       readonly kind: "blocked";
       readonly reason: string;
+    }
+  | {
+      readonly kind: "materialized";
+      readonly executionOutput: ExecutionOutput;
     };
 
 /**
@@ -77,6 +105,16 @@ export interface StageOverrideConfig {
     policyContext: PolicyContext,
     executionContext: ExecutionContext,
   ) => { readonly status: "authorized" | "denied" | "unavailable" };
+
+  /**
+   * Overrides the generated Outcome.
+   */
+  readonly outcome?: Outcome;
+
+  /**
+   * Overrides the generated TrustResult.
+   */
+  readonly trustResult?: TrustResult;
 
   /**
    * Overrides Admission stage behavior. By default, Admission fails closed.

@@ -1,23 +1,25 @@
-import { validateExecutionRequest, verifyEvidenceBundle } from "@zyppi/domain";
-import type { ExecutionContext, PolicyContext } from "@zyppi/domain";
+import {
+  validateExecutionRequest,
+  verifyEvidenceBundle,
+  validateExecutionReceipt,
+  generateReceiptHashes,
+} from "@zyppi/domain";
+import type { ExecutionContext, PolicyContext, Outcome } from "@zyppi/domain";
 import type {
   LifecycleStage,
   PipelineResult,
   PipelineError,
   StageOverrideConfig,
+  TrustStatus,
+  TrustResult,
+  ExecutionOutput,
 } from "./types.js";
 import {
   materializeResolutionGraph,
   evaluatePolicies,
   type ExecutionSequence,
+  type PolicyDecision,
 } from "./evaluator.js";
-
-/**
- * Private, unexported implementation-local evaluator result type.
- */
-type EvaluatorResult = {
-  readonly status: "authorized" | "denied" | "unavailable";
-};
 
 /**
  * Pure-deterministic unexported default policy evaluator.
@@ -25,26 +27,10 @@ type EvaluatorResult = {
 function defaultPolicyEvaluator(
   _policyContext: PolicyContext,
   _executionContext: ExecutionContext,
-): EvaluatorResult {
+): { status: "authorized" | "denied" | "unavailable" } {
   void _policyContext;
   void _executionContext;
   return { status: "unavailable" };
-}
-
-/**
- * Executes the internal pipeline traverse through all 9 required constitutional lifecycle stages.
- * Guaranteed to be pure, in-memory, synchronous, and completely deterministic.
- *
- * @param input Raw ExecutionRequest input or similar
- * @param overrides Tightly constrained test override configurations (none in production)
- */
-/**
- * Direct mapping of evaluator status to the decision summary.
- */
-function summarizeEvaluatorResult(
-  status: "authorized" | "denied" | "unavailable",
-): "authorized" | "denied" | "unavailable" {
-  return status;
 }
 
 export function runInternalPipeline(
@@ -309,6 +295,10 @@ export function runInternalPipeline(
     return { ok: false, error: resGraphRes.error, trace };
   }
 
+  let policyDecisions: readonly PolicyDecision[] = [];
+  let evaluatedPolicyVersion = "0.0.0";
+  let pipelineDiagnostics: readonly string[] = [];
+
   // 8. Active Execution
   const activeExecRes = executePostAdmissionStage(
     "Active Execution",
@@ -318,6 +308,10 @@ export function runInternalPipeline(
           executionRequest.activeConstitutionalView.applicablePolicies,
       };
       const result = evaluatePolicies(seq, policyContext, context);
+
+      policyDecisions = result.policyDecisions;
+      evaluatedPolicyVersion = result.policyVersion;
+      pipelineDiagnostics = result.diagnostics;
 
       // Update retainedStatus based on aggregate policy result
       if (result.aggregateResult === "ALLOW") {
@@ -346,26 +340,111 @@ export function runInternalPipeline(
     return { ok: false, error: receiptRes.error, trace };
   }
 
-  const decisionSummary = summarizeEvaluatorResult(retainedStatus);
+  // --- STAGE 9: RECEIPT MATERIALIZATION ---
+
+  // Determine explicit Outcome & TrustResult (allowing testing overrides)
+  let outcome: Outcome = overrides?.outcome ?? "unverified";
+  let trustStatus: TrustStatus =
+    overrides?.trustResult?.trustStatus ?? "speculative";
+  let degradationFactors: readonly string[] =
+    overrides?.trustResult?.degradationFactors ?? [];
+
+  if (!overrides?.outcome) {
+    if (retainedStatus === "authorized") {
+      outcome = "verified";
+    } else if (retainedStatus === "denied") {
+      outcome = "rejected";
+    } else {
+      outcome = "unverified";
+    }
+  }
+
+  if (!overrides?.trustResult) {
+    if (retainedStatus === "authorized") {
+      trustStatus = "definite";
+      degradationFactors = [];
+    } else if (retainedStatus === "denied") {
+      trustStatus = "speculative";
+      degradationFactors = ["POLICY_DENIED"];
+    } else {
+      trustStatus = "uncertain";
+      degradationFactors = ["POLICY_INDETERMINATE"];
+    }
+  }
+
+  const trustResult: TrustResult = {
+    trustStatus,
+    degradationFactors,
+  };
+
+  // Convert explicit constitutional timestamp to numeric evaluation time coordinate
+  let executionTime = 0;
+  try {
+    const parsedTime = Date.parse(context.constitutionalTimestamp);
+    if (!Number.isNaN(parsedTime) && parsedTime >= 0) {
+      executionTime = parsedTime;
+    }
+  } catch {
+    // Fall back to 0 if parsing fails
+  }
+
+  // Invoke pure, domain-separated cryptographic hashing and summary construction (G-0803, G-0809, G-0816)
+  const hashes = generateReceiptHashes(
+    executionRequest,
+    outcome,
+    trustResult,
+    policyDecisions,
+    pipelineDiagnostics,
+    evaluatedPolicyVersion,
+    executionTime,
+    context.executionId,
+    "1.0.0",
+  );
+
+  const executionReceipt = {
+    receiptId: hashes.receiptId,
+    executionId: context.executionId,
+    runtimeVersion: "1.0.0",
+    inputHash: hashes.inputHash,
+    outputHash: hashes.outputHash,
+    evidenceHash: hashes.evidenceHash,
+    policyVersion: evaluatedPolicyVersion,
+    decisionSummary: hashes.decisionSummary,
+    executionTime,
+    deterministicHash: hashes.deterministicHash,
+  };
+
+  // Perform a safety validation check to guarantee receipt schema compliance
+  const validationReceipt = validateExecutionReceipt(executionReceipt);
+  if (!validationReceipt.ok) {
+    return {
+      ok: false,
+      error: {
+        stage: "Receipt Generation",
+        code: "INVALID_GENERATED_RECEIPT",
+        message: validationReceipt.error.message,
+      },
+      trace,
+    };
+  }
+
+  const executionOutput: ExecutionOutput = {
+    outcome,
+    executionReceipt: validationReceipt.value,
+    evidenceReferences:
+      executionRequest.activeConstitutionalView.evidenceReferences,
+    trustResult,
+    policyDecisions,
+    diagnostics: pipelineDiagnostics,
+  };
 
   return {
     ok: true,
     stage: "Receipt Generation",
     trace,
     outcome: {
-      kind: "deferred",
-      decisionSummary,
-      unresolvedFields: [
-        "receiptId",
-        "executionId",
-        "runtimeVersion",
-        "inputHash",
-        "outputHash",
-        "evidenceHash",
-        "policyVersion",
-        "executionTime",
-        "deterministicHash",
-      ],
+      kind: "materialized",
+      executionOutput,
     },
   };
 }
