@@ -1,4 +1,4 @@
-import { validateExecutionRequest } from "@zyppi/domain";
+import { validateExecutionRequest, verifyEvidenceBundle } from "@zyppi/domain";
 import type { ExecutionContext, PolicyContext } from "@zyppi/domain";
 import type {
   LifecycleStage,
@@ -45,6 +45,7 @@ function summarizeEvaluatorResult(
 export function runInternalPipeline(
   input: unknown,
   overrides?: StageOverrideConfig,
+  evidencePayloads?: ReadonlyMap<string, unknown>,
 ): PipelineResult {
   const trace: LifecycleStage[] = [];
   let retainedStatus: "authorized" | "denied" | "unavailable" = "unavailable";
@@ -178,13 +179,41 @@ export function runInternalPipeline(
     };
   }
 
+  type StageAction = (
+    context: ExecutionContext,
+  ) => { ok: true } | { ok: false; code: string; message: string };
+
   // Helper to standardise failing subsequent unimplemented stages
-  function makeUnimplementedAction(stageName: string) {
+  function makeUnimplementedAction(stageName: string): StageAction {
     if (stageName === "Receipt Generation") {
-      return () => ({ ok: true as const });
+      return () => ({ ok: true });
+    }
+    if (stageName === "Bundle Verification" && evidencePayloads) {
+      return () => {
+        const report = verifyEvidenceBundle(
+          executionRequest.evidenceBundle,
+          evidencePayloads,
+        );
+        if (!report.isValid) {
+          if (report.errorCode === "BUNDLE_LIMIT_EXCEEDED") {
+            return {
+              ok: false,
+              code: "BUNDLE_LIMIT_EXCEEDED",
+              message: "Evidence bundle exceeds the canonical size limit.",
+            };
+          }
+          const failedRecord = report.records.find((r) => !r.valid);
+          return {
+            ok: false,
+            code: failedRecord?.errorCode ?? "BUNDLE_VERIFICATION_FAILED",
+            message: `Runtime evidence verification failed: ${failedRecord?.errorCode || "invalid bundle"}`,
+          };
+        }
+        return { ok: true };
+      };
     }
     return () => ({
-      ok: false as const,
+      ok: false,
       code: `${stageName.toUpperCase().replace(/\s+/g, "_")}_UNAVAILABLE`,
       message: `Substantive ${stageName.toLowerCase()} implementation is not available.`,
     });
