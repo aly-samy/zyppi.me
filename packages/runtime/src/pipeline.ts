@@ -179,12 +179,12 @@ export function runInternalPipeline(
     };
   }
 
-  // Helper to standardise failing subsequent unimplemented stages
-  function makeUnimplementedAction(
-    stageName: string,
-  ): (
+  type StageAction = (
     context: ExecutionContext,
-  ) => { ok: true } | { ok: false; code: string; message: string } {
+  ) => { ok: true } | { ok: false; code: string; message: string };
+
+  // Helper to standardise failing subsequent unimplemented stages
+  function makeUnimplementedAction(stageName: string): StageAction {
     if (stageName === "Receipt Generation") {
       return () => ({ ok: true });
     }
