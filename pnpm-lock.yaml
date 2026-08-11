@@ -102,6 +102,9 @@ importers:
       "@zyppi/domain":
         specifier: workspace:*
         version: link:../domain
+      "@zyppi/runtime":
+        specifier: workspace:*
+        version: link:../runtime
 
 packages:
   "@babel/helper-string-parser@7.29.7":
