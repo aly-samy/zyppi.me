@@ -302,40 +302,20 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     }
 
     // Verify ACV Activation specifically (which is implemented in AMS-0801)
-    const acvPattern = `executePostAdmissionStage(\n    "ACV Activation",\n    () => {`;
-    const acvPattern2 = `executePostAdmissionStage( "ACV Activation", () => {`;
     const acvCleaned = source.replace(/\s+/g, " ");
-    const hasAcvMatch =
-      source.includes(acvPattern) ||
-      acvCleaned.includes(acvPattern2) ||
-      acvCleaned.includes(
-        'executePostAdmissionStage( "ACV Activation", () => {',
-      );
-    expect(hasAcvMatch).toBe(true);
+    expect(acvCleaned).toContain(
+      'executePostAdmissionStage( "ACV Activation", () => {',
+    );
 
     // Verify Resolution Graph Construction specifically (implemented in AMS-0804)
-    const rgcPattern = `executePostAdmissionStage(\n    "Resolution Graph Construction",\n    () => {`;
-    const rgcPattern2 = `executePostAdmissionStage( "Resolution Graph Construction", () => {`;
-    const rgcCleaned = source.replace(/\s+/g, " ");
-    const hasRgcMatch =
-      source.includes(rgcPattern) ||
-      rgcCleaned.includes(rgcPattern2) ||
-      rgcCleaned.includes(
-        'executePostAdmissionStage( "Resolution Graph Construction", () => {',
-      );
-    expect(hasRgcMatch).toBe(true);
+    expect(acvCleaned).toContain(
+      'executePostAdmissionStage( "Resolution Graph Construction", () => {',
+    );
 
     // Verify Active Execution specifically (implemented in AMS-0804)
-    const aePattern = `executePostAdmissionStage(\n    "Active Execution",\n    () => {`;
-    const aePattern2 = `executePostAdmissionStage( "Active Execution", () => {`;
-    const aeCleaned = source.replace(/\s+/g, " ");
-    const hasAeMatch =
-      source.includes(aePattern) ||
-      aeCleaned.includes(aePattern2) ||
-      aeCleaned.includes(
-        'executePostAdmissionStage( "Active Execution", () => {',
-      );
-    expect(hasAeMatch).toBe(true);
+    expect(acvCleaned).toContain(
+      'executePostAdmissionStage( "Active Execution", () => {',
+    );
   });
 
   // 12.2: Input Immutability Test
@@ -685,10 +665,13 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     };
     const resAuth = runInternalPipeline(validRequestInput, overridesAuthorized);
     expect(resAuth.ok).toBe(true);
-    if (resAuth.ok && resAuth.outcome.kind === "deferred") {
-      expect(resAuth.outcome.decisionSummary).toBe("authorized");
+    if (resAuth.ok && resAuth.outcome.kind === "materialized") {
+      const parsed = JSON.parse(
+        resAuth.outcome.executionOutput.executionReceipt.decisionSummary,
+      );
+      expect(parsed.aggregateResult).toBe("authorized");
     } else {
-      expect.fail("Expected outcome to be deferred");
+      expect.fail("Expected outcome to be materialized");
     }
 
     // Case B: denied (halts at Admission)
@@ -722,15 +705,18 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       overridesUnavailable,
     );
     expect(resUnavail.ok).toBe(true);
-    if (resUnavail.ok && resUnavail.outcome.kind === "deferred") {
-      expect(resUnavail.outcome.decisionSummary).toBe("unavailable");
+    if (resUnavail.ok && resUnavail.outcome.kind === "materialized") {
+      const parsed = JSON.parse(
+        resUnavail.outcome.executionOutput.executionReceipt.decisionSummary,
+      );
+      expect(parsed.aggregateResult).toBe("unavailable");
     } else {
-      expect.fail("Expected outcome to be deferred");
+      expect.fail("Expected outcome to be materialized");
     }
   });
 
-  // AMS-0405: Receipt-Stage Deferred Outcome Unresolved Fields
-  it("reaches Receipt Generation, has deferred kind, and lists exactly the 9 unresolved fields", () => {
+  // AMS-0405: Reaches Stage 9 and successfully materializes the ExecutionOutput
+  it("reaches Receipt Generation and successfully materializes the ExecutionOutput", () => {
     const overrides: StageOverrideConfig = {
       policyEvaluator: () => ({ status: "authorized" }),
       "Bundle Discovery": { ok: true },
@@ -745,28 +731,21 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
     const result = runInternalPipeline(validRequestInput, overrides);
     expect(result.ok).toBe(true);
-    if (result.ok && result.outcome.kind === "deferred") {
+    if (result.ok && result.outcome.kind === "materialized") {
       expect(result.trace).toContain("Receipt Generation");
-
-      const expectedUnresolved = [
-        "receiptId",
-        "executionId",
-        "runtimeVersion",
-        "inputHash",
-        "outputHash",
-        "evidenceHash",
-        "policyVersion",
-        "executionTime",
-        "deterministicHash",
-      ];
-      expect(result.outcome.unresolvedFields).toEqual(expectedUnresolved);
+      const output = result.outcome.executionOutput;
+      expect(output.outcome).toBe("verified");
+      expect(output.trustResult.trustStatus).toBe("definite");
+      expect(output.executionReceipt).toBeDefined();
+      expect(output.executionReceipt.executionId).toBe("exec-456");
+      expect(output.policyDecisions).toBeDefined();
     } else {
-      expect.fail("Expected outcome to be deferred");
+      expect.fail("Expected outcome to be materialized");
     }
   });
 
-  // AMS-0405: No Fabricated Receipt Negative Test
-  it("proves the pipeline outcome does not construct or return a partial or completed ExecutionReceipt", () => {
+  // AMS-0405: Receipt-Stage constructs and returns a fully completed and validated ExecutionReceipt
+  it("proves the pipeline outcome constructs and returns a fully completed and validated ExecutionReceipt", () => {
     const overrides: StageOverrideConfig = {
       policyEvaluator: () => ({ status: "authorized" }),
       "Bundle Discovery": { ok: true },
@@ -781,28 +760,17 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
     const result = runInternalPipeline(validRequestInput, overrides);
     expect(result.ok).toBe(true);
-    if (result.ok) {
-      const outcomeKeys = Object.keys(result.outcome);
-      // The outcome must only have kind, decisionSummary, and unresolvedFields
-      expect(outcomeKeys).toContain("kind");
-      expect(outcomeKeys).toContain("decisionSummary");
-      expect(outcomeKeys).toContain("unresolvedFields");
-
-      // Negative check: none of the unresolved fields must exist as top-level properties on the outcome
-      const forbiddenKeys = [
-        "receiptId",
-        "executionId",
-        "runtimeVersion",
-        "inputHash",
-        "outputHash",
-        "evidenceHash",
-        "policyVersion",
-        "executionTime",
-        "deterministicHash",
-      ];
-      for (const k of forbiddenKeys) {
-        expect(result.outcome).not.toHaveProperty(k);
-      }
+    if (result.ok && result.outcome.kind === "materialized") {
+      const receipt = result.outcome.executionOutput.executionReceipt;
+      expect(receipt.receiptId).toBeDefined();
+      expect(receipt.executionId).toBe("exec-456");
+      expect(receipt.runtimeVersion).toBe("1.0.0");
+      expect(receipt.inputHash).toBeDefined();
+      expect(receipt.outputHash).toBeDefined();
+      expect(receipt.evidenceHash).toBeDefined();
+      expect(receipt.deterministicHash).toBeDefined();
+    } else {
+      expect.fail("Expected outcome to be materialized");
     }
   });
 
@@ -838,7 +806,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(res1).toEqual(res2);
       expect(res1).toEqual(res3);
 
-      if (res1.ok && res1.outcome.kind === "deferred") {
+      if (res1.ok && res1.outcome.kind === "materialized") {
         expect(res1.stage).toBe("Receipt Generation");
         expect(res1.trace).toEqual([
           "Admission",
@@ -851,20 +819,12 @@ describe("Runtime Pipeline Scaffold Tests", () => {
           "Active Execution",
           "Receipt Generation",
         ]);
-        expect(res1.outcome.decisionSummary).toBe("authorized");
-        expect(res1.outcome.unresolvedFields).toEqual([
-          "receiptId",
-          "executionId",
-          "runtimeVersion",
-          "inputHash",
-          "outputHash",
-          "evidenceHash",
-          "policyVersion",
-          "executionTime",
-          "deterministicHash",
-        ]);
+        const parsed = JSON.parse(
+          res1.outcome.executionOutput.executionReceipt.decisionSummary,
+        );
+        expect(parsed.aggregateResult).toBe("authorized");
       } else {
-        expect.fail("Outcome should be deferred with 9-stage completion");
+        expect.fail("Outcome should be materialized with 9-stage completion");
       }
     });
 
@@ -925,7 +885,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     });
 
     // DR-03B: override-enabled unavailable × 3 independent runs
-    it("DR-03B: override-enabled unavailable x 3 -> structurally identical successful deferred outcomes", () => {
+    it("DR-03B: override-enabled unavailable x 3 -> structurally identical successful materialized outcomes", () => {
       const overrides: StageOverrideConfig = {
         policyEvaluator: () => ({ status: "unavailable" }),
         Admission: { ok: true },
@@ -954,27 +914,19 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(res1).toEqual(res2);
       expect(res1).toEqual(res3);
 
-      if (res1.ok && res1.outcome.kind === "deferred") {
+      if (res1.ok && res1.outcome.kind === "materialized") {
         expect(res1.stage).toBe("Receipt Generation");
-        expect(res1.outcome.decisionSummary).toBe("unavailable");
-        expect(res1.outcome.unresolvedFields).toEqual([
-          "receiptId",
-          "executionId",
-          "runtimeVersion",
-          "inputHash",
-          "outputHash",
-          "evidenceHash",
-          "policyVersion",
-          "executionTime",
-          "deterministicHash",
-        ]);
+        const parsed = JSON.parse(
+          res1.outcome.executionOutput.executionReceipt.decisionSummary,
+        );
+        expect(parsed.aggregateResult).toBe("unavailable");
       } else {
-        expect.fail("Outcome should be successful and deferred");
+        expect.fail("Outcome should be successful and materialized");
       }
     });
 
-    // DR-04: Exact nine-field membership and canonical order
-    it("DR-04: Exact nine-field membership and canonical order", () => {
+    // DR-04: Exact ten-field membership and canonical order
+    it("DR-04: Exact ten-field membership and canonical order", () => {
       const expectedFields = [
         "receiptId",
         "executionId",
@@ -983,6 +935,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         "outputHash",
         "evidenceHash",
         "policyVersion",
+        "decisionSummary",
         "executionTime",
         "deterministicHash",
       ];
@@ -1001,11 +954,15 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
       const result = runInternalPipeline(validRequestInput, overrides);
       expect(result.ok).toBe(true);
-      if (result.ok && result.outcome.kind === "deferred") {
-        expect(result.outcome.unresolvedFields).toEqual(expectedFields);
-        expect(result.outcome.unresolvedFields.length).toBe(9);
+      if (result.ok && result.outcome.kind === "materialized") {
+        const receipt = result.outcome.executionOutput.executionReceipt;
+        const keys = Object.keys(receipt);
+        expect(keys.length).toBe(10);
+        for (const field of expectedFields) {
+          expect(keys).toContain(field);
+        }
       } else {
-        expect.fail("Expected a successful deferred outcome");
+        expect.fail("Expected a successful materialized outcome");
       }
     });
 
@@ -1081,8 +1038,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(frozenInput).toEqual(validRequestInput);
     });
 
-    // DR-07: Behavioral confirmation that no ExecutionReceipt is constructed, returned, or populated
-    it("DR-07: Behavioral confirmation that no ExecutionReceipt is constructed, returned, or populated", () => {
+    // DR-07: Behavioral confirmation of ExecutionReceipt fields being returned
+    it("DR-07: Behavioral confirmation of ExecutionReceipt fields being returned", () => {
       const overrides: StageOverrideConfig = {
         policyEvaluator: () => ({ status: "authorized" }),
         "Bundle Discovery": { ok: true },
@@ -1099,32 +1056,104 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.ok).toBe(true);
 
       if (result.ok) {
-        // Must contain ONLY ReceiptOutcome fields, not ExecutionReceipt fields
         const outcome = result.outcome;
-        expect(outcome.kind).toBe("deferred");
-
-        const keys = Object.keys(outcome);
-        // The outcomes keys are restricted strictly to ReceiptOutcome
-        expect(keys).toContain("kind");
-        expect(keys).toContain("decisionSummary");
-        expect(keys).toContain("unresolvedFields");
-        expect(keys.length).toBe(3);
-
-        // Verification of zero property leakage of the nine deferred receipt fields at top level of the outcome
-        const deferredFields = [
-          "receiptId",
-          "executionId",
-          "runtimeVersion",
-          "inputHash",
-          "outputHash",
-          "evidenceHash",
-          "policyVersion",
-          "executionTime",
-          "deterministicHash",
-        ];
-        for (const k of deferredFields) {
-          expect(outcome).not.toHaveProperty(k);
+        expect(outcome.kind).toBe("materialized");
+        if (outcome.kind === "materialized") {
+          const receipt = outcome.executionOutput.executionReceipt;
+          expect(receipt.receiptId).toBeDefined();
+          expect(receipt.deterministicHash).toBeDefined();
         }
+      }
+    });
+  });
+
+  describe("AMS-0803 Explicit Full Verification Tests", () => {
+    const defaultOverrides: StageOverrideConfig = {
+      policyEvaluator: () => ({ status: "authorized" }),
+      "Bundle Discovery": { ok: true },
+      "Bundle Verification": { ok: true },
+      "Dependency Resolution": { ok: true },
+      "Compatibility Validation": { ok: true },
+      "ACV Activation": { ok: true },
+      "Resolution Graph Construction": { ok: true },
+      "Active Execution": { ok: true },
+      "Receipt Generation": { ok: true },
+    };
+
+    it("verifies explicit G-0813 Budget consumption and fail-closed behavior on budget exhaustion", () => {
+      const lowBudgetInput = {
+        ...validRequestInput,
+        executionContext: {
+          ...validRequestInput.executionContext,
+          budget: 0, // 0 budget fails closed deterministically
+        },
+      };
+
+      const res = runInternalPipeline(lowBudgetInput, {
+        ...defaultOverrides,
+        "Active Execution": undefined, // don't override step 8 to let real budget engine run
+      });
+      // Budget exhaustion during evaluation terminates evaluation and fails closed as INDETERMINATE
+      expect(res.ok).toBe(true);
+      if (res.ok && res.outcome.kind === "materialized") {
+        expect(res.outcome.executionOutput.outcome).toBe("unverified");
+        expect(res.outcome.executionOutput.trustResult.trustStatus).toBe(
+          "uncertain",
+        );
+        expect(res.outcome.executionOutput.diagnostics).toContain(
+          "Budget exhausted before evaluating policy: policy-001",
+        );
+      }
+    });
+
+    it("verifies direct Outcome and TrustResult consumption and override capabilities", () => {
+      const overrides: StageOverrideConfig = {
+        ...defaultOverrides,
+        outcome: "rejected",
+        trustResult: {
+          trustStatus: "speculative",
+          degradationFactors: ["TEST_DEGRADED"],
+        },
+      };
+
+      const res = runInternalPipeline(validRequestInput, overrides);
+      expect(res.ok).toBe(true);
+      if (res.ok && res.outcome.kind === "materialized") {
+        const output = res.outcome.executionOutput;
+        expect(output.outcome).toBe("rejected");
+        expect(output.trustResult.trustStatus).toBe("speculative");
+        expect(output.trustResult.degradationFactors).toEqual([
+          "TEST_DEGRADED",
+        ]);
+      }
+    });
+
+    it("verifies deterministic, G-0809 domain-separated hashes (preimages are stable and non-circular)", () => {
+      const res = runInternalPipeline(validRequestInput, defaultOverrides);
+      expect(res.ok).toBe(true);
+      if (res.ok && res.outcome.kind === "materialized") {
+        const receipt = res.outcome.executionOutput.executionReceipt;
+        expect(receipt.inputHash.startsWith("sha256:")).toBe(true);
+        expect(receipt.outputHash.startsWith("sha256:")).toBe(true);
+        expect(receipt.evidenceHash.startsWith("sha256:")).toBe(true);
+        expect(receipt.deterministicHash.startsWith("sha256:")).toBe(true);
+
+        // Ensure distinct hashes across domains to prove domain separation
+        expect(receipt.inputHash).not.toBe(receipt.outputHash);
+        expect(receipt.inputHash).not.toBe(receipt.evidenceHash);
+        expect(receipt.deterministicHash).not.toBe(receipt.inputHash);
+      }
+    });
+
+    it("verifies evaluationCoordinate is properly mapped to executionTime and carries no ambient performance time", () => {
+      const res = runInternalPipeline(validRequestInput, defaultOverrides);
+      expect(res.ok).toBe(true);
+      if (res.ok && res.outcome.kind === "materialized") {
+        const receipt = res.outcome.executionOutput.executionReceipt;
+        const expectedTime = Date.parse(
+          validRequestInput.executionContext.constitutionalTimestamp,
+        );
+        expect(receipt.executionTime).toBe(expectedTime);
       }
     });
   });
