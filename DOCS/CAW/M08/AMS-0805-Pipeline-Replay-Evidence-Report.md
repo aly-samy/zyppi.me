@@ -40,6 +40,7 @@ No source code in `packages/runtime/` or `packages/domain/` was modified. The re
 ## 5. Contracts Consumed
 
 The suite consumes existing, unaltered constitutional contracts, including:
+
 - `ExecutionRequest` (domain)
 - `ExecutionContext` (domain)
 - `PipelineResult` (runtime/types)
@@ -66,23 +67,24 @@ No synthetic `ReplayInput` or duplicate constitutional representations were crea
 
 ## 7. Replay Vector Catalogue
 
-| Vector ID | Description | Status |
-|---|---|---|
-| **REPLAY-001** | Baseline: Execute same valid request twice. | **BLOCKED** |
-| **REPLAY-002** | Policy DENY: Stage 8 policy DENY execution. | **BLOCKED** |
-| **REPLAY-003** | Policy INDETERMINATE: Stage 8 policy INDETERMINATE. | **BLOCKED** |
-| **REPLAY-004** | Deterministic Admission/Integrity Failure: Stage 1 error. | **TESTED & VERIFIED** |
-| **REPLAY-005** | Budget Exhaustion: Stage 8 G-0813 active exhaustion. | **BLOCKED** |
+| Vector ID      | Description                                                                                            | Status                |
+| -------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
+| **REPLAY-001** | Baseline: Execute same valid request twice.                                                            | **BLOCKED**           |
+| **REPLAY-002** | Policy DENY: Stage 8 policy DENY execution.                                                            | **BLOCKED**           |
+| **REPLAY-003** | Policy INDETERMINATE: Stage 8 policy INDETERMINATE.                                                    | **BLOCKED**           |
+| **REPLAY-004** | Deterministic Admission/Integrity Failure: Stage 1 error.                                              | **TESTED & VERIFIED** |
+| **REPLAY-005** | Budget Exhaustion: Stage 8 G-0813 active exhaustion.                                                   | **BLOCKED**           |
 | **REPLAY-006** | Object Property Permutation: Semantically identical requests with different property insertion orders. | **TESTED & VERIFIED** |
-| **REPLAY-007** | Collection Permutation: Permuted `evidenceRecords` inside `evidenceBundle`. | **TESTED & VERIFIED** |
-| **REPLAY-008** | A-B-A Isolation: Sequential invocation sequence `Run(A) -> Run(B) -> Run(A)`. | **TESTED & VERIFIED** |
-| **AC-09** | Temporal Isolation: Identical explicit constitutional timestamp under ambient time variations. | **TESTED & VERIFIED** |
+| **REPLAY-007** | Collection Permutation: Permuted `evidenceRecords` inside `evidenceBundle`.                            | **TESTED & VERIFIED** |
+| **REPLAY-008** | A-B-A Isolation: Sequential invocation sequence `Run(A) -> Run(B) -> Run(A)`.                          | **TESTED & VERIFIED** |
+| **AC-09**      | Temporal Isolation: Identical explicit constitutional timestamp under ambient time variations.         | **TESTED & VERIFIED** |
 
 ---
 
 ## 8. Oracle Implementation
 
 Our oracle utilizes a strict, two-layer design:
+
 - **Layer A (Structural):** Verifies that the returned `PipelineResult` structures are value-equivalent (exact error code, stage, message, and trace matching) using Deep Equal (`toEqual`).
 - **Layer B (Cryptographic):** Verifies that the serialized ExecutionRequests have identical canonical RFC 8785 representation and identical computed SHA-256 digests. For failure results (where no output receipt is generated), cryptographic comparison is applied to the input state to guarantee deterministic mapping.
 
@@ -107,7 +109,10 @@ function assertStructuralEquality<T>(a: T, b: T): void {
 All input structures under permutation test cases utilize JCS serialization and SHA-256 hashing to assert absolute identity-by-hash.
 
 ```typescript
-function assertCryptographicEquality(reqA: ExecutionRequest, reqB: ExecutionRequest): void {
+function assertCryptographicEquality(
+  reqA: ExecutionRequest,
+  reqB: ExecutionRequest,
+): void {
   const serializedA = serializeExecutionRequest(reqA);
   const serializedB = serializeExecutionRequest(reqB);
   const hashA = computeSha256(serializedA);
@@ -137,6 +142,7 @@ Statically audited the codebase to confirm that zero environment-dependent clock
 ## 13. Permutation Evidence
 
 **TESTED & VERIFIED.**
+
 - **Object properties:** Permuted the property insertion order of `executionContext` (e.g. putting `versions` before `executionId`). Verified that JCS serialization handles key sorting canonically and yields identical SHA-256 hashes and structural pipeline outcomes.
 - **Collections:** Permuted the `evidenceRecords` inside `evidenceBundle` (which the serializer explicitly sorts lexicographically). Verified that JCS serialization yields identical SHA-256 hashes and identical pipeline outcomes.
 
@@ -152,6 +158,7 @@ Proven that Admission stage validates the `budget` input contract, rejecting inv
 ## 15. Test Results
 
 Vitest successfully discovered and executed all 9 tests in `@zyppi/testing` with 100% success rate:
+
 ```bash
 ✓ packages/testing/src/replay/pipelineReplay.test.ts (9 tests) 19ms
   ✓ REPLAY-001 — Baseline [BLOCKED]
@@ -177,24 +184,28 @@ The replay suite is 100% pure, running strictly in-memory and in synchronous iso
 ## 17. Blocked or Not-Applicable Vectors
 
 ### REPLAY-001 — Baseline [BLOCKED]
+
 - **Intended Behavior:** Execute same valid constitutional request twice to yield equivalent successful `ExecutionOutput`, receipt material, and hashes.
 - **Authority:** Section 6, REPLAY-001.
 - **Evidence of Blockage:** Stage 2 (Bundle Discovery), Stage 4 (Dependency Resolution), and Stage 5 (Compatibility Validation) are completely unimplemented in the production Runtime pipeline and natively return `_UNAVAILABLE` error codes. End-to-end execution of a successful 9-stage pipeline is therefore unconstructible natively.
 - **Why it requires semantic invention:** To force a native successful run, one would need to write synthetic, unratified implementations of Stages 2, 4, and 5.
 
 ### REPLAY-002 — Policy DENY [BLOCKED]
+
 - **Intended Behavior:** Admitted execution reaching Stage 8 and natively evaluating to aggregate `DENY`.
 - **Authority:** Section 6, REPLAY-002.
 - **Evidence of Blockage:** Same as REPLAY-001.
 - **Why it requires semantic invention:** Same as REPLAY-001.
 
 ### REPLAY-003 — Policy INDETERMINATE [BLOCKED]
+
 - **Intended Behavior:** Admitted execution reaching Stage 8 and natively evaluating to aggregate `INDETERMINATE`.
 - **Authority:** Section 6, REPLAY-003.
 - **Evidence of Blockage:** Same as REPLAY-001.
 - **Why it requires semantic invention:** Same as REPLAY-001.
 
 ### REPLAY-005 — Budget Exhaustion [BLOCKED]
+
 - **Intended Behavior:** Native Stage 8 active execution budget exhaustion under G-0813.
 - **Authority:** Section 6, REPLAY-005.
 - **Evidence of Blockage:** Same as REPLAY-001.

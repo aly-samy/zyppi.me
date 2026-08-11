@@ -111,7 +111,10 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
   }
 
   // Oracle Layer B: Cryptographic Equality Verification for input
-  function assertCryptographicEquality(reqA: ExecutionRequest, reqB: ExecutionRequest): void {
+  function assertCryptographicEquality(
+    reqA: ExecutionRequest,
+    reqB: ExecutionRequest,
+  ): void {
     const serializedA = serializeExecutionRequest(reqA);
     const serializedB = serializeExecutionRequest(reqB);
     const hashA = computeSha256(serializedA);
