@@ -44,6 +44,26 @@ Done when:    Replay passes, receipt schema documented, CI green,
               performance baseline recorded
 ```
 
+## M08.5 AI Mandate Index (`AMS-0851` through `AMS-0859`)
+
+The `AMS-0851` through `AMS-0859` mandate series corresponds strictly to tasks `IT-0851` through `IT-0859` established in CAW-011 for Milestone M08.5 (Z-PROF Profile Architecture).
+
+```
+AMS-0851 → IT-0851  Profile Architecture Semantic & Boundary Closure Preparation
+AMS-0852 → IT-0852  Domain Template Card Specification & Requirement Binding Model
+AMS-0853 → IT-0853  CompositionManifest Specification & Governed Reference Model
+AMS-0854 → IT-0854  Interrogation Boundary & Application/Runtime Resolution Model
+AMS-0855 → IT-0855  Registry Generalization, Compatibility & Versioning Boundaries
+AMS-0856 → IT-0856  Epistemic, Temporal & Provenance Boundary Specification
+AMS-0857 → IT-0857  ARM Projection, SIOS Translation & RSN/Intelligence Projection Boundaries
+AMS-0858 → IT-0858  Shadow / Wedge Validation Protocol Specification
+AMS-0859 → IT-0859  Final Z-PROF Architecture & Contract Readiness Audit
+```
+
+**Implementation Authority Notice:**
+
+> M08.5 planning and mandate index recognition do NOT grant implementation authority. Individual AMS mandates remain unissued (`Implementation Authority: NONE`) until explicit Council decisions, architectural specifications, and contracts are closed. An AI agent shall NOT execute implementation work under M08.5 until an individual AMS mandate is explicitly issued by human/Council authority.
+
 ## Assignment Rule
 
 An AI agent is never assigned a whole Milestone, package, or subsystem — one `IT-xxxx` only, per CEngS-003 §3. On completion: Review → Validation → Merge → next task (CEngS-102 §4–6). This is what keeps progress deterministic and architectural drift near zero — don't shortcut it even when a task looks trivial.

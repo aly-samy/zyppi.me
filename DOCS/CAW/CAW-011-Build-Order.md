@@ -121,13 +121,29 @@ _(Depends on M04, M06, M07)_
 | IT-0804 | Policy evaluation integration       | IT-0803, IT-0404 | M    | AMS-0804 | ☐      |
 | IT-0805 | Pipeline replay tests               | IT-0804          | S    | AMS-0805 | ☐      |
 
+## M08.5 — Z-PROF Profile Architecture
+
+_(Depends on M08 — Implementation Authority: NONE until individual AMS mandates are authorized)_
+
+| ID      | Title                                                                     | Depends On                | Size | AMS      | Status |
+| ------- | ------------------------------------------------------------------------- | ------------------------- | ---- | -------- | ------ |
+| IT-0851 | Profile Architecture Semantic & Boundary Closure Preparation              | IT-0805                   | S    | AMS-0851 | ☐      |
+| IT-0852 | Domain Template Card Specification & Requirement Binding Model            | IT-0851                   | S    | AMS-0852 | ☐      |
+| IT-0853 | CompositionManifest Specification & Governed Reference Model              | IT-0851                   | S    | AMS-0853 | ☐      |
+| IT-0854 | Interrogation Boundary & Application/Runtime Resolution Model             | IT-0851                   | S    | AMS-0854 | ☐      |
+| IT-0855 | Registry Generalization, Compatibility & Versioning Boundaries            | IT-0854                   | S    | AMS-0855 | ☐      |
+| IT-0856 | Epistemic, Temporal & Provenance Boundary Specification                   | IT-0854                   | S    | AMS-0856 | ☐      |
+| IT-0857 | ARM Projection, SIOS Translation & RSN/Intelligence Projection Boundaries | IT-0854                   | S    | AMS-0857 | ☐      |
+| IT-0858 | Shadow / Wedge Validation Protocol Specification                          | IT-0855, IT-0856, IT-0857 | M    | AMS-0858 | ☐      |
+| IT-0859 | Final Z-PROF Architecture & Contract Readiness Audit                      | IT-0858                   | S    | AMS-0859 | ☐      |
+
 ## M09 — API Layer
 
-_(Depends on M08)_
+_(Depends on M08.5)_
 
 | ID      | Title                                               | Depends On   | Size | AMS      | Status |
 | ------- | --------------------------------------------------- | ------------ | ---- | -------- | ------ |
-| IT-0901 | REST endpoint scaffold (`GET /v1/resolve`, CAW-006) | IT-0805      | S    | AMS-0901 | ☐      |
+| IT-0901 | REST endpoint scaffold (`GET /v1/resolve`, CAW-006) | IT-0859      | S    | AMS-0901 | ☐      |
 | IT-0902 | Request validation                                  | IT-0901      | S    | AMS-0902 | ☐      |
 | IT-0903 | OpenAPI spec generation                             | IT-0901      | S    | AMS-0903 | ☐      |
 | IT-0904 | Error handling (CAW-006 table)                      | IT-0901      | S    | AMS-0904 | ☐      |
@@ -203,9 +219,9 @@ _(Depends on M14)_
 
 ```
 M01 → M02 → M03 ─┬─→ M04 ─┐
-                  ├─→ M05 ─┼─→ M08 → M09 → M10 → M11 ─┬─→ M13 ─┐
-                  └─→ M06 ─┘         M07 ──────────────┘        ├─→ M14 → M15
-                                                          M12 ───┘
+                  ├─→ M05 ─┼─→ M08 ──► M08.5 ──► M09 → M10 → M11 ─┬─→ M13 ─┐
+                  └─→ M06 ─┘           M07 ────────────────────────┘        ├─→ M14 → M15
+                                                            M12 ────────────┘
 ```
 
 M03's downstream (M04, M05, M06) may run in parallel once M03 is complete. M07 may run parallel with M06 (both depend only on M03/M05). M12 runs alongside M09–M11, not after them.

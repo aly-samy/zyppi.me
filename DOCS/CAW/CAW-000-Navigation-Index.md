@@ -54,6 +54,7 @@ Before creating any new document, ask: does this define a permanent engineering 
 - **Database work:** CAW-000 → CAW-008
 - **Edge routing work:** CAW-000 → CAW-010
 - **Planning the next block of work:** CAW-000 → CAW-011
+- **Working on Profile Architecture (M08.5):** CAW-000 → CAW-005 → M08.5-PREP → M08.5-PLAN → Council decisions → AMS-085x
 - **Validating the wedge is actually done:** CAW-000 → CAW-013
 
 ## Relationship to CEngS
