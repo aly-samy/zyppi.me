@@ -27,6 +27,7 @@ import type {
   BoundConstitutionalPayload,
   CompositionResolutionResult,
   CompositionError,
+  GenericCompositionOptions,
 } from "./types.js";
 import { GS1_DOMAIN_TEMPLATE_CARD } from "./fixtures/gs1Dtc.js";
 import {
@@ -70,19 +71,21 @@ export type ApplicationCompositionBridgeResult =
     };
 
 /**
- * Application Composition Resolver for GS1 Z-PROF Bridge (AMS-0853).
+ * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854).
  *
  * Owned strictly by the Application layer.
- * Connects GS1 Z-PROF static declarations to existing Application resolution and Runtime substrate.
+ * Connects Z-PROF static domain declarations (GS1, DPP, etc.) to existing Application
+ * resolution and Runtime substrate without branching on domain identifiers or
+ * multiplying constitutional organs.
  */
 export class ApplicationCompositionResolver {
   /**
-   * Resolves structural composition and validates inputs against static GS1 DTC & Epistemic Requirements.
+   * Resolves structural composition and validates inputs against static DTC & Epistemic Requirements.
    * Consumes existing Registry and Evidence mechanisms read-only.
    * Preserves epistemic uncertainty without coercing states into false or inventing fallback facts.
    */
   public async resolveComposition(
-    options: GS1CompositionOptions,
+    options: GenericCompositionOptions | GS1CompositionOptions,
   ): Promise<CompositionResolutionResult> {
     const dtc = options.dtcFixture ?? GS1_DOMAIN_TEMPLATE_CARD;
     const reqs = options.epistemicRequirementsFixtures ?? [
@@ -91,7 +94,7 @@ export class ApplicationCompositionResolver {
     ];
 
     // 1. Structural Validation of DTC
-    if (dtc.dtcId !== GS1_DOMAIN_TEMPLATE_CARD.dtcId) {
+    if (!dtc.dtcId || !dtc.dtcId.startsWith("dtc:zyppi:domain:")) {
       return {
         ok: false,
         error: {
@@ -113,7 +116,6 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // Check for prohibited capability references or malformed requirements
     if (dtc.epistemicRequirements.length === 0) {
       return {
         ok: false,
@@ -149,44 +151,72 @@ export class ApplicationCompositionResolver {
           code: "missing",
           category: "Composition Failure",
           message: "Registry state not found for the supplied identifier",
-          requirementId: "epistemic:req:gtin_identification:v1",
+          requirementId: reqs[0]?.requirementId ?? "epistemic:req:unknown:v1",
         },
         epistemicStatus: "UNAVAILABLE",
       };
     }
 
-    // 3. Epistemic Requirements Verification against retrieved facts
-    // Verify mandatory fact: primaryIdentifier.gtin14
-    if (!retrievedState.identity || !retrievedState.identity.identityId) {
-      return {
-        ok: false,
-        error: {
-          code: "missing",
-          category: "Composition Failure",
-          message:
-            "Mandatory fact primaryIdentifier.gtin14 is missing from registry identity",
-          requirementId: "epistemic:req:gtin_identification:v1",
-        },
-        epistemicStatus: "UNKNOWN",
-      };
-    }
-
-    // Verify mandatory fact: authorityId for brand owner
-    if (
-      !retrievedState.authorities ||
-      retrievedState.authorities.length === 0
-    ) {
-      return {
-        ok: false,
-        error: {
-          code: "missing",
-          category: "Composition Failure",
-          message:
-            "Mandatory fact authorityId is missing from registry authorities",
-          requirementId: "epistemic:req:brand_owner_authority:v1",
-        },
-        epistemicStatus: "UNAVAILABLE",
-      };
+    // 3. Epistemic Requirements Verification against retrieved facts (Structural & Domain-Agnostic)
+    for (const req of reqs) {
+      for (const fact of req.requiredFacts) {
+        if (fact.optionality === "MANDATORY") {
+          if (fact.factKey.startsWith("primaryIdentifier")) {
+            if (
+              !retrievedState.identity ||
+              !retrievedState.identity.identityId
+            ) {
+              return {
+                ok: false,
+                error: {
+                  code: "missing",
+                  category: "Composition Failure",
+                  message: `Mandatory fact ${fact.factKey} is missing from registry identity`,
+                  requirementId: req.requirementId,
+                },
+                epistemicStatus: "UNKNOWN",
+              };
+            }
+          } else if (fact.factKey === "authorityId") {
+            if (
+              !retrievedState.authorities ||
+              retrievedState.authorities.length === 0
+            ) {
+              return {
+                ok: false,
+                error: {
+                  code: "missing",
+                  category: "Composition Failure",
+                  message:
+                    "Mandatory fact authorityId is missing from registry authorities",
+                  requirementId: req.requirementId,
+                },
+                epistemicStatus: "UNAVAILABLE",
+              };
+            }
+          } else if (fact.factKey === "materialComposition") {
+            const hasMaterialCap = retrievedState.capabilities?.some(
+              (c) =>
+                c.scope.includes("material") ||
+                c.scope.includes("composition") ||
+                c.capabilityId.includes("material"),
+            );
+            if (!hasMaterialCap) {
+              return {
+                ok: false,
+                error: {
+                  code: "missing",
+                  category: "Composition Failure",
+                  message:
+                    "Mandatory fact materialComposition is missing from registry capabilities",
+                  requirementId: req.requirementId,
+                },
+                epistemicStatus: "UNAVAILABLE",
+              };
+            }
+          }
+        }
+      }
     }
 
     // 4. Resolve Evidence Bundle & Payloads using existing Evidence mechanisms
@@ -285,10 +315,12 @@ export class ApplicationCompositionResolver {
       applicablePolicies: retrievedState.applicablePolicies,
     };
 
+    const domainSlug = dtc.domainIdentifier.replace("domain:", "");
+
     // 6. Build Application-layer CompositionManifest
     const manifest: CompositionManifest = Object.freeze({
       $schema: "https://zyppi.org/schemas/v1/composition_manifest.json",
-      manifestId: `manifest:zyppi:gs1_trade_item:v1:${options.executionId}`,
+      manifestId: `manifest:zyppi:${domainSlug}_trade_item:v1:${options.executionId}`,
       dtcReference: Object.freeze({
         dtcId: dtc.dtcId,
         version: dtc.version,
@@ -367,7 +399,7 @@ export class ApplicationCompositionResolver {
     // 7. Build Bound Constitutional Payload
     const boundPayload: BoundConstitutionalPayload = Object.freeze({
       $schema: "https://zyppi.org/schemas/v1/bound_payload.json",
-      payloadId: `bound:payload:gs1:${options.executionId}`,
+      payloadId: `bound:payload:${domainSlug}:${options.executionId}`,
       manifestId: manifest.manifestId,
       resolvedActiveConstitutionalView,
       resolvedEvidenceBundle: evidenceBundle,
@@ -393,7 +425,7 @@ export class ApplicationCompositionResolver {
    * Resolves composition, constructs ExecutionRequest, and executes via existing Runtime substrate.
    */
   public async composeAndExecute(
-    options: GS1CompositionOptions,
+    options: GenericCompositionOptions | GS1CompositionOptions,
   ): Promise<ApplicationCompositionBridgeResult> {
     const res = await this.resolveComposition(options);
     if (!res.ok) {

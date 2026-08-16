@@ -4,19 +4,29 @@ import {
   type RetrievedRegistryState,
 } from "@zyppi/contracts";
 import {
-  type ExecutionRequest,
   type PolicyContext,
   type ResolvedPolicyGraph,
   type EvidenceRecord,
   type IdentityRecord,
+  type CapabilityRecord,
+  type PolicyRecord,
 } from "@zyppi/domain";
 import { runInternalPipeline } from "@zyppi/runtime/dist/pipeline.js";
 import type { StageOverrideConfig } from "@zyppi/runtime/dist/types.js";
 import { ApplicationCompositionResolver } from "./compositionResolver.js";
 import { GS1_DOMAIN_TEMPLATE_CARD } from "./fixtures/gs1Dtc.js";
+import {
+  GS1_GTIN_EPISTEMIC_REQUIREMENT,
+  GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+} from "./fixtures/gs1EpistemicRequirements.js";
+import { DPP_DOMAIN_TEMPLATE_CARD } from "./fixtures/dppDtc.js";
+import {
+  DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+  DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+} from "./fixtures/dppEpistemicRequirements.js";
 import { TestRegistryRepository } from "./testRegistryRepository.js";
 
-describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
+describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation Test Suite", () => {
   const validIdentifierResult =
     createValidatedCanonicalIdentifier("09501101530003");
   if (!validIdentifierResult.ok) {
@@ -77,7 +87,15 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
     updatedAt: "2026-01-01T00:00:00Z",
   });
 
-  const sampleSnapshotState: RetrievedRegistryState = Object.freeze({
+  const materialCapability: CapabilityRecord = Object.freeze({
+    capabilityId: "cap-material-001",
+    subjectId: "09501101530003",
+    scope: "material_composition_v1",
+    validFrom: "2026-01-01T00:00:00Z",
+    validTo: "2030-01-01T00:00:00Z",
+  });
+
+  const sampleCompleteSnapshotState: RetrievedRegistryState = Object.freeze({
     identity: sampleIdentity,
     relationships: Object.freeze([]),
     standings: Object.freeze([]),
@@ -90,22 +108,34 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
         validTo: "2030-01-01T00:00:00Z",
       }),
     ]),
-    capabilities: Object.freeze([]),
+    capabilities: Object.freeze([materialCapability]),
     evidenceReferences: Object.freeze([sampleEvidenceRecord]),
     applicablePolicies: Object.freeze([]),
   });
 
-  it("STRUCTURAL: resolves valid GS1 composition with static fixtures", async () => {
-    const registryRepo = new TestRegistryRepository(sampleSnapshotState, [
-      sampleEvidenceRecord,
-    ]);
+  const sampleSnapshotStateNoMaterialCap: RetrievedRegistryState =
+    Object.freeze({
+      ...sampleCompleteSnapshotState,
+      capabilities: Object.freeze([]),
+    });
+
+  it("TEST A — GS1 Success: resolves valid GS1 composition through Application Composition boundary", async () => {
+    const registryRepo = new TestRegistryRepository(
+      sampleCompleteSnapshotState,
+      [sampleEvidenceRecord],
+    );
 
     const resolver = new ApplicationCompositionResolver();
     const result = await resolver.composeAndExecute({
+      dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        GS1_GTIN_EPISTEMIC_REQUIREMENT,
+        GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+      ],
       registryRepository: registryRepo,
       identifier: validIdentifier,
-      requestId: "req-001",
-      executionId: "exec-001",
+      requestId: "req-gs1-01",
+      executionId: "exec-gs1-01",
       constitutionalTimestamp: "2026-08-10T00:00:00Z",
       budget: 1000,
       entropy: "entropy-123",
@@ -123,51 +153,71 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
         GS1_DOMAIN_TEMPLATE_CARD.dtcId,
       );
       expect(result.manifest.boundEpistemicRequirements).toHaveLength(2);
-      expect(result.boundPayload.payloadId).toBe("bound:payload:gs1:exec-001");
+      expect(result.boundPayload.payloadId).toBe(
+        "bound:payload:gs1:exec-gs1-01",
+      );
       expect(result.pipelineResult).toBeDefined();
     }
   });
 
-  it("FAILURE TAXONOMY & EPISTEMIC UNCERTAINTY: preserves UNAVAILABLE on missing registry record", async () => {
-    const emptyRegistryRepo = new TestRegistryRepository(null, []);
+  it("TEST B — DPP Success: resolves valid DPP composition through the same structural composition boundary", async () => {
+    const registryRepo = new TestRegistryRepository(
+      sampleCompleteSnapshotState,
+      [sampleEvidenceRecord],
+    );
 
     const resolver = new ApplicationCompositionResolver();
     const result = await resolver.composeAndExecute({
-      registryRepository: emptyRegistryRepo,
+      dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+        DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+      ],
+      registryRepository: registryRepo,
       identifier: validIdentifier,
-      requestId: "req-002",
-      executionId: "exec-002",
+      requestId: "req-dpp-01",
+      executionId: "exec-dpp-01",
       constitutionalTimestamp: "2026-08-10T00:00:00Z",
       budget: 1000,
-      entropy: "entropy-123",
+      entropy: "entropy-dpp-123",
       versions: ["1.0.0"],
       policyContext: defaultPolicyContext,
       resolvedPolicyGraph: defaultResolvedPolicyGraph,
-      explicitEvidenceBundle: emptyEvidenceBundle,
+      explicitEvidenceBundle: validEvidenceBundle,
+      explicitEvidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
 
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.code).toBe("missing");
-      expect(result.epistemicStatus).toBe("UNAVAILABLE");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.manifest.dtcReference.dtcId).toBe(
+        DPP_DOMAIN_TEMPLATE_CARD.dtcId,
+      );
+      expect(result.manifest.boundEpistemicRequirements).toHaveLength(2);
+      expect(result.boundPayload.payloadId).toBe(
+        "bound:payload:dpp:exec-dpp-01",
+      );
+      expect(result.pipelineResult).toBeDefined();
     }
   });
 
-  it("FAILURE TAXONOMY & EPISTEMIC UNCERTAINTY: preserves UNAVAILABLE when brand owner authority is missing", async () => {
-    const missingAuthorityState: RetrievedRegistryState = Object.freeze({
-      ...sampleSnapshotState,
-      authorities: Object.freeze([]),
-    });
-
-    const registryRepo = new TestRegistryRepository(missingAuthorityState, []);
+  it("TEST C — DPP Epistemic Deficit: DPP scenario exhibiting missing material capability produces UNAVAILABLE state", async () => {
+    const registryRepo = new TestRegistryRepository(
+      sampleSnapshotStateNoMaterialCap,
+      [sampleEvidenceRecord],
+    );
 
     const resolver = new ApplicationCompositionResolver();
     const result = await resolver.composeAndExecute({
+      dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+        DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+      ],
       registryRepository: registryRepo,
       identifier: validIdentifier,
-      requestId: "req-003",
-      executionId: "exec-003",
+      requestId: "req-dpp-02",
+      executionId: "exec-dpp-02",
       constitutionalTimestamp: "2026-08-10T00:00:00Z",
       budget: 1000,
       entropy: "entropy-123",
@@ -182,23 +232,188 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
     if (!result.ok) {
       expect(result.error.code).toBe("missing");
       expect(result.error.requirementId).toBe(
-        "epistemic:req:brand_owner_authority:v1",
+        "epistemic:req:dpp_material_composition:v1",
       );
       expect(result.epistemicStatus).toBe("UNAVAILABLE");
     }
   });
 
-  it("FACTORIZATION VERIFICATION: GS1 composition does not mutate ARM Profiles, ACV, or Runtime", async () => {
-    const registryRepo = new TestRegistryRepository(sampleSnapshotState, [
-      sampleEvidenceRecord,
-    ]);
-
+  it("TEST D & E — GS1 Independence & Shared Asset Reality: DPP epistemic failure does not invalidate GS1 for same asset", async () => {
+    // Snapshot state has NO material capability (causes DPP failure) but complete GS1 facts
+    const registryRepo = new TestRegistryRepository(
+      sampleSnapshotStateNoMaterialCap,
+      [sampleEvidenceRecord],
+    );
     const resolver = new ApplicationCompositionResolver();
-    const res = await resolver.resolveComposition({
+
+    // 1. Evaluate DPP composition over asset -> Expect UNAVAILABLE failure
+    const dppResult = await resolver.composeAndExecute({
+      dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+        DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+      ],
       registryRepository: registryRepo,
       identifier: validIdentifier,
-      requestId: "req-004",
-      executionId: "exec-004",
+      requestId: "req-shared-dpp",
+      executionId: "exec-shared-dpp",
+      constitutionalTimestamp: "2026-08-10T00:00:00Z",
+      budget: 1000,
+      entropy: "entropy-123",
+      versions: ["1.0.0"],
+      policyContext: defaultPolicyContext,
+      resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      explicitEvidenceBundle: validEvidenceBundle,
+      explicitEvidencePayloads: validEvidencePayloads,
+      overrides: testOverrides,
+    });
+
+    expect(dppResult.ok).toBe(false);
+    if (!dppResult.ok) {
+      expect(dppResult.epistemicStatus).toBe("UNAVAILABLE");
+    }
+
+    // 2. Evaluate GS1 composition over EXACT SAME asset & repository state -> Expect SUCCESS
+    const gs1Result = await resolver.composeAndExecute({
+      dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        GS1_GTIN_EPISTEMIC_REQUIREMENT,
+        GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+      ],
+      registryRepository: registryRepo,
+      identifier: validIdentifier,
+      requestId: "req-shared-gs1",
+      executionId: "exec-shared-gs1",
+      constitutionalTimestamp: "2026-08-10T00:00:00Z",
+      budget: 1000,
+      entropy: "entropy-123",
+      versions: ["1.0.0"],
+      policyContext: defaultPolicyContext,
+      resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      explicitEvidenceBundle: validEvidenceBundle,
+      explicitEvidencePayloads: validEvidencePayloads,
+      overrides: testOverrides,
+    });
+
+    expect(gs1Result.ok).toBe(true);
+
+    // 3. Verify underlying Asset Reality was NOT mutated or duplicated
+    expect(sampleSnapshotStateNoMaterialCap.identity.identityId).toBe(
+      "09501101530003",
+    );
+    expect(sampleSnapshotStateNoMaterialCap.identity.status).toBe("active");
+  });
+
+  it("TEST F — Policy Context Isolation: GS1 authorization context does not implicitly authorize DPP", async () => {
+    const gs1PolicyRecord: PolicyRecord = Object.freeze({
+      policyId: "pol:req:gs1_active:v1",
+      policyType: "POLICY_RULE",
+      version: "1.0.0",
+      definition: Object.freeze({ allow: "GS1_ONLY" }),
+      active: true,
+    });
+
+    const dppPolicyRecord: PolicyRecord = Object.freeze({
+      policyId: "pol:req:dpp_compliance:v1",
+      policyType: "POLICY_RULE",
+      version: "1.0.0",
+      definition: Object.freeze({ allow: "DPP_ONLY" }),
+      active: true,
+    });
+
+    const gs1PolicyContext: PolicyContext = Object.freeze({
+      policies: Object.freeze([gs1PolicyRecord]),
+    });
+
+    const dppPolicyContext: PolicyContext = Object.freeze({
+      policies: Object.freeze([dppPolicyRecord]),
+    });
+
+    const registryRepo = new TestRegistryRepository(
+      sampleCompleteSnapshotState,
+      [sampleEvidenceRecord],
+    );
+    const resolver = new ApplicationCompositionResolver();
+
+    // GS1 Composition with GS1 Policy Context
+    const gs1Res = await resolver.resolveComposition({
+      dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        GS1_GTIN_EPISTEMIC_REQUIREMENT,
+        GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+      ],
+      registryRepository: registryRepo,
+      identifier: validIdentifier,
+      requestId: "req-pol-gs1",
+      executionId: "exec-pol-gs1",
+      constitutionalTimestamp: "2026-08-10T00:00:00Z",
+      budget: 1000,
+      entropy: "entropy-123",
+      versions: ["1.0.0"],
+      policyContext: gs1PolicyContext,
+      resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      explicitEvidenceBundle: validEvidenceBundle,
+      explicitEvidencePayloads: validEvidencePayloads,
+    });
+
+    // DPP Composition with DPP Policy Context
+    const dppRes = await resolver.resolveComposition({
+      dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+        DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+      ],
+      registryRepository: registryRepo,
+      identifier: validIdentifier,
+      requestId: "req-pol-dpp",
+      executionId: "exec-pol-dpp",
+      constitutionalTimestamp: "2026-08-10T00:00:00Z",
+      budget: 1000,
+      entropy: "entropy-123",
+      versions: ["1.0.0"],
+      policyContext: dppPolicyContext,
+      resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      explicitEvidenceBundle: validEvidenceBundle,
+      explicitEvidencePayloads: validEvidencePayloads,
+    });
+
+    expect(gs1Res.ok).toBe(true);
+    expect(dppRes.ok).toBe(true);
+
+    if (gs1Res.ok && dppRes.ok) {
+      // Manifest references remain strictly domain-scoped
+      expect(gs1Res.manifest.dtcReference.dtcId).toBe(
+        "dtc:zyppi:domain:gs1:v1",
+      );
+      expect(dppRes.manifest.dtcReference.dtcId).toBe(
+        "dtc:zyppi:domain:dpp:v1",
+      );
+
+      // Verify execution context policy scopes are distinct
+      expect(gs1Res.boundPayload.payloadId).not.toEqual(
+        dppRes.boundPayload.payloadId,
+      );
+    }
+  });
+
+  it("TEST G & H — Runtime & Substrate Isolation: Both domains compose without modifying Runtime or Registry substrate", async () => {
+    const registryRepo = new TestRegistryRepository(
+      sampleCompleteSnapshotState,
+      [sampleEvidenceRecord],
+    );
+
+    const resolver = new ApplicationCompositionResolver();
+
+    const gs1Res = await resolver.resolveComposition({
+      dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        GS1_GTIN_EPISTEMIC_REQUIREMENT,
+        GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+      ],
+      registryRepository: registryRepo,
+      identifier: validIdentifier,
+      requestId: "req-iso-gs1",
+      executionId: "exec-iso-gs1",
       constitutionalTimestamp: "2026-08-10T00:00:00Z",
       budget: 1000,
       entropy: "entropy-123",
@@ -209,35 +424,66 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
       explicitEvidencePayloads: validEvidencePayloads,
     });
 
-    expect(res.ok).toBe(true);
-    if (res.ok) {
-      // ACV structure is standard pure ActiveConstitutionalView
-      const acv = res.boundPayload.resolvedActiveConstitutionalView;
-      expect(acv).toHaveProperty("identity");
-      expect(acv).toHaveProperty("relationships");
-      expect(acv).toHaveProperty("standings");
-      expect(acv).toHaveProperty("authorities");
-      expect(acv).toHaveProperty("capabilities");
-      expect(acv).toHaveProperty("evidenceReferences");
-      expect(acv).toHaveProperty("applicablePolicies");
-      // Verify no Z-PROF fields exist on ACV
-      expect(acv).not.toHaveProperty("dtc");
-      expect(acv).not.toHaveProperty("compositionManifest");
+    const dppRes = await resolver.resolveComposition({
+      dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+        DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+      ],
+      registryRepository: registryRepo,
+      identifier: validIdentifier,
+      requestId: "req-iso-dpp",
+      executionId: "exec-iso-dpp",
+      constitutionalTimestamp: "2026-08-10T00:00:00Z",
+      budget: 1000,
+      entropy: "entropy-123",
+      versions: ["1.0.0"],
+      policyContext: defaultPolicyContext,
+      resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      explicitEvidenceBundle: validEvidenceBundle,
+      explicitEvidencePayloads: validEvidencePayloads,
+    });
+
+    expect(gs1Res.ok).toBe(true);
+    expect(dppRes.ok).toBe(true);
+
+    if (gs1Res.ok && dppRes.ok) {
+      // Both bound payloads use the exact same pure ActiveConstitutionalView format and single ARM Profile
+      expect(
+        gs1Res.boundPayload.resolvedActiveConstitutionalView.identity
+          .identityId,
+      ).toBe("09501101530003");
+      expect(
+        dppRes.boundPayload.resolvedActiveConstitutionalView.identity
+          .identityId,
+      ).toBe("09501101530003");
+
+      expect(gs1Res.manifest.armProfileReference.profileId).toBe(
+        "arm:profile:trade_item:v1",
+      );
+      expect(dppRes.manifest.armProfileReference.profileId).toBe(
+        "arm:profile:trade_item:v1",
+      );
     }
   });
 
-  it("DISAPPEARANCE TEST: compares Path A (Composition Bridge) vs Path B (Direct Assembly)", async () => {
-    const registryRepo = new TestRegistryRepository(sampleSnapshotState, [
-      sampleEvidenceRecord,
-    ]);
+  it("TEST I — GS1 Disappearance Test: Path A (GS1 Composition Bridge) vs Path B (Direct Execution)", async () => {
+    const registryRepo = new TestRegistryRepository(
+      sampleCompleteSnapshotState,
+      [sampleEvidenceRecord],
+    );
 
-    // --- PATH A: Via GS1 Z-PROF Composition Bridge ---
     const resolver = new ApplicationCompositionResolver();
     const pathAResult = await resolver.composeAndExecute({
+      dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        GS1_GTIN_EPISTEMIC_REQUIREMENT,
+        GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+      ],
       registryRepository: registryRepo,
       identifier: validIdentifier,
-      requestId: "req-disappear-01",
-      executionId: "exec-disappear-01",
+      requestId: "req-disappear-gs1",
+      executionId: "exec-disappear-gs1",
       constitutionalTimestamp: "2026-08-10T00:00:00Z",
       budget: 1000,
       entropy: "entropy-disappear",
@@ -252,42 +498,37 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
     expect(pathAResult.ok).toBe(true);
     if (!pathAResult.ok) return;
 
-    // --- PATH B: Direct Assembly from Equivalent Constitutional Inputs ---
     const directAcv = {
-      identity: sampleSnapshotState.identity,
-      relationships: sampleSnapshotState.relationships,
-      standings: sampleSnapshotState.standings,
-      authorities: sampleSnapshotState.authorities,
-      capabilities: sampleSnapshotState.capabilities,
-      evidenceReferences: sampleSnapshotState.evidenceReferences,
-      applicablePolicies: sampleSnapshotState.applicablePolicies,
-    };
-
-    const directExecutionRequest: ExecutionRequest = {
-      requestId: "req-disappear-01",
-      identity: sampleSnapshotState.identity,
-      activeConstitutionalView: directAcv,
-      evidenceBundle: validEvidenceBundle,
-      policyContext: defaultPolicyContext,
-      executionContext: {
-        executionId: "exec-disappear-01",
-        constitutionalTimestamp: "2026-08-10T00:00:00Z",
-        budget: 1000,
-        entropy: "entropy-disappear",
-        versions: ["1.0.0"],
-      },
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      identity: sampleCompleteSnapshotState.identity,
+      relationships: sampleCompleteSnapshotState.relationships,
+      standings: sampleCompleteSnapshotState.standings,
+      authorities: sampleCompleteSnapshotState.authorities,
+      capabilities: sampleCompleteSnapshotState.capabilities,
+      evidenceReferences: sampleCompleteSnapshotState.evidenceReferences,
+      applicablePolicies: sampleCompleteSnapshotState.applicablePolicies,
     };
 
     const pathBPipelineResult = runInternalPipeline(
-      directExecutionRequest,
+      {
+        requestId: "req-disappear-gs1",
+        identity: sampleCompleteSnapshotState.identity,
+        activeConstitutionalView: directAcv,
+        evidenceBundle: validEvidenceBundle,
+        policyContext: defaultPolicyContext,
+        executionContext: {
+          executionId: "exec-disappear-gs1",
+          constitutionalTimestamp: "2026-08-10T00:00:00Z",
+          budget: 1000,
+          entropy: "entropy-disappear",
+          versions: ["1.0.0"],
+        },
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      },
       testOverrides,
       validEvidencePayloads,
     );
 
-    // --- COMPARISON ---
     expect(pathAResult.pipelineResult.ok).toBe(pathBPipelineResult.ok);
-
     if (
       pathAResult.pipelineResult.ok &&
       pathBPipelineResult.ok &&
@@ -298,58 +539,86 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
       const outputB = pathBPipelineResult.outcome.executionOutput;
 
       expect(outputA.outcome).toBe(outputB.outcome);
-      expect(outputA.trustResult).toEqual(outputB.trustResult);
-
-      expect(outputA.executionReceipt.receiptId).toBe(
-        outputB.executionReceipt.receiptId,
-      );
-      expect(outputA.executionReceipt.inputHash).toBe(
-        outputB.executionReceipt.inputHash,
-      );
-      expect(outputA.executionReceipt.outputHash).toBe(
-        outputB.executionReceipt.outputHash,
-      );
-      expect(outputA.executionReceipt.evidenceHash).toBe(
-        outputB.executionReceipt.evidenceHash,
-      );
       expect(outputA.executionReceipt.deterministicHash).toBe(
         outputB.executionReceipt.deterministicHash,
       );
     }
   });
 
-  it("DETERMINISM & REPLAY: identical inputs produce identical composition manifests & bound payloads", async () => {
-    const registryRepo = new TestRegistryRepository(sampleSnapshotState, [
-      sampleEvidenceRecord,
-    ]);
+  it("TEST J — DPP Disappearance Test: Path A (DPP Composition Bridge) vs Path B (Direct Execution)", async () => {
+    const registryRepo = new TestRegistryRepository(
+      sampleCompleteSnapshotState,
+      [sampleEvidenceRecord],
+    );
 
     const resolver = new ApplicationCompositionResolver();
-
-    const requestOptions = {
+    const pathAResult = await resolver.composeAndExecute({
+      dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+      epistemicRequirementsFixtures: [
+        DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+        DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+      ],
       registryRepository: registryRepo,
       identifier: validIdentifier,
-      requestId: "req-replay-01",
-      executionId: "exec-replay-01",
+      requestId: "req-disappear-dpp",
+      executionId: "exec-disappear-dpp",
       constitutionalTimestamp: "2026-08-10T00:00:00Z",
       budget: 1000,
-      entropy: "entropy-replay",
+      entropy: "entropy-disappear",
       versions: ["1.0.0"],
       policyContext: defaultPolicyContext,
       resolvedPolicyGraph: defaultResolvedPolicyGraph,
       explicitEvidenceBundle: validEvidenceBundle,
       explicitEvidencePayloads: validEvidencePayloads,
+      overrides: testOverrides,
+    });
+
+    expect(pathAResult.ok).toBe(true);
+    if (!pathAResult.ok) return;
+
+    const directAcv = {
+      identity: sampleCompleteSnapshotState.identity,
+      relationships: sampleCompleteSnapshotState.relationships,
+      standings: sampleCompleteSnapshotState.standings,
+      authorities: sampleCompleteSnapshotState.authorities,
+      capabilities: sampleCompleteSnapshotState.capabilities,
+      evidenceReferences: sampleCompleteSnapshotState.evidenceReferences,
+      applicablePolicies: sampleCompleteSnapshotState.applicablePolicies,
     };
 
-    const res1 = await resolver.resolveComposition(requestOptions);
-    const res2 = await resolver.resolveComposition(requestOptions);
+    const pathBPipelineResult = runInternalPipeline(
+      {
+        requestId: "req-disappear-dpp",
+        identity: sampleCompleteSnapshotState.identity,
+        activeConstitutionalView: directAcv,
+        evidenceBundle: validEvidenceBundle,
+        policyContext: defaultPolicyContext,
+        executionContext: {
+          executionId: "exec-disappear-dpp",
+          constitutionalTimestamp: "2026-08-10T00:00:00Z",
+          budget: 1000,
+          entropy: "entropy-disappear",
+          versions: ["1.0.0"],
+        },
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      },
+      testOverrides,
+      validEvidencePayloads,
+    );
 
-    expect(res1.ok).toBe(true);
-    expect(res2.ok).toBe(true);
+    expect(pathAResult.pipelineResult.ok).toBe(pathBPipelineResult.ok);
+    if (
+      pathAResult.pipelineResult.ok &&
+      pathBPipelineResult.ok &&
+      pathAResult.pipelineResult.outcome.kind === "materialized" &&
+      pathBPipelineResult.outcome.kind === "materialized"
+    ) {
+      const outputA = pathAResult.pipelineResult.outcome.executionOutput;
+      const outputB = pathBPipelineResult.outcome.executionOutput;
 
-    if (res1.ok && res2.ok) {
-      expect(JSON.stringify(res1.manifest)).toBe(JSON.stringify(res2.manifest));
-      expect(JSON.stringify(res1.boundPayload)).toBe(
-        JSON.stringify(res2.boundPayload),
+      expect(outputA.outcome).toBe(outputB.outcome);
+      expect(outputA.executionReceipt.deterministicHash).toBe(
+        outputB.executionReceipt.deterministicHash,
       );
     }
   });

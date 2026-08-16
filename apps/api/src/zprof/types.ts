@@ -2,7 +2,17 @@ import type {
   ActiveConstitutionalView,
   EvidenceBundle,
   ExecutionContext,
+  PolicyContext,
+  ResolvedPolicyGraph,
 } from "@zyppi/domain";
+import type {
+  RegistryRepository,
+  ValidatedCanonicalIdentifier,
+  EvidenceReferenceResolver,
+  EvidencePayloadProvider,
+  ObjectStorageClient,
+} from "@zyppi/contracts";
+import type { StageOverrideConfig } from "@zyppi/runtime/dist/types.js";
 
 /**
  * Closed epistemic status taxonomy per AMS-0852 §12.3 / CONTRACT-R1.
@@ -159,21 +169,45 @@ export interface BoundConstitutionalPayload {
 }
 
 /**
- * GS1 Composition Resolution Request options.
+ * Generic structural composition request options (AMS-0854 domain-agnostic interface).
  */
-export interface GS1CompositionRequest {
-  readonly identifier: import("@zyppi/contracts").ValidatedCanonicalIdentifier;
+export interface GenericCompositionOptions {
+  readonly dtcFixture: DomainTemplateCard;
+  readonly epistemicRequirementsFixtures: readonly EpistemicRequirementContract[];
+  readonly registryRepository: RegistryRepository;
+  readonly identifier: ValidatedCanonicalIdentifier;
   readonly requestId: string;
   readonly executionId: string;
   readonly constitutionalTimestamp: string;
   readonly budget: number;
   readonly entropy: string;
   readonly versions: readonly string[];
-  readonly policyContext: import("@zyppi/domain").PolicyContext;
-  readonly resolvedPolicyGraph: import("@zyppi/domain").ResolvedPolicyGraph;
+  readonly policyContext: PolicyContext;
+  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
-  readonly overrides?: import("@zyppi/runtime/dist/types.js").StageOverrideConfig;
+  readonly overrides?: StageOverrideConfig;
+  readonly evidenceResolver?: EvidenceReferenceResolver;
+  readonly evidencePayloadProvider?: EvidencePayloadProvider;
+  readonly objectStorageClient?: ObjectStorageClient;
+}
+
+/**
+ * GS1 Composition Resolution Request options (AMS-0853 compatibility alias / subset).
+ */
+export interface GS1CompositionRequest {
+  readonly identifier: ValidatedCanonicalIdentifier;
+  readonly requestId: string;
+  readonly executionId: string;
+  readonly constitutionalTimestamp: string;
+  readonly budget: number;
+  readonly entropy: string;
+  readonly versions: readonly string[];
+  readonly policyContext: PolicyContext;
+  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+  readonly explicitEvidenceBundle?: EvidenceBundle;
+  readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
+  readonly overrides?: StageOverrideConfig;
 }
 
 /**
