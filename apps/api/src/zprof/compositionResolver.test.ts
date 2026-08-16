@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   createValidatedCanonicalIdentifier,
   type RetrievedRegistryState,
+  type EvidencePayloadProvider,
 } from "@zyppi/contracts";
 import {
   type PolicyContext,
@@ -24,6 +25,10 @@ import {
   DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
   DPP_MATERIAL_COMPOSITION_REQUIREMENT,
 } from "./fixtures/dppEpistemicRequirements.js";
+import {
+  SIOS_GTIN_EPISTEMIC_REQUIREMENT,
+  SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+} from "./fixtures/siosEpistemicRequirements.js";
 import { TestRegistryRepository } from "./testRegistryRepository.js";
 
 describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation Test Suite", () => {
@@ -239,14 +244,12 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
   });
 
   it("TEST D & E — GS1 Independence & Shared Asset Reality: DPP epistemic failure does not invalidate GS1 for same asset", async () => {
-    // Snapshot state has NO material capability (causes DPP failure) but complete GS1 facts
     const registryRepo = new TestRegistryRepository(
       sampleSnapshotStateNoMaterialCap,
       [sampleEvidenceRecord],
     );
     const resolver = new ApplicationCompositionResolver();
 
-    // 1. Evaluate DPP composition over asset -> Expect UNAVAILABLE failure
     const dppResult = await resolver.composeAndExecute({
       dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
       epistemicRequirementsFixtures: [
@@ -273,7 +276,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       expect(dppResult.epistemicStatus).toBe("UNAVAILABLE");
     }
 
-    // 2. Evaluate GS1 composition over EXACT SAME asset & repository state -> Expect SUCCESS
     const gs1Result = await resolver.composeAndExecute({
       dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
       epistemicRequirementsFixtures: [
@@ -297,7 +299,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
 
     expect(gs1Result.ok).toBe(true);
 
-    // 3. Verify underlying Asset Reality was NOT mutated or duplicated
     expect(sampleSnapshotStateNoMaterialCap.identity.identityId).toBe(
       "09501101530003",
     );
@@ -335,7 +336,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
     );
     const resolver = new ApplicationCompositionResolver();
 
-    // GS1 Composition with GS1 Policy Context
     const gs1Res = await resolver.resolveComposition({
       dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
       epistemicRequirementsFixtures: [
@@ -356,7 +356,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       explicitEvidencePayloads: validEvidencePayloads,
     });
 
-    // DPP Composition with DPP Policy Context
     const dppRes = await resolver.resolveComposition({
       dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
       epistemicRequirementsFixtures: [
@@ -381,7 +380,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
     expect(dppRes.ok).toBe(true);
 
     if (gs1Res.ok && dppRes.ok) {
-      // Manifest references remain strictly domain-scoped
       expect(gs1Res.manifest.dtcReference.dtcId).toBe(
         "dtc:zyppi:domain:gs1:v1",
       );
@@ -389,7 +387,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         "dtc:zyppi:domain:dpp:v1",
       );
 
-      // Verify execution context policy scopes are distinct
       expect(gs1Res.boundPayload.payloadId).not.toEqual(
         dppRes.boundPayload.payloadId,
       );
@@ -448,7 +445,6 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
     expect(dppRes.ok).toBe(true);
 
     if (gs1Res.ok && dppRes.ok) {
-      // Both bound payloads use the exact same pure ActiveConstitutionalView format and single ARM Profile
       expect(
         gs1Res.boundPayload.resolvedActiveConstitutionalView.identity
           .identityId,
@@ -719,7 +715,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         constitutionalTimestamp: "2026-08-10T00:00:00Z",
         budget: 1000,
         entropy: "entropy-123",
-        versions: ["2.0.0"], // Explicit version that does NOT satisfy required "1.0.0"
+        versions: ["2.0.0"],
         policyContext: defaultPolicyContext,
         resolvedPolicyGraph: defaultResolvedPolicyGraph,
         explicitEvidenceBundle: validEvidenceBundle,
@@ -873,15 +869,398 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         overrides: testOverrides,
       });
 
-      // Verification assertions for AC-16
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        // Must reject deterministically using an authorized code (incompatible or conflicting)
         expect(["incompatible", "conflicting"]).toContain(result.error.code);
         expect(result.error.category).toBe("Composition Failure");
-        // Must NOT return a pipeline execution result or bound payload
         expect("pipelineResult" in result).toBe(false);
         expect("boundPayload" in result).toBe(false);
+      }
+    });
+  });
+
+  describe("AMS-0856-R SIOS → Z-PROF Consumer Boundary Test Suite (§19.1 – §19.10)", () => {
+    it("19.1 Valid SIOS-Derived Requirement: A structurally valid, correctly versioned SIOS requirement enters composition pathway", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+
+      const resolver = new ApplicationCompositionResolver();
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          SIOS_GTIN_EPISTEMIC_REQUIREMENT,
+          SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-01",
+        executionId: "exec-sios-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-01",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.boundEpistemicRequirements).toHaveLength(2);
+        expect(
+          result.manifest.boundEpistemicRequirements[0].requirementId,
+        ).toBe(SIOS_GTIN_EPISTEMIC_REQUIREMENT.requirementId);
+        expect(
+          result.manifest.boundEpistemicRequirements[1].requirementId,
+        ).toBe(SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT.requirementId);
+      }
+    });
+
+    it("19.2 Missing Requirement: An absent required Epistemic Requirement reference is rejected with code 'missing'", async () => {
+      const missingAuthorityState: RetrievedRegistryState = {
+        ...sampleCompleteSnapshotState,
+        authorities: Object.freeze([]),
+      };
+
+      const registryRepo = new TestRegistryRepository(missingAuthorityState, [
+        sampleEvidenceRecord,
+      ]);
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-02",
+        executionId: "exec-sios-02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-02",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+      }
+    });
+
+    it("19.3 Invalid Structure: Malformed DTC epistemic requirement reference list returns code 'invalid'", async () => {
+      const malformedDtc = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirements: [],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: malformedDtc,
+        epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-03",
+        executionId: "exec-sios-03",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-03",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("invalid");
+      }
+    });
+
+    it("19.4 Version Conflict: Incompatible SIOS requirement version is rejected with code 'incompatible'", async () => {
+      const incompatibleSiosReq = {
+        ...SIOS_GTIN_EPISTEMIC_REQUIREMENT,
+        version: "2.0.0",
+      };
+
+      const dtcWithConstraint = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        versionConstraints: Object.freeze({
+          "arm:profile:trade_item": "1.0.0",
+        }),
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcWithConstraint,
+        epistemicRequirementsFixtures: [incompatibleSiosReq],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-04",
+        executionId: "exec-sios-04",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-04",
+        versions: ["2.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("incompatible");
+      }
+    });
+
+    it("19.5 Unverified Trust: Failure during evidence payload loading fails closed with code 'unverified'", async () => {
+      const failingPayloadProvider: EvidencePayloadProvider = {
+        loadPayloads: async () => ({
+          ok: false,
+          error: {
+            kind: "INVALID_PAYLOAD",
+            evidenceId: "evd-001",
+            reason: "Payload corrupted",
+          },
+        }),
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-05",
+        executionId: "exec-sios-05",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-05",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        evidencePayloadProvider: failingPayloadProvider,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("unverified");
+        expect(result.epistemicStatus).toBe("UNVERIFIED");
+      }
+    });
+
+    it("19.6 Unauthorized Requirement: Decommissioned identity status returns code 'unauthorized'", async () => {
+      const decommissionedState: RetrievedRegistryState = {
+        ...sampleCompleteSnapshotState,
+        identity: {
+          ...sampleIdentity,
+          status: "decommissioned",
+        },
+      };
+
+      const registryRepo = new TestRegistryRepository(decommissionedState, [
+        sampleEvidenceRecord,
+      ]);
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-06",
+        executionId: "exec-sios-06",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-06",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("unauthorized");
+      }
+    });
+
+    it("19.7 Temporal Requirement: Explicit temporal constraints in SIOS requirement are preserved deterministically", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+
+      const resolver = new ApplicationCompositionResolver();
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-07",
+        executionId: "exec-sios-07",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-07",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(
+          SIOS_GTIN_EPISTEMIC_REQUIREMENT.temporalConstraints,
+        ).toBeDefined();
+        expect(
+          SIOS_GTIN_EPISTEMIC_REQUIREMENT.temporalConstraints
+            ?.validTimeRequired,
+        ).toBe(true);
+        expect(
+          result.boundPayload.executionContext.constitutionalTimestamp,
+        ).toBe("2026-08-10T00:00:00Z");
+      }
+    });
+
+    it("19.8 Provenance Preservation: Composition preserves provenance references without reinterpreting translation semantics", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+
+      const resolver = new ApplicationCompositionResolver();
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          SIOS_GTIN_EPISTEMIC_REQUIREMENT,
+          SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-08",
+        executionId: "exec-sios-08",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-08",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.provenanceReferences.manifestAuthor).toBe(
+          "identity:council:admin",
+        );
+        expect(result.manifest.provenanceReferences.createdTimestamp).toBe(
+          "2026-08-10T00:00:00Z",
+        );
+      }
+    });
+
+    it("19.9 SIOS Absence: Z-PROF consumer boundary operates cleanly using a static SIOS requirement fixture without a live SIOS engine", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+
+      const resolver = new ApplicationCompositionResolver();
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-09",
+        executionId: "exec-sios-09",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-09",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(
+          result.manifest.boundEpistemicRequirements[0].requirementId,
+        ).toBe("epistemic:req:sios:gtin_trade_item:v1");
+      }
+    });
+
+    it("19.10 Semantic Ignorance Test: Z-PROF composes SIOS requirements purely by structural shape without evaluating semantic accuracy", async () => {
+      const syntheticConceptRequirement = Object.freeze({
+        $schema: "https://zyppi.org/schemas/v1/epistemic_requirement.json",
+        requirementId: "epistemic:req:sios:synthetic_domain_concept:v1",
+        version: "1.0.0",
+        targetDimension: "dimension:zyppi:domain:synthetic_concept",
+        goldenQuestionRef: "question:zyppi:sios:synthetic_concept_valid",
+        requiredFacts: Object.freeze([
+          Object.freeze({
+            factKey: "authorityId",
+            optionality: "MANDATORY" as const,
+            expectedType: "string",
+          }),
+        ]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+
+      const resolver = new ApplicationCompositionResolver();
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [syntheticConceptRequirement],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-sios-10",
+        executionId: "exec-sios-10",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-sios-10",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(
+          result.manifest.boundEpistemicRequirements[0].requirementId,
+        ).toBe("epistemic:req:sios:synthetic_domain_concept:v1");
       }
     });
   });
