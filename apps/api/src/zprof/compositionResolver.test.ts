@@ -1,12 +1,14 @@
 import { describe, it, expect } from "vitest";
 import {
   createValidatedCanonicalIdentifier,
-  type EvidenceRecord,
+  type RetrievedRegistryState,
 } from "@zyppi/contracts";
 import {
   type ExecutionRequest,
   type PolicyContext,
   type ResolvedPolicyGraph,
+  type EvidenceRecord,
+  type IdentityRecord,
 } from "@zyppi/domain";
 import { runInternalPipeline } from "@zyppi/runtime/dist/pipeline.js";
 import type { StageOverrideConfig } from "@zyppi/runtime/dist/types.js";
@@ -36,16 +38,11 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
 
   const sampleEvidenceRecord: EvidenceRecord = Object.freeze({
     evidenceId: "evd-001",
-    schemaVersion: "1.0",
+    identityId: "09501101530003",
     evidenceType: "GTIN_VERIFICATION",
-    targetReferentId: "id-gtin-01",
-    providerIdentityId: "id-provider-01",
-    issuerIdentityId: "id-issuer-01",
-    policyReferenceIds: Object.freeze(["pol-001"]),
-    evidencePayloadHash:
-      "sha256:d7a8fbb307d7809469ca9abec0003e42edd8ad9ab130919d20f23e37271dca9f",
-    validFrom: "2026-01-01T00:00:00Z",
-    validUntil: "2027-01-01T00:00:00Z",
+    hash: "sha256:d7a8fbb307d7809469ca9abec0003e42edd8ad9ab130919d20f23e37271dca9f",
+    storageRef: "r2://evidence/evd-001",
+    retrievedAt: "2026-08-10T00:00:00Z",
   });
 
   const emptyEvidenceBundle = Object.freeze({
@@ -63,44 +60,38 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
   ]);
 
   const defaultPolicyContext: PolicyContext = Object.freeze({
-    policyContextId: "ctx-001",
-    tenantId: "tenant-001",
-    environment: "test",
-    timestamp: "2026-08-10T00:00:00Z",
+    policies: Object.freeze([]),
   });
 
   const defaultResolvedPolicyGraph: ResolvedPolicyGraph = Object.freeze({
-    graphId: "graph-001",
-    nodes: Object.freeze([]),
     edges: Object.freeze([]),
   });
 
-  const sampleSnapshotState = Object.freeze({
-    identity: Object.freeze({
-      identityId: "09501101530003",
-      canonicalIdentifier: validIdentifier,
-      identityType: "ORGANIZATION" as const,
-      registeredAt: "2026-01-01T00:00:00Z",
-    }),
+  const sampleIdentity: IdentityRecord = Object.freeze({
+    identityId: "09501101530003",
+    identityType: "ORGANIZATION",
+    canonicalReference: validIdentifier,
+    referentId: null,
+    status: "active",
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
+  });
+
+  const sampleSnapshotState: RetrievedRegistryState = Object.freeze({
+    identity: sampleIdentity,
     relationships: Object.freeze([]),
     standings: Object.freeze([]),
     authorities: Object.freeze([
       Object.freeze({
         authorityId: "auth-001",
-        subjectIdentityId: "09501101530003",
-        authorityType: "BRAND_OWNER" as const,
-        scope: "GLOBAL" as const,
-        grantedAt: "2026-01-01T00:00:00Z",
+        subjectId: "09501101530003",
+        scope: "GLOBAL",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
       }),
     ]),
     capabilities: Object.freeze([]),
-    evidenceReferences: Object.freeze([
-      Object.freeze({
-        evidenceId: "evd-001",
-        evidenceType: "GTIN_VERIFICATION",
-        targetReferentId: "09501101530003",
-      }),
-    ]),
+    evidenceReferences: Object.freeze([sampleEvidenceRecord]),
     applicablePolicies: Object.freeze([]),
   });
 
@@ -164,7 +155,7 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
   });
 
   it("FAILURE TAXONOMY & EPISTEMIC UNCERTAINTY: preserves UNAVAILABLE when brand owner authority is missing", async () => {
-    const missingAuthorityState = Object.freeze({
+    const missingAuthorityState: RetrievedRegistryState = Object.freeze({
       ...sampleSnapshotState,
       authorities: Object.freeze([]),
     });
@@ -309,24 +300,20 @@ describe("AMS-0853 GS1 Z-PROF Application Composition Bridge", () => {
       expect(outputA.outcome).toBe(outputB.outcome);
       expect(outputA.trustResult).toEqual(outputB.trustResult);
 
-      expect(outputA.evidenceReceipt.identityId).toBe(
-        outputB.evidenceReceipt.identityId,
+      expect(outputA.executionReceipt.receiptId).toBe(
+        outputB.executionReceipt.receiptId,
       );
-      expect(outputA.evidenceReceipt.bundleDigest).toBe(
-        outputB.evidenceReceipt.bundleDigest,
+      expect(outputA.executionReceipt.inputHash).toBe(
+        outputB.executionReceipt.inputHash,
       );
-      expect(outputA.evidenceReceipt.acvDigest).toBe(
-        outputB.evidenceReceipt.acvDigest,
+      expect(outputA.executionReceipt.outputHash).toBe(
+        outputB.executionReceipt.outputHash,
       );
-      expect(outputA.evidenceReceipt.policyDigest).toBe(
-        outputB.evidenceReceipt.policyDigest,
+      expect(outputA.executionReceipt.evidenceHash).toBe(
+        outputB.executionReceipt.evidenceHash,
       );
-      expect(outputA.evidenceReceipt.outcome).toBe(
-        outputB.evidenceReceipt.outcome,
-      );
-
-      expect(outputA.evidenceReceipt.receiptId).toBe(
-        outputB.evidenceReceipt.receiptId,
+      expect(outputA.executionReceipt.deterministicHash).toBe(
+        outputB.executionReceipt.deterministicHash,
       );
     }
   });
