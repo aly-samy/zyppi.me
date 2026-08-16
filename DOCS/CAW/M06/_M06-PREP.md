@@ -1253,7 +1253,6 @@ The next program step is therefore:
 - **CAW-011 Build Order:** `DOCS/CAW/CAW-011-Build-Order.md`
 
 - **M03 Domain Contracts:** `packages/domain/src/index.ts`
-
   - `GS1Identifier`
 
   - `validateGS1Identifier`
@@ -1263,19 +1262,15 @@ The next program step is therefore:
   - `ReferentRecord`
 
 - **M03 Domain Tests:** `packages/domain/src/referent.test.ts`
-
   - `GS1Identifier` test suite
 
 - **M04 Replay Proof:** `packages/runtime/src/pipeline.test.ts`
-
   - `"Deterministic replay proof — AMS-0406"`
 
 - **M05 Registry Repository Port:** `packages/contracts/src/registry.ts`
-
   - `RegistryRepository`
 
 - **M05 Registry Adapter:** `apps/api/src/registry/postgres-registry-repository.ts`
-
   - `PostgresRegistryRepository`
 
   - `lookup`

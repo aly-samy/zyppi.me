@@ -299,7 +299,7 @@ The audit found that the final committed implementation satisfies the binding AM
 # Chair Decision
 
 **Chair:** Aly A. Samy
-**Decision Date:** ____________________
+**Decision Date:** **\*\*\*\***\_\_\_\_**\*\*\*\***
 
 ### Final Disposition
 
@@ -315,7 +315,7 @@ The audit found that the final committed implementation satisfies the binding AM
 
 ### Ratification / Decision Record
 
-**Signature or Recorded Approval:** ____________________
+**Signature or Recorded Approval:** **\*\*\*\***\_\_\_\_**\*\*\*\***
 
 ---
 

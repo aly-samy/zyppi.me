@@ -682,27 +682,27 @@ The investigation has established from physical repository evidence that:
 
 Below is the directory locator index map representing the exact physical source code and file footprints reviewed for this report:
 
-| Evidence Target                            | Repository Locator                                                      | Direct Declaration Quote / Target Value                                                |
-| :----------------------------------------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **`IdentityRecord`**                       | `packages/domain/src/index.ts:L20-L28`                                  | `export type IdentityRecord = { ... }`                                                 |
-| **`StandingRecord`**                       | `packages/domain/src/index.ts:L143-L149`                                | `export type StandingRecord = { ... }`                                                 |
-| **`AuthorityRecord`**                      | `packages/domain/src/index.ts:L99-L105`                                 | `export type AuthorityRecord = { ... }`                                                |
-| **`CapabilityRecord`**                     | `packages/domain/src/index.ts:L121-L127`                                | `export type CapabilityRecord = { ... }`                                               |
-| **`PolicyRecord`**                         | `packages/domain/src/index.ts:L667-L673`                                | `export type PolicyRecord = { ... }`                                                   |
-| **`EvidenceRecord`**                       | `packages/domain/src/index.ts:L76-L83`                                  | `export type EvidenceRecord = { ... }`                                                 |
-| **`ActiveConstitutionalView`**             | `packages/domain/src/index.ts:L1443-L1451`                              | `export interface ActiveConstitutionalView { ... }`                                    |
-| **`EvidenceBundle`**                       | `packages/domain/src/index.ts:L1464-L1467`                              | `export interface EvidenceBundle { ... }`                                              |
-| **`ExecutionContext`**                     | `packages/domain/src/index.ts:L1609-L1613`                              | `export interface ExecutionContext { ... }`                                            |
-| **`ExecutionRequest`**                     | `packages/domain/src/index.ts:L1736-L1743`                              | `export interface ExecutionRequest { ... }`                                            |
-| **`ExecutionReceipt`**                     | `packages/domain/src/index.ts:L2147-L2158`                              | `export interface ExecutionReceipt { ... }`                                            |
-| **`Outcome`**                              | `packages/domain/src/index.ts:L620-L620`                                | `export type Outcome = "verified"                                                      | "unverified" | "rejected"` |
-| **`RetrievedRegistryState`**               | `packages/contracts/src/registry.ts:L50-L58`                            | `export interface RetrievedRegistryState { ... }`                                      |
-| **`ResolvedGs1DigitalLink`**               | `packages/contracts/src/gs1Resolver.ts:L16-L19`                         | `export interface ResolvedGs1DigitalLink { ... }`                                      |
-| **`RegistryEvidenceResolver`**             | `apps/api/src/registry/evidenceResolver.ts:L12-L14`                     | `export class RegistryEvidenceResolver implements EvidenceReferenceResolver`           |
+| Evidence Target | Repository Locator | Direct Declaration Quote / Target Value |
+| :----------------------------------------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | ------------ | ----------- |
+| **`IdentityRecord`** | `packages/domain/src/index.ts:L20-L28` | `export type IdentityRecord = { ... }` |
+| **`StandingRecord`** | `packages/domain/src/index.ts:L143-L149` | `export type StandingRecord = { ... }` |
+| **`AuthorityRecord`** | `packages/domain/src/index.ts:L99-L105` | `export type AuthorityRecord = { ... }` |
+| **`CapabilityRecord`** | `packages/domain/src/index.ts:L121-L127` | `export type CapabilityRecord = { ... }` |
+| **`PolicyRecord`** | `packages/domain/src/index.ts:L667-L673` | `export type PolicyRecord = { ... }` |
+| **`EvidenceRecord`** | `packages/domain/src/index.ts:L76-L83` | `export type EvidenceRecord = { ... }` |
+| **`ActiveConstitutionalView`** | `packages/domain/src/index.ts:L1443-L1451` | `export interface ActiveConstitutionalView { ... }` |
+| **`EvidenceBundle`** | `packages/domain/src/index.ts:L1464-L1467` | `export interface EvidenceBundle { ... }` |
+| **`ExecutionContext`** | `packages/domain/src/index.ts:L1609-L1613` | `export interface ExecutionContext { ... }` |
+| **`ExecutionRequest`** | `packages/domain/src/index.ts:L1736-L1743` | `export interface ExecutionRequest { ... }` |
+| **`ExecutionReceipt`** | `packages/domain/src/index.ts:L2147-L2158` | `export interface ExecutionReceipt { ... }` |
+| **`Outcome`** | `packages/domain/src/index.ts:L620-L620` | `export type Outcome = "verified"                                                      | "unverified" | "rejected"` |
+| **`RetrievedRegistryState`** | `packages/contracts/src/registry.ts:L50-L58` | `export interface RetrievedRegistryState { ... }` |
+| **`ResolvedGs1DigitalLink`** | `packages/contracts/src/gs1Resolver.ts:L16-L19` | `export interface ResolvedGs1DigitalLink { ... }` |
+| **`RegistryEvidenceResolver`** | `apps/api/src/registry/evidenceResolver.ts:L12-L14` | `export class RegistryEvidenceResolver implements EvidenceReferenceResolver` |
 | **`ObjectStorageEvidencePayloadProvider`** | `apps/api/src/evidence/objectStorageEvidencePayloadProvider.ts:L61-L61` | `export class ObjectStorageEvidencePayloadProvider implements EvidencePayloadProvider` |
-| **`verifyEvidenceBundle`**                 | `packages/domain/src/evidenceVerification.ts:L42-L42`                   | `export function verifyEvidenceBundle(...)`                                            |
-| **`runInternalPipeline`**                  | `packages/runtime/src/pipeline.ts:L37-L37`                              | `export function runInternalPipeline(...)`                                             |
-| **`defaultPolicyEvaluator`**               | `packages/runtime/src/pipeline.ts:L20-L28`                              | `function defaultPolicyEvaluator(...)`                                                 |
-| **`OPEN-001-A`**                           | `DOCS/CAW/OPEN-001-Open-Constitutional-Questions.md:L13-L13`            | Wording: Clock drift/ordering between edge and registry                                |
-| **`CAW-008 Header`**                       | `DOCS/CAW/CAW-008-Registry-Schema.md:L3-L3`                             | Wording: `Package: packages/runtime repository adapters`                               |
-| **`pnpm-workspace`**                       | `pnpm-workspace.yaml:L1-L5`                                             | Maps active project boundary locations                                                 |
+| **`verifyEvidenceBundle`** | `packages/domain/src/evidenceVerification.ts:L42-L42` | `export function verifyEvidenceBundle(...)` |
+| **`runInternalPipeline`** | `packages/runtime/src/pipeline.ts:L37-L37` | `export function runInternalPipeline(...)` |
+| **`defaultPolicyEvaluator`** | `packages/runtime/src/pipeline.ts:L20-L28` | `function defaultPolicyEvaluator(...)` |
+| **`OPEN-001-A`** | `DOCS/CAW/OPEN-001-Open-Constitutional-Questions.md:L13-L13` | Wording: Clock drift/ordering between edge and registry |
+| **`CAW-008 Header`** | `DOCS/CAW/CAW-008-Registry-Schema.md:L3-L3` | Wording: `Package: packages/runtime repository adapters` |
+| **`pnpm-workspace`** | `pnpm-workspace.yaml:L1-L5` | Maps active project boundary locations |
