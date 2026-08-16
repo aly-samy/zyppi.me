@@ -145,7 +145,9 @@ For both domains, Path A and Path B produced identical execution outcomes (`veri
 
 ## 14. N+1 Architectural Observation
 
-**N+1 Architectural Observation:** The current structural composition boundary does not exhibit a domain-specific dependency that inherently requires a third-domain-specific constitutional organ. This observation is not evidence that every future domain will factorize without additional architectural work. No third domain or third-domain infrastructure was implemented under AMS-0854.
+**N+1 Architectural Observation:** The structural composition boundary successfully factorized the tested domains (GS1 and Digital Product Passport / DPP), demonstrating that additional domain participation can occur without additional ARM Profiles or Runtime modifications in the tested configuration.
+
+_Qualification Note (CORR-0854-1):_ This is an empirical factorization result demonstrated under the GS1/DPP experiment. It is **not** a constitutional guarantee that every future unexamined domain will require zero substrate changes. Every future domain remains subject to its own DTC, composition, epistemic, ownership, and boundary validation. No third domain or third-domain infrastructure was implemented under AMS-0854.
 
 ---
 

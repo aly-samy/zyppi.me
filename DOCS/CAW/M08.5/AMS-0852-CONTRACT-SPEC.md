@@ -138,11 +138,13 @@ The structural specification of a Domain Template Card is defined as follows:
 | `version`                   | `[RATIFIED / EXISTING]` | Z-PROF           | Explicit semantic version string (`X.Y.Z`).                      |
 | `applicableArmProfiles`     | `[RATIFIED / EXISTING]` | ARM / Z-PROF     | List of authorized ARM Profile references.                       |
 | `epistemicRequirements`     | `[DEFINED BY AMS-0852]` | Shared Substrate | References to declared Epistemic Requirement Contracts.          |
-| `requiredPrjSpecifications` | `[RATIFIED / EXISTING]` | PRJ              | References to PRJ-owned projection specifications.               |
-| `requiredRsnBlueprints`     | `[RATIFIED / EXISTING]` | RSN              | References to RSN-owned reasoning blueprints.                    |
-| `applicablePolRequirements` | `[RATIFIED / EXISTING]` | POL              | Policy requirements declared for domain participation.           |
-| `applicableSecRequirements` | `[RATIFIED / EXISTING]` | SEC              | Security / trust requirements declared for domain participation. |
-| `requiredRiCapabilities`    | `[RATIFIED / EXISTING]` | RI               | Runtime execution capabilities required by the domain.           |
+| `requiredPrjSpecifications` | `[RATIFIED / EXISTING]` | PRJ              | Derived from CONTRACT-R1 §5; formalized by AMS-0852.             |
+| `requiredRsnBlueprints`     | `[RATIFIED / EXISTING]` | RSN              | Derived from CONTRACT-R1 §5; formalized by AMS-0852.             |
+| `applicablePolRequirements` | `[RATIFIED / EXISTING]` | POL              | Derived from CONTRACT-R1 §5; formalized by AMS-0852.             |
+| `applicableSecRequirements` | `[RATIFIED / EXISTING]` | SEC              | Derived from CONTRACT-R1 §5; formalized by AMS-0852.             |
+| `requiredRiCapabilities`    | `[RATIFIED / EXISTING]` | RI               | Derived from CONTRACT-R1 §5; formalized by AMS-0852.             |
+
+_Provenance Harmonization Note (CORR-0852-1):_ The fields `requiredPrjSpecifications`, `requiredRsnBlueprints`, `requiredContextDimensions`, `applicablePolRequirements`, `applicableSecRequirements`, and `requiredRiCapabilities` derive their constitutional authority directly from `CONTRACT-R1` §5. AMS-0852 formalizes their JSON specification representation without creating new constitutional ownership or independent capabilities.
 
 ### 3.5 Prohibited DTC Capabilities
 
