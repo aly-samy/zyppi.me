@@ -212,13 +212,15 @@ The end-to-end processing pipeline exhibits the following explicit boundary flow
 
 The following missing capabilities were identified during reconnaissance:
 
-| Missing Capability                    | Location / Layer                      | Impact on Future Z-PROF                                                           | Status / Authority                         |
-| :------------------------------------ | :------------------------------------ | :-------------------------------------------------------------------------------- | :----------------------------------------- |
-| Profile / Domain Template Card Schema | Domain / Contracts                    | No formal type or schema exists for defining domain profiles or template cards    | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
-| CompositionManifest Definition        | Domain / Contracts                    | No manifest contract exists for orchestrating multi-domain profile compositions   | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
-| Profile Resolver Interface            | Contracts / Application               | No contract or adapter exists to resolve Profiles by ID or URI                    | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
-| Multi-Domain Identity Discriminator   | Registry Schema (`infra/migrations/`) | Registry schema lacks domain type discriminator columns for non-GTIN entities     | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
-| Interrogation Boundary Contract       | Application / Runtime                 | No interface exists for querying profile requirements prior to pipeline execution | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
+| Missing Capability                    | Location / Layer                      | Impact on Future Z-PROF                                                                                                                                      | Status / Authority                         |
+| :------------------------------------ | :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------- |
+| Profile / Domain Template Card Schema | Z-PROF / Application Seam             | Connective construct. Current quarantine is in Application/Z-PROF seam. Eventual package allocation subject to Gap 2. Not a missing `@zyppi/contracts` item. | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
+| CompositionManifest Definition        | Z-PROF / Application Seam             | Connective construct. Current quarantine is in Application/Z-PROF seam. Eventual package allocation subject to Gap 2. Not a missing `@zyppi/contracts` item. | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
+| Profile Resolver Interface            | Application Composition Seam          | No contract or adapter exists to resolve Profiles by ID or URI                                                                                               | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
+| Multi-Domain Identity Discriminator   | Registry Schema (`infra/migrations/`) | Registry schema lacks domain type discriminator columns for non-GTIN entities                                                                                | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
+| Interrogation Boundary Contract       | Application Composition Seam          | No interface exists for querying profile requirements prior to pipeline execution                                                                            | **UNRESOLVED — COUNCIL DECISION REQUIRED** |
+
+_Clarification note (CORR-0851-1):_ Domain Template Cards and CompositionManifests are Z-PROF connective constructs. They are currently quarantined in the Application/Z-PROF composition seam (`apps/api/src/zprof/`). Their eventual physical package placement remains subject to Council decision (Gap 2) and they are not declared as missing capabilities of `@zyppi/contracts` or `@zyppi/domain`.
 
 ---
 
@@ -229,7 +231,7 @@ Per §2 and §11 of the mandate, all unanswered architectural questions are reco
 1. **`UNRESOLVED — COUNCIL DECISION REQUIRED`**: What is the formal constitutional schema and ownership model for a Z-PROF Profile, Domain Template Card, and Composition Manifest?
 2. **`UNRESOLVED — COUNCIL DECISION REQUIRED`**: Does Profile resolution occur entirely in the Application Layer before constructing the `ExecutionRequest`, or does the Runtime participate in Profile activation?
 3. **`UNRESOLVED — COUNCIL DECISION REQUIRED`**: How will multi-domain identities (e.g., non-GS1 carriers) be indexed and stored in the PostgreSQL Registry schema?
-4. **`UNRESOLVED — COUNCIL DECISION REQUIRED`**: How will Profile identifiers be bound to `ExecutionReceipt` structures and deterministic receipt hashes without violating receipt non-circularity?
+4. **`UNRESOLVED — COUNCIL DECISION REQUIRED`**: How will Profile composition references at the Application boundary relate to down-stream execution metadata, given that Profile resolution occurs at the Application/Z-PROF boundary, ACV remains the pure Runtime input boundary, and existing `ExecutionReceipt` semantics remain authoritative without Runtime receipt schema modification?
 5. **`UNRESOLVED — COUNCIL DECISION REQUIRED`**: What are the temporal, provenance, and epistemic decay rules governing Profile definitions over time?
 
 ---

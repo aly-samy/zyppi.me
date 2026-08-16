@@ -50,6 +50,8 @@ DOCS/CAW/M08.5/AMS-0853-BOUNDARY-DIAGRAM.md      (Deliverable D3 C4 Boundary Dia
 DOCS/CAW/M08.5/AMS-0853-EVR.md                   (Deliverable D2 Evidence Verification Report)
 ```
 
+_Application Types Quarantine Note (CORR-0853-1):_ The TypeScript interfaces declared in `apps/api/src/zprof/types.ts` (`DomainTemplateCard`, `CompositionManifest`, `BoundConstitutionalPayload`) are local Application-layer representations constructed for the M08.5 resolution bridge. They do not constitute globally ratified contract types in `@zyppi/contracts` and do not alter the `@zyppi/contracts` package boundary.
+
 ### 2.2 Protected Path Compliance Verification
 
 An explicit check against protected repository paths yields zero modifications:
