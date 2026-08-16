@@ -14,8 +14,9 @@ export class TestRegistryRepository implements RegistryRepository {
   ) {}
 
   async lookup(
-    _identifier: ValidatedCanonicalIdentifier,
+    identifier: ValidatedCanonicalIdentifier,
   ): Promise<RegistryResult<RetrievedRegistryState | null>> {
+    void identifier;
     if (this.simulateError) {
       return { ok: false, error: { kind: "InfrastructureUnavailable" } };
     }
