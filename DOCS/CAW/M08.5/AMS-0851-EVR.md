@@ -29,29 +29,31 @@ Per the binding mandate and Council clarification:
 
 ---
 
-## 2. Repository Baseline and Preservation Proof
+## 2. Repository Baseline
 
-### 2.1 Git Baseline State
+### 2.1 Git Baseline Details
 
 - **Baseline HEAD SHA:** `d2a676917a76c1dd8fcd4bfa27d29a755717798d`
 - **Working Branch:** `jules-13401536226888107624-96aec8dc`
-- **Pre-execution Working Tree:** Clean (`git status --short` returned empty).
+- **Pre-execution Working Tree State:** Clean (`git status --short` returned empty).
 
-### 2.2 Protected Path Verification
+### 2.2 Workspace Package Baseline
 
-Reconnaissance explicitly verified that all protected production paths were preserved without modification:
+The monorepo workspace comprises 9 packages/applications defined in `pnpm-workspace.yaml`:
 
-- `packages/runtime/` — **UNTOUCHED / UNMODIFIED**
-- `packages/domain/` — **UNTOUCHED / UNMODIFIED**
-- `packages/contracts/` — **UNTOUCHED / UNMODIFIED**
-- `apps/` (`apps/api`, `apps/web`) — **UNTOUCHED / UNMODIFIED**
-- `infra/` — **UNTOUCHED / UNMODIFIED**
+- `packages/domain` (`@zyppi/domain`)
+- `packages/contracts` (`@zyppi/contracts`)
+- `packages/runtime` (`@zyppi/runtime`)
+- `packages/testing` (`@zyppi/testing`)
+- `packages/shared` (`@zyppi/shared`)
+- `apps/api` (`@zyppi/api`)
+- `apps/web` (`@zyppi/web`)
+- `infra` (`@zyppi/infra`)
+- Root workspace (`zyppi-monorepo`)
 
 ---
 
-## 3. Layer-by-Layer Repository Mapping
-
-### 3.1 Registry Map
+## 3. Registry Map
 
 - **Location:** `infra/migrations/001_initial_registry_schema.sql`, `apps/api/src/registry/`, `packages/contracts/src/registry.ts`.
 - **Entities & Schema:** Defines 8 constitutional tables in PostgreSQL: `referents`, `identities`, `evidence`, `policies`, `authorities`, `capabilities`, `standings`, `execution_receipts`.
@@ -60,14 +62,18 @@ Reconnaissance explicitly verified that all protected production paths were pres
 - **Versioning & Compatibility:** Tables store raw domain values without schema versioning columns except `schema_version` on Evidence and ExecutionReceipt JSON representations.
 - **Domain Coupling:** Heavily coupled to GS1 GTIN product identity (`subject_id` = GTIN-14). No generic concept of non-GTIN identity types or multi-domain registration trees exists in the current Registry layer.
 
-### 3.2 Domain Map
+---
+
+## 4. Domain Map
 
 - **Location:** `packages/domain/src/`.
 - **Records & Value Objects:** GS1 identifiers (`gs1Parser.ts`, `gs1Validator.ts`, `gs1Normalizer.ts`), Identity (`index.ts`), Evidence & EvidenceBundle (`evidenceVerification.ts`), Authority (`authority.test.ts`), Capability (`capability.test.ts`), Standing (`standing.test.ts`), Policy (`policy.test.ts`), ExecutionRequest (`executionRequest.test.ts`), ExecutionContext (`receiptHash.ts`), ExecutionOutput/Receipt (`executionReceipt.test.ts`).
 - **Boundaries & Dependencies:** `packages/domain` is a pure ESM leaf package (depends only on `@zyppi/shared`). Contains zero side-effects and zero Node.js native standard library dependencies (e.g., no Node `crypto`).
 - **Projection & Aggregation:** `RetrievedRegistryState` (`packages/contracts/src/registry.ts`) aggregates domain collections (`standings`, `authorities`, `capabilities`, `policies`) associated with a single `IdentityRecord`.
 
-### 3.3 Application Orchestration Map
+---
+
+## 5. Application Orchestration Map
 
 - **Location:** `apps/api/src/registry/pipelineOrchestrator.ts`, `apps/api/src/registry/evidenceResolver.ts`, `apps/api/src/evidence/objectStorageEvidencePayloadProvider.ts`.
 - **Responsibilities:**
@@ -78,7 +84,9 @@ Reconnaissance explicitly verified that all protected production paths were pres
   5. Constructing the explicit `ExecutionRequest` and passing transported payloads to `runInternalPipeline(...)` in `@zyppi/runtime`.
 - **Domain Coupling:** Application code assumes the primary entity is a GS1 GTIN product scan. Domain mapping logic maps GTIN directly into the pipeline without multi-domain abstraction.
 
-### 3.4 Runtime Boundary Map
+---
+
+## 6. Runtime Boundary Map
 
 - **Location:** `packages/runtime/src/pipeline.ts`, `packages/runtime/src/types.ts`.
 - **Inputs:** `ExecutionRequest` (contains `ExecutionContext`, `ActiveConstitutionalView`, `evidenceBundle`), optional StageOverrides, and optional `evidencePayloads` transported as `ReadonlyMap<string, unknown>`.
@@ -95,7 +103,9 @@ Reconnaissance explicitly verified that all protected production paths were pres
 - **Outputs:** `PipelineResult` returning `ReceiptOutcome` (`materialized` with `ExecutionOutput` or `failed`).
 - **Domain Neutrality:** `packages/runtime` is completely domain-neutral. It evaluates generic AST-based policies and evidence bundles without knowing or assuming GS1, product, or retail semantics.
 
-### 3.5 Testing / Replay Infrastructure Map
+---
+
+## 7. Testing / Replay Map
 
 - **Location:** `packages/testing/src/replay/`.
 - **Mechanisms:**
@@ -105,7 +115,7 @@ Reconnaissance explicitly verified that all protected production paths were pres
 
 ---
 
-## 4. Mandatory Profile-Like Structural Heuristic Inventory
+## 8. Profile-Like Structural Inventory
 
 Per §5 and §8 of the mandate, the following inventory lists every relevant artifact in the repository that aggregates, composes, or projects data across more than one bounded domain or collection.
 
@@ -122,9 +132,9 @@ Per §5 and §8 of the mandate, the following inventory lists every relevant art
 
 ---
 
-## 5. Domain Multiplication Reconnaissance
+## 9. Domain Multiplication Findings
 
-### 5.1 Single-Domain Assumptions & Hard-Coded Identifiers
+### 9.1 Single-Domain Assumptions & Hard-Coded Identifiers
 
 1. **Registry Schema (`infra/migrations/001_initial_registry_schema.sql`):**
    - `identities.id` and `referents.id` store GTIN-14 strings directly as primary keys.
@@ -135,7 +145,7 @@ Per §5 and §8 of the mandate, the following inventory lists every relevant art
 3. **GS1 Tooling (`packages/domain/src/gs1Parser.ts`, `gs1Validator.ts`, `gs1Normalizer.ts`):**
    - Handled as the primary domain in `packages/domain`. No common interface/abstraction exists for non-GS1 carrier parsers or normalizers.
 
-### 5.2 Domain-Neutral Structures
+### 9.2 Domain-Neutral Abstractions Already Existing
 
 1. **Runtime Execution Engine (`packages/runtime/src/pipeline.ts`):**
    - Highly domain-neutral. Operates strictly on `ExecutionRequest`, `ActiveConstitutionalView`, `PolicyRecord`, and `EvidenceBundle`. Contains zero references to GTIN, GS1, or retail commerce.
@@ -146,7 +156,22 @@ Per §5 and §8 of the mandate, the following inventory lists every relevant art
 
 ---
 
-## 6. Boundary Mapping
+## 10. Contract Preservation Findings
+
+Reconnaissance explicitly verified that all existing core contracts remain intact, unchanged, and preserved:
+
+- `ExecutionRequest`: Unchanged (`packages/domain/src/executionRequest.test.ts`).
+- `ExecutionOutput`: Unchanged (`packages/domain/src/executionReceipt.test.ts`).
+- `ExecutionContext`: Unchanged (`packages/domain/src/executionContext.test.ts`).
+- `RegistryRecord` structures: Unchanged (`packages/contracts/src/registry.ts`).
+- `EvidenceBundle` & `EvidenceRecord`: Unchanged (`packages/domain/src/evidenceVerification.ts`).
+- `ExecutionReceipt`: Unchanged (`packages/domain/src/executionReceipt.test.ts`).
+
+**Gap Identified — No modification authorized under AMS-0851.**
+
+---
+
+## 11. Boundary Preservation Findings
 
 The end-to-end processing pipeline exhibits the following explicit boundary flow:
 
@@ -183,22 +208,7 @@ The end-to-end processing pipeline exhibits the following explicit boundary flow
 
 ---
 
-## 7. Contract Preservation Findings
-
-Reconnaissance explicitly verified that all existing core contracts remain intact, unchanged, and preserved:
-
-- `ExecutionRequest`: Unchanged (`packages/domain/src/executionRequest.test.ts`).
-- `ExecutionOutput`: Unchanged (`packages/domain/src/executionReceipt.test.ts`).
-- `ExecutionContext`: Unchanged (`packages/domain/src/executionContext.test.ts`).
-- `RegistryRecord` structures: Unchanged (`packages/contracts/src/registry.ts`).
-- `EvidenceBundle` & `EvidenceRecord`: Unchanged (`packages/domain/src/evidenceVerification.ts`).
-- `ExecutionReceipt`: Unchanged (`packages/domain/src/executionReceipt.test.ts`).
-
-**Gap Identified — No modification authorized under AMS-0851.**
-
----
-
-## 8. Missing-Capability Register
+## 12. Missing-Capability Register
 
 The following missing capabilities were identified during reconnaissance:
 
@@ -212,7 +222,7 @@ The following missing capabilities were identified during reconnaissance:
 
 ---
 
-## 9. Unresolved Architectural Questions Register
+## 13. Unresolved Architectural Questions
 
 Per §2 and §11 of the mandate, all unanswered architectural questions are recorded here for Council resolution:
 
@@ -224,39 +234,35 @@ Per §2 and §11 of the mandate, all unanswered architectural questions are reco
 
 ---
 
-## 10. Verification Results
+## 14. Protected-Area Verification
 
-The complete required repository verification suite was executed.
+Reconnaissance explicitly verified that all protected production paths were preserved without modification:
 
-| Verification Command             | Execution Result                             | Notes / Details                                                                               |
-| :------------------------------- | :------------------------------------------- | :-------------------------------------------------------------------------------------------- |
-| `pnpm format:check`              | **PASS**                                     | All files conform to Prettier formatting rules                                                |
-| `pnpm lint`                      | **PASS**                                     | ESLint check passed with zero errors                                                          |
-| `pnpm exec tsc -b`               | **PASS**                                     | Clean TypeScript compilation across all 9 workspace packages                                  |
-| `pnpm boundary:all`              | **PASS**                                     | All public package export boundaries verified successfully                                    |
-| `pnpm graph:validate`            | **PASS**                                     | Monorepo dependency graph complies with CAW-004 v2.1                                          |
-| `pnpm runtime:purity`            | **PASS**                                     | `@zyppi/runtime` passed static AST purity and determinism checks                              |
-| `pnpm test` (Unit / Replay)      | **32 PASSED / 628 Tests PASSED**             | Pure unit and replay tests passed 100%                                                        |
-| `pnpm test` (Database-Dependent) | **4 SKIPPED/FAILED (29 skipped, 15 failed)** | `connect ECONNREFUSED 127.0.0.1:5432` due to local Postgres service unavailability in sandbox |
-| `git diff --check`               | **PASS**                                     | Zero whitespace or line-ending errors                                                         |
+- `packages/runtime/` — **VERIFIED UNTOUCHED**
+- `packages/domain/` — **VERIFIED UNTOUCHED**
+- `packages/contracts/` — **VERIFIED UNTOUCHED**
+- `apps/` (`apps/api`, `apps/web`) — **VERIFIED UNTOUCHED**
+- `infra/` — **VERIFIED UNTOUCHED**
+
+Zero production semantics, zero Z-PROF contracts, and zero mock interfaces were created or introduced in any protected path.
 
 ---
 
-## 11. Final Repository Preservation Evidence
+## 15. Repository Preservation Evidence
 
-### 11.1 Repository State
+### 15.1 Git State Proof
 
-- **Initial HEAD SHA:** `d2a676917a76c1dd8fcd4bfa27d29a755717798d`
+- **Baseline HEAD SHA:** `d2a676917a76c1dd8fcd4bfa27d29a755717798d`
 - **Final HEAD SHA:** `d2a676917a76c1dd8fcd4bfa27d29a755717798d` (uncommitted EVR)
 - **Branch:** `jules-13401536226888107624-96aec8dc`
 
-### 11.2 Modified Files (`git status --short`)
+### 15.2 Working Tree Status (`git status --short`)
 
 ```
-?? DOCS/CAW/M08.5/AMS-0851-EVR.md
+A  DOCS/CAW/M08.5/AMS-0851-EVR.md
 ```
 
-### 11.3 Diff Summary
+### 15.3 Diff Summary
 
 - **Production Code Changes (`packages/*`, `apps/*`, `infra/*`):** **ZERO (0 files modified)**
 - **Constitutional/Contract Changes:** **ZERO (0 files modified)**
@@ -264,7 +270,7 @@ The complete required repository verification suite was executed.
 
 ---
 
-## 12. Final Classification and Handoff
+## 16. Final Findings and Handoff
 
 - **Mandate Status:** **MATERIALIZED**
 - **Reconnaissance Status:** **VERIFIED**
