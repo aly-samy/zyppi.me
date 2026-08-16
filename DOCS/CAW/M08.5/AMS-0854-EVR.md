@@ -77,7 +77,7 @@ Protected paths were checked via `git status` and `git diff`:
 - `packages/contracts/`: **0 changes**
 - `infra/`: **0 changes**
 
-No database schemas, migrations, or workspace packages were added or modified.
+No database schemas, migrations, or workspace packages were added or modified. `packages/testing/replay/receipts/latest.json` remains completely unmodified.
 
 ---
 
@@ -87,9 +87,12 @@ Test A in `apps/api/src/zprof/compositionResolver.test.ts` verified that GS1 com
 
 ---
 
-## 8. DPP Composition Verification
+## 8. DPP Composition Verification & Semantic Ownership Boundary
 
 Test B in `apps/api/src/zprof/compositionResolver.test.ts` verified that DPP participates through the exact same Application Composition boundary (`ApplicationCompositionResolver.composeAndExecute`), resolving DTC `dtc:zyppi:domain:dpp:v1` and epistemic requirements over the same substrate without requiring DPP-specific Runtimes, Registries, or ACVs.
+
+**DPP Semantic Ownership Boundary Statement:**
+The DPP fixtures represent bounded Application-layer declarations of information required for this factorization experiment. They do not establish ownership of a DPP ontology, regulatory authority, semantic model, or constitutional primitive by Z-PROF. DPP semantics remain external to the generic composition mechanics.
 
 ---
 
@@ -142,9 +145,7 @@ For both domains, Path A and Path B produced identical execution outcomes (`veri
 
 ## 14. N+1 Architectural Observation
 
-AMS-0854 performed an N+1 architectural observation:
-If a third domain (e.g., EU Deforestation Regulation — EUDR) were introduced, the demonstrated structural composition boundary (`ApplicationCompositionResolver`) would accommodate it without multiplying constitutional organs.
-_Note: Per AMS-0854 §18, no third domain or third-domain infrastructure was implemented._
+**N+1 Architectural Observation:** The current structural composition boundary does not exhibit a domain-specific dependency that inherently requires a third-domain-specific constitutional organ. This observation is not evidence that every future domain will factorize without additional architectural work. No third domain or third-domain infrastructure was implemented under AMS-0854.
 
 ---
 
@@ -165,6 +166,7 @@ Zero implementation convenience was converted into constitutional precedent.
 
 ```bash
 pnpm format:check
+pnpm lint
 pnpm exec tsc -b
 pnpm runtime:purity
 pnpm boundary:all
@@ -221,11 +223,13 @@ None. All Application-layer composition mechanics were verified without encounte
 
 ## 19. Final Constitutional Verdict
 
-### `FACTORISATION PROVEN`
+### `SECOND-DOMAIN FACTORIZATION DEMONSTRATED`
 
-Executable and repository evidence conclusively demonstrates that a second commerce domain (Digital Product Passport) participates through the existing Z-PROF Application Composition boundary without requiring a new constitutional organ, new ARM Profile, new ACV field, new Registry ontology, or Runtime modification.
+The evidence demonstrates under the AMS-0854 test conditions that a second commerce domain (Digital Product Passport) participates through the existing Z-PROF Application Composition boundary without requiring a new constitutional organ, new ARM Profile, new ACV field, new Registry ontology, or Runtime modification.
 
-Z-PROF is verified as connective tissue, never a new organ.
+AMS-0853 demonstrated that Z-PROF can connect one commerce domain. AMS-0854 demonstrates, under a second-domain test, that the same Application Composition boundary can serve GS1 and DPP without multiplying the constitutional substrate.
+
+Z-PROF remains connective tissue, never a new constitutional organ.
 
 ---
 
