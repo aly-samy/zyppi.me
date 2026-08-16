@@ -79,7 +79,7 @@ Reconnaissance was performed across the entire monorepo workspace to factually a
 
 - **Search Query / Scope:** `sios` across `packages/`, `apps/`, `infra/`, `edge/`.
 - **Finding:** **Zero** source code implementation of a SIOS Translation engine, translation module, or translation service exists in the repository.
-- **Build Order Correlation:** `DOCS/CAW/CAW-011-Build-Order.md` confirms that SIOS Translation is scheduled under task **`IT-0857` / `AMS-0857`** ("ARM Projection, SIOS Translation & RSN/Intelligence Projection Boundaries"), which is an unissued future mandate.
+- **Translation Availability Status:** No SIOS Translation implementation or translated-output contract currently exists in the repository. The upstream Translation capability is therefore not currently available for Z-PROF consumption. Any required Translation capability, output contract, or consumption seam requires separate governed architectural and contract treatment before Z-PROF can consume it.
 
 ### B. Existing Translated Output Contract Search
 
@@ -106,7 +106,7 @@ The repository evidence establishes the following facts:
 1. **SIOS Translation Implementation:** **ABSENT**. No SIOS Translation engine or module is present in `packages/`, `apps/`, `infra/`, or `edge/`.
 2. **Translated-Output Contract:** **ABSENT**. No authorized contract representing translated constitutional requirements/concepts exists in `@zyppi/contracts` or `@zyppi/domain`.
 3. **Z-PROF Translation Seam:** **ABSENT**. No authorized Z-PROF consumption seam for translated output exists without creating a new contract.
-4. **Future Mandate Status:** SIOS Translation is formally scheduled under `IT-0857` / `AMS-0857` in `DOCS/CAW/CAW-011-Build-Order.md` and `DOCS/CAW/CAW-012-AI-Mandates.md`.
+4. **Governed Architectural Treatment Required:** Any required Translation capability, output contract, or consumption seam requires separate governed architectural and contract treatment before Z-PROF can consume it.
 
 ---
 
@@ -162,7 +162,7 @@ Because SIOS Translation and translated-output contracts are **ABSENT** in the r
 
 ### Identified Gap:
 
-1. **Upstream Capability Missing:** SIOS Translation implementation (`AMS-0857` / `IT-0857`) has not yet been authorized or implemented.
+1. **Upstream Capability Missing:** No SIOS Translation implementation or translated-output contract currently exists in the repository.
 2. **Contract Boundary Missing:** No constitutional contract representing SIOS-translated output is defined in `@zyppi/contracts` or `@zyppi/domain`.
 
 ### Implementation Consequence:
@@ -225,16 +225,19 @@ NEW FILE: DOCS/CAW/M08.5/AMS-0856-EVR.md
 
 ---
 
-## 13. Council Gap Preservation
+## 13. Council Gap Preservation & Repository Implementation Gap Classification
 
-All existing Council Gaps remain 100% preserved and quarantined:
+All five existing governed Council Gaps remain 100% preserved and quarantined:
 
 1. **Gap 1 (DTC Lifecycle):** Unmodified; no lifecycle state machine created.
 2. **Gap 2 (Package Ownership):** Unmodified; no package structural reassignments made.
 3. **Gap 3 (Failure Taxonomy):** Unmodified; no 9th failure code or new translation taxonomy introduced.
 4. **Gap 4 (Manifest Hashing):** Unmodified; no new hash domain or digest protocol created.
 5. **Gap 5 (Conflict Semantics):** Unmodified; raw epistemic states preserved.
-6. **Gap 6 (SIOS Translation Seam):** **Preserved as a formal gap.** No synthetic translation layer or invented contract created.
+
+### Repository Implementation Gap — SIOS Translation Consumption Seam
+
+The absence of SIOS Translation and an authorized translated-output consumption seam is a repository implementation/dependency finding established by AMS-0856 reconnaissance. It is not hereby classified as a new Constitutional Council Gap, and this correction does not create, close, or modify any constitutional gap. No synthetic translation layer or invented contract was created.
 
 ---
 
@@ -252,7 +255,7 @@ The agent acted as the implementation and verification arm, refusing to solve an
 
 | Objective / Section | Description                                   | Repository Status                  | Verdict            |
 | :------------------ | :-------------------------------------------- | :--------------------------------- | :----------------- |
-| **Section 4.A**     | Inspect SIOS Translation implementation       | Absent (`IT-0857` scheduled)       | Factually Verified |
+| **Section 4.A**     | Inspect SIOS Translation implementation       | Absent (No implementation present) | Factually Verified |
 | **Section 4.B**     | Inspect translated output contract            | Absent                             | Factually Verified |
 | **Section 4.C**     | Inspect Z-PROF translation input seam         | Absent                             | Factually Verified |
 | **Section 4.D**     | Inspect Application assembly boundary         | Present (`composeAndRunPipeline`)  | Factually Verified |
@@ -276,4 +279,4 @@ The agent acted as the implementation and verification arm, refusing to solve an
 
 ---
 
-_Report materialized by Jules under CAW-011 Milestone M08.5 Mandate AMS-0856._
+_Report materialized and corrected under CORR-0856-1 by Jules under CAW-011 Milestone M08.5 Mandate AMS-0856._
