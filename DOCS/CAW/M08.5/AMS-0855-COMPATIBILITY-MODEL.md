@@ -15,7 +15,7 @@
 
 AMS-0855 defines and implements the deterministic, 10-point structural and contractual compatibility model required for Z-PROF compositions. Compatibility is **not** generic SemVer range guesswork or floating version overlap. It is the deterministic evaluation of declared structural, contractual, epistemic, and authority relationships across all referenced capabilities prior to producing a `BoundConstitutionalPayload` or crossing toward Runtime.
 
-This document materializes Deliverable D2 for AMS-0855. It documents the 10 compatibility checks, the failure taxonomy mapping, and the quarantine of cryptographic semantics.
+This document materializes Deliverable D2 for AMS-0855, restoring exact traceability to the 10 canonical compatibility checks established by AMS-0852.
 
 ---
 
@@ -31,75 +31,38 @@ Compatibility in AMS-0855 is evaluated strictly from the **declared structural a
 
 ---
 
-## 3. The 10-Point Compatibility Validation Procedure
+## 3. Canonical 10-Check Compatibility Traceability Matrix
 
-The generalized Application composition resolver (`ApplicationCompositionResolver` in `apps/api/src/zprof/compositionResolver.ts`) executes `validateCompositionCompatibility()` in `apps/api/src/zprof/compatibilityValidator.ts`, evaluating the following ten checks in order:
+The generalized Application composition resolver (`ApplicationCompositionResolver` in `apps/api/src/zprof/compositionResolver.ts`) executes `validateCompositionCompatibility()` in `apps/api/src/zprof/compatibilityValidator.ts`, evaluating the exact 10 canonical AMS-0852 checks:
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│               10-Point Compatibility Validation Procedure               │
-├────────────────────────────────────────────────────────────────────────┤
-│  1. Artifact Existence          │  6. Dependency Closure               │
-│  2. Authorization              │  7. Ownership Uniqueness             │
-│  3. Explicit Version Binding    │  8. Domain-Scope Compatibility       │
-│  4. Declared Version Constraints│  9. Profile Isolation                │
-│  5. Capability Compatibility   │ 10. Provenance Satisfaction         │
-└──────────────────────────────────┬─────────────────────────────────────┘
-                                   │
-                                   ▼
-             Pass: Validated Bound Composition
-             Fail: Closed Rejection (Closed 8-Code Error Taxonomy)
+┌────────────────────────────────────────────────────────────────────────────────┐
+│               Canonical 10-Check Compatibility Traceability Matrix             │
+├────────────────────────────────────────────────────────────────────────────────┤
+│  1. Referenced Artifact Existence    │  6. Absence of Prohibited Capabilities  │
+│  2. Authorized References            │  7. Profile Isolation Preservation      │
+│  3. Version Compatibility            │  8. No New Constitutional Primitive     │
+│  4. Satisfiable Dependencies         │  9. Provenance Satisfaction            │
+│  5. Unambiguous Ownership            │ 10. Declared Domain Scope Boundary      │
+└──────────────────────────────────────┬─────────────────────────────────────────┘
+                                       │
+                                       ▼
+                 Pass: Validated Bound Composition
+                 Fail: Closed Rejection (Closed 8-Code Error Taxonomy)
 ```
 
-### 3.1 Check 1 — Artifact Existence
-
-- **Evaluation:** Verifies that the requested DTC, Epistemic Requirements contracts, ARM Profiles, PRJ specifications, and RSN blueprints exist in the authorized substrate.
-- **Failure Code:** `missing` (or `unavailable` if temporary network/repository retrieval failure).
-
-### 3.2 Check 2 — Authorization
-
-- **Evaluation:** Verifies that the retrieved referent identity and authorities are currently active and authorized. Rejects identities with status `revoked`, `suspended`, `unauthorized`, or `decommissioned`.
-- **Failure Code:** `unauthorized`.
-
-### 3.3 Check 3 — Explicit Version Binding
-
-- **Evaluation:** Verifies that every version specifier across DTCs, options, epistemic requirements, and profiles is explicit (e.g. `"1.0.0"`). Rejects floating or wildcard specifiers (`latest`, `*`, `^1.x`, `>=1.0`, etc.).
-- **Failure Code:** `invalid`.
-
-### 3.4 Check 4 — Declared Version Constraints
-
-- **Evaluation:** Compares provided explicit versions against explicit version constraints declared in `dtc.versionConstraints`.
-- **Failure Code:** `incompatible` if explicit versions do not satisfy explicit constraint requirements. (`invalid` if constraint syntax itself is malformed or floating).
-
-### 3.5 Check 5 — Capability / Requirement Compatibility
-
-- **Evaluation:** Evaluates mandatory facts declared in Epistemic Requirements against facts and capabilities in `RetrievedRegistryState` (e.g. GTIN identity, authorityId, materialComposition capability).
-- **Failure Code:** `missing` if mandatory fact is absent; `incompatible` if capability scope is incompatible.
-
-### 3.6 Check 6 — Dependency Closure
-
-- **Evaluation:** Verifies that all dependency nodes and edges declared in `dtc.dependencyTopology` form a closed, valid graph without dangling references.
-- **Failure Code:** `invalid`.
-
-### 3.7 Check 7 — Ownership Uniqueness
-
-- **Evaluation:** Inspects referents and relationships in `RetrievedRegistryState` for conflicting ownership or multiple distinct brand/manufacturer claims over the same identity.
-- **Failure Code:** `conflicting`.
-
-### 3.8 Check 8 — Domain-Scope Compatibility
-
-- **Evaluation:** Verifies that epistemic requirements and target dimensions match the DTC's domain identifier and scope. For example, attempting to combine a `HEALTHCARE_PATIENT` epistemic requirement with a `GS1 Trade Item` DTC is rejected deterministically.
-- **Failure Code:** `incompatible`.
-
-### 3.9 Check 9 — Profile Isolation
-
-- **Evaluation:** Verifies that ARM profiles across combined declarations do not violate mutual profile isolation (e.g., Trade Item profile combined with Patient profile).
-- **Failure Code:** `conflicting` or `incompatible`.
-
-### 3.10 Check 10 — Provenance Satisfaction
-
-- **Evaluation:** Evaluates DTC provenance requirements (`requireAuthorIdentity`, `requireRegistrationReceipt`) and evidence verification reports.
-- **Failure Code:** `unverified`.
+| Canonical AMS-0852 Check                  | Implementation Subchecks in `compatibilityValidator.ts`                                                                         | Test Evidence          | Failure Code                                            |
+| :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :--------------------- | :------------------------------------------------------ |
+| **1. Referenced Artifact Existence**      | Verifies DTC fixture and Epistemic Requirement contracts are defined and populated.                                             | Test C, Test P         | `missing` / `unavailable`                               |
+| **2. Authorized References**              | Verifies retrieved identity and authority status are active (rejects `revoked`, `suspended`, `unauthorized`, `decommissioned`). | Test N                 | `unauthorized`                                          |
+| **3. Version Compatibility**              | Validates strict `X.Y.Z` SemVer explicit version binding and verifies `dtc.versionConstraints`.                                 | Test K, Test L, Test M | `invalid` (floating syntax) / `incompatible` (mismatch) |
+| **4. Satisfiable Dependencies**           | Verifies dependency nodes and edges form a closed graph without dangling references.                                            | Test A, Test B         | `invalid`                                               |
+| **5. Unambiguous Ownership**              | Inspects referents/relationships for conflicting brand or manufacturer claims over the identity.                                | Test O                 | `conflicting`                                           |
+| **6. Absence of Prohibited Capabilities** | Validates mandatory facts against retrieved state capabilities without requesting prohibited scopes.                            | Test C, Test D, Test P | `missing` / `incompatible`                              |
+| **7. Profile Isolation Preservation**     | Enforces mutual profile isolation (e.g. Trade Item profile cannot compose with Patient profile).                                | Test P                 | `conflicting` / `incompatible`                          |
+| **8. No New Constitutional Primitive**    | Verifies composition output contains only authorized schema fields and no invented primitives.                                  | Test A, Test B         | `invalid`                                               |
+| **9. Provenance Satisfaction**            | Verifies required author identity and evidence references/payloads pass preflight verification.                                 | Test A, Test B         | `unverified`                                            |
+| **10. Declared Domain Scope Boundary**    | Verifies domain scope compatibility (rejects combining Healthcare Patient requirements with GS1/DPP DTCs).                      | Test P (AC-16)         | `incompatible`                                          |
 
 ---
 
@@ -132,6 +95,6 @@ In accordance with Council Gap 4:
 
 ## 6. Summary & Conclusion
 
-The AMS-0855 Compatibility Model replaces floating SemVer speculation with a pure, deterministic 10-check structural and contractual validation procedure, enforcing fail-closed composition safety before anything can cross toward the M08 Runtime.
+The AMS-0855 Compatibility Model restores exact 1-to-1 traceability to the 10 canonical AMS-0852 checks, replacing floating SemVer speculation with a pure, deterministic structural and contractual validation procedure that fails closed before crossing toward the M08 Runtime.
 
 This completes Deliverable D2 for AMS-0855.

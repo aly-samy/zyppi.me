@@ -1,11 +1,11 @@
 import type { CompositionError } from "./types.js";
 
 /**
- * Checks whether a version string is an explicit, concrete version specifier.
- * Rejects floating specifiers, wildcards, semver ranges, and unversioned references:
+ * Checks whether a version string is an explicit, concrete SemVer version specifier (X.Y.Z).
+ * Rejects floating specifiers, wildcards, semver ranges, partial versions, and unversioned references:
  * - "latest", "*", "wildcard", "unversioned"
  * - "^1.0.0", "~1.0.0", ">=1.0.0", "<=2.0.0", ">1.0", "<2.0"
- * - "1.x", "1.0.x", "1.*"
+ * - "1.x", "1.0.x", "1.*", "v1", "1.0"
  * - Empty or whitespace-only strings
  */
 export function isExplicitVersion(version: string): boolean {
@@ -31,6 +31,7 @@ export function isExplicitVersion(version: string): boolean {
     trimmed.startsWith(">") ||
     trimmed.startsWith("<") ||
     trimmed.startsWith("=") ||
+    trimmed.startsWith("v") ||
     trimmed.includes("*") ||
     /\b\d+\.x\b/i.test(trimmed) ||
     /\bx\b/i.test(trimmed)
@@ -38,8 +39,8 @@ export function isExplicitVersion(version: string): boolean {
     return false;
   }
 
-  // Must follow a basic explicit version pattern (e.g. "1.0.0", "v1.0.0", "1.0", "1.0.0-alpha.1")
-  return /^v?\d+(\.\d+)*(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$/.test(trimmed);
+  // Must follow strict explicit SemVer X.Y.Z pattern (e.g. "1.0.0", "1.0.0-alpha.1")
+  return /^\d+\.\d+\.\d+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$/.test(trimmed);
 }
 
 /**
