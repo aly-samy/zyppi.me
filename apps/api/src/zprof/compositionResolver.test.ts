@@ -622,4 +622,266 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       );
     }
   });
+
+  describe("AMS-0855 Version Binding & Compatibility Validation Tests", () => {
+    it("TEST K — Version Binding: Rejects floating version specifier 'latest' with code 'invalid'", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-ver-01",
+        executionId: "exec-ver-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["latest"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("invalid");
+        expect(result.error.message).toContain("Prohibited floating");
+      }
+    });
+
+    it("TEST L — Version Binding: Rejects wildcard range specifier '^1.0.0' with code 'invalid'", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-ver-02",
+        executionId: "exec-ver-02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["^1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("invalid");
+        expect(result.error.message).toContain("Prohibited floating");
+      }
+    });
+
+    it("TEST M — Version Constraint Mismatch: Explicit valid version mismatch returns code 'incompatible'", async () => {
+      const dtcWithConstraint = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        versionConstraints: Object.freeze({
+          "arm:profile:trade_item": "1.0.0",
+        }),
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcWithConstraint,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-ver-03",
+        executionId: "exec-ver-03",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["2.0.0"], // Explicit version that does NOT satisfy required "1.0.0"
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("incompatible");
+        expect(result.error.message).toContain("do not satisfy required explicit constraint");
+      }
+    });
+
+    it("TEST N — Authorization Check: Revoked identity status returns code 'unauthorized'", async () => {
+      const revokedIdentityState: RetrievedRegistryState = {
+        ...sampleCompleteSnapshotState,
+        identity: {
+          ...sampleIdentity,
+          status: "decommissioned",
+        },
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        revokedIdentityState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-auth-01",
+        executionId: "exec-auth-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("unauthorized");
+        expect(result.epistemicStatus).toBe("UNVERIFIED");
+      }
+    });
+
+    it("TEST O — Ownership Uniqueness Check: Multiple conflicting brand referents return code 'conflicting'", async () => {
+      const conflictingRelationshipsState: RetrievedRegistryState = {
+        ...sampleCompleteSnapshotState,
+        relationships: Object.freeze([
+          Object.freeze({
+            referentId: "ref-brand-A",
+            referentType: "brand" as const,
+            name: "Brand A",
+            parentReferentId: null,
+            createdAt: "2026-01-01T00:00:00Z",
+          }),
+          Object.freeze({
+            referentId: "ref-brand-B",
+            referentType: "brand" as const,
+            name: "Brand B",
+            parentReferentId: null,
+            createdAt: "2026-01-01T00:00:00Z",
+          }),
+        ]),
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        conflictingRelationshipsState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-owner-01",
+        executionId: "exec-owner-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("conflicting");
+        expect(result.epistemicStatus).toBe("CONFLICTING");
+      }
+    });
+
+    it("TEST P (AC-16) — Mandatory Negative Test: Incompatible Healthcare Patient requirement combined with GS1 Trade Item DTC is rejected deterministically", async () => {
+      const healthcarePatientRequirement = Object.freeze({
+        $schema: "https://zyppi.org/schemas/v1/epistemic_requirement.json",
+        requirementId: "epistemic:req:healthcare_patient:v1",
+        version: "1.0.0",
+        targetDimension: "HEALTHCARE_PATIENT",
+        goldenQuestionRef: "question:healthcare:patient_identification:v1",
+        requiredFacts: Object.freeze([
+          Object.freeze({
+            factKey: "healthcarePatientId",
+            optionality: "MANDATORY" as const,
+            expectedType: "string",
+          }),
+        ]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.composeAndExecute({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          healthcarePatientRequirement,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-neg-01",
+        executionId: "exec-neg-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-neg-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        overrides: testOverrides,
+      });
+
+      // Verification assertions for AC-16
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        // Must reject deterministically using an authorized code (incompatible or conflicting)
+        expect(["incompatible", "conflicting"]).toContain(result.error.code);
+        expect(result.error.category).toBe("Composition Failure");
+        // Must NOT return a pipeline execution result or bound payload
+        expect("pipelineResult" in result).toBe(false);
+        expect("boundPayload" in result).toBe(false);
+      }
+    });
+  });
 });
