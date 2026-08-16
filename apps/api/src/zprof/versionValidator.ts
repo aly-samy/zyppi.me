@@ -14,7 +14,13 @@ export function isExplicitVersion(version: string): boolean {
   }
 
   const trimmed = version.trim();
-  if (trimmed === "" || trimmed === "latest" || trimmed === "wildcard" || trimmed === "unversioned" || trimmed === "*") {
+  if (
+    trimmed === "" ||
+    trimmed === "latest" ||
+    trimmed === "wildcard" ||
+    trimmed === "unversioned" ||
+    trimmed === "*"
+  ) {
     return false;
   }
 

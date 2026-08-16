@@ -33,6 +33,7 @@ This report materializes Deliverable D5 for AMS-0855, documenting repository evi
 ## 3. Governing-Source Verification
 
 The implementation strictly followed the governing authority hierarchy:
+
 1. Ratified Zyppi Constitution and Constitutional Council decisions.
 2. Governing CEngS standards.
 3. Active ARM/ZRM/POL/SEC/RI/PRJ/RSN authorities.
@@ -67,7 +68,9 @@ Repository evidence confirms that both GS1 and DPP compositions resolve read-onl
 
 ```typescript
 // Single read-only query interface consumed by both GS1 and DPP
-const lookupResult = await options.registryRepository.lookup(options.identifier);
+const lookupResult = await options.registryRepository.lookup(
+  options.identifier,
+);
 ```
 
 - **AC-01 Pass:** GS1 and DPP resolve through the existing Registry substrate.
@@ -78,6 +81,7 @@ const lookupResult = await options.registryRepository.lookup(options.identifier)
 ## 6. Compatibility Algorithm Evidence (AC-05, AC-06, AC-07)
 
 The compatibility algorithm in `apps/api/src/zprof/compatibilityValidator.ts` evaluates declared structural and contractual relationships across 10 distinct checks:
+
 1. Artifact existence
 2. Authorization
 3. Explicit version binding
@@ -101,7 +105,7 @@ The compatibility algorithm in `apps/api/src/zprof/compatibilityValidator.ts` ev
 
 ```typescript
 // Rejects floating/wildcard specifiers: "latest", "*", "^1.0.0", "~1.0.0", ">=1.0", "1.x", "unversioned"
-export function isExplicitVersion(version: string): boolean
+export function isExplicitVersion(version: string): boolean;
 ```
 
 Tests K and L in `compositionResolver.test.ts` verify that passing `"latest"` or `"^1.0.0"` returns `ok: false` with failure code `invalid`.
@@ -144,6 +148,7 @@ Test B in `compositionResolver.test.ts` verified that DPP compositions resolve t
 ## 11. Negative-Test Evidence (AC-16)
 
 Test P in `compositionResolver.test.ts` executed the mandatory negative test:
+
 - **Input:** GS1 Trade Item DTC (`dtc:zyppi:domain:gs1:v1`) combined with a synthetic Healthcare Patient epistemic requirement fixture (`epistemic:req:healthcare_patient:v1`).
 - **Result:**
   - `result.ok` was `false`.
@@ -163,6 +168,7 @@ Tests K through P confirm that identical explicit composition inputs (`Compositi
 ## 13. Disappearance Test Evidence (AC-17)
 
 Tests I and J in `compositionResolver.test.ts` verified the operationalized Disappearance Test for both GS1 and DPP:
+
 - Removing `ApplicationCompositionResolver` leaves underlying Registry `IdentityRecord`s, `CapabilityRecord`s, and `EvidenceRecord`s completely intact and independently usable under their governing authorities.
 - Direct execution (Path B) without the Z-PROF resolver produces identical Runtime outcomes (`verified`) and identical `deterministicHash` receipts.
 
@@ -177,6 +183,7 @@ Comparing GS1 and DPP compositions demonstrates that adding DPP required zero ne
 ## 15. Gap-Preservation Evidence (AC-21)
 
 All five Council Gaps remain 100% quarantined:
+
 1. **Gap 1 (DTC Lifecycle):** No lifecycle state machine or deprecation engine was created.
 2. **Gap 2 (Package Ownership):** No package ownership decisions were inferred.
 3. **Gap 3 (Failure Taxonomy):** Reused strictly the 8 authorized failure codes.
@@ -216,6 +223,7 @@ pnpm test -- apps/api/src/zprof/compositionResolver.test.ts
 ```
 
 Output:
+
 ```
 ✓ apps/api/src/zprof/compositionResolver.test.ts (14 tests)
 ```

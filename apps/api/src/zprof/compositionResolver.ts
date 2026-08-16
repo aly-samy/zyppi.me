@@ -148,7 +148,10 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    if (dtc.versionConstraints && Object.keys(dtc.versionConstraints).length > 0) {
+    if (
+      dtc.versionConstraints &&
+      Object.keys(dtc.versionConstraints).length > 0
+    ) {
       const constraintCheck = validateVersionConstraints(
         options.versions,
         dtc.versionConstraints,

@@ -16,6 +16,7 @@
 ## 1. Executive Summary & Purpose
 
 AMS-0855 establishes the generalized Application-layer composition boundary required to demonstrate that Z-PROF scales across multiple commerce domains (including GS1 and Digital Product Passport / DPP) without:
+
 1. creating a domain-specific Registry architecture;
 2. creating a parallel constitutional substrate or second Registry database;
 3. adding domain-specific schema tables or persistence adapters;
@@ -134,13 +135,13 @@ Building a domain-specific Registry for each new commerce domain creates exponen
 
 ## 7. Application / Infrastructure Ownership Boundaries
 
-| Operational Seam | Responsible Layer | Permitted Authority in AMS-0855 |
-| :--- | :--- | :--- |
-| Database Persistence & Schema | `infra/` / PostgreSQL | **NONE** — Read-only consumption via `RegistryRepository` |
-| Infrastructure Data Retrieval | Application (`apps/api/src/`) | **AUTHORIZED** — via `RegistryRepository` and evidence resolvers |
-| Z-PROF Declaration & Binding | Application (`apps/api/src/zprof/`) | **AUTHORIZED** — Generalized composition, version & compatibility validation |
-| Pipeline Execution & Verification | Runtime (`packages/runtime/`) | **NONE** — Zero modifications to Runtime |
-| HTTP Route / API Exposure | API Transport (M09 / `apps/api/src/http`) | **NONE** — Deferred to M09 / AMS-0901 |
+| Operational Seam                  | Responsible Layer                         | Permitted Authority in AMS-0855                                              |
+| :-------------------------------- | :---------------------------------------- | :--------------------------------------------------------------------------- |
+| Database Persistence & Schema     | `infra/` / PostgreSQL                     | **NONE** — Read-only consumption via `RegistryRepository`                    |
+| Infrastructure Data Retrieval     | Application (`apps/api/src/`)             | **AUTHORIZED** — via `RegistryRepository` and evidence resolvers             |
+| Z-PROF Declaration & Binding      | Application (`apps/api/src/zprof/`)       | **AUTHORIZED** — Generalized composition, version & compatibility validation |
+| Pipeline Execution & Verification | Runtime (`packages/runtime/`)             | **NONE** — Zero modifications to Runtime                                     |
+| HTTP Route / API Exposure         | API Transport (M09 / `apps/api/src/http`) | **NONE** — Deferred to M09 / AMS-0901                                        |
 
 ---
 

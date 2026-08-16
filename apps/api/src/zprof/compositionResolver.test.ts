@@ -729,7 +729,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("incompatible");
-        expect(result.error.message).toContain("do not satisfy required explicit constraint");
+        expect(result.error.message).toContain(
+          "do not satisfy required explicit constraint",
+        );
       }
     });
 
@@ -742,10 +744,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         },
       };
 
-      const registryRepo = new TestRegistryRepository(
-        revokedIdentityState,
-        [sampleEvidenceRecord],
-      );
+      const registryRepo = new TestRegistryRepository(revokedIdentityState, [
+        sampleEvidenceRecord,
+      ]);
       const resolver = new ApplicationCompositionResolver();
 
       const result = await resolver.resolveComposition({

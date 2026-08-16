@@ -66,7 +66,12 @@ export function validateCompositionCompatibility(
   // 2. Authorization (Check 2)
   if (retrievedState.identity) {
     const status = (retrievedState.identity.status || "").toLowerCase();
-    if (status === "revoked" || status === "suspended" || status === "unauthorized" || status === "decommissioned") {
+    if (
+      status === "revoked" ||
+      status === "suspended" ||
+      status === "unauthorized" ||
+      status === "decommissioned"
+    ) {
       return {
         ok: false,
         error: {
@@ -80,12 +85,18 @@ export function validateCompositionCompatibility(
   }
 
   // 3. Explicit Version Binding (Check 3)
-  const dtcVersionCheck = validateExplicitVersionList([dtc.version], "DTC version");
+  const dtcVersionCheck = validateExplicitVersionList(
+    [dtc.version],
+    "DTC version",
+  );
   if (!dtcVersionCheck.ok) {
     return { ok: false, error: dtcVersionCheck.error };
   }
 
-  const optionsVersionsCheck = validateExplicitVersionList(versions, "options.versions");
+  const optionsVersionsCheck = validateExplicitVersionList(
+    versions,
+    "options.versions",
+  );
   if (!optionsVersionsCheck.ok) {
     return { ok: false, error: optionsVersionsCheck.error };
   }
@@ -104,7 +115,11 @@ export function validateCompositionCompatibility(
   }
 
   for (const armProfile of dtc.applicableArmProfiles) {
-    if (armProfile.includes(":floating:") || armProfile.endsWith(":latest") || armProfile.includes("*")) {
+    if (
+      armProfile.includes(":floating:") ||
+      armProfile.endsWith(":latest") ||
+      armProfile.includes("*")
+    ) {
       return {
         ok: false,
         error: {
@@ -117,8 +132,14 @@ export function validateCompositionCompatibility(
   }
 
   // 4. Declared Version Constraints (Check 4)
-  if (dtc.versionConstraints && Object.keys(dtc.versionConstraints).length > 0) {
-    const constraintCheck = validateVersionConstraints(versions, dtc.versionConstraints);
+  if (
+    dtc.versionConstraints &&
+    Object.keys(dtc.versionConstraints).length > 0
+  ) {
+    const constraintCheck = validateVersionConstraints(
+      versions,
+      dtc.versionConstraints,
+    );
     if (!constraintCheck.ok) {
       return { ok: false, error: constraintCheck.error };
     }
@@ -142,13 +163,17 @@ export function validateCompositionCompatibility(
             };
           }
         } else if (fact.factKey === "authorityId") {
-          if (!retrievedState.authorities || retrievedState.authorities.length === 0) {
+          if (
+            !retrievedState.authorities ||
+            retrievedState.authorities.length === 0
+          ) {
             return {
               ok: false,
               error: {
                 code: "missing",
                 category: "Composition Failure",
-                message: "Mandatory fact authorityId is missing from registry authorities",
+                message:
+                  "Mandatory fact authorityId is missing from registry authorities",
                 requirementId: req.requirementId,
               },
               epistemicStatus: "UNAVAILABLE",
@@ -167,15 +192,20 @@ export function validateCompositionCompatibility(
               error: {
                 code: "missing",
                 category: "Composition Failure",
-                message: "Mandatory fact materialComposition is missing from registry capabilities",
+                message:
+                  "Mandatory fact materialComposition is missing from registry capabilities",
                 requirementId: req.requirementId,
               },
               epistemicStatus: "UNAVAILABLE",
             };
           }
-        } else if (fact.factKey === "healthcarePatientId" || fact.factKey.includes("patient")) {
+        } else if (
+          fact.factKey === "healthcarePatientId" ||
+          fact.factKey.includes("patient")
+        ) {
           const hasPatientCap = retrievedState.capabilities?.some(
-            (c) => c.scope.includes("patient") || c.capabilityId.includes("patient"),
+            (c) =>
+              c.scope.includes("patient") || c.capabilityId.includes("patient"),
           );
           if (!hasPatientCap) {
             return {
@@ -245,7 +275,10 @@ export function validateCompositionCompatibility(
       req.requirementId.includes("healthcare") ||
       req.goldenQuestionRef.includes("patient")
     ) {
-      if (dtc.domainIdentifier === "domain:gs1" || dtc.domainIdentifier === "domain:dpp") {
+      if (
+        dtc.domainIdentifier === "domain:gs1" ||
+        dtc.domainIdentifier === "domain:dpp"
+      ) {
         return {
           ok: false,
           error: {
@@ -262,13 +295,17 @@ export function validateCompositionCompatibility(
   // 9. Profile Isolation (Check 9)
   const profileSet = new Set(dtc.applicableArmProfiles);
   for (const req of reqs) {
-    if (req.targetDimension === "HEALTHCARE_PATIENT" && profileSet.has("arm:profile:trade_item:v1")) {
+    if (
+      req.targetDimension === "HEALTHCARE_PATIENT" &&
+      profileSet.has("arm:profile:trade_item:v1")
+    ) {
       return {
         ok: false,
         error: {
           code: "conflicting",
           category: "Composition Failure",
-          message: "Profile isolation conflict: Trade Item profile cannot compose with Healthcare Patient profile",
+          message:
+            "Profile isolation conflict: Trade Item profile cannot compose with Healthcare Patient profile",
           requirementId: req.requirementId,
         },
       };
@@ -283,7 +320,8 @@ export function validateCompositionCompatibility(
         error: {
           code: "unverified",
           category: "Composition Failure",
-          message: "Provenance satisfaction failure: author identity is required but missing from registry state",
+          message:
+            "Provenance satisfaction failure: author identity is required but missing from registry state",
         },
         epistemicStatus: "UNVERIFIED",
       };

@@ -22,6 +22,7 @@ This document materializes Deliverable D3 for AMS-0855. It documents explicit ve
 ## 2. Ratified Constitutional Requirement
 
 AMS-0852 records as `[RATIFIED / EXISTING]` the invariant:
+
 > _All referenced capabilities in a CompositionManifest SHALL be explicitly version-bound; floating and wildcard references are prohibited._
 
 AMS-0855 converts this specification into executable Application-layer validation (`versionValidator.ts` and `compatibilityValidator.ts`).
@@ -33,6 +34,7 @@ AMS-0855 converts this specification into executable Application-layer validatio
 The Application composition layer rejects any composition input containing floating, range-based, wildcard, or unversioned references.
 
 ### Prohibited Forms (Failure Code: `invalid`)
+
 - **`latest`**: Ambient/default version discovery.
 - **`*`**: Unconstrained wildcard.
 - **`^1.x`**, **`^1.0.0`**: Caret SemVer range.
@@ -43,6 +45,7 @@ The Application composition layer rejects any composition input containing float
 - **`ambient version discovery`**: Inferring versions from external environment or filesystem.
 
 ### Accepted Concrete Forms
+
 - Explicit concrete semantic version strings: `"1.0.0"`, `"1.0.1"`, `"2.1.0-alpha.1"`.
 - Explicit concrete single-level version tags: `"v1"`, `"1.0"`.
 
@@ -86,6 +89,7 @@ AMS-0855 does not collapse these separate checks into a single pass. Each condit
 ## 5. DTC Lifecycle & Revocation (Council Gap 1 Preserved)
 
 In accordance with Council Gap 1:
+
 - AMS-0855 **does not** create a DTC lifecycle state machine, deprecation engine, or registration authority.
 - DTC status defaults to static authorized fixtures (`version: "1.0.0"`).
 - If an artifact's status cannot be established from retrieved Registry state, the Application fails closed using `unauthorized` or `unavailable` without inventing a lifecycle state machine.
@@ -97,6 +101,7 @@ In accordance with Council Gap 1:
 If a referenced version or capability cannot be resolved from the authorized substrate, the Application layer fails explicitly.
 
 Per the **Rule of Silence**, the Application SHALL NOT:
+
 - infer the artifact;
 - substitute another version;
 - substitute the latest version;
