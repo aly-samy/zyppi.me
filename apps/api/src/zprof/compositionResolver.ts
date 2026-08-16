@@ -34,6 +34,11 @@ import {
   GS1_GTIN_EPISTEMIC_REQUIREMENT,
   GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
 } from "./fixtures/gs1EpistemicRequirements.js";
+import { validateCompositionCompatibility } from "./compatibilityValidator.js";
+import {
+  validateExplicitVersionList,
+  validateVersionConstraints,
+} from "./versionValidator.js";
 
 export interface GS1CompositionOptions {
   readonly registryRepository: RegistryRepository;
@@ -93,7 +98,7 @@ export class ApplicationCompositionResolver {
       GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
     ];
 
-    // 1. Structural Validation of DTC
+    // 1. Structural Validation & Explicit Version Binding of DTC
     if (!dtc.dtcId || !dtc.dtcId.startsWith("dtc:zyppi:domain:")) {
       return {
         ok: false,
@@ -103,6 +108,22 @@ export class ApplicationCompositionResolver {
           message: `Unsupported DTC ID: ${dtc.dtcId}`,
         },
       };
+    }
+
+    const dtcVersionCheck = validateExplicitVersionList(
+      [dtc.version],
+      "DTC version",
+    );
+    if (!dtcVersionCheck.ok) {
+      return { ok: false, error: dtcVersionCheck.error };
+    }
+
+    const optionsVersionsCheck = validateExplicitVersionList(
+      options.versions,
+      "options.versions",
+    );
+    if (!optionsVersionsCheck.ok) {
+      return { ok: false, error: optionsVersionsCheck.error };
     }
 
     if (dtc.version !== "1.0.0") {
@@ -125,6 +146,19 @@ export class ApplicationCompositionResolver {
           message: "DTC must reference at least one epistemic requirement",
         },
       };
+    }
+
+    if (
+      dtc.versionConstraints &&
+      Object.keys(dtc.versionConstraints).length > 0
+    ) {
+      const constraintCheck = validateVersionConstraints(
+        options.versions,
+        dtc.versionConstraints,
+      );
+      if (!constraintCheck.ok) {
+        return { ok: false, error: constraintCheck.error };
+      }
     }
 
     // 2. Fetch Registry state read-only
@@ -157,66 +191,19 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // 3. Epistemic Requirements Verification against retrieved facts (Structural & Domain-Agnostic)
-    for (const req of reqs) {
-      for (const fact of req.requiredFacts) {
-        if (fact.optionality === "MANDATORY") {
-          if (fact.factKey.startsWith("primaryIdentifier")) {
-            if (
-              !retrievedState.identity ||
-              !retrievedState.identity.identityId
-            ) {
-              return {
-                ok: false,
-                error: {
-                  code: "missing",
-                  category: "Composition Failure",
-                  message: `Mandatory fact ${fact.factKey} is missing from registry identity`,
-                  requirementId: req.requirementId,
-                },
-                epistemicStatus: "UNKNOWN",
-              };
-            }
-          } else if (fact.factKey === "authorityId") {
-            if (
-              !retrievedState.authorities ||
-              retrievedState.authorities.length === 0
-            ) {
-              return {
-                ok: false,
-                error: {
-                  code: "missing",
-                  category: "Composition Failure",
-                  message:
-                    "Mandatory fact authorityId is missing from registry authorities",
-                  requirementId: req.requirementId,
-                },
-                epistemicStatus: "UNAVAILABLE",
-              };
-            }
-          } else if (fact.factKey === "materialComposition") {
-            const hasMaterialCap = retrievedState.capabilities?.some(
-              (c) =>
-                c.scope.includes("material") ||
-                c.scope.includes("composition") ||
-                c.capabilityId.includes("material"),
-            );
-            if (!hasMaterialCap) {
-              return {
-                ok: false,
-                error: {
-                  code: "missing",
-                  category: "Composition Failure",
-                  message:
-                    "Mandatory fact materialComposition is missing from registry capabilities",
-                  requirementId: req.requirementId,
-                },
-                epistemicStatus: "UNAVAILABLE",
-              };
-            }
-          }
-        }
-      }
+    // 3. Validate Composition Compatibility across 10 evaluation areas
+    const compatResult = validateCompositionCompatibility(
+      dtc,
+      reqs,
+      retrievedState,
+      options.versions,
+    );
+    if (!compatResult.ok) {
+      return {
+        ok: false,
+        error: compatResult.error,
+        epistemicStatus: compatResult.epistemicStatus,
+      };
     }
 
     // 4. Resolve Evidence Bundle & Payloads using existing Evidence mechanisms
