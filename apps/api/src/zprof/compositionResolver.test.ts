@@ -1086,6 +1086,84 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       }
     });
 
+    it("TEST 857.4.A — Explicit Pinned ACV Input Isolation: Two explicit ACVs produce two corresponding deterministic results", async () => {
+      const registryRepo = new TestRegistryRepository(null, []);
+      const resolver = new ApplicationCompositionResolver();
+
+      const explicitAcvAuthorized = {
+        identity: sampleIdentity,
+        relationships: [],
+        standings: [],
+        authorities: [
+          {
+            authorityId: "auth-001",
+            subjectId: "09501101530003",
+            scope: "GLOBAL",
+            validFrom: "2026-01-01T00:00:00Z",
+            validTo: "2030-01-01T00:00:00Z",
+          },
+        ],
+        capabilities: [gs1ProjectionCapability],
+        evidenceReferences: [sampleEvidenceRecord],
+        applicablePolicies: [],
+      };
+
+      const explicitAcvUnauthorized = {
+        ...explicitAcvAuthorized,
+        capabilities: [], // Omit GS1 projection capability
+      };
+
+      const resAuth = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-exp-01",
+        executionId: "exec-exp-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitAcv: explicitAcvAuthorized,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      const resUnauth = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-exp-02",
+        executionId: "exec-exp-02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitAcv: explicitAcvUnauthorized,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(resAuth.ok).toBe(true);
+      expect(resUnauth.ok).toBe(false);
+
+      if (!resUnauth.ok) {
+        expect(resUnauth.error.code).toBe("unauthorized");
+        expect(resUnauth.error.message).toContain("in pinned ACV");
+      }
+    });
+
     it("TEST 857.4.B — Required vs Optional ATT-R-001 Proof Reference: Missing required proof fails closed", async () => {
       const registryRepo = new TestRegistryRepository(
         sampleCompleteSnapshotState,

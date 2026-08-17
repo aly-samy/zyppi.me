@@ -211,6 +211,7 @@ export interface GenericCompositionOptions {
   readonly versions: readonly string[];
   readonly policyContext: PolicyContext;
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+  readonly explicitAcv?: ActiveConstitutionalView;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
   readonly explicitCl16Artifacts?: readonly Cl16IntelligenceReference[];

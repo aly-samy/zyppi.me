@@ -5,6 +5,7 @@ import type {
 } from "@zyppi/runtime/dist/types.js";
 import type {
   RegistryRepository,
+  RetrievedRegistryState,
   ValidatedCanonicalIdentifier,
   EvidenceReferenceResolver,
   EvidencePayloadProvider,
@@ -55,6 +56,7 @@ export interface GS1CompositionOptions {
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
   readonly dtcFixture?: DomainTemplateCard;
   readonly epistemicRequirementsFixtures?: readonly EpistemicRequirementContract[];
+  readonly explicitAcv?: ActiveConstitutionalView;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
   readonly explicitCl16Artifacts?: readonly Cl16IntelligenceReference[];
@@ -164,46 +166,61 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // 2. Fetch Registry state read-only
-    const lookupResult = await options.registryRepository.lookup(
-      options.identifier,
-    );
-    if (!lookupResult.ok) {
-      return {
-        ok: false,
-        error: {
-          code: "unavailable",
-          category: "Composition Failure",
-          message: `Registry repository lookup failed: ${JSON.stringify(lookupResult.error)}`,
-        },
-        epistemicStatus: "UNAVAILABLE",
+    let retrievedState: RetrievedRegistryState;
+    let resolvedActiveConstitutionalView: ActiveConstitutionalView;
+
+    if (options.explicitAcv) {
+      resolvedActiveConstitutionalView = options.explicitAcv;
+      retrievedState = {
+        identity: options.explicitAcv.identity,
+        relationships: options.explicitAcv.relationships,
+        standings: options.explicitAcv.standings,
+        authorities: options.explicitAcv.authorities,
+        capabilities: options.explicitAcv.capabilities,
+        evidenceReferences: options.explicitAcv.evidenceReferences,
+        applicablePolicies: options.explicitAcv.applicablePolicies,
+      };
+    } else {
+      // 2. Fetch Registry state read-only if explicit ACV is not supplied
+      const lookupResult = await options.registryRepository.lookup(
+        options.identifier,
+      );
+      if (!lookupResult.ok) {
+        return {
+          ok: false,
+          error: {
+            code: "unavailable",
+            category: "Composition Failure",
+            message: `Registry repository lookup failed: ${JSON.stringify(lookupResult.error)}`,
+          },
+          epistemicStatus: "UNAVAILABLE",
+        };
+      }
+
+      if (!lookupResult.value) {
+        return {
+          ok: false,
+          error: {
+            code: "missing",
+            category: "Composition Failure",
+            message: "Registry state not found for the supplied identifier",
+            requirementId: reqs[0]?.requirementId ?? "epistemic:req:unknown:v1",
+          },
+          epistemicStatus: "UNAVAILABLE",
+        };
+      }
+
+      retrievedState = lookupResult.value;
+      resolvedActiveConstitutionalView = {
+        identity: retrievedState.identity,
+        relationships: retrievedState.relationships,
+        standings: retrievedState.standings,
+        authorities: retrievedState.authorities,
+        capabilities: retrievedState.capabilities,
+        evidenceReferences: retrievedState.evidenceReferences,
+        applicablePolicies: retrievedState.applicablePolicies,
       };
     }
-
-    const retrievedState = lookupResult.value;
-    if (!retrievedState) {
-      return {
-        ok: false,
-        error: {
-          code: "missing",
-          category: "Composition Failure",
-          message: "Registry state not found for the supplied identifier",
-          requirementId: reqs[0]?.requirementId ?? "epistemic:req:unknown:v1",
-        },
-        epistemicStatus: "UNAVAILABLE",
-      };
-    }
-
-    // 3. Construct ActiveConstitutionalView directly from retrieved state BEFORE validation
-    const resolvedActiveConstitutionalView: ActiveConstitutionalView = {
-      identity: retrievedState.identity,
-      relationships: retrievedState.relationships,
-      standings: retrievedState.standings,
-      authorities: retrievedState.authorities,
-      capabilities: retrievedState.capabilities,
-      evidenceReferences: retrievedState.evidenceReferences,
-      applicablePolicies: retrievedState.applicablePolicies,
-    };
 
     // 4. Validate Composition Compatibility against explicit pinned ACV
     const compatResult = validateCompositionCompatibility(
@@ -231,7 +248,7 @@ export class ApplicationCompositionResolver {
       evidencePayloads = options.explicitEvidencePayloads ?? new Map();
     } else {
       const evidenceIds = retrievedState.evidenceReferences.map(
-        (r) => r.evidenceId,
+        (r: { readonly evidenceId: string }) => r.evidenceId,
       );
       const resolver =
         options.evidenceResolver ??
