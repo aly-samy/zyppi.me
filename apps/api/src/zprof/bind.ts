@@ -57,6 +57,7 @@ export interface BindOptions {
   readonly pinnedSubstrate: PinnedSubstrate;
   readonly boundCoordinates: BoundCoordinates;
   readonly authorizedInputs?: Readonly<Record<string, unknown>>;
+  readonly ownerLookup?: Readonly<Record<string, string>>;
 }
 
 export type BindResult =
@@ -69,8 +70,28 @@ export type BindResult =
   | { readonly ok: false; readonly error: CompositionError };
 
 /**
+ * Recursively deep freezes an object/array structure.
+ */
+function deepFreeze<T>(obj: T): T {
+  if (obj === null || typeof obj !== "object" || Object.isFrozen(obj)) {
+    return obj;
+  }
+  Object.freeze(obj);
+  for (const key of Reflect.ownKeys(obj)) {
+    const val = (obj as Record<string | symbol, unknown>)[key];
+    if (val !== null && typeof val === "object") {
+      deepFreeze(val);
+    }
+  }
+  return obj;
+}
+
+/**
  * Pure declarative BIND operation per AMS-0858 §14–§16.
  * BIND(CompositionDefinition, PinnedSubstrate, BoundCoordinates, AuthorizedInputs) -> BoundCompositionPayload
+ *
+ * BIND binds a declared composition. It DOES NOT invent or synthesize missing constitutional participants,
+ * default DTCs, default ARM Profiles, default manifests, or fabricated owners.
  *
  * Operates with ZERO ambient Registry lookups, ZERO network I/O, ZERO database access,
  * and ZERO runtime execution.
@@ -95,7 +116,7 @@ export function bindComposition(options: BindOptions): BindResult {
     };
   }
 
-  // 2. Resolve Participants P
+  // 2. Resolve Participants P without synthesis
   let participants: readonly Participant[];
   const manifest: CompositionManifest | undefined =
     compositionDefinition.manifest;
@@ -110,7 +131,7 @@ export function bindComposition(options: BindOptions): BindResult {
     if (!pRes.ok) return { ok: false, error: pRes.error };
     participants = pRes.participants;
   } else if (manifest) {
-    const pRes = extractParticipantsFromManifest(manifest);
+    const pRes = extractParticipantsFromManifest(manifest, options.ownerLookup);
     if (!pRes.ok) return { ok: false, error: pRes.error };
     participants = pRes.participants;
   } else {
@@ -125,16 +146,25 @@ export function bindComposition(options: BindOptions): BindResult {
     };
   }
 
-  // 3. Resolve Structural & Binding Topologies
-  const structEdges: readonly StructuralEdge[] =
-    compositionDefinition.structuralEdges ||
-    (manifest?.dependencyTopology?.edges.map((e) => ({
-      sourceId: e.from,
-      targetId: e.to,
-      relationKind: "structural_dependency",
-    })) ??
-      []);
+  // 3. Mandatory Check: Must contain DTC and ARM Profile declared in P
+  const hasDtc = participants.some((p) => p.kind === "DTC");
+  const hasArm = participants.some((p) => p.kind === "ARM_PROFILE");
 
+  if (!hasDtc || !hasArm) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "Composition definition missing required DTC or ARM_PROFILE participant; BIND shall not synthesize missing participants",
+      },
+    };
+  }
+
+  // 4. Resolve Structural & Binding Topologies
+  const structEdges: readonly StructuralEdge[] =
+    compositionDefinition.structuralEdges || [];
   const bindEdges: readonly BindingEdge[] =
     compositionDefinition.bindingEdges || [];
 
@@ -143,7 +173,7 @@ export function bindComposition(options: BindOptions): BindResult {
     return { ok: false, error: topoRes.error };
   }
 
-  // 4. Derive Deterministic CompositionID
+  // 5. Derive Deterministic CompositionID
   const idRes = deriveCompositionId({
     P: participants,
     T_struct: structEdges,
@@ -157,94 +187,51 @@ export function bindComposition(options: BindOptions): BindResult {
 
   const compositionId = idRes.compositionId;
 
-  // 5. Build/Normalize CompositionManifest if not pre-supplied
+  // 6. Require explicit CompositionManifest (no synthesis permitted)
+  if (!manifest) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message:
+          "BIND requires an explicit CompositionManifest; synthesis of missing manifests is prohibited",
+      },
+    };
+  }
+
+  const finalManifest: CompositionManifest = deepFreeze({
+    ...manifest,
+    composition_id: compositionId,
+  } as CompositionManifest);
+
+  // 7. Build Immutable BoundConstitutionalPayload
   const domainSlug =
     pinnedSubstrate.acv.identity.identityType ||
     participants[0]?.identity.split(":")[2] ||
     "trade_item";
-  const manifestId =
-    manifest?.manifestId ||
-    `manifest:zyppi:${domainSlug}:${boundCoordinates.executionId}`;
 
-  const finalManifest: CompositionManifest = manifest
-    ? Object.freeze({ ...manifest, composition_id: compositionId })
-    : Object.freeze({
-        $schema: "https://zyppi.org/schemas/v1/composition_manifest.json",
-        manifestId,
-        dtcReference: {
-          dtcId:
-            participants.find((p) => p.kind === "DTC")?.identity ||
-            "dtc:zyppi:domain:trade_item:v1",
-          version: "1.0.0",
-        },
-        armProfileReference: {
-          profileId:
-            participants.find((p) => p.kind === "ARM_PROFILE")?.identity ||
-            "arm:profile:trade_item:v1",
-          version: "1.0.0",
-        },
-        boundEpistemicRequirements: participants
-          .filter((p) => p.kind === "EPISTEMIC_REQUIREMENT")
-          .map((p) =>
-            Object.freeze({ requirementId: p.identity, version: p.version }),
-          ),
-        boundPrjSpecifications: participants
-          .filter((p) => p.kind === "PRJ_SPECIFICATION")
-          .map((p) =>
-            Object.freeze({ specId: p.identity, version: p.version }),
-          ),
-        boundRsnBlueprints: participants
-          .filter((p) => p.kind === "RSN_BLUEPRINT")
-          .map((p) =>
-            Object.freeze({ blueprintId: p.identity, version: p.version }),
-          ),
-        boundPolRequirements: participants
-          .filter((p) => p.kind === "POL_REQUIREMENT")
-          .map((p) =>
-            Object.freeze({ policyId: p.identity, version: p.version }),
-          ),
-        boundSecRequirements: participants
-          .filter((p) => p.kind === "SEC_REQUIREMENT")
-          .map((p) =>
-            Object.freeze({ securityReqId: p.identity, version: p.version }),
-          ),
-        boundRiCapabilities: participants
-          .filter((p) => p.kind === "RI_CAPABILITY")
-          .map((p) =>
-            Object.freeze({ capabilityId: p.identity, version: p.version }),
-          ),
-        dependencyTopology: Object.freeze({
-          nodes: Object.freeze(participants.map((p) => p.identity)),
-          edges: Object.freeze(
-            structEdges.map((e) => ({ from: e.sourceId, to: e.targetId })),
-          ),
-        }),
-        provenanceReferences: Object.freeze({
-          manifestAuthor: "identity:council:admin",
-          createdTimestamp: boundCoordinates.constitutionalTimestamp,
-        }),
-      });
-
-  // 6. Build Immutable BoundConstitutionalPayload
   const evidenceBundle: EvidenceBundle = pinnedSubstrate.evidenceBundle ?? {
     schemaVersion: "1.0",
     evidenceRecords: [],
   };
 
-  const boundPayload: BoundConstitutionalPayload = Object.freeze({
+  const rawPayload: BoundConstitutionalPayload = {
     $schema: "https://zyppi.org/schemas/v1/bound_payload.json",
     payloadId: `bound:payload:${domainSlug}:${boundCoordinates.executionId}`,
     manifestId: finalManifest.manifestId,
     resolvedActiveConstitutionalView: pinnedSubstrate.acv,
     resolvedEvidenceBundle: evidenceBundle,
-    executionContext: Object.freeze({
+    executionContext: {
       executionId: boundCoordinates.executionId,
       constitutionalTimestamp: boundCoordinates.constitutionalTimestamp,
       budget: boundCoordinates.budget,
       entropy: boundCoordinates.entropy,
       versions: boundCoordinates.versions,
-    }),
-  });
+    },
+  };
+
+  const boundPayload: BoundConstitutionalPayload = deepFreeze(rawPayload);
 
   return {
     ok: true,

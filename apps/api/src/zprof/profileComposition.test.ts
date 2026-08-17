@@ -1,11 +1,15 @@
 import { describe, it, expect } from "vitest";
 import type { ActiveConstitutionalView, EvidenceBundle } from "@zyppi/domain";
+import type { CompositionManifest } from "./types.js";
 import {
   validateParticipant,
   validateParticipantCollection,
+  extractParticipantsFromManifest,
   type Participant,
 } from "./participant.js";
 import {
+  normalizeTopologyGraph,
+  detectBindingCycle,
   validateTopologyGraph,
   type StructuralEdge,
   type BindingEdge,
@@ -115,6 +119,40 @@ const validParticipant3: Participant = {
   reference: { id: "epistemic:req:gtin:v1", version: "1.0.0" },
 };
 
+const mockManifest: CompositionManifest = {
+  $schema: "https://zyppi.org/schemas/v1/composition_manifest.json",
+  manifestId: "manifest:zyppi:trade_item:exec-12345",
+  dtcReference: {
+    dtcId: "dtc:zyppi:domain:trade_item:v1",
+    version: "1.0.0",
+  },
+  armProfileReference: {
+    profileId: "arm:profile:trade_item:v1",
+    version: "1.0.0",
+  },
+  boundEpistemicRequirements: [
+    { requirementId: "epistemic:req:gtin:v1", version: "1.0.0" },
+  ],
+  boundPrjSpecifications: [],
+  boundRsnBlueprints: [],
+  boundPolRequirements: [],
+  boundSecRequirements: [],
+  boundRiCapabilities: [],
+  dependencyTopology: {
+    nodes: ["dtc:zyppi:domain:trade_item:v1", "arm:profile:trade_item:v1"],
+    edges: [
+      {
+        from: "dtc:zyppi:domain:trade_item:v1",
+        to: "arm:profile:trade_item:v1",
+      },
+    ],
+  },
+  provenanceReferences: {
+    manifestAuthor: "identity:council:admin",
+    createdTimestamp: "2026-08-15T12:00:00Z",
+  },
+};
+
 describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
   describe("Participant Validation (P-001 through P-010)", () => {
     it("1. Missing identity -> fail", () => {
@@ -125,9 +163,9 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("2. Missing kind -> fail", () => {
-      const p = {
+      const p: Participant = {
         ...validParticipant1,
-        kind: "" as unknown as Participant["kind"],
+        kind: "" as Participant["kind"],
       };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
@@ -141,7 +179,7 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       if (!res.ok) expect(res.error.code).toBe("invalid");
     });
 
-    it("4. Ambiguous owner -> fail", () => {
+    it("4. Ambiguous/missing owner -> fail (no owner fabrication)", () => {
       const p = { ...validParticipant1, owner: "   " };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
@@ -149,30 +187,44 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("5. Missing role -> fail", () => {
-      const p = {
+      const p: Participant = {
         ...validParticipant1,
-        role: "" as unknown as Participant["role"],
+        role: "" as Participant["role"],
       };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.error.code).toBe("invalid");
     });
 
-    it("6. Duplicate participant identity with same role -> fail", () => {
+    it("6. Duplicate participant identity -> fail closed", () => {
       const collection = [validParticipant1, validParticipant1];
       const res = validateParticipantCollection(collection);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.error.code).toBe("conflicting");
     });
 
-    it("7. Floating/wildcard identity -> fail", () => {
+    it("7. Same identity with different role -> fail closed (P-007 identity keying)", () => {
+      const pWithDiffRole: Participant = {
+        ...validParticipant1,
+        role: "asset_profile",
+      };
+      const collection = [validParticipant1, pWithDiffRole];
+      const res = validateParticipantCollection(collection);
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("conflicting");
+        expect(res.error.message).toContain("Duplicate participant identity");
+      }
+    });
+
+    it("8. Floating/wildcard identity -> fail", () => {
       const p = { ...validParticipant1, identity: "dtc:zyppi:*" };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.error.code).toBe("invalid");
     });
 
-    it("8. Missing reference -> fail", () => {
+    it("9. Missing reference -> fail", () => {
       const p = {
         ...validParticipant1,
         reference: { id: "", version: "1.0.0" },
@@ -182,12 +234,28 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       if (!res.ok) expect(res.error.code).toBe("invalid");
     });
 
-    it("9. Valid participant collection succeeds", () => {
+    it("10. Valid participant collection succeeds", () => {
       const res = validateParticipantCollection([
         validParticipant1,
         validParticipant2,
       ]);
       expect(res.ok).toBe(true);
+    });
+
+    it("11. Manifest extraction without discoverable author/owner -> fail closed", () => {
+      const unownedManifest: CompositionManifest = {
+        ...mockManifest,
+        provenanceReferences: {
+          manifestAuthor: "",
+          createdTimestamp: "2026-08-15T12:00:00Z",
+        },
+      };
+      const res = extractParticipantsFromManifest(unownedManifest);
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("invalid");
+        expect(res.error.message).toContain("missing or ambiguous owner");
+      }
     });
   });
 
@@ -306,6 +374,24 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
         expect(res.error.code).toBe("invalid");
       }
     });
+
+    it("7. Topology normalization and cycle detection utilities operate deterministically", () => {
+      const norm = normalizeTopologyGraph(
+        ["b", "a"],
+        [{ sourceId: "a", targetId: "b", relationKind: "r" }],
+        [{ sourceId: "a", targetId: "b", dependencyKind: "d" }],
+      );
+      expect(norm.nodes).toEqual(["a", "b"]);
+
+      const cycle = detectBindingCycle(
+        ["a", "b"],
+        [
+          { sourceId: "a", targetId: "b", dependencyKind: "d" },
+          { sourceId: "b", targetId: "a", dependencyKind: "d" },
+        ],
+      );
+      expect(cycle.hasCycle).toBe(true);
+    });
   });
 
   describe("Composition Identity & Canonicalization", () => {
@@ -404,10 +490,11 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
   });
 
   describe("Declarative BIND & Substrate Pinning", () => {
-    it("1. BIND produces immutable BoundCompositionPayload without ambient I/O", () => {
+    it("1. BIND produces immutable BoundCompositionPayload without ambient I/O or synthesis", () => {
       const res = bindComposition({
         compositionDefinition: {
           participants: [validParticipant1, validParticipant2],
+          manifest: mockManifest,
         },
         pinnedSubstrate: mockPinnedSubstrate,
         boundCoordinates: mockBoundCoordinates,
@@ -419,11 +506,68 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
         );
         expect(res.boundPayload.resolvedActiveConstitutionalView).toBe(mockAcv);
         expect(Object.isFrozen(res.boundPayload)).toBe(true);
+        expect(Object.isFrozen(res.boundPayload.executionContext)).toBe(true);
       }
     });
 
-    it("2. Dynamic coordinate changes alone do NOT alter CompositionID", () => {
-      const def = { participants: [validParticipant1, validParticipant2] };
+    it("2. BIND fails when manifest is missing (no manifest synthesis)", () => {
+      const res = bindComposition({
+        compositionDefinition: {
+          participants: [validParticipant1, validParticipant2],
+        },
+        pinnedSubstrate: mockPinnedSubstrate,
+        boundCoordinates: mockBoundCoordinates,
+      });
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("invalid");
+        expect(res.error.message).toContain("explicit CompositionManifest");
+      }
+    });
+
+    it("3. BIND fails when DTC or ARM_PROFILE is missing from P", () => {
+      const res = bindComposition({
+        compositionDefinition: {
+          participants: [validParticipant1],
+          manifest: mockManifest,
+        },
+        pinnedSubstrate: mockPinnedSubstrate,
+        boundCoordinates: mockBoundCoordinates,
+      });
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("missing");
+        expect(res.error.message).toContain(
+          "missing required DTC or ARM_PROFILE",
+        );
+      }
+    });
+
+    it("4. Deep Immutability: Mutating nested payload properties throws or fails", () => {
+      const res = bindComposition({
+        compositionDefinition: {
+          participants: [validParticipant1, validParticipant2],
+          manifest: mockManifest,
+        },
+        pinnedSubstrate: mockPinnedSubstrate,
+        boundCoordinates: mockBoundCoordinates,
+      });
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(() => {
+          (res.boundPayload as { payloadId: string }).payloadId = "mutated";
+        }).toThrow();
+        expect(() => {
+          (res.boundPayload.executionContext as { budget: number }).budget = 0;
+        }).toThrow();
+      }
+    });
+
+    it("5. Dynamic coordinate changes alone do NOT alter CompositionID", () => {
+      const def = {
+        participants: [validParticipant1, validParticipant2],
+        manifest: mockManifest,
+      };
       const res1 = bindComposition({
         compositionDefinition: def,
         pinnedSubstrate: mockPinnedSubstrate,
@@ -444,10 +588,15 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       }
     });
 
-    it("3. BIND fails closed on missing pinned ACV", () => {
+    it("6. BIND fails closed on missing pinned ACV", () => {
       const res = bindComposition({
-        compositionDefinition: { participants: [validParticipant1] },
-        pinnedSubstrate: { acv: null as unknown as ActiveConstitutionalView },
+        compositionDefinition: {
+          participants: [validParticipant1, validParticipant2],
+          manifest: mockManifest,
+        },
+        pinnedSubstrate: {
+          acv: null as unknown as ActiveConstitutionalView,
+        },
         boundCoordinates: mockBoundCoordinates,
       });
       expect(res.ok).toBe(false);
@@ -462,13 +611,14 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       const res = bindComposition({
         compositionDefinition: {
           participants: [validParticipant1, validParticipant2],
+          manifest: mockManifest,
         },
         pinnedSubstrate: mockPinnedSubstrate,
         boundCoordinates: mockBoundCoordinates,
       });
       expect(res.ok).toBe(true);
       if (res.ok) {
-        expect(res.manifest.dependencyTopology.edges.length).toBe(0);
+        expect(res.manifest.dependencyTopology.edges.length).toBe(1);
       }
     });
   });

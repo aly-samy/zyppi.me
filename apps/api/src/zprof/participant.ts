@@ -132,7 +132,7 @@ export function validateParticipant(
     return { ok: false, error: verCheck.error };
   }
 
-  // P-004: Unambiguous Ownership
+  // P-004: Unambiguous Ownership (No default/fabricated owner permitted)
   if (!p.owner || typeof p.owner !== "string" || p.owner.trim() === "") {
     return {
       ok: false,
@@ -185,6 +185,7 @@ export function validateParticipant(
 
 /**
  * Validates a collection P of participants against constraints P-001 through P-010.
+ * Strictly enforces P-007: same identity MUST NOT occur more than once in P.
  */
 export function validateParticipantCollection(
   participants: readonly Participant[],
@@ -201,7 +202,7 @@ export function validateParticipantCollection(
     };
   }
 
-  const seenIdentities = new Map<string, ParticipantRole>();
+  const seenIdentities = new Set<string>();
 
   for (const p of participants) {
     const singleCheck = validateParticipant(p);
@@ -209,21 +210,18 @@ export function validateParticipantCollection(
       return singleCheck;
     }
 
-    // P-007: Structural Uniqueness (same identity cannot occur unless explicitly permitted with distinct roles)
+    // P-007: Structural Uniqueness (Participant Identity Keying)
     if (seenIdentities.has(p.identity)) {
-      const existingRole = seenIdentities.get(p.identity);
-      if (existingRole === p.role) {
-        return {
-          ok: false,
-          error: {
-            code: "conflicting",
-            category: "Composition Failure",
-            message: `Duplicate participant identity '${p.identity}' with same role '${p.role}'`,
-          },
-        };
-      }
+      return {
+        ok: false,
+        error: {
+          code: "conflicting",
+          category: "Composition Failure",
+          message: `Duplicate participant identity '${p.identity}' in collection P`,
+        },
+      };
     }
-    seenIdentities.set(p.identity, p.role);
+    seenIdentities.add(p.identity);
   }
 
   return { ok: true, participants: Object.freeze([...participants]) };
@@ -231,11 +229,20 @@ export function validateParticipantCollection(
 
 /**
  * Extracts and constructs the formal participant collection P from a CompositionManifest.
+ * Explicit owner MUST be supplied from manifest provenance or explicit owner map; NO default owner synthesis permitted.
  */
 export function extractParticipantsFromManifest(
   manifest: CompositionManifest,
-  defaultOwner = "identity:council:admin",
+  ownerLookup?: Readonly<Record<string, string>>,
 ): ParticipantValidationResult {
+  const getOwner = (id: string): string => {
+    if (ownerLookup && ownerLookup[id]) return ownerLookup[id]!;
+    if (manifest.provenanceReferences?.manifestAuthor) {
+      return manifest.provenanceReferences.manifestAuthor;
+    }
+    return "";
+  };
+
   const participants: Participant[] = [];
 
   // 1. DTC Participant
@@ -244,7 +251,7 @@ export function extractParticipantsFromManifest(
       identity: manifest.dtcReference.dtcId,
       kind: "DTC",
       version: manifest.dtcReference.version,
-      owner: defaultOwner,
+      owner: getOwner(manifest.dtcReference.dtcId),
       role: "domain_template",
       reference: {
         id: manifest.dtcReference.dtcId,
@@ -259,7 +266,7 @@ export function extractParticipantsFromManifest(
       identity: manifest.armProfileReference.profileId,
       kind: "ARM_PROFILE",
       version: manifest.armProfileReference.version,
-      owner: defaultOwner,
+      owner: getOwner(manifest.armProfileReference.profileId),
       role: "asset_profile",
       reference: {
         id: manifest.armProfileReference.profileId,
@@ -274,7 +281,7 @@ export function extractParticipantsFromManifest(
       identity: ref.requirementId,
       kind: "EPISTEMIC_REQUIREMENT",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.requirementId),
       role: "epistemic_requirement",
       reference: {
         id: ref.requirementId,
@@ -289,7 +296,7 @@ export function extractParticipantsFromManifest(
       identity: ref.specId,
       kind: "PRJ_SPECIFICATION",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.specId),
       role: "prj_specification",
       reference: {
         id: ref.specId,
@@ -304,7 +311,7 @@ export function extractParticipantsFromManifest(
       identity: ref.blueprintId,
       kind: "RSN_BLUEPRINT",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.blueprintId),
       role: "rsn_blueprint",
       reference: {
         id: ref.blueprintId,
@@ -319,7 +326,7 @@ export function extractParticipantsFromManifest(
       identity: ref.policyId,
       kind: "POL_REQUIREMENT",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.policyId),
       role: "pol_requirement",
       reference: {
         id: ref.policyId,
@@ -334,7 +341,7 @@ export function extractParticipantsFromManifest(
       identity: ref.securityReqId,
       kind: "SEC_REQUIREMENT",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.securityReqId),
       role: "sec_requirement",
       reference: {
         id: ref.securityReqId,
@@ -349,7 +356,7 @@ export function extractParticipantsFromManifest(
       identity: ref.capabilityId,
       kind: "RI_CAPABILITY",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.capabilityId),
       role: "ri_capability",
       reference: {
         id: ref.capabilityId,
@@ -364,7 +371,7 @@ export function extractParticipantsFromManifest(
       identity: ref.artifactId,
       kind: "CL16_INTELLIGENCE",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.artifactId),
       role: "cl16_intelligence",
       reference: {
         id: ref.artifactId,
@@ -380,7 +387,7 @@ export function extractParticipantsFromManifest(
       identity: ref.proofId,
       kind: "ATTR_PROOF",
       version: ref.version,
-      owner: defaultOwner,
+      owner: getOwner(ref.proofId),
       role: "attr_proof",
       reference: {
         id: ref.proofId,
