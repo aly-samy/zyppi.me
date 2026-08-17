@@ -918,7 +918,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
     it("TEST 857.2 — ARM Projection Authorization Gate: Unsupported projection reference rejected fail closed", async () => {
       const dtcWithUnsupportedPrj = {
         ...GS1_DOMAIN_TEMPLATE_CARD,
-        requiredPrjSpecifications: ["prj:spec:unsupported_custom_projection:v1"],
+        requiredPrjSpecifications: [
+          "prj:spec:unsupported_custom_projection:v1",
+        ],
       };
 
       const registryRepo = new TestRegistryRepository(
@@ -950,7 +952,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("unauthorized");
-        expect(result.error.message).toContain("is not explicitly authorized by primary ARM Profile");
+        expect(result.error.message).toContain(
+          "is not explicitly authorized by primary ARM Profile",
+        );
       }
     });
 
@@ -989,7 +993,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("unauthorized");
-        expect(result.error.message).toContain("is not explicitly authorized by primary ARM Profile");
+        expect(result.error.message).toContain(
+          "is not explicitly authorized by primary ARM Profile",
+        );
       }
     });
 
@@ -1035,7 +1041,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       // Composition evaluated against explicit evidence bundle & initial pinned state in first resolution
       // remains isolated when using explicit inputs
       if (result1.ok) {
-        expect(result1.boundPayload.resolvedActiveConstitutionalView.identity.status).toBe("active");
+        expect(
+          result1.boundPayload.resolvedActiveConstitutionalView.identity.status,
+        ).toBe("active");
       }
     });
 
@@ -1088,7 +1096,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         expect(
           result.manifest.boundAttestationProofReferences?.[0].proofId,
         ).toBe("proof:att_r_001:exec_01");
-        expect(result.boundPayload.boundCl16IntelligenceArtifacts).toHaveLength(1);
+        expect(result.boundPayload.boundCl16IntelligenceArtifacts).toHaveLength(
+          1,
+        );
       }
     });
 
@@ -1134,7 +1144,9 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("invalid");
-        expect(result.error.message).toContain("Malformed ATT-R-001 proof reference");
+        expect(result.error.message).toContain(
+          "Malformed ATT-R-001 proof reference",
+        );
       }
     });
 

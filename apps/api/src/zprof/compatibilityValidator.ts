@@ -338,7 +338,9 @@ export function validateCompositionCompatibility(
   }
 
   // Authoritative declaration catalog for Primary ARM Profiles per AMS-0857 §5.1 / §13.A
-  const PRIMARY_ARM_PROFILE_CATALOG: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  const PRIMARY_ARM_PROFILE_CATALOG: Readonly<
+    Record<string, readonly string[]>
+  > = Object.freeze({
     "arm:profile:trade_item:v1": Object.freeze([
       "prj:spec:gs1_digital_link_projection:v1",
       "prj:spec:dpp_passport_projection:v1",
@@ -359,7 +361,8 @@ export function validateCompositionCompatibility(
     };
   }
 
-  const authorizedProjections = PRIMARY_ARM_PROFILE_CATALOG[primaryArmProfile] || [];
+  const authorizedProjections =
+    PRIMARY_ARM_PROFILE_CATALOG[primaryArmProfile] || [];
 
   // Evaluate requested PRJ specifications against primary ARM Profile authorized declarations (fail closed on set mismatch)
   for (const prjSpec of dtc.requiredPrjSpecifications) {
@@ -384,7 +387,8 @@ export function validateCompositionCompatibility(
           error: {
             code: "invalid",
             category: "Composition Failure",
-            message: "Malformed CL-16 Intelligence Artifact structural reference",
+            message:
+              "Malformed CL-16 Intelligence Artifact structural reference",
           },
         };
       }

@@ -313,7 +313,10 @@ export class ApplicationCompositionResolver {
     const boundCl16Artifacts: Cl16IntelligenceReference[] = [];
     const boundAttestationProofReferences: AttRProofReference[] = [];
 
-    if (options.explicitCl16Artifacts && options.explicitCl16Artifacts.length > 0) {
+    if (
+      options.explicitCl16Artifacts &&
+      options.explicitCl16Artifacts.length > 0
+    ) {
       for (const artifact of options.explicitCl16Artifacts) {
         boundCl16Artifacts.push(Object.freeze({ ...artifact }));
         if (artifact.attestationProofRef) {

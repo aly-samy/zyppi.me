@@ -19,6 +19,7 @@
 This Context Receipt is produced pursuant to CEngS-003 engineering standards prior to executing repository modifications under mandate **AMS-0857**.
 
 AMS-0857 authorizes Jules to implement the mechanical consumer boundaries between Z-PROF composition validation and:
+
 1. **ARM Projection Authorization Gate** (evaluating projection references against the primary ARM Profile of the bound Asset Reality under the pinned ACV);
 2. **SIOS Translation Boundary** (consuming pre-translated Epistemic Requirements without executing translation);
 3. **RSN / CL-16 Reasoning Boundary** (structurally binding RSN Blueprints and CL-16 Intelligence Artifacts without executing reasoning or creating `DomainJudgment`);
