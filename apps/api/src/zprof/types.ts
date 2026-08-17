@@ -122,6 +122,7 @@ export interface Cl16IntelligenceReference {
   readonly artifactId: string;
   readonly version: string;
   readonly rsnBlueprintRef: string;
+  readonly requireAttestationProof?: boolean;
   readonly attestationProofRef?: AttRProofReference;
   readonly conclusionSummary?: string;
 }

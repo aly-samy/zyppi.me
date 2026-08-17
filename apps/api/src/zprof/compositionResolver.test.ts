@@ -100,6 +100,22 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
     validTo: "2030-01-01T00:00:00Z",
   });
 
+  const gs1ProjectionCapability: CapabilityRecord = Object.freeze({
+    capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+    subjectId: "arm:profile:trade_item:v1",
+    scope: "projection:gs1_digital_link",
+    validFrom: "2026-01-01T00:00:00Z",
+    validTo: "2030-01-01T00:00:00Z",
+  });
+
+  const dppProjectionCapability: CapabilityRecord = Object.freeze({
+    capabilityId: "prj:spec:dpp_passport_projection:v1",
+    subjectId: "arm:profile:trade_item:v1",
+    scope: "projection:dpp_passport",
+    validFrom: "2026-01-01T00:00:00Z",
+    validTo: "2030-01-01T00:00:00Z",
+  });
+
   const sampleCompleteSnapshotState: RetrievedRegistryState = Object.freeze({
     identity: sampleIdentity,
     relationships: Object.freeze([]),
@@ -113,7 +129,11 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         validTo: "2030-01-01T00:00:00Z",
       }),
     ]),
-    capabilities: Object.freeze([materialCapability]),
+    capabilities: Object.freeze([
+      materialCapability,
+      gs1ProjectionCapability,
+      dppProjectionCapability,
+    ]),
     evidenceReferences: Object.freeze([sampleEvidenceRecord]),
     applicablePolicies: Object.freeze([]),
   });
@@ -121,7 +141,10 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
   const sampleSnapshotStateNoMaterialCap: RetrievedRegistryState =
     Object.freeze({
       ...sampleCompleteSnapshotState,
-      capabilities: Object.freeze([]),
+      capabilities: Object.freeze([
+        gs1ProjectionCapability,
+        dppProjectionCapability,
+      ]),
     });
 
   it("TEST A — GS1 Success: resolves valid GS1 composition through Application Composition boundary", async () => {
@@ -999,7 +1022,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       }
     });
 
-    it("TEST 857.4 — Pinned ACV Isolation: Ambient registry state mutation does not alter composition against pinned ACV", async () => {
+    it("TEST 857.4 — Pinned ACV Isolation: Ambient registry state mutation does not alter composition against pinned ACV, while mutating pinned ACV capabilities alters result", async () => {
       const registryRepo = new TestRegistryRepository(
         sampleCompleteSnapshotState,
         [sampleEvidenceRecord],
@@ -1029,7 +1052,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result1 = await resolver.resolveComposition(options);
       expect(result1.ok).toBe(true);
 
-      // Mutate backing state on repository double to simulate ambient drift
+      // Mutate backing state on repository double to simulate ambient drift AFTER resolution
       registryRepo.setRetrievedState({
         ...sampleCompleteSnapshotState,
         identity: {
@@ -1038,12 +1061,103 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         },
       });
 
-      // Composition evaluated against explicit evidence bundle & initial pinned state in first resolution
-      // remains isolated when using explicit inputs
+      // Pinned ACV inside result1 remains 100% isolated
       if (result1.ok) {
         expect(
           result1.boundPayload.resolvedActiveConstitutionalView.identity.status,
         ).toBe("active");
+      }
+
+      // Conversely, if registry state is mutated BEFORE lookup (so pinned ACV loses projection capability), gate fails closed
+      registryRepo.setRetrievedState({
+        ...sampleCompleteSnapshotState,
+        capabilities: [materialCapability], // GS1 projection capability omitted
+      });
+
+      const result2 = await resolver.resolveComposition({
+        ...options,
+        executionId: "exec-acv-02",
+      });
+
+      expect(result2.ok).toBe(false);
+      if (!result2.ok) {
+        expect(result2.error.code).toBe("unauthorized");
+        expect(result2.error.message).toContain("in pinned ACV");
+      }
+    });
+
+    it("TEST 857.4.B — Required vs Optional ATT-R-001 Proof Reference: Missing required proof fails closed", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      // Path A: Optional proof reference absent -> Accepted
+      const optionalCl16Artifact = Object.freeze({
+        artifactId: "cl16:artifact:optional_proof:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:gs1_identity_verification:v1",
+      });
+
+      const resOptional = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-att-opt-01",
+        executionId: "exec-att-opt-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        explicitCl16Artifacts: [optionalCl16Artifact],
+      });
+
+      expect(resOptional.ok).toBe(true);
+
+      // Path B: Required proof reference absent -> Fail closed with code 'missing'
+      const requiredCl16Artifact = Object.freeze({
+        artifactId: "cl16:artifact:require_proof_test:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:gs1_identity_verification:v1",
+        requireAttestationProof: true,
+      });
+
+      const resRequiredMissing = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-att-req-01",
+        executionId: "exec-att-req-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        explicitCl16Artifacts: [requiredCl16Artifact],
+      });
+
+      expect(resRequiredMissing.ok).toBe(false);
+      if (!resRequiredMissing.ok) {
+        expect(resRequiredMissing.error.code).toBe("missing");
+        expect(resRequiredMissing.error.message).toContain(
+          "Required ATT-R-001 proof reference is missing",
+        );
       }
     });
 

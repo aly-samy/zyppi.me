@@ -13,15 +13,17 @@
 
 ## 1. Executive Summary & Verification Disposition
 
-This Evidence Verification Report (EVR) establishes that **IT-0857 — ARM Projection, SIOS Translation & RSN/Intelligence Projection Boundaries** has been fully implemented, tested, and verified strictly within the authorized scope of mandate **AMS-0857**.
+This Evidence Verification Report (EVR) establishes that **IT-0857 — ARM Projection, SIOS Translation & RSN/Intelligence Projection Boundaries** has been fully implemented, tested, and verified strictly within the authorized scope of mandate **AMS-0857** and Council review guidance.
 
-Zero constitutional documents were modified, zero Runtime code in `packages/runtime/` was touched, and zero new domain engines (PRJ, RSN, SIOS, SEC, POL) were created. The implementation establishes the declarative consumer boundaries between Z-PROF composition validation and upstream constitutional capabilities in `apps/api/src/zprof/`. All 33 automated unit and integration tests in `apps/api/src/zprof/compositionResolver.test.ts` pass with 100% success.
+Zero constitutional documents were modified, zero Runtime code in `packages/runtime/` was touched, and zero new domain engines (PRJ, RSN, SIOS, SEC, POL) were created. The implementation establishes the declarative consumer boundaries between Z-PROF composition validation and upstream constitutional capabilities in `apps/api/src/zprof/`.
+
+Following Council review, the ARM Projection Authorization Gate was refactored to consume capabilities directly from the explicitly pinned `ActiveConstitutionalView` (ACV) constructed before compatibility validation, completely eliminating internal hard-coded catalogs. All 34 automated unit and integration tests in `apps/api/src/zprof/compositionResolver.test.ts` pass with 100% success.
 
 ---
 
 ## 2. Baseline Commitment & Repository State
 
-- **Working Branch:** `jules-14586333695777264390-d25a72ee`
+- **Working Branch:** `jules-ams-0857-impl-5423763147842577466`
 - **Baseline Commit:** HEAD on working branch.
 - **Repository Implementation Scope:**
   - `apps/api/src/zprof/types.ts`
@@ -53,25 +55,26 @@ The implementation adheres to the ratified corpus:
 
 ## 4. Summary of Changed Files
 
-| Filepath                                         | Modification Type | Description                                                                                                  |
-| :----------------------------------------------- | :---------------- | :----------------------------------------------------------------------------------------------------------- |
-| `DOCS/CAW/M08.5/AMS-0857-CONTEXT-RECEIPT.md`     | Created           | CEngS-003 Context Receipt recording baseline and constraints                                                 |
-| `apps/api/src/zprof/types.ts`                    | Modified          | Added `AttRProofReference`, `Cl16IntelligenceReference`, and structural manifest/payload fields              |
-| `apps/api/src/zprof/compatibilityValidator.ts`   | Modified          | Added ARM Projection Authorization Gate (§11) and RSN/CL-16 structural reference checks (§12)                |
-| `apps/api/src/zprof/compositionResolver.ts`      | Modified          | Extended resolver to populate CL-16 references, ATT-R-001 proof references, and detect `epistemicDivergence` |
-| `apps/api/src/zprof/testRegistryRepository.ts`   | Modified          | Added `setRetrievedState()` for ACV isolation testing                                                        |
-| `apps/api/src/zprof/compositionResolver.test.ts` | Modified          | Added 9 dedicated IT-0857 test scenarios (857.1–857.9)                                                       |
-| `DOCS/CAW/M08.5/AMS-0857-EVR.md`                 | Created           | This Evidence Verification Report                                                                            |
+| Filepath                                         | Modification Type | Description                                                                                                      |
+| :----------------------------------------------- | :---------------- | :--------------------------------------------------------------------------------------------------------------- |
+| `DOCS/CAW/M08.5/AMS-0857-CONTEXT-RECEIPT.md`     | Created           | CEngS-003 Context Receipt recording baseline and constraints                                                     |
+| `apps/api/src/zprof/types.ts`                    | Modified          | Added `AttRProofReference`, `Cl16IntelligenceReference`, and structural manifest/payload fields                  |
+| `apps/api/src/zprof/compatibilityValidator.ts`   | Modified          | Added ACV-bound ARM Projection Authorization Gate (§11) and RSN/CL-16 structural reference checks (§12)          |
+| `apps/api/src/zprof/compositionResolver.ts`      | Modified          | Extended resolver to construct ACV early, evaluate ARM gate against pinned ACV, and detect `epistemicDivergence` |
+| `apps/api/src/zprof/testRegistryRepository.ts`   | Modified          | Added `setRetrievedState()` for ACV isolation testing                                                            |
+| `apps/api/src/zprof/compositionResolver.test.ts` | Modified          | Added 10 dedicated IT-0857 test scenarios (857.1–857.9 + 857.4.B)                                                |
+| `DOCS/CAW/M08.5/AMS-0857-EVR.md`                 | Created           | This Evidence Verification Report                                                                                |
 
 ---
 
 ## 5. Detailed Verification Evidence
 
-### 5.1 ARM Projection Authorization Gate (IT-0857-A)
+### 5.1 ACV-Bound ARM Projection Authorization Gate (IT-0857-A)
 
-- **Primary ARM Profile Evaluation:** Projections in `requiredPrjSpecifications` are evaluated strictly against the primary ARM Profile (`dtc.applicableArmProfiles[0]`) under the pinned ACV.
-- **Fail-Closed Behavior:** Projections not explicitly authorized by the primary Profile fail closed returning code `unauthorized`. Projections declared only by secondary profiles are rejected (`TEST 857.2` & `TEST 857.3`).
-- **Pinned ACV Determinism:** Evaluates against the explicit pinned ACV supplied to composition resolution; ambient registry mutation does not alter resolution (`TEST 857.4`).
+- **Pinned ACV Evaluation:** In `compositionResolver.ts`, the `ActiveConstitutionalView` is constructed directly from retrieved registry state before compatibility validation begins. `compatibilityValidator.ts` accepts `acv` and evaluates `requiredPrjSpecifications` strictly against capabilities present in that pinned ACV under the primary ARM Profile.
+- **Zero Internal Catalogs:** No internal `PRIMARY_ARM_PROFILE_CATALOG` or hard-coded projection lookup table exists in Z-PROF. Projection authorization is derived purely from the pinned ACV (`TEST 857.1`).
+- **Fail-Closed Behavior:** Any projection specification missing from the pinned ACV capabilities fails closed returning code `unauthorized` (`TEST 857.2` & `TEST 857.3`).
+- **Pinned ACV Isolation:** Mutating ambient registry state after resolution leaves the pinned ACV inside bound payloads 100% isolated (`TEST 857.4`).
 
 ### 5.2 SIOS Translation Consumer Boundary (IT-0857-C)
 
@@ -81,11 +84,11 @@ The implementation adheres to the ratified corpus:
 
 - **No DomainJudgment:** `DomainJudgment` does not exist as a primitive or object in Z-PROF types, manifests, or payloads (`TEST 857.8`).
 - **CL-16 Structural References:** CL-16 Intelligence Artifacts are structurally bound as governed references without inspecting conclusion semantics or calculating confidence (`TEST 857.5`).
-- **ATT-R-001 Structural Check Only:** `ATT-R-001` proof references are verified for structural presence and well-formedness without performing cryptographic signature verification (`TEST 857.6` & `TEST 857.9`).
+- **ATT-R-001 Required vs Optional Proof Check:** `ATT-R-001` proof references are verified for presence when required (`TEST 857.4.B`) and well-formedness without performing cryptographic signature verification (`TEST 857.6` & `TEST 857.9`).
 
 ### 5.4 Divergence Preservation (IT-0857-E)
 
-- **Uncollapsed Divergence:** Multiple conflicting CL-16 artifacts preserve `epistemicDivergence: true` on manifest and payload without picking a winner or collapsing conclusions (`TEST 857.7`).
+- **Uncollapsed Structural Divergence:** Multiple conflicting CL-16 artifacts preserve `epistemicDivergence: true` on manifest and payload when their `conclusionSummary` strings differ, without evaluating semantic meaning, picking a winner, or collapsing conclusions (`TEST 857.7`).
 
 ### 5.5 Negative Boundary & Non-Retrievability (IT-0857-G)
 
@@ -95,17 +98,17 @@ The implementation adheres to the ratified corpus:
 
 ## 6. Test Suite Execution & Results
 
-Full workspace build and test execution:
+Full workspace build, formatting check, and test execution:
 
-- Command: `pnpm build && pnpm exec vitest run apps/api/src/zprof/compositionResolver.test.ts`
-- Result: **33 tests passed, 0 failed**
+- Commands: `pnpm format:check`, `pnpm build`, `pnpm exec vitest run apps/api/src/zprof/compositionResolver.test.ts`
+- Result: **All matched files use Prettier code style! All 34 tests passed, 0 failed.**
 
 ```
-✓ apps/api/src/zprof/compositionResolver.test.ts (33 tests) 37ms
+✓ apps/api/src/zprof/compositionResolver.test.ts (34 tests) 47ms
   - TEST A through J (AMS-0854 Multi-Domain & Factorization)
   - TEST K through P (AMS-0855 Version Binding & Compatibility)
   - TEST 19.1 through 19.10 (AMS-0856-R SIOS Consumer Seam)
-  - TEST 857.1 through 857.9 (AMS-0857 ARM Gate, CL-16 Binding & Divergence)
+  - TEST 857.1 through 857.9 & 857.4.B (AMS-0857 ACV-bound ARM Gate, CL-16 Binding & Divergence)
 ```
 
 ---
@@ -123,7 +126,7 @@ Full workspace build and test execution:
 DISPOSITION: IMPLEMENTED — VERIFIED
 ```
 
-Workstream **IT-0857** is complete, fully tested, and ready for Council verification and handoff to **IT-0858**.
+Workstream **IT-0857** is complete, fully verified against explicit pinned ACV declarations, formatted, and ready for Council verification and handoff to **IT-0858**.
 
 ---
 

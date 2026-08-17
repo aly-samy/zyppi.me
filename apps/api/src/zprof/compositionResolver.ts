@@ -194,12 +194,24 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // 3. Validate Composition Compatibility across canonical checks + AMS-0857 gates
+    // 3. Construct ActiveConstitutionalView directly from retrieved state BEFORE validation
+    const resolvedActiveConstitutionalView: ActiveConstitutionalView = {
+      identity: retrievedState.identity,
+      relationships: retrievedState.relationships,
+      standings: retrievedState.standings,
+      authorities: retrievedState.authorities,
+      capabilities: retrievedState.capabilities,
+      evidenceReferences: retrievedState.evidenceReferences,
+      applicablePolicies: retrievedState.applicablePolicies,
+    };
+
+    // 4. Validate Composition Compatibility against explicit pinned ACV
     const compatResult = validateCompositionCompatibility(
       dtc,
       reqs,
       retrievedState,
       options.versions,
+      resolvedActiveConstitutionalView,
       options.explicitCl16Artifacts,
     );
     if (!compatResult.ok) {
@@ -294,17 +306,6 @@ export class ApplicationCompositionResolver {
         };
       }
     }
-
-    // 5. Construct ActiveConstitutionalView directly from retrieved state
-    const resolvedActiveConstitutionalView: ActiveConstitutionalView = {
-      identity: retrievedState.identity,
-      relationships: retrievedState.relationships,
-      standings: retrievedState.standings,
-      authorities: retrievedState.authorities,
-      capabilities: retrievedState.capabilities,
-      evidenceReferences: retrievedState.evidenceReferences,
-      applicablePolicies: retrievedState.applicablePolicies,
-    };
 
     const domainSlug = dtc.domainIdentifier.replace("domain:", "");
 

@@ -1,4 +1,5 @@
 import type { RetrievedRegistryState } from "@zyppi/contracts";
+import type { ActiveConstitutionalView } from "@zyppi/domain";
 import type {
   CompositionError,
   DomainTemplateCard,
@@ -38,6 +39,7 @@ export function validateCompositionCompatibility(
   reqs: readonly EpistemicRequirementContract[],
   retrievedState: RetrievedRegistryState,
   versions: readonly string[],
+  acv: ActiveConstitutionalView,
   cl16Artifacts?: readonly Cl16IntelligenceReference[],
 ): CompatibilityValidationResult {
   // 1. Referenced Artifact Existence (Canonical Check 1)
@@ -337,18 +339,8 @@ export function validateCompositionCompatibility(
     }
   }
 
-  // Authoritative declaration catalog for Primary ARM Profiles per AMS-0857 §5.1 / §13.A
-  const PRIMARY_ARM_PROFILE_CATALOG: Readonly<
-    Record<string, readonly string[]>
-  > = Object.freeze({
-    "arm:profile:trade_item:v1": Object.freeze([
-      "prj:spec:gs1_digital_link_projection:v1",
-      "prj:spec:dpp_passport_projection:v1",
-    ]),
-  });
-
   // 11. ARM Projection Authorization Gate (AMS-0857 §5.1 / §13.A / ARCH-CLOSURE §7)
-  // Evaluate projection_refs strictly against explicit declarations of the primary ARM Profile under pinned ACV.
+  // Evaluate projection_refs strictly against explicit declarations of the primary ARM Profile inside the pinned ACV.
   const primaryArmProfile = dtc.applicableArmProfiles[0];
   if (!primaryArmProfile) {
     return {
@@ -361,18 +353,26 @@ export function validateCompositionCompatibility(
     };
   }
 
-  const authorizedProjections =
-    PRIMARY_ARM_PROFILE_CATALOG[primaryArmProfile] || [];
+  // Extract authorized projection declarations directly from pinned ACV capabilities owned strictly by the primary ARM Profile
+  const authorizedProjectionsFromAcv = new Set<string>();
+  if (acv.capabilities) {
+    for (const cap of acv.capabilities) {
+      if (cap.subjectId === primaryArmProfile) {
+        authorizedProjectionsFromAcv.add(cap.capabilityId);
+        authorizedProjectionsFromAcv.add(cap.scope);
+      }
+    }
+  }
 
-  // Evaluate requested PRJ specifications against primary ARM Profile authorized declarations (fail closed on set mismatch)
+  // Evaluate requested PRJ specifications against pinned ACV declarations (fail closed if absent)
   for (const prjSpec of dtc.requiredPrjSpecifications) {
-    if (!authorizedProjections.includes(prjSpec)) {
+    if (!authorizedProjectionsFromAcv.has(prjSpec)) {
       return {
         ok: false,
         error: {
           code: "unauthorized",
           category: "Composition Failure",
-          message: `Projection specification '${prjSpec}' is not explicitly authorized by primary ARM Profile '${primaryArmProfile}'`,
+          message: `Projection specification '${prjSpec}' is not explicitly authorized by primary ARM Profile '${primaryArmProfile}' in pinned ACV`,
         },
       };
     }
@@ -393,7 +393,21 @@ export function validateCompositionCompatibility(
         };
       }
 
-      // Check ATT-R-001 proof reference structural well-formedness if specified or required
+      // Check ATT-R-001 proof reference required vs optional condition
+      const requiresAttestationProof =
+        artifact.requireAttestationProof === true;
+
+      if (requiresAttestationProof && !artifact.attestationProofRef) {
+        return {
+          ok: false,
+          error: {
+            code: "missing",
+            category: "Composition Failure",
+            message: `Required ATT-R-001 proof reference is missing in CL-16 artifact '${artifact.artifactId}'`,
+          },
+        };
+      }
+
       if (artifact.attestationProofRef) {
         const proof = artifact.attestationProofRef;
         if (!proof.proofId || !proof.version || !proof.attestationType) {
