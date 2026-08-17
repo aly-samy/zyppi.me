@@ -15,36 +15,60 @@ import {
   type BindingEdge,
 } from "./topology.js";
 import { deriveCompositionId } from "./compositionId.js";
-import { bindComposition, type PinnedSubstrate, type BoundCoordinates } from "./bind.js";
+import {
+  bindComposition,
+  type PinnedSubstrate,
+  type BoundCoordinates,
+} from "./bind.js";
 
 const mockAcv: ActiveConstitutionalView = {
   identity: {
-    canonicalIdentifier: "urn:zyppi:gtin:00012345678905",
-    domainSlug: "trade_item",
-    primaryIdentifier: "00012345678905",
+    identityId: "id:gtin:00012345678905",
+    identityType: "gtin",
+    canonicalReference: "urn:zyppi:gtin:00012345678905",
+    referentId: "ref:product:123",
+    status: "active",
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
   },
   relationships: [],
   standings: [
     {
       standingId: "standing:good",
-      status: "GOOD_STANDING",
+      subjectId: "id:gtin:00012345678905",
+      scope: "global",
       validFrom: "2026-01-01T00:00:00Z",
+      validTo: "2029-01-01T00:00:00Z",
     },
   ],
   authorities: [
     {
       authorityId: "auth:council",
-      jurisdiction: "GLOBAL",
+      subjectId: "id:gtin:00012345678905",
+      scope: "global",
+      validFrom: "2026-01-01T00:00:00Z",
+      validTo: "2029-01-01T00:00:00Z",
     },
   ],
   capabilities: [
     {
       capabilityId: "cap:trade_item_read",
-      version: "1.0.0",
+      subjectId: "id:gtin:00012345678905",
+      scope: "global",
+      validFrom: "2026-01-01T00:00:00Z",
+      validTo: "2029-01-01T00:00:00Z",
     },
   ],
   evidenceReferences: [],
-  applicablePolicies: ["policy:trade_item_v1"],
+  applicablePolicies: [
+    {
+      policyId: "policy:trade_item_v1",
+      policyType: "trade_item",
+      version: "1.0.0",
+      definition: {},
+      active: true,
+    },
+  ],
 };
 
 const mockEvidenceBundle: EvidenceBundle = {
@@ -147,14 +171,20 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("8. Missing reference -> fail", () => {
-      const p = { ...validParticipant1, reference: { id: "", version: "1.0.0" } };
+      const p = {
+        ...validParticipant1,
+        reference: { id: "", version: "1.0.0" },
+      };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.error.code).toBe("invalid");
     });
 
     it("9. Valid participant collection succeeds", () => {
-      const res = validateParticipantCollection([validParticipant1, validParticipant2]);
+      const res = validateParticipantCollection([
+        validParticipant1,
+        validParticipant2,
+      ]);
       expect(res.ok).toBe(true);
     });
   });
@@ -162,18 +192,38 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
   describe("Topology Validation (T_struct & T_bind)", () => {
     it("1. Acyclic T_struct -> valid", () => {
       const eStruct: StructuralEdge[] = [
-        { sourceId: validParticipant1.identity, targetId: validParticipant2.identity, relationKind: "contains" },
+        {
+          sourceId: validParticipant1.identity,
+          targetId: validParticipant2.identity,
+          relationKind: "contains",
+        },
       ];
-      const res = validateTopologyGraph([validParticipant1, validParticipant2], eStruct, []);
+      const res = validateTopologyGraph(
+        [validParticipant1, validParticipant2],
+        eStruct,
+        [],
+      );
       expect(res.ok).toBe(true);
     });
 
     it("2. Cyclic T_struct -> valid (structural cycles permitted)", () => {
       const eStruct: StructuralEdge[] = [
-        { sourceId: validParticipant1.identity, targetId: validParticipant2.identity, relationKind: "ref" },
-        { sourceId: validParticipant2.identity, targetId: validParticipant1.identity, relationKind: "back_ref" },
+        {
+          sourceId: validParticipant1.identity,
+          targetId: validParticipant2.identity,
+          relationKind: "ref",
+        },
+        {
+          sourceId: validParticipant2.identity,
+          targetId: validParticipant1.identity,
+          relationKind: "back_ref",
+        },
       ];
-      const res = validateTopologyGraph([validParticipant1, validParticipant2], eStruct, []);
+      const res = validateTopologyGraph(
+        [validParticipant1, validParticipant2],
+        eStruct,
+        [],
+      );
       expect(res.ok).toBe(true);
       if (res.ok) {
         expect(res.graph.eStruct.length).toBe(2);
@@ -182,18 +232,38 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
 
     it("3. Acyclic T_bind -> valid", () => {
       const eBind: BindingEdge[] = [
-        { sourceId: validParticipant1.identity, targetId: validParticipant2.identity, dependencyKind: "requires" },
+        {
+          sourceId: validParticipant1.identity,
+          targetId: validParticipant2.identity,
+          dependencyKind: "requires",
+        },
       ];
-      const res = validateTopologyGraph([validParticipant1, validParticipant2], [], eBind);
+      const res = validateTopologyGraph(
+        [validParticipant1, validParticipant2],
+        [],
+        eBind,
+      );
       expect(res.ok).toBe(true);
     });
 
     it("4. Cyclic T_bind -> fail closed", () => {
       const eBind: BindingEdge[] = [
-        { sourceId: validParticipant1.identity, targetId: validParticipant2.identity, dependencyKind: "requires" },
-        { sourceId: validParticipant2.identity, targetId: validParticipant1.identity, dependencyKind: "requires" },
+        {
+          sourceId: validParticipant1.identity,
+          targetId: validParticipant2.identity,
+          dependencyKind: "requires",
+        },
+        {
+          sourceId: validParticipant2.identity,
+          targetId: validParticipant1.identity,
+          dependencyKind: "requires",
+        },
       ];
-      const res = validateTopologyGraph([validParticipant1, validParticipant2], [], eBind);
+      const res = validateTopologyGraph(
+        [validParticipant1, validParticipant2],
+        [],
+        eBind,
+      );
       expect(res.ok).toBe(false);
       if (!res.ok) {
         expect(res.error.code).toBe("incompatible");
@@ -203,9 +273,17 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
 
     it("5. Structural reference without dependency -> does not create T_bind edge", () => {
       const eStruct: StructuralEdge[] = [
-        { sourceId: validParticipant1.identity, targetId: validParticipant2.identity, relationKind: "reference_only" },
+        {
+          sourceId: validParticipant1.identity,
+          targetId: validParticipant2.identity,
+          relationKind: "reference_only",
+        },
       ];
-      const res = validateTopologyGraph([validParticipant1, validParticipant2], eStruct, []);
+      const res = validateTopologyGraph(
+        [validParticipant1, validParticipant2],
+        eStruct,
+        [],
+      );
       expect(res.ok).toBe(true);
       if (res.ok) {
         expect(res.graph.eBind.length).toBe(0);
@@ -214,7 +292,11 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
 
     it("6. Edge source or target not in P -> fail", () => {
       const eStruct: StructuralEdge[] = [
-        { sourceId: validParticipant1.identity, targetId: "missing:node:v1", relationKind: "ref" },
+        {
+          sourceId: validParticipant1.identity,
+          targetId: "missing:node:v1",
+          relationKind: "ref",
+        },
       ];
       const res = validateTopologyGraph([validParticipant1], eStruct, []);
       expect(res.ok).toBe(false);
@@ -253,7 +335,13 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     it("3. Different participant version -> different CompositionID", () => {
       const domain1 = { P: [validParticipant1], T_struct: [], T_bind: [] };
       const domain2 = {
-        P: [{ ...validParticipant1, version: "2.0.0", reference: { id: validParticipant1.identity, version: "2.0.0" } }],
+        P: [
+          {
+            ...validParticipant1,
+            version: "2.0.0",
+            reference: { id: validParticipant1.identity, version: "2.0.0" },
+          },
+        ],
         T_struct: [],
         T_bind: [],
       };
@@ -265,8 +353,16 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("4. Participant permutation -> identical CompositionID", () => {
-      const domain1 = { P: [validParticipant1, validParticipant2, validParticipant3], T_struct: [], T_bind: [] };
-      const domain2 = { P: [validParticipant3, validParticipant1, validParticipant2], T_struct: [], T_bind: [] };
+      const domain1 = {
+        P: [validParticipant1, validParticipant2, validParticipant3],
+        T_struct: [],
+        T_bind: [],
+      };
+      const domain2 = {
+        P: [validParticipant3, validParticipant1, validParticipant2],
+        T_struct: [],
+        T_bind: [],
+      };
       const res1 = deriveCompositionId(domain1);
       const res2 = deriveCompositionId(domain2);
       expect(res1.ok).toBe(true);
@@ -277,10 +373,26 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("5. Structural edge permutation -> identical CompositionID", () => {
-      const e1: StructuralEdge = { sourceId: validParticipant1.identity, targetId: validParticipant2.identity, relationKind: "r1" };
-      const e2: StructuralEdge = { sourceId: validParticipant2.identity, targetId: validParticipant3.identity, relationKind: "r2" };
-      const domain1 = { P: [validParticipant1, validParticipant2, validParticipant3], T_struct: [e1, e2], T_bind: [] };
-      const domain2 = { P: [validParticipant1, validParticipant2, validParticipant3], T_struct: [e2, e1], T_bind: [] };
+      const e1: StructuralEdge = {
+        sourceId: validParticipant1.identity,
+        targetId: validParticipant2.identity,
+        relationKind: "r1",
+      };
+      const e2: StructuralEdge = {
+        sourceId: validParticipant2.identity,
+        targetId: validParticipant3.identity,
+        relationKind: "r2",
+      };
+      const domain1 = {
+        P: [validParticipant1, validParticipant2, validParticipant3],
+        T_struct: [e1, e2],
+        T_bind: [],
+      };
+      const domain2 = {
+        P: [validParticipant1, validParticipant2, validParticipant3],
+        T_struct: [e2, e1],
+        T_bind: [],
+      };
       const res1 = deriveCompositionId(domain1);
       const res2 = deriveCompositionId(domain2);
       if (res1.ok && res2.ok) {
@@ -300,7 +412,9 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       });
       expect(res.ok).toBe(true);
       if (res.ok) {
-        expect(res.boundPayload.payloadId).toBe("bound:payload:trade_item:exec-12345");
+        expect(res.boundPayload.payloadId).toBe(
+          "bound:payload:gtin:exec-12345",
+        );
         expect(res.boundPayload.resolvedActiveConstitutionalView).toBe(mockAcv);
         expect(Object.isFrozen(res.boundPayload)).toBe(true);
       }

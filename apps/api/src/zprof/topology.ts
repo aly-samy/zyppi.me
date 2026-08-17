@@ -202,10 +202,7 @@ export function validateTopologyGraph(
   }
 
   // 3. T_bind Cycle Check (T_bind MUST be acyclic, T_struct MAY contain cycles)
-  const cycleResult = detectBindingCycle(
-    Array.from(nodeSet),
-    rawBindingEdges,
-  );
+  const cycleResult = detectBindingCycle(Array.from(nodeSet), rawBindingEdges);
   if (cycleResult.hasCycle) {
     return {
       ok: false,

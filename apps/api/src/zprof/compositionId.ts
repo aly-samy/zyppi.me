@@ -73,7 +73,8 @@ export function deriveCompositionId(
       }),
     )
     .sort((a, b) => {
-      if (a.identity !== b.identity) return a.identity.localeCompare(b.identity);
+      if (a.identity !== b.identity)
+        return a.identity.localeCompare(b.identity);
       return a.role.localeCompare(b.role);
     });
 
@@ -88,8 +89,7 @@ export function deriveCompositionId(
       domain.structuralRequirementSignatures,
     ).sort();
     for (const key of sortedKeys) {
-      normalizedSignatures[key] =
-        domain.structuralRequirementSignatures[key]!;
+      normalizedSignatures[key] = domain.structuralRequirementSignatures[key]!;
     }
   }
 
@@ -119,7 +119,9 @@ export function deriveCompositionId(
   }
 
   // 7. Compute SHA-256 hash
-  const hashHex = createHash("sha256").update(canonicalJson, "utf8").digest("hex");
+  const hashHex = createHash("sha256")
+    .update(canonicalJson, "utf8")
+    .digest("hex");
   const compositionId = `composition:zyppi:${hashHex}`;
 
   return {

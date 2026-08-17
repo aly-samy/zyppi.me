@@ -56,9 +56,15 @@ export type ParticipantValidationResult =
  */
 export function validateParticipant(
   p: Participant,
-): { readonly ok: true } | { readonly ok: false; readonly error: CompositionError } {
+):
+  | { readonly ok: true }
+  | { readonly ok: false; readonly error: CompositionError } {
   // P-001: Explicit Identity
-  if (!p.identity || typeof p.identity !== "string" || p.identity.trim() === "") {
+  if (
+    !p.identity ||
+    typeof p.identity !== "string" ||
+    p.identity.trim() === ""
+  ) {
     return {
       ok: false,
       error: {
@@ -118,7 +124,10 @@ export function validateParticipant(
       },
     };
   }
-  const verCheck = validateExplicitVersionList([p.version], `Participant '${p.identity}' version`);
+  const verCheck = validateExplicitVersionList(
+    [p.version],
+    `Participant '${p.identity}' version`,
+  );
   if (!verCheck.ok) {
     return { ok: false, error: verCheck.error };
   }
@@ -186,7 +195,8 @@ export function validateParticipantCollection(
       error: {
         code: "invalid",
         category: "Composition Failure",
-        message: "Participant collection P must contain at least one participant",
+        message:
+          "Participant collection P must contain at least one participant",
       },
     };
   }
