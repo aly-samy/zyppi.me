@@ -3,11 +3,7 @@ import { canonicalizeJcs } from "@zyppi/domain";
 import type { CompositionError } from "./types.js";
 import type { Participant } from "./participant.js";
 import { validateParticipantCollection } from "./participant.js";
-import type {
-  NormalizedTopologyGraph,
-  StructuralEdge,
-  BindingEdge,
-} from "./topology.js";
+import type { StructuralEdge, BindingEdge } from "./topology.js";
 import { validateTopologyGraph } from "./topology.js";
 
 /**

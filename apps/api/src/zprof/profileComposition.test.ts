@@ -1,15 +1,11 @@
 import { describe, it, expect } from "vitest";
 import type { ActiveConstitutionalView, EvidenceBundle } from "@zyppi/domain";
-import type { CompositionManifest } from "./types.js";
 import {
   validateParticipant,
   validateParticipantCollection,
-  extractParticipantsFromManifest,
   type Participant,
 } from "./participant.js";
 import {
-  normalizeTopologyGraph,
-  detectBindingCycle,
   validateTopologyGraph,
   type StructuralEdge,
   type BindingEdge,
@@ -129,7 +125,10 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("2. Missing kind -> fail", () => {
-      const p = { ...validParticipant1, kind: "" as any };
+      const p = {
+        ...validParticipant1,
+        kind: "" as unknown as Participant["kind"],
+      };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.error.code).toBe("invalid");
@@ -150,7 +149,10 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     });
 
     it("5. Missing role -> fail", () => {
-      const p = { ...validParticipant1, role: "" as any };
+      const p = {
+        ...validParticipant1,
+        role: "" as unknown as Participant["role"],
+      };
       const res = validateParticipant(p);
       expect(res.ok).toBe(false);
       if (!res.ok) expect(res.error.code).toBe("invalid");
@@ -445,7 +447,7 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
     it("3. BIND fails closed on missing pinned ACV", () => {
       const res = bindComposition({
         compositionDefinition: { participants: [validParticipant1] },
-        pinnedSubstrate: { acv: null as any },
+        pinnedSubstrate: { acv: null as unknown as ActiveConstitutionalView },
         boundCoordinates: mockBoundCoordinates,
       });
       expect(res.ok).toBe(false);

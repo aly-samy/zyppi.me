@@ -97,7 +97,7 @@ export function bindComposition(options: BindOptions): BindResult {
 
   // 2. Resolve Participants P
   let participants: readonly Participant[];
-  let manifest: CompositionManifest | undefined =
+  const manifest: CompositionManifest | undefined =
     compositionDefinition.manifest;
 
   if (
