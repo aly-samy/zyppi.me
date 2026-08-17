@@ -5,6 +5,7 @@ import type {
 } from "@zyppi/runtime/dist/types.js";
 import type {
   RegistryRepository,
+  RetrievedRegistryState,
   ValidatedCanonicalIdentifier,
   EvidenceReferenceResolver,
   EvidencePayloadProvider,
@@ -28,6 +29,8 @@ import type {
   CompositionResolutionResult,
   CompositionError,
   GenericCompositionOptions,
+  Cl16IntelligenceReference,
+  AttRProofReference,
 } from "./types.js";
 import { GS1_DOMAIN_TEMPLATE_CARD } from "./fixtures/gs1Dtc.js";
 import {
@@ -53,8 +56,10 @@ export interface GS1CompositionOptions {
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
   readonly dtcFixture?: DomainTemplateCard;
   readonly epistemicRequirementsFixtures?: readonly EpistemicRequirementContract[];
+  readonly explicitAcv?: ActiveConstitutionalView;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
+  readonly explicitCl16Artifacts?: readonly Cl16IntelligenceReference[];
   readonly overrides?: StageOverrideConfig;
   readonly evidenceResolver?: EvidenceReferenceResolver;
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
@@ -161,42 +166,70 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // 2. Fetch Registry state read-only
-    const lookupResult = await options.registryRepository.lookup(
-      options.identifier,
-    );
-    if (!lookupResult.ok) {
-      return {
-        ok: false,
-        error: {
-          code: "unavailable",
-          category: "Composition Failure",
-          message: `Registry repository lookup failed: ${JSON.stringify(lookupResult.error)}`,
-        },
-        epistemicStatus: "UNAVAILABLE",
+    let retrievedState: RetrievedRegistryState;
+    let resolvedActiveConstitutionalView: ActiveConstitutionalView;
+
+    if (options.explicitAcv) {
+      resolvedActiveConstitutionalView = options.explicitAcv;
+      retrievedState = {
+        identity: options.explicitAcv.identity,
+        relationships: options.explicitAcv.relationships,
+        standings: options.explicitAcv.standings,
+        authorities: options.explicitAcv.authorities,
+        capabilities: options.explicitAcv.capabilities,
+        evidenceReferences: options.explicitAcv.evidenceReferences,
+        applicablePolicies: options.explicitAcv.applicablePolicies,
+      };
+    } else {
+      // 2. Fetch Registry state read-only if explicit ACV is not supplied
+      const lookupResult = await options.registryRepository.lookup(
+        options.identifier,
+      );
+      if (!lookupResult.ok) {
+        return {
+          ok: false,
+          error: {
+            code: "unavailable",
+            category: "Composition Failure",
+            message: `Registry repository lookup failed: ${JSON.stringify(lookupResult.error)}`,
+          },
+          epistemicStatus: "UNAVAILABLE",
+        };
+      }
+
+      if (!lookupResult.value) {
+        return {
+          ok: false,
+          error: {
+            code: "missing",
+            category: "Composition Failure",
+            message: "Registry state not found for the supplied identifier",
+            requirementId: reqs[0]?.requirementId ?? "epistemic:req:unknown:v1",
+          },
+          epistemicStatus: "UNAVAILABLE",
+        };
+      }
+
+      retrievedState = lookupResult.value;
+      resolvedActiveConstitutionalView = {
+        identity: retrievedState.identity,
+        relationships: retrievedState.relationships,
+        standings: retrievedState.standings,
+        authorities: retrievedState.authorities,
+        capabilities: retrievedState.capabilities,
+        evidenceReferences: retrievedState.evidenceReferences,
+        applicablePolicies: retrievedState.applicablePolicies,
       };
     }
 
-    const retrievedState = lookupResult.value;
-    if (!retrievedState) {
-      return {
-        ok: false,
-        error: {
-          code: "missing",
-          category: "Composition Failure",
-          message: "Registry state not found for the supplied identifier",
-          requirementId: reqs[0]?.requirementId ?? "epistemic:req:unknown:v1",
-        },
-        epistemicStatus: "UNAVAILABLE",
-      };
-    }
-
-    // 3. Validate Composition Compatibility across 10 evaluation areas
+    // 4. Validate Composition Compatibility against explicit pinned ACV
     const compatResult = validateCompositionCompatibility(
       dtc,
       reqs,
       retrievedState,
       options.versions,
+      resolvedActiveConstitutionalView,
+      options.explicitCl16Artifacts,
     );
     if (!compatResult.ok) {
       return {
@@ -215,7 +248,7 @@ export class ApplicationCompositionResolver {
       evidencePayloads = options.explicitEvidencePayloads ?? new Map();
     } else {
       const evidenceIds = retrievedState.evidenceReferences.map(
-        (r) => r.evidenceId,
+        (r: { readonly evidenceId: string }) => r.evidenceId,
       );
       const resolver =
         options.evidenceResolver ??
@@ -291,18 +324,37 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // 5. Construct ActiveConstitutionalView directly from retrieved state
-    const resolvedActiveConstitutionalView: ActiveConstitutionalView = {
-      identity: retrievedState.identity,
-      relationships: retrievedState.relationships,
-      standings: retrievedState.standings,
-      authorities: retrievedState.authorities,
-      capabilities: retrievedState.capabilities,
-      evidenceReferences: retrievedState.evidenceReferences,
-      applicablePolicies: retrievedState.applicablePolicies,
-    };
-
     const domainSlug = dtc.domainIdentifier.replace("domain:", "");
+
+    // Detect structural divergence if multiple conflicting CL-16 artifacts are present
+    let epistemicDivergence = false;
+    const boundCl16Artifacts: Cl16IntelligenceReference[] = [];
+    const boundAttestationProofReferences: AttRProofReference[] = [];
+
+    if (
+      options.explicitCl16Artifacts &&
+      options.explicitCl16Artifacts.length > 0
+    ) {
+      for (const artifact of options.explicitCl16Artifacts) {
+        boundCl16Artifacts.push(Object.freeze({ ...artifact }));
+        if (artifact.attestationProofRef) {
+          boundAttestationProofReferences.push(
+            Object.freeze({ ...artifact.attestationProofRef }),
+          );
+        }
+      }
+
+      if (options.explicitCl16Artifacts.length > 1) {
+        const conclusions = new Set(
+          options.explicitCl16Artifacts
+            .map((a: Cl16IntelligenceReference) => a.conclusionSummary)
+            .filter(Boolean),
+        );
+        if (conclusions.size > 1) {
+          epistemicDivergence = true;
+        }
+      }
+    }
 
     // 6. Build Application-layer CompositionManifest
     const manifest: CompositionManifest = Object.freeze({
@@ -364,6 +416,17 @@ export class ApplicationCompositionResolver {
           }),
         ),
       ),
+      ...(boundCl16Artifacts.length > 0
+        ? { boundCl16IntelligenceArtifacts: Object.freeze(boundCl16Artifacts) }
+        : {}),
+      ...(boundAttestationProofReferences.length > 0
+        ? {
+            boundAttestationProofReferences: Object.freeze(
+              boundAttestationProofReferences,
+            ),
+          }
+        : {}),
+      ...(epistemicDivergence ? { epistemicDivergence: true } : {}),
       dependencyTopology: Object.freeze({
         nodes: Object.freeze([
           dtc.dtcId,
@@ -397,6 +460,10 @@ export class ApplicationCompositionResolver {
         entropy: options.entropy,
         versions: options.versions,
       }),
+      ...(boundCl16Artifacts.length > 0
+        ? { boundCl16IntelligenceArtifacts: Object.freeze(boundCl16Artifacts) }
+        : {}),
+      ...(epistemicDivergence ? { epistemicDivergence: true } : {}),
     });
 
     return {

@@ -106,7 +106,29 @@ export interface VersionedReference {
 }
 
 /**
- * CompositionManifest structural specification per AMS-0852 §5.2.
+ * Structural reference to an ATT-R-001 Execution Proof artifact per AMS-0857 ARCH-CLOSURE §10.
+ * Pure structural reference; Z-PROF does not perform cryptographic signature verification.
+ */
+export interface AttRProofReference {
+  readonly proofId: string;
+  readonly version: string;
+  readonly attestationType: string;
+}
+
+/**
+ * Structural reference to a CL-16 Governed Intelligence Artifact per AMS-0857 ARCH-CLOSURE §9.
+ */
+export interface Cl16IntelligenceReference {
+  readonly artifactId: string;
+  readonly version: string;
+  readonly rsnBlueprintRef: string;
+  readonly requireAttestationProof?: boolean;
+  readonly attestationProofRef?: AttRProofReference;
+  readonly conclusionSummary?: string;
+}
+
+/**
+ * CompositionManifest structural specification per AMS-0852 §5.2 / AMS-0857 ARCH-CLOSURE.
  */
 export interface CompositionManifest {
   readonly $schema?: string;
@@ -143,6 +165,9 @@ export interface CompositionManifest {
     readonly capabilityId: string;
     readonly version: string;
   }[];
+  readonly boundCl16IntelligenceArtifacts?: readonly Cl16IntelligenceReference[];
+  readonly boundAttestationProofReferences?: readonly AttRProofReference[];
+  readonly epistemicDivergence?: boolean;
   readonly dependencyTopology: {
     readonly nodes: readonly string[];
     readonly edges: readonly {
@@ -166,6 +191,8 @@ export interface BoundConstitutionalPayload {
   readonly resolvedActiveConstitutionalView: ActiveConstitutionalView;
   readonly resolvedEvidenceBundle: EvidenceBundle;
   readonly executionContext: ExecutionContext;
+  readonly boundCl16IntelligenceArtifacts?: readonly Cl16IntelligenceReference[];
+  readonly epistemicDivergence?: boolean;
 }
 
 /**
@@ -184,8 +211,10 @@ export interface GenericCompositionOptions {
   readonly versions: readonly string[];
   readonly policyContext: PolicyContext;
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+  readonly explicitAcv?: ActiveConstitutionalView;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
+  readonly explicitCl16Artifacts?: readonly Cl16IntelligenceReference[];
   readonly overrides?: StageOverrideConfig;
   readonly evidenceResolver?: EvidenceReferenceResolver;
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
