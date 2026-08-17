@@ -15,11 +15,11 @@ import { deriveCompositionId } from "./compositionId.js";
 
 /**
  * Pinned substrate state per AMS-0858 §14.
- * Must include explicit ActiveConstitutionalView (ACV) and optional pre-resolved evidence.
+ * Must include explicit ActiveConstitutionalView (ACV) and explicit evidenceBundle.
  */
 export interface PinnedSubstrate {
   readonly acv: ActiveConstitutionalView;
-  readonly evidenceBundle?: EvidenceBundle;
+  readonly evidenceBundle: EvidenceBundle;
   readonly evidencePayloads?: ReadonlyMap<string, unknown>;
 }
 
@@ -91,7 +91,7 @@ function deepFreeze<T>(obj: T): T {
  * BIND(CompositionDefinition, PinnedSubstrate, BoundCoordinates, AuthorizedInputs) -> BoundCompositionPayload
  *
  * BIND binds a declared composition. It DOES NOT invent or synthesize missing constitutional participants,
- * default DTCs, default ARM Profiles, default manifests, or fabricated owners.
+ * default DTCs, default ARM Profiles, default manifests, default evidence bundles, or fabricated owners.
  *
  * Operates with ZERO ambient Registry lookups, ZERO network I/O, ZERO database access,
  * and ZERO runtime execution.
@@ -99,7 +99,7 @@ function deepFreeze<T>(obj: T): T {
 export function bindComposition(options: BindOptions): BindResult {
   const { compositionDefinition, pinnedSubstrate, boundCoordinates } = options;
 
-  // 1. Verify Pinned ACV Substrate Presence (P-006 / Substrate Pinning Rule)
+  // 1. Verify Pinned Substrate Presence (ACV and Evidence Bundle)
   if (
     !pinnedSubstrate ||
     !pinnedSubstrate.acv ||
@@ -112,6 +112,30 @@ export function bindComposition(options: BindOptions): BindResult {
         category: "Composition Failure",
         message:
           "BIND requires an explicitly pinned ActiveConstitutionalView substrate",
+      },
+    };
+  }
+
+  if (!pinnedSubstrate.acv.identity.identityType) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message:
+          "BIND requires explicit identityType on pinned ACV identity; fallback synthesis is prohibited",
+      },
+    };
+  }
+
+  if (!pinnedSubstrate.evidenceBundle) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "BIND requires an explicit evidenceBundle in pinnedSubstrate; fallback synthesis is prohibited",
       },
     };
   }
@@ -205,23 +229,15 @@ export function bindComposition(options: BindOptions): BindResult {
     composition_id: compositionId,
   } as CompositionManifest);
 
-  // 7. Build Immutable BoundConstitutionalPayload
-  const domainSlug =
-    pinnedSubstrate.acv.identity.identityType ||
-    participants[0]?.identity.split(":")[2] ||
-    "trade_item";
-
-  const evidenceBundle: EvidenceBundle = pinnedSubstrate.evidenceBundle ?? {
-    schemaVersion: "1.0",
-    evidenceRecords: [],
-  };
+  // 7. Build Immutable BoundConstitutionalPayload with exact inputs
+  const domainSlug = pinnedSubstrate.acv.identity.identityType;
 
   const rawPayload: BoundConstitutionalPayload = {
     $schema: "https://zyppi.org/schemas/v1/bound_payload.json",
     payloadId: `bound:payload:${domainSlug}:${boundCoordinates.executionId}`,
     manifestId: finalManifest.manifestId,
     resolvedActiveConstitutionalView: pinnedSubstrate.acv,
-    resolvedEvidenceBundle: evidenceBundle,
+    resolvedEvidenceBundle: pinnedSubstrate.evidenceBundle,
     executionContext: {
       executionId: boundCoordinates.executionId,
       constitutionalTimestamp: boundCoordinates.constitutionalTimestamp,

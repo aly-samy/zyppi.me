@@ -121,7 +121,7 @@ const validParticipant3: Participant = {
 
 const mockManifest: CompositionManifest = {
   $schema: "https://zyppi.org/schemas/v1/composition_manifest.json",
-  manifestId: "manifest:zyppi:trade_item:exec-12345",
+  manifestId: "manifest:zyppi:gtin:exec-12345",
   dtcReference: {
     dtcId: "dtc:zyppi:domain:trade_item:v1",
     version: "1.0.0",
@@ -487,6 +487,34 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
         expect(res1.compositionId).toBe(res2.compositionId);
       }
     });
+
+    it("6. Binding edge permutation -> identical CompositionID", () => {
+      const b1: BindingEdge = {
+        sourceId: validParticipant1.identity,
+        targetId: validParticipant2.identity,
+        dependencyKind: "d1",
+      };
+      const b2: BindingEdge = {
+        sourceId: validParticipant2.identity,
+        targetId: validParticipant3.identity,
+        dependencyKind: "d2",
+      };
+      const domain1 = {
+        P: [validParticipant1, validParticipant2, validParticipant3],
+        T_struct: [],
+        T_bind: [b1, b2],
+      };
+      const domain2 = {
+        P: [validParticipant1, validParticipant2, validParticipant3],
+        T_struct: [],
+        T_bind: [b2, b1],
+      };
+      const res1 = deriveCompositionId(domain1);
+      const res2 = deriveCompositionId(domain2);
+      if (res1.ok && res2.ok) {
+        expect(res1.compositionId).toBe(res2.compositionId);
+      }
+    });
   });
 
   describe("Declarative BIND & Substrate Pinning", () => {
@@ -543,7 +571,29 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       }
     });
 
-    it("4. Deep Immutability: Mutating nested payload properties throws or fails", () => {
+    it("4. BIND fails when evidenceBundle is missing from pinnedSubstrate (no evidence synthesis)", () => {
+      const incompleteSubstrate = {
+        acv: mockAcv,
+        evidenceBundle: undefined as unknown as EvidenceBundle,
+      };
+      const res = bindComposition({
+        compositionDefinition: {
+          participants: [validParticipant1, validParticipant2],
+          manifest: mockManifest,
+        },
+        pinnedSubstrate: incompleteSubstrate,
+        boundCoordinates: mockBoundCoordinates,
+      });
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("missing");
+        expect(res.error.message).toContain(
+          "explicit evidenceBundle in pinnedSubstrate",
+        );
+      }
+    });
+
+    it("5. Deep Immutability: Mutating nested payload properties throws or fails", () => {
       const res = bindComposition({
         compositionDefinition: {
           participants: [validParticipant1, validParticipant2],
@@ -563,7 +613,7 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       }
     });
 
-    it("5. Dynamic coordinate changes alone do NOT alter CompositionID", () => {
+    it("6. Dynamic coordinate changes alone do NOT alter CompositionID", () => {
       const def = {
         participants: [validParticipant1, validParticipant2],
         manifest: mockManifest,
@@ -588,7 +638,7 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       }
     });
 
-    it("6. BIND fails closed on missing pinned ACV", () => {
+    it("7. BIND fails closed on missing pinned ACV", () => {
       const res = bindComposition({
         compositionDefinition: {
           participants: [validParticipant1, validParticipant2],
@@ -596,6 +646,7 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
         },
         pinnedSubstrate: {
           acv: null as unknown as ActiveConstitutionalView,
+          evidenceBundle: mockEvidenceBundle,
         },
         boundCoordinates: mockBoundCoordinates,
       });
@@ -618,6 +669,7 @@ describe("AMS-0858 — Profile Composition Algebra Test Suite", () => {
       });
       expect(res.ok).toBe(true);
       if (res.ok) {
+        // Struct edge exists in manifest, but eBind edge remains 0
         expect(res.manifest.dependencyTopology.edges.length).toBe(1);
       }
     });
