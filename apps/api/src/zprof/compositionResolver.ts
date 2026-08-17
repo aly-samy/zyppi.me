@@ -28,6 +28,8 @@ import type {
   CompositionResolutionResult,
   CompositionError,
   GenericCompositionOptions,
+  Cl16IntelligenceReference,
+  AttRProofReference,
 } from "./types.js";
 import { GS1_DOMAIN_TEMPLATE_CARD } from "./fixtures/gs1Dtc.js";
 import {
@@ -55,6 +57,7 @@ export interface GS1CompositionOptions {
   readonly epistemicRequirementsFixtures?: readonly EpistemicRequirementContract[];
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
+  readonly explicitCl16Artifacts?: readonly Cl16IntelligenceReference[];
   readonly overrides?: StageOverrideConfig;
   readonly evidenceResolver?: EvidenceReferenceResolver;
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
@@ -191,12 +194,13 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // 3. Validate Composition Compatibility across 10 evaluation areas
+    // 3. Validate Composition Compatibility across canonical checks + AMS-0857 gates
     const compatResult = validateCompositionCompatibility(
       dtc,
       reqs,
       retrievedState,
       options.versions,
+      options.explicitCl16Artifacts,
     );
     if (!compatResult.ok) {
       return {
@@ -304,6 +308,33 @@ export class ApplicationCompositionResolver {
 
     const domainSlug = dtc.domainIdentifier.replace("domain:", "");
 
+    // Detect structural divergence if multiple conflicting CL-16 artifacts are present
+    let epistemicDivergence = false;
+    const boundCl16Artifacts: Cl16IntelligenceReference[] = [];
+    const boundAttestationProofReferences: AttRProofReference[] = [];
+
+    if (options.explicitCl16Artifacts && options.explicitCl16Artifacts.length > 0) {
+      for (const artifact of options.explicitCl16Artifacts) {
+        boundCl16Artifacts.push(Object.freeze({ ...artifact }));
+        if (artifact.attestationProofRef) {
+          boundAttestationProofReferences.push(
+            Object.freeze({ ...artifact.attestationProofRef }),
+          );
+        }
+      }
+
+      if (options.explicitCl16Artifacts.length > 1) {
+        const conclusions = new Set(
+          options.explicitCl16Artifacts
+            .map((a: Cl16IntelligenceReference) => a.conclusionSummary)
+            .filter(Boolean),
+        );
+        if (conclusions.size > 1) {
+          epistemicDivergence = true;
+        }
+      }
+    }
+
     // 6. Build Application-layer CompositionManifest
     const manifest: CompositionManifest = Object.freeze({
       $schema: "https://zyppi.org/schemas/v1/composition_manifest.json",
@@ -364,6 +395,17 @@ export class ApplicationCompositionResolver {
           }),
         ),
       ),
+      ...(boundCl16Artifacts.length > 0
+        ? { boundCl16IntelligenceArtifacts: Object.freeze(boundCl16Artifacts) }
+        : {}),
+      ...(boundAttestationProofReferences.length > 0
+        ? {
+            boundAttestationProofReferences: Object.freeze(
+              boundAttestationProofReferences,
+            ),
+          }
+        : {}),
+      ...(epistemicDivergence ? { epistemicDivergence: true } : {}),
       dependencyTopology: Object.freeze({
         nodes: Object.freeze([
           dtc.dtcId,
@@ -397,6 +439,10 @@ export class ApplicationCompositionResolver {
         entropy: options.entropy,
         versions: options.versions,
       }),
+      ...(boundCl16Artifacts.length > 0
+        ? { boundCl16IntelligenceArtifacts: Object.freeze(boundCl16Artifacts) }
+        : {}),
+      ...(epistemicDivergence ? { epistemicDivergence: true } : {}),
     });
 
     return {

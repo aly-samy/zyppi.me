@@ -4,6 +4,7 @@ import type {
   DomainTemplateCard,
   EpistemicRequirementContract,
   EpistemicStatus,
+  Cl16IntelligenceReference,
 } from "./types.js";
 import {
   isExplicitVersion,
@@ -37,6 +38,7 @@ export function validateCompositionCompatibility(
   reqs: readonly EpistemicRequirementContract[],
   retrievedState: RetrievedRegistryState,
   versions: readonly string[],
+  cl16Artifacts?: readonly Cl16IntelligenceReference[],
 ): CompatibilityValidationResult {
   // 1. Referenced Artifact Existence (Canonical Check 1)
   if (!dtc || !dtc.dtcId) {
@@ -331,6 +333,75 @@ export function validateCompositionCompatibility(
             requirementId: req.requirementId,
           },
         };
+      }
+    }
+  }
+
+  // Authoritative declaration catalog for Primary ARM Profiles per AMS-0857 §5.1 / §13.A
+  const PRIMARY_ARM_PROFILE_CATALOG: Readonly<Record<string, readonly string[]>> = Object.freeze({
+    "arm:profile:trade_item:v1": Object.freeze([
+      "prj:spec:gs1_digital_link_projection:v1",
+      "prj:spec:dpp_passport_projection:v1",
+    ]),
+  });
+
+  // 11. ARM Projection Authorization Gate (AMS-0857 §5.1 / §13.A / ARCH-CLOSURE §7)
+  // Evaluate projection_refs strictly against explicit declarations of the primary ARM Profile under pinned ACV.
+  const primaryArmProfile = dtc.applicableArmProfiles[0];
+  if (!primaryArmProfile) {
+    return {
+      ok: false,
+      error: {
+        code: "unauthorized",
+        category: "Composition Failure",
+        message: "Primary ARM Profile missing from DTC",
+      },
+    };
+  }
+
+  const authorizedProjections = PRIMARY_ARM_PROFILE_CATALOG[primaryArmProfile] || [];
+
+  // Evaluate requested PRJ specifications against primary ARM Profile authorized declarations (fail closed on set mismatch)
+  for (const prjSpec of dtc.requiredPrjSpecifications) {
+    if (!authorizedProjections.includes(prjSpec)) {
+      return {
+        ok: false,
+        error: {
+          code: "unauthorized",
+          category: "Composition Failure",
+          message: `Projection specification '${prjSpec}' is not explicitly authorized by primary ARM Profile '${primaryArmProfile}'`,
+        },
+      };
+    }
+  }
+
+  // 12. RSN / CL-16 Structural Binding & ATT-R-001 Proof Reference Check (AMS-0857 §7, §8 / ARCH-CLOSURE §9, §10)
+  if (cl16Artifacts && cl16Artifacts.length > 0) {
+    for (const artifact of cl16Artifacts) {
+      if (!artifact.artifactId || !artifact.rsnBlueprintRef) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message: "Malformed CL-16 Intelligence Artifact structural reference",
+          },
+        };
+      }
+
+      // Check ATT-R-001 proof reference structural well-formedness if specified or required
+      if (artifact.attestationProofRef) {
+        const proof = artifact.attestationProofRef;
+        if (!proof.proofId || !proof.version || !proof.attestationType) {
+          return {
+            ok: false,
+            error: {
+              code: "invalid",
+              category: "Composition Failure",
+              message: `Malformed ATT-R-001 proof reference in CL-16 artifact '${artifact.artifactId}'`,
+            },
+          };
+        }
       }
     }
   }

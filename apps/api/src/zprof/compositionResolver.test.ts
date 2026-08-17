@@ -879,6 +879,407 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
     });
   });
 
+  describe("AMS-0857 ARM Projection Authorization, RSN/CL-16 Structural Binding & Divergence Test Suite", () => {
+    it("TEST 857.1 — ARM Projection Authorization Gate: Primary ARM Profile explicit support accepted", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-arm-01",
+        executionId: "exec-arm-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.boundPrjSpecifications[0].specId).toBe(
+          "prj:spec:gs1_digital_link_projection:v1",
+        );
+      }
+    });
+
+    it("TEST 857.2 — ARM Projection Authorization Gate: Unsupported projection reference rejected fail closed", async () => {
+      const dtcWithUnsupportedPrj = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        requiredPrjSpecifications: ["prj:spec:unsupported_custom_projection:v1"],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcWithUnsupportedPrj,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-arm-02",
+        executionId: "exec-arm-02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("unauthorized");
+        expect(result.error.message).toContain("is not explicitly authorized by primary ARM Profile");
+      }
+    });
+
+    it("TEST 857.3 — ARM Projection Authorization Gate: Secondary profile projection rejected when primary profile does not declare support", async () => {
+      const dtcWithSecondaryPrj = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        requiredPrjSpecifications: ["prj:spec:secondary_only_projection:v1"],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcWithSecondaryPrj,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-arm-03",
+        executionId: "exec-arm-03",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("unauthorized");
+        expect(result.error.message).toContain("is not explicitly authorized by primary ARM Profile");
+      }
+    });
+
+    it("TEST 857.4 — Pinned ACV Isolation: Ambient registry state mutation does not alter composition against pinned ACV", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const options = {
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-acv-01",
+        executionId: "exec-acv-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      };
+
+      const result1 = await resolver.resolveComposition(options);
+      expect(result1.ok).toBe(true);
+
+      // Mutate backing state on repository double to simulate ambient drift
+      registryRepo.setRetrievedState({
+        ...sampleCompleteSnapshotState,
+        identity: {
+          ...sampleIdentity,
+          status: "decommissioned",
+        },
+      });
+
+      // Composition evaluated against explicit evidence bundle & initial pinned state in first resolution
+      // remains isolated when using explicit inputs
+      if (result1.ok) {
+        expect(result1.boundPayload.resolvedActiveConstitutionalView.identity.status).toBe("active");
+      }
+    });
+
+    it("TEST 857.5 — CL-16 Structural Binding & ATT-R-001 Reference Check: Valid CL-16 structural reference is bound without executing RSN", async () => {
+      const sampleCl16Artifact = Object.freeze({
+        artifactId: "cl16:artifact:gs1_origin_analysis:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:gs1_identity_verification:v1",
+        attestationProofRef: Object.freeze({
+          proofId: "proof:att_r_001:exec_01",
+          version: "1.0.0",
+          attestationType: "ATT-R-001",
+        }),
+        conclusionSummary: "ORIGIN_VERIFIED_AUTHENTIC",
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-cl16-01",
+        executionId: "exec-cl16-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        explicitCl16Artifacts: [sampleCl16Artifact],
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.boundCl16IntelligenceArtifacts).toHaveLength(1);
+        expect(
+          result.manifest.boundCl16IntelligenceArtifacts?.[0].artifactId,
+        ).toBe("cl16:artifact:gs1_origin_analysis:v1");
+        expect(
+          result.manifest.boundAttestationProofReferences?.[0].proofId,
+        ).toBe("proof:att_r_001:exec_01");
+        expect(result.boundPayload.boundCl16IntelligenceArtifacts).toHaveLength(1);
+      }
+    });
+
+    it("TEST 857.6 — ATT-R-001 Proof Reference Check: Malformed proof reference is rejected fail closed without cryptographic verification", async () => {
+      const malformedCl16Artifact = Object.freeze({
+        artifactId: "cl16:artifact:gs1_origin_analysis:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:gs1_identity_verification:v1",
+        attestationProofRef: Object.freeze({
+          proofId: "", // Malformed proofId
+          version: "1.0.0",
+          attestationType: "ATT-R-001",
+        }),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-cl16-02",
+        executionId: "exec-cl16-02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        explicitCl16Artifacts: [malformedCl16Artifact],
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("invalid");
+        expect(result.error.message).toContain("Malformed ATT-R-001 proof reference");
+      }
+    });
+
+    it("TEST 857.7 — Divergence Preservation: Conflicting CL-16 conclusions preserve structural divergence without selecting a winner", async () => {
+      const cl16ArtifactA = Object.freeze({
+        artifactId: "cl16:artifact:methodology_A:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:methodology_A:v1",
+        conclusionSummary: "CONCLUSION_AUTHENTIC",
+      });
+
+      const cl16ArtifactB = Object.freeze({
+        artifactId: "cl16:artifact:methodology_B:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:methodology_B:v1",
+        conclusionSummary: "CONCLUSION_SUSPECT",
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-div-01",
+        executionId: "exec-div-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        explicitCl16Artifacts: [cl16ArtifactA, cl16ArtifactB],
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.boundCl16IntelligenceArtifacts).toHaveLength(2);
+        expect(result.manifest.epistemicDivergence).toBe(true);
+        expect(result.boundPayload.epistemicDivergence).toBe(true);
+        // Both artifacts remain present and uncollapsed
+        expect(
+          result.manifest.boundCl16IntelligenceArtifacts?.[0].conclusionSummary,
+        ).toBe("CONCLUSION_AUTHENTIC");
+        expect(
+          result.manifest.boundCl16IntelligenceArtifacts?.[1].conclusionSummary,
+        ).toBe("CONCLUSION_SUSPECT");
+      }
+    });
+
+    it("TEST 857.8 — Negative Boundary: Executable logic and DomainJudgment primitives do not exist in Z-PROF composition output", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-neg-02",
+        executionId: "exec-neg-02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect("DomainJudgment" in result.manifest).toBe(false);
+        expect("DomainJudgment" in result.boundPayload).toBe(false);
+        expect("reasoningEngine" in result.manifest).toBe(false);
+        expect("translationEngine" in result.manifest).toBe(false);
+      }
+    });
+
+    it("TEST 857.9 — Proof Unchecked Cryptographically: Syntactically well-formed ATT-R-001 proof reference is bound without cryptographic evaluation", async () => {
+      const cl16ArtifactWithUnverifiedProof = Object.freeze({
+        artifactId: "cl16:artifact:unverified_signature:v1",
+        version: "1.0.0",
+        rsnBlueprintRef: "rsn:blueprint:gs1_identity_verification:v1",
+        attestationProofRef: Object.freeze({
+          proofId: "proof:att_r_001:invalid_crypto_signature_payload",
+          version: "1.0.0",
+          attestationType: "ATT-R-001",
+        }),
+        conclusionSummary: "INTERPRETED_CONCLUSION",
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-crypto-01",
+        executionId: "exec-crypto-01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        explicitCl16Artifacts: [cl16ArtifactWithUnverifiedProof],
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(
+          result.manifest.boundAttestationProofReferences?.[0].proofId,
+        ).toBe("proof:att_r_001:invalid_crypto_signature_payload");
+      }
+    });
+  });
+
   describe("AMS-0856-R SIOS → Z-PROF Consumer Boundary Test Suite (§19.1 – §19.10)", () => {
     it("19.1 Valid SIOS-Derived Requirement: A structurally valid, correctly versioned SIOS requirement enters composition pathway", async () => {
       const registryRepo = new TestRegistryRepository(

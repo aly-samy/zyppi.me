@@ -8,10 +8,14 @@ import type { EvidenceRecord } from "@zyppi/domain";
 
 export class TestRegistryRepository implements RegistryRepository {
   constructor(
-    private readonly state: RetrievedRegistryState | null,
+    private state: RetrievedRegistryState | null,
     private readonly evidenceRecords: readonly EvidenceRecord[] = [],
     private readonly simulateError?: boolean,
   ) {}
+
+  public setRetrievedState(newState: RetrievedRegistryState | null): void {
+    this.state = newState;
+  }
 
   async lookup(
     identifier: ValidatedCanonicalIdentifier,
