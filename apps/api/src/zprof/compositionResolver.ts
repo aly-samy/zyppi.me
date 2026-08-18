@@ -241,7 +241,7 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // 4B. Deterministic Conflict Evaluation Boundary (AMS-0859 / CORR-0859-1 §8)
+    // 4B. Deterministic Conflict Evaluation Boundary (AMS-0859 / CORR-0859-3 §3)
     if (options.explicitConflictInputs) {
       const conflictEval = evaluateConflict(options.explicitConflictInputs);
       if (
@@ -257,17 +257,6 @@ export class ApplicationCompositionResolver {
               conflictEval.status === "UNRESOLVED"
                 ? conflictEval.reason
                 : conflictEval.details,
-          },
-        };
-      } else if (conflictEval.status === "RESOLVED") {
-        // CORR-0859-1 §8: RESOLVED without a structural transformation mechanism fails closed
-        return {
-          ok: false,
-          error: {
-            code: "invalid",
-            category: "Composition Failure",
-            message:
-              "RESOLUTION APPLICATION CONTRACT GAP: Resolution rule matched but Z-PROF lacks authorized structural outcome transformation mechanism",
           },
         };
       }

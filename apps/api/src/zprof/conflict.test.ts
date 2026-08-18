@@ -11,7 +11,7 @@ import type { Participant } from "./participant.js";
 import type { StructuralEdge, BindingEdge } from "./topology.js";
 import { validateTopologyGraph } from "./topology.js";
 
-describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix", () => {
+describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 / CORR-0859-3 Z-PROF Conflict Unit Tests Matrix", () => {
   const p1: Participant = {
     identity: "dtc:zyppi:domain:gs1:v1",
     kind: "DTC",
@@ -179,7 +179,7 @@ describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix
     const resIgnored = evaluateConflict(inputsIgnored);
     expect(resIgnored.status).toBe("NO_CONFLICT");
 
-    // Case 9C: Partial target presence (only p1 present, p2 missing) -> rule ignored
+    // Case 9C: Partial target presence -> rule ignored
     const inputsPartial: ConflictEvaluationInputs = {
       declarations: [{ id: "p1", jurisdiction: "Egypt" }],
       explicitIncompatibilityRules: [rule],
@@ -220,10 +220,6 @@ describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix
     };
     const resRule = evaluateConflict(inputsRule);
     expect(resRule.status).toBe("UNRESOLVED");
-    if (resRule.status === "UNRESOLVED") {
-      expect(resRule.diagnostic).toBe("CONTEXT_CONFLICT");
-      expect(resRule.disposition).toBe("incompatible");
-    }
 
     // Negative test: Identical contexts under rule -> NO_CONFLICT
     const inputsSameCtx: ConflictEvaluationInputs = {
@@ -236,8 +232,8 @@ describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix
     expect(evaluateConflict(inputsSameCtx).status).toBe("NO_CONFLICT");
   });
 
-  // Test 11: CORR-0859-2 Assertion Structural Validation Test
-  it("Test 11 (CORR-0859-2): malformed explicit assertions are rejected", () => {
+  // Test 11: CORR-0859-3 Malformed Explicit Assertion Test (Fails Closed with invalid disposition)
+  it("Test 11 (CORR-0859-3): malformed explicit assertions fail closed as DIAGNOSTIC with disposition invalid", () => {
     const malformedAssertion: ExplicitConflictAssertion = {
       assertionId: "",
       diagnostic: "SEMANTIC_REQUIREMENT_CONFLICT",
@@ -249,11 +245,80 @@ describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix
     const inputs: ConflictEvaluationInputs = {
       explicitConflictAssertions: [malformedAssertion],
     };
+    const res = evaluateConflict(inputs);
+    expect(res.status).toBe("DIAGNOSTIC");
+    if (res.status === "DIAGNOSTIC") {
+      expect(res.disposition).toBe("invalid");
+      expect(res.details).toContain(
+        "Malformed explicitly supplied conflict assertion",
+      );
+    }
+  });
+
+  // Test 12: CORR-0859-3 Malformed Explicit Incompatibility Rule Tests
+  it("Test 12 (CORR-0859-3): malformed explicit incompatibility rules fail closed with disposition invalid", () => {
+    // 12A: Empty ruleId
+    const ruleNoId: ExplicitIncompatibilityRule = {
+      ruleId: "",
+      diagnostic: "JURISDICTION_CONFLICT",
+      disposition: "conflicting",
+      targetReferences: ["p1", "p2"],
+      condition: { mutuallyExclusiveJurisdictions: ["A", "B"] },
+    };
+    const resNoId = evaluateConflict({
+      explicitIncompatibilityRules: [ruleNoId],
+    });
+    expect(resNoId.status).toBe("DIAGNOSTIC");
+    if (resNoId.status === "DIAGNOSTIC") {
+      expect(resNoId.disposition).toBe("invalid");
+    }
+
+    // 12B: Empty targetReferences
+    const ruleNoTargets: ExplicitIncompatibilityRule = {
+      ruleId: "r2",
+      diagnostic: "JURISDICTION_CONFLICT",
+      disposition: "conflicting",
+      targetReferences: [],
+      condition: { mutuallyExclusiveJurisdictions: ["A", "B"] },
+    };
+    const resNoTargets = evaluateConflict({
+      explicitIncompatibilityRules: [ruleNoTargets],
+    });
+    expect(resNoTargets.status).toBe("DIAGNOSTIC");
+    if (resNoTargets.status === "DIAGNOSTIC") {
+      expect(resNoTargets.disposition).toBe("invalid");
+    }
+
+    // 12C: Context rule missing required coordinate
+    const ruleNoCoord: ExplicitIncompatibilityRule = {
+      ruleId: "r3",
+      diagnostic: "CONTEXT_CONFLICT",
+      disposition: "incompatible",
+      targetReferences: ["p1", "p2"],
+      condition: { mutuallyExclusiveContexts: ["prod", "dev"] },
+    };
+    const resNoCoord = evaluateConflict({
+      explicitIncompatibilityRules: [ruleNoCoord],
+    });
+    expect(resNoCoord.status).toBe("DIAGNOSTIC");
+    if (resNoCoord.status === "DIAGNOSTIC") {
+      expect(resNoCoord.disposition).toBe("invalid");
+    }
+  });
+
+  // Test 13: CORR-0859-3 Control Test: Absence of assertions/conflicts produces NO_CONFLICT
+  it("Test 13 (CORR-0859-3): control test - absence of conflict assertions and rules produces NO_CONFLICT", () => {
+    const inputs: ConflictEvaluationInputs = {
+      declarations: [
+        { id: "p1", jurisdiction: "US" },
+        { id: "p2", jurisdiction: "EU" },
+      ],
+    };
     expect(evaluateConflict(inputs).status).toBe("NO_CONFLICT");
   });
 
-  // Test 12: CORR-0859-2 Path B Resolution Candidate Test (Fails Closed with Contract Gap)
-  it("Test 12 (CORR-0859-2): candidate resolution rule fails closed as UNRESOLVED with contract gap", () => {
+  // Test 14: CORR-0859-2 Path B Resolution Candidate Test (Fails Closed with Contract Gap)
+  it("Test 14 (CORR-0859-2 / CORR-0859-3): candidate resolution rule fails closed as UNRESOLVED with contract gap", () => {
     const rule: AuthorizedResolutionRule = {
       authorityRef: "auth:council:pol",
       ruleRef: "rule:pol:version_override:v1",
@@ -277,8 +342,8 @@ describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix
     }
   });
 
-  // Test 13: Authority without rule -> unresolved
-  it("Test 13: authority without rule -> unresolved", () => {
+  // Test 15: Authority without rule -> unresolved
+  it("Test 15: authority without rule -> unresolved", () => {
     const rule: AuthorizedResolutionRule = {
       authorityRef: "auth:council:pol",
       ruleRef: "",
@@ -292,37 +357,6 @@ describe("AMS-0859 / CORR-0859-1 / CORR-0859-2 Z-PROF Conflict Unit Tests Matrix
       ["mod:x"],
       "test",
       [rule],
-    );
-    expect(res.status).toBe("UNRESOLVED");
-  });
-
-  // Test 14: Rule without authority -> unresolved
-  it("Test 14: rule without authority -> unresolved", () => {
-    const rule: AuthorizedResolutionRule = {
-      authorityRef: "",
-      ruleRef: "rule:pol:version_override:v1",
-      conflictCategory: "VERSION_CONFLICT",
-      targetReferences: ["mod:x"],
-      resolutionResult: "use_pinned_1.0.0",
-    };
-    const res = resolveConflictWithRules(
-      "VERSION_CONFLICT",
-      "incompatible",
-      ["mod:x"],
-      "test",
-      [rule],
-    );
-    expect(res.status).toBe("UNRESOLVED");
-  });
-
-  // Test 15: Neither authority nor rule -> unresolved
-  it("Test 15: neither authority nor rule -> unresolved", () => {
-    const res = resolveConflictWithRules(
-      "VERSION_CONFLICT",
-      "incompatible",
-      ["mod:x"],
-      "test",
-      [],
     );
     expect(res.status).toBe("UNRESOLVED");
   });

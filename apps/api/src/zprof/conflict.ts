@@ -20,7 +20,7 @@ export type ConflictDiagnosticCategory =
   | "UNRESOLVED_CONFLICT";
 
 /**
- * Explicit Governed Incompatibility Rule supplied to evaluation per CORR-0859-1 §4 / CORR-0859-2 §2, §3.
+ * Explicit Governed Incompatibility Rule supplied to evaluation per CORR-0859-1 §4 / CORR-0859-2 §2, §3 / CORR-0859-3 §2.
  * Z-PROF compares values strictly against target-scoped declarations; it does NOT guess or infer conflict.
  */
 export interface ExplicitIncompatibilityRule {
@@ -38,7 +38,7 @@ export interface ExplicitIncompatibilityRule {
 }
 
 /**
- * Explicit Governed Conflict Assertion supplied from upstream per CORR-0859-1 §5 / CORR-0859-2 §4.
+ * Explicit Governed Conflict Assertion supplied from upstream per CORR-0859-1 §5 / CORR-0859-2 §4 / CORR-0859-3 §1.
  * Carries already-determined incompatibility into Z-PROF without Z-PROF inventing facts.
  */
 export interface ExplicitConflictAssertion {
@@ -51,8 +51,8 @@ export interface ExplicitConflictAssertion {
 }
 
 /**
- * Structural representation of an explicit resolution rule supplied to evaluation per AMS-0859 §8, §25 / CORR-0859-2 §1.
- * RESOLVED requires explicit verified authority AND explicit rule.
+ * Structural representation of an explicit resolution rule supplied to evaluation per AMS-0859 §8, §25 / CORR-0859-2 §1 / CORR-0859-3 §3.
+ * Resolution candidates remain identified but fail closed as UNRESOLVED because authority/application contracts are not materialized.
  */
 export interface AuthorizedResolutionRule {
   readonly ruleRef: string;
@@ -82,7 +82,7 @@ export interface GovernedDeclaration {
 }
 
 /**
- * Inputs supplied to deterministic conflict evaluation per AMS-0859 §12, §13, §14 and CORR-0859-1 / CORR-0859-2.
+ * Inputs supplied to deterministic conflict evaluation per AMS-0859 §12, §13, §14 and CORR-0859-1 / CORR-0859-2 / CORR-0859-3.
  */
 export interface ConflictEvaluationInputs {
   readonly participants?: readonly Participant[];
@@ -113,7 +113,9 @@ export interface ConflictEvaluationInputs {
 }
 
 /**
- * Diagnostic conflict evaluation outcome per AMS-0859 §5, §6, §8, §12 / CORR-0859-2 §1.
+ * Diagnostic conflict evaluation outcome per AMS-0859 §5, §6, §8, §12 and CORR-0859-3 §3.
+ * RESOLVED is removed from the active runtime execution model because resolution authority
+ * and structural outcome transformation contracts are not materialized.
  */
 export type ConflictEvaluationResult =
   | {
@@ -124,16 +126,6 @@ export type ConflictEvaluationResult =
       readonly diagnostic: ConflictDiagnosticCategory;
       readonly disposition: CompositionErrorCode;
       readonly details: string;
-      readonly involvedReferences?: readonly string[];
-    }
-  | {
-      readonly status: "RESOLVED";
-      readonly diagnostic: ConflictDiagnosticCategory;
-      readonly disposition: CompositionErrorCode;
-      readonly authorityRef: string;
-      readonly ruleRef: string;
-      readonly result: string;
-      readonly details?: string;
       readonly involvedReferences?: readonly string[];
     }
   | {
@@ -186,7 +178,7 @@ const VALID_DIAGNOSTICS: readonly ConflictDiagnosticCategory[] = [
 ];
 
 /**
- * Validates structural integrity of an ExplicitConflictAssertion per CORR-0859-2 §4.
+ * Validates structural integrity of an ExplicitConflictAssertion per CORR-0859-2 §4 / CORR-0859-3 §1.
  */
 function validateConflictAssertion(
   assertion: ExplicitConflictAssertion,
@@ -224,10 +216,60 @@ function validateConflictAssertion(
 }
 
 /**
- * Attempts to apply explicit authorized resolution rules to a detected conflict per CORR-0859-2 §1.
- * Path B: Non-empty authorityRef and ruleRef strings prove reference presence, NOT constitutional authority standing.
- * Therefore, unless verified against substrate, resolution candidates fail closed with
- * BLOCKED — RESOLUTION AUTHORITY/APPLICATION CONTRACT NOT MATERIALIZED.
+ * Validates structural integrity of an ExplicitIncompatibilityRule per CORR-0859-3 §2.
+ */
+function validateIncompatibilityRule(
+  rule: ExplicitIncompatibilityRule,
+): boolean {
+  if (!rule) return false;
+  if (
+    !rule.ruleId ||
+    typeof rule.ruleId !== "string" ||
+    rule.ruleId.trim() === ""
+  )
+    return false;
+  if (!rule.diagnostic || !VALID_DIAGNOSTICS.includes(rule.diagnostic))
+    return false;
+  if (!rule.disposition || !VALID_DISPOSITIONS.includes(rule.disposition))
+    return false;
+  if (
+    !rule.targetReferences ||
+    !Array.isArray(rule.targetReferences) ||
+    rule.targetReferences.length === 0
+  )
+    return false;
+  if (!rule.condition || typeof rule.condition !== "object") return false;
+
+  const hasJur =
+    Array.isArray(rule.condition.mutuallyExclusiveJurisdictions) &&
+    rule.condition.mutuallyExclusiveJurisdictions.length > 0;
+  const hasAuth =
+    Array.isArray(rule.condition.mutuallyExclusiveAuthorities) &&
+    rule.condition.mutuallyExclusiveAuthorities.length > 0;
+  const hasVal =
+    Array.isArray(rule.condition.mutuallyExclusiveValues) &&
+    rule.condition.mutuallyExclusiveValues.length > 0;
+  const hasCtx =
+    Array.isArray(rule.condition.mutuallyExclusiveContexts) &&
+    rule.condition.mutuallyExclusiveContexts.length > 0;
+
+  if (!hasJur && !hasAuth && !hasVal && !hasCtx) return false;
+
+  if (
+    (hasVal || hasCtx) &&
+    (!rule.condition.coordinate ||
+      typeof rule.condition.coordinate !== "string" ||
+      rule.condition.coordinate.trim() === "")
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Attempts to apply explicit authorized resolution rules to a detected conflict per CORR-0859-2 §1 / CORR-0859-3 §3.
+ * Resolution candidates remain identified but fail closed as UNRESOLVED with BLOCKED — RESOLUTION AUTHORITY/APPLICATION CONTRACT NOT MATERIALIZED.
  */
 export function resolveConflictWithRules(
   diagnostic: ConflictDiagnosticCategory,
@@ -268,8 +310,6 @@ export function resolveConflictWithRules(
       involvedReferences.every((ref) => ruleTargets.has(ref));
 
     if (targetsMatch) {
-      // CORR-0859-2 §1 Path B: Caller-supplied strings prove presence, NOT verified constitutional authority.
-      // Fail closed as UNRESOLVED with explicit contract gap.
       return deepFreeze({
         status: "UNRESOLVED",
         diagnostic,
@@ -290,8 +330,9 @@ export function resolveConflictWithRules(
 }
 
 /**
- * Evaluates composition inputs for deterministic conflicts per AMS-0859, CORR-0859-1, and CORR-0859-2.
+ * Evaluates composition inputs for deterministic conflicts per AMS-0859, CORR-0859-1, CORR-0859-2, and CORR-0859-3.
  * Z-PROF NEVER infers conflict solely because values, jurisdictions, authorities, or contexts differ.
+ * Malformed explicit inputs fail closed with disposition `invalid`.
  */
 export function evaluateConflict(
   inputs: ConflictEvaluationInputs,
@@ -305,11 +346,19 @@ export function evaluateConflict(
     authorizedRules,
   } = inputs;
 
-  // 1. Explicit Governed Conflict Assertions (CORR-0859-1 §5 / CORR-0859-2 §4)
+  // 1. Explicit Governed Conflict Assertions (CORR-0859-1 §5 / CORR-0859-2 §4 / CORR-0859-3 §1)
   if (explicitConflictAssertions && explicitConflictAssertions.length > 0) {
     for (const assertion of explicitConflictAssertions) {
       if (!validateConflictAssertion(assertion)) {
-        continue;
+        return deepFreeze({
+          status: "DIAGNOSTIC",
+          diagnostic: "AMBIGUITY",
+          disposition: "invalid",
+          details: `Malformed explicitly supplied conflict assertion: ${JSON.stringify(assertion)}`,
+          involvedReferences: Object.freeze(
+            assertion?.involvedReferences || [],
+          ),
+        });
       }
       const involved = assertion.involvedReferences;
       const details = `Explicit conflict assertion '${assertion.assertionId}' under rule '${assertion.governingRuleRef}': ${assertion.details}`;
@@ -323,7 +372,145 @@ export function evaluateConflict(
     }
   }
 
-  // 2. Structural Version Conflict Detection (AMS-0859 §5.4 / CORR-0859-1 §9)
+  // 2. Explicit Incompatibility Rule Structural Validation & Evaluation (CORR-0859-3 §2)
+  if (explicitIncompatibilityRules && explicitIncompatibilityRules.length > 0) {
+    for (const rule of explicitIncompatibilityRules) {
+      if (!validateIncompatibilityRule(rule)) {
+        return deepFreeze({
+          status: "DIAGNOSTIC",
+          diagnostic: "STRUCTURAL_CONFLICT",
+          disposition: "invalid",
+          details: `Malformed explicitly supplied incompatibility rule: ${JSON.stringify(rule)}`,
+          involvedReferences: Object.freeze(rule?.targetReferences || []),
+        });
+      }
+
+      if (declarations && declarations.length > 0) {
+        const targetSet = new Set(rule.targetReferences);
+        const targetDecls = declarations.filter((d) => targetSet.has(d.id));
+
+        const foundTargetIds = new Set(targetDecls.map((d) => d.id));
+        const allTargetsPresent = rule.targetReferences.every((ref) =>
+          foundTargetIds.has(ref),
+        );
+        if (!allTargetsPresent) {
+          continue;
+        }
+
+        // 2A. Mutually Exclusive Jurisdictions
+        if (
+          rule.condition.mutuallyExclusiveJurisdictions &&
+          rule.condition.mutuallyExclusiveJurisdictions.length > 0
+        ) {
+          const matchingDecls = targetDecls.filter(
+            (d) =>
+              d.jurisdiction &&
+              rule.condition.mutuallyExclusiveJurisdictions!.includes(
+                d.jurisdiction,
+              ),
+          );
+          const uniqueJur = new Set(matchingDecls.map((f) => f.jurisdiction!));
+          if (uniqueJur.size > 1) {
+            const involved = matchingDecls.map((f) => f.id).sort();
+            const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for mutually exclusive jurisdictions [${Array.from(uniqueJur).sort().join(", ")}] on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
+            return resolveConflictWithRules(
+              rule.diagnostic,
+              rule.disposition,
+              involved,
+              details,
+              authorizedRules,
+            );
+          }
+        }
+
+        // 2B. Mutually Exclusive Authorities
+        if (
+          rule.condition.mutuallyExclusiveAuthorities &&
+          rule.condition.mutuallyExclusiveAuthorities.length > 0
+        ) {
+          const matchingDecls = targetDecls.filter(
+            (d) =>
+              d.authorityRef &&
+              rule.condition.mutuallyExclusiveAuthorities!.includes(
+                d.authorityRef,
+              ),
+          );
+          const uniqueAuth = new Set(matchingDecls.map((f) => f.authorityRef!));
+          if (uniqueAuth.size > 1) {
+            const involved = matchingDecls.map((f) => f.id).sort();
+            const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for mutually exclusive authorities [${Array.from(uniqueAuth).sort().join(", ")}] on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
+            return resolveConflictWithRules(
+              rule.diagnostic,
+              rule.disposition,
+              involved,
+              details,
+              authorizedRules,
+            );
+          }
+        }
+
+        // 2C. Mutually Exclusive Values for Coordinate
+        if (
+          rule.condition.coordinate &&
+          rule.condition.mutuallyExclusiveValues &&
+          rule.condition.mutuallyExclusiveValues.length > 0
+        ) {
+          const matchingDecls = targetDecls.filter(
+            (d) =>
+              d.requirementKey === rule.condition.coordinate &&
+              d.requiredValue !== undefined &&
+              rule.condition.mutuallyExclusiveValues!.includes(d.requiredValue),
+          );
+          const uniqueVals = new Set(
+            matchingDecls.map((f) => JSON.stringify(f.requiredValue)),
+          );
+          if (uniqueVals.size > 1) {
+            const involved = matchingDecls.map((f) => f.id).sort();
+            const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for coordinate '${rule.condition.coordinate}' with mutually exclusive values on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
+            return resolveConflictWithRules(
+              rule.diagnostic,
+              rule.disposition,
+              involved,
+              details,
+              authorizedRules,
+            );
+          }
+        }
+
+        // 2D. Mutually Exclusive Context Values for Context Coordinate
+        if (
+          rule.condition.coordinate &&
+          rule.condition.mutuallyExclusiveContexts &&
+          rule.condition.mutuallyExclusiveContexts.length > 0
+        ) {
+          const matchingDecls = targetDecls.filter(
+            (d) =>
+              d.contextCoordinate === rule.condition.coordinate &&
+              d.contextValue !== undefined &&
+              rule.condition.mutuallyExclusiveContexts!.includes(
+                d.contextValue,
+              ),
+          );
+          const uniqueContexts = new Set(
+            matchingDecls.map((f) => f.contextValue!),
+          );
+          if (uniqueContexts.size > 1) {
+            const involved = matchingDecls.map((f) => f.id).sort();
+            const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for context coordinate '${rule.condition.coordinate}' with mutually exclusive context values [${Array.from(uniqueContexts).sort().join(", ")}] on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
+            return resolveConflictWithRules(
+              rule.diagnostic,
+              rule.disposition,
+              involved,
+              details,
+              authorizedRules,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Structural Version Conflict Detection (AMS-0859 §5.4 / CORR-0859-1 §9)
   if (versionRequirements && versionRequirements.length > 1) {
     const versionMap = new Map<string, Set<string>>();
     for (const vReq of versionRequirements) {
@@ -345,141 +532,6 @@ export function evaluateConflict(
           details,
           authorizedRules,
         );
-      }
-    }
-  }
-
-  // 3. Explicit Incompatibility Rule Evaluation with Strict Target Scope (CORR-0859-2 §2, §3)
-  if (
-    explicitIncompatibilityRules &&
-    explicitIncompatibilityRules.length > 0 &&
-    declarations &&
-    declarations.length > 0
-  ) {
-    for (const rule of explicitIncompatibilityRules) {
-      if (!rule.targetReferences || rule.targetReferences.length === 0) {
-        continue;
-      }
-
-      // Restrict candidate declarations strictly to rule's explicitly governed targets
-      const targetSet = new Set(rule.targetReferences);
-      const targetDecls = declarations.filter((d) => targetSet.has(d.id));
-
-      // Partial target presence -> SHALL NOT silently apply rule
-      const foundTargetIds = new Set(targetDecls.map((d) => d.id));
-      const allTargetsPresent = rule.targetReferences.every((ref) =>
-        foundTargetIds.has(ref),
-      );
-      if (!allTargetsPresent) {
-        continue;
-      }
-
-      // 3A. Mutually Exclusive Jurisdictions
-      if (
-        rule.condition.mutuallyExclusiveJurisdictions &&
-        rule.condition.mutuallyExclusiveJurisdictions.length > 0
-      ) {
-        const matchingDecls = targetDecls.filter(
-          (d) =>
-            d.jurisdiction &&
-            rule.condition.mutuallyExclusiveJurisdictions!.includes(
-              d.jurisdiction,
-            ),
-        );
-        const uniqueJur = new Set(matchingDecls.map((f) => f.jurisdiction!));
-        if (uniqueJur.size > 1) {
-          const involved = matchingDecls.map((f) => f.id).sort();
-          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for mutually exclusive jurisdictions [${Array.from(uniqueJur).sort().join(", ")}] on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
-          return resolveConflictWithRules(
-            rule.diagnostic,
-            rule.disposition,
-            involved,
-            details,
-            authorizedRules,
-          );
-        }
-      }
-
-      // 3B. Mutually Exclusive Authorities
-      if (
-        rule.condition.mutuallyExclusiveAuthorities &&
-        rule.condition.mutuallyExclusiveAuthorities.length > 0
-      ) {
-        const matchingDecls = targetDecls.filter(
-          (d) =>
-            d.authorityRef &&
-            rule.condition.mutuallyExclusiveAuthorities!.includes(
-              d.authorityRef,
-            ),
-        );
-        const uniqueAuth = new Set(matchingDecls.map((f) => f.authorityRef!));
-        if (uniqueAuth.size > 1) {
-          const involved = matchingDecls.map((f) => f.id).sort();
-          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for mutually exclusive authorities [${Array.from(uniqueAuth).sort().join(", ")}] on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
-          return resolveConflictWithRules(
-            rule.diagnostic,
-            rule.disposition,
-            involved,
-            details,
-            authorizedRules,
-          );
-        }
-      }
-
-      // 3C. Mutually Exclusive Values for Coordinate
-      if (
-        rule.condition.coordinate &&
-        rule.condition.mutuallyExclusiveValues &&
-        rule.condition.mutuallyExclusiveValues.length > 0
-      ) {
-        const matchingDecls = targetDecls.filter(
-          (d) =>
-            d.requirementKey === rule.condition.coordinate &&
-            d.requiredValue !== undefined &&
-            rule.condition.mutuallyExclusiveValues!.includes(d.requiredValue),
-        );
-        const uniqueVals = new Set(
-          matchingDecls.map((f) => JSON.stringify(f.requiredValue)),
-        );
-        if (uniqueVals.size > 1) {
-          const involved = matchingDecls.map((f) => f.id).sort();
-          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for coordinate '${rule.condition.coordinate}' with mutually exclusive values on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
-          return resolveConflictWithRules(
-            rule.diagnostic,
-            rule.disposition,
-            involved,
-            details,
-            authorizedRules,
-          );
-        }
-      }
-
-      // 3D. Mutually Exclusive Context Values for Context Coordinate (CORR-0859-2 §3)
-      if (
-        rule.condition.coordinate &&
-        rule.condition.mutuallyExclusiveContexts &&
-        rule.condition.mutuallyExclusiveContexts.length > 0
-      ) {
-        const matchingDecls = targetDecls.filter(
-          (d) =>
-            d.contextCoordinate === rule.condition.coordinate &&
-            d.contextValue !== undefined &&
-            rule.condition.mutuallyExclusiveContexts!.includes(d.contextValue),
-        );
-        const uniqueContexts = new Set(
-          matchingDecls.map((f) => f.contextValue!),
-        );
-        if (uniqueContexts.size > 1) {
-          const involved = matchingDecls.map((f) => f.id).sort();
-          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for context coordinate '${rule.condition.coordinate}' with mutually exclusive context values [${Array.from(uniqueContexts).sort().join(", ")}] on targets [${rule.targetReferences.slice().sort().join(", ")}]`;
-          return resolveConflictWithRules(
-            rule.diagnostic,
-            rule.disposition,
-            involved,
-            details,
-            authorizedRules,
-          );
-        }
       }
     }
   }
