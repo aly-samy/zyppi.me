@@ -39,7 +39,11 @@ describe("AMS-0859 Z-PROF Conflict Unit Tests Matrix (§28)", () => {
   it("Test 2: structural conflict -> explicit diagnostic", () => {
     // Structural cycle alone is permitted in T_struct, but structural node absence in P is invalid
     const invalidEdges: readonly StructuralEdge[] = [
-      { sourceId: p1.identity, targetId: "non_existent_node", relationKind: "references" },
+      {
+        sourceId: p1.identity,
+        targetId: "non_existent_node",
+        relationKind: "references",
+      },
     ];
     const topoRes = validateTopologyGraph([p1, p2], invalidEdges, []);
     expect(topoRes.ok).toBe(false);
@@ -51,8 +55,16 @@ describe("AMS-0859 Z-PROF Conflict Unit Tests Matrix (§28)", () => {
   // Test 3: T_struct cycle alone -> not automatically conflict
   it("Test 3: T_struct cycle alone -> not automatically conflict", () => {
     const structCycleEdges: readonly StructuralEdge[] = [
-      { sourceId: p1.identity, targetId: p2.identity, relationKind: "references" },
-      { sourceId: p2.identity, targetId: p1.identity, relationKind: "references" },
+      {
+        sourceId: p1.identity,
+        targetId: p2.identity,
+        relationKind: "references",
+      },
+      {
+        sourceId: p2.identity,
+        targetId: p1.identity,
+        relationKind: "references",
+      },
     ];
     const topoRes = validateTopologyGraph([p1, p2], structCycleEdges, []);
     expect(topoRes.ok).toBe(true);
@@ -61,8 +73,16 @@ describe("AMS-0859 Z-PROF Conflict Unit Tests Matrix (§28)", () => {
   // Test 4: T_bind dependency cycle -> deterministic failure through existing composition rules
   it("Test 4: T_bind dependency cycle -> deterministic failure", () => {
     const bindCycleEdges: readonly BindingEdge[] = [
-      { sourceId: p1.identity, targetId: p2.identity, dependencyKind: "requires" },
-      { sourceId: p2.identity, targetId: p1.identity, dependencyKind: "requires" },
+      {
+        sourceId: p1.identity,
+        targetId: p2.identity,
+        dependencyKind: "requires",
+      },
+      {
+        sourceId: p2.identity,
+        targetId: p1.identity,
+        dependencyKind: "requires",
+      },
     ];
     const topoRes = validateTopologyGraph([p1, p2], [], bindCycleEdges);
     expect(topoRes.ok).toBe(false);
@@ -110,14 +130,28 @@ describe("AMS-0859 Z-PROF Conflict Unit Tests Matrix (§28)", () => {
 
   // Test 8: Unavailable != missing
   it("Test 8: unavailable != missing", () => {
-    expect(mapDiagnosticToDisposition("EVIDENCE_CONFLICT", { epistemicStatus: "UNAVAILABLE" })).toBe("unavailable");
-    expect(mapDiagnosticToDisposition("EVIDENCE_CONFLICT", { isMissing: true })).toBe("missing");
+    expect(
+      mapDiagnosticToDisposition("EVIDENCE_CONFLICT", {
+        epistemicStatus: "UNAVAILABLE",
+      }),
+    ).toBe("unavailable");
+    expect(
+      mapDiagnosticToDisposition("EVIDENCE_CONFLICT", { isMissing: true }),
+    ).toBe("missing");
   });
 
   // Test 9: Unverified != conflicting unless explicit conflicting evidence exists
   it("Test 9: unverified != conflicting unless explicit conflicting evidence exists", () => {
-    expect(mapDiagnosticToDisposition("EVIDENCE_CONFLICT", { epistemicStatus: "UNVERIFIED" })).toBe("unverified");
-    expect(mapDiagnosticToDisposition("EVIDENCE_CONFLICT", { epistemicStatus: "CONFLICTING" })).toBe("conflicting");
+    expect(
+      mapDiagnosticToDisposition("EVIDENCE_CONFLICT", {
+        epistemicStatus: "UNVERIFIED",
+      }),
+    ).toBe("unverified");
+    expect(
+      mapDiagnosticToDisposition("EVIDENCE_CONFLICT", {
+        epistemicStatus: "CONFLICTING",
+      }),
+    ).toBe("conflicting");
   });
 
   // Test 10: Unresolved conflict cannot produce successful binding (covered in integration)
@@ -166,7 +200,13 @@ describe("AMS-0859 Z-PROF Conflict Unit Tests Matrix (§28)", () => {
       targetReferences: ["mod:x"],
       resolutionResult: "use_pinned_1.0.0",
     };
-    const res = resolveConflictWithRules("VERSION_CONFLICT", "incompatible", ["mod:x"], "test", [rule]);
+    const res = resolveConflictWithRules(
+      "VERSION_CONFLICT",
+      "incompatible",
+      ["mod:x"],
+      "test",
+      [rule],
+    );
     expect(res.status).toBe("UNRESOLVED");
   });
 
@@ -179,13 +219,25 @@ describe("AMS-0859 Z-PROF Conflict Unit Tests Matrix (§28)", () => {
       targetReferences: ["mod:x"],
       resolutionResult: "use_pinned_1.0.0",
     };
-    const res = resolveConflictWithRules("VERSION_CONFLICT", "incompatible", ["mod:x"], "test", [rule]);
+    const res = resolveConflictWithRules(
+      "VERSION_CONFLICT",
+      "incompatible",
+      ["mod:x"],
+      "test",
+      [rule],
+    );
     expect(res.status).toBe("UNRESOLVED");
   });
 
   // Test 14: Neither authority nor rule -> unresolved/failure
   it("Test 14: neither authority nor rule -> unresolved", () => {
-    const res = resolveConflictWithRules("VERSION_CONFLICT", "incompatible", ["mod:x"], "test", []);
+    const res = resolveConflictWithRules(
+      "VERSION_CONFLICT",
+      "incompatible",
+      ["mod:x"],
+      "test",
+      [],
+    );
     expect(res.status).toBe("UNRESOLVED");
   });
 

@@ -244,7 +244,10 @@ export class ApplicationCompositionResolver {
     // 4B. Deterministic Conflict Evaluation Boundary (AMS-0859)
     if (options.explicitConflictInputs) {
       const conflictEval = evaluateConflict(options.explicitConflictInputs);
-      if (conflictEval.status === "UNRESOLVED" || conflictEval.status === "DIAGNOSTIC") {
+      if (
+        conflictEval.status === "UNRESOLVED" ||
+        conflictEval.status === "DIAGNOSTIC"
+      ) {
         return {
           ok: false,
           error: {

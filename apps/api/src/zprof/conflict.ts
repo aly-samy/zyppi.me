@@ -46,7 +46,8 @@ export interface GovernedDeclaration {
   readonly contextCoordinate?: string;
   readonly contextValue?: string;
   readonly isMissing?: boolean;
-  readonly epistemicStatus?: "UNKNOWN" | "UNAVAILABLE" | "UNVERIFIED" | "CONFLICTING";
+  readonly epistemicStatus?:
+    "UNKNOWN" | "UNAVAILABLE" | "UNVERIFIED" | "CONFLICTING";
 }
 
 /**
@@ -56,11 +57,25 @@ export interface ConflictEvaluationInputs {
   readonly participants?: readonly Participant[];
   readonly structuralEdges?: readonly StructuralEdge[];
   readonly bindingEdges?: readonly BindingEdge[];
-  readonly versionRequirements?: readonly { readonly id: string; readonly version: string }[];
-  readonly contextRequirements?: readonly { readonly key: string; readonly value: string }[];
-  readonly evidenceRequirements?: readonly { readonly id: string; readonly status?: string; readonly isConflicting?: boolean; readonly isMissing?: boolean }[];
+  readonly versionRequirements?: readonly {
+    readonly id: string;
+    readonly version: string;
+  }[];
+  readonly contextRequirements?: readonly {
+    readonly key: string;
+    readonly value: string;
+  }[];
+  readonly evidenceRequirements?: readonly {
+    readonly id: string;
+    readonly status?: string;
+    readonly isConflicting?: boolean;
+    readonly isMissing?: boolean;
+  }[];
   readonly declarations?: readonly GovernedDeclaration[];
-  readonly ambiguousInterpretations?: readonly { readonly key: string; readonly candidates: readonly string[] }[];
+  readonly ambiguousInterpretations?: readonly {
+    readonly key: string;
+    readonly candidates: readonly string[];
+  }[];
   readonly authorizedRules?: readonly AuthorizedResolutionRule[];
 }
 
@@ -118,7 +133,11 @@ function deepFreeze<T>(obj: T): T {
  */
 export function mapDiagnosticToDisposition(
   category: ConflictDiagnosticCategory,
-  context?: { readonly epistemicStatus?: string; readonly isMissing?: boolean; readonly isUnauthorized?: boolean },
+  context?: {
+    readonly epistemicStatus?: string;
+    readonly isMissing?: boolean;
+    readonly isUnauthorized?: boolean;
+  },
 ): CompositionErrorCode {
   switch (category) {
     case "ABSENCE":
@@ -148,7 +167,8 @@ export function mapDiagnosticToDisposition(
     case "EVIDENCE_CONFLICT":
       if (context?.epistemicStatus === "UNAVAILABLE") return "unavailable";
       if (context?.epistemicStatus === "UNVERIFIED") return "unverified";
-      if (context?.epistemicStatus === "UNKNOWN" || context?.isMissing) return "missing";
+      if (context?.epistemicStatus === "UNKNOWN" || context?.isMissing)
+        return "missing";
       return "conflicting";
 
     case "UNRESOLVED_CONFLICT":
@@ -263,7 +283,13 @@ export function evaluateConflict(
         const diag = "VERSION_CONFLICT";
         const disp = mapDiagnosticToDisposition(diag);
 
-        return resolveConflictWithRules(diag, disp, involved, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involved,
+          details,
+          authorizedRules,
+        );
       }
     }
   }
@@ -292,12 +318,20 @@ export function evaluateConflict(
         const diag = "SEMANTIC_REQUIREMENT_CONFLICT";
         const disp = mapDiagnosticToDisposition(diag);
 
-        return resolveConflictWithRules(diag, disp, involvedIds, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involvedIds,
+          details,
+          authorizedRules,
+        );
       }
     }
 
     // 3. Jurisdiction Conflict Detection (§5.3)
-    const jurDeclarations = declarations.filter((d) => d.jurisdiction !== undefined);
+    const jurDeclarations = declarations.filter(
+      (d) => d.jurisdiction !== undefined,
+    );
     if (jurDeclarations.length > 1) {
       const jurSet = new Set(jurDeclarations.map((d) => d.jurisdiction!));
       if (jurSet.size > 1) {
@@ -306,12 +340,20 @@ export function evaluateConflict(
         const diag = "JURISDICTION_CONFLICT";
         const disp = mapDiagnosticToDisposition(diag);
 
-        return resolveConflictWithRules(diag, disp, involvedIds, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involvedIds,
+          details,
+          authorizedRules,
+        );
       }
     }
 
     // 4. Authority Conflict Detection (§5.7)
-    const authDeclarations = declarations.filter((d) => d.authorityRef !== undefined);
+    const authDeclarations = declarations.filter(
+      (d) => d.authorityRef !== undefined,
+    );
     if (authDeclarations.length > 1) {
       const authSet = new Set(authDeclarations.map((d) => d.authorityRef!));
       if (authSet.size > 1) {
@@ -320,7 +362,13 @@ export function evaluateConflict(
         const diag = "AUTHORITY_CONFLICT";
         const disp = mapDiagnosticToDisposition(diag);
 
-        return resolveConflictWithRules(diag, disp, involvedIds, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involvedIds,
+          details,
+          authorizedRules,
+        );
       }
     }
   }
@@ -343,7 +391,13 @@ export function evaluateConflict(
         const diag = "CONTEXT_CONFLICT";
         const disp = mapDiagnosticToDisposition(diag);
 
-        return resolveConflictWithRules(diag, disp, involved, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involved,
+          details,
+          authorizedRules,
+        );
       }
     }
   }
@@ -355,9 +409,17 @@ export function evaluateConflict(
         const involved = [eReq.id];
         const details = `Conflicting evidence state declared for evidence '${eReq.id}'`;
         const diag = "EVIDENCE_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag, { epistemicStatus: "CONFLICTING" });
+        const disp = mapDiagnosticToDisposition(diag, {
+          epistemicStatus: "CONFLICTING",
+        });
 
-        return resolveConflictWithRules(diag, disp, involved, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involved,
+          details,
+          authorizedRules,
+        );
       }
     }
   }
@@ -371,7 +433,13 @@ export function evaluateConflict(
         const diag = "AMBIGUITY";
         const disp = mapDiagnosticToDisposition(diag);
 
-        return resolveConflictWithRules(diag, disp, involved, details, authorizedRules);
+        return resolveConflictWithRules(
+          diag,
+          disp,
+          involved,
+          details,
+          authorizedRules,
+        );
       }
     }
   }
@@ -385,7 +453,13 @@ export function evaluateConflict(
       const diag = "ABSENCE";
       const disp = mapDiagnosticToDisposition(diag, { isMissing: true });
 
-      return resolveConflictWithRules(diag, disp, involved, details, authorizedRules);
+      return resolveConflictWithRules(
+        diag,
+        disp,
+        involved,
+        details,
+        authorizedRules,
+      );
     }
   }
 
