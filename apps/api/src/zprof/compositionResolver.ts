@@ -38,6 +38,7 @@ import {
   GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
 } from "./fixtures/gs1EpistemicRequirements.js";
 import { validateCompositionCompatibility } from "./compatibilityValidator.js";
+import { evaluateConflict } from "./conflict.js";
 import {
   validateExplicitVersionList,
   validateVersionConstraints,
@@ -64,6 +65,7 @@ export interface GS1CompositionOptions {
   readonly evidenceResolver?: EvidenceReferenceResolver;
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
+  readonly explicitConflictInputs?: import("./conflict.js").ConflictEvaluationInputs;
 }
 
 export type ApplicationCompositionBridgeResult =
@@ -237,6 +239,24 @@ export class ApplicationCompositionResolver {
         error: compatResult.error,
         epistemicStatus: compatResult.epistemicStatus,
       };
+    }
+
+    // 4B. Deterministic Conflict Evaluation Boundary (AMS-0859)
+    if (options.explicitConflictInputs) {
+      const conflictEval = evaluateConflict(options.explicitConflictInputs);
+      if (conflictEval.status === "UNRESOLVED" || conflictEval.status === "DIAGNOSTIC") {
+        return {
+          ok: false,
+          error: {
+            code: conflictEval.disposition,
+            category: "Composition Failure",
+            message:
+              conflictEval.status === "UNRESOLVED"
+                ? conflictEval.reason
+                : conflictEval.details,
+          },
+        };
+      }
     }
 
     // 4. Resolve Evidence Bundle & Payloads using existing Evidence mechanisms

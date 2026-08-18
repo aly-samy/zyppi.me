@@ -123,19 +123,37 @@ _(Depends on M04, M06, M07)_
 
 ## M08.5 — Z-PROF Profile Architecture
 
-_(Depends on M08 — Implementation Authority: NONE until individual AMS mandates are authorized)_
+_(Depends on M08 — Implementation Authority granted only through individually ratified AMS mandates)_
 
-| ID      | Title                                                                     | Depends On                | Size | AMS      | Status |
-| ------- | ------------------------------------------------------------------------- | ------------------------- | ---- | -------- | ------ |
-| IT-0851 | Profile Architecture Semantic & Boundary Closure Preparation              | IT-0805                   | S    | AMS-0851 | ☐      |
-| IT-0852 | Domain Template Card Specification & Requirement Binding Model            | IT-0851                   | S    | AMS-0852 | ☐      |
-| IT-0853 | CompositionManifest Specification & Governed Reference Model              | IT-0851                   | S    | AMS-0853 | ☐      |
-| IT-0854 | Interrogation Boundary & Application/Runtime Resolution Model             | IT-0851                   | S    | AMS-0854 | ☐      |
-| IT-0855 | Registry Generalization, Compatibility & Versioning Boundaries            | IT-0854                   | S    | AMS-0855 | ☐      |
-| IT-0856 | Epistemic, Temporal & Provenance Boundary Specification                   | IT-0854                   | S    | AMS-0856 | ☐      |
-| IT-0857 | ARM Projection, SIOS Translation & RSN/Intelligence Projection Boundaries | IT-0854                   | S    | AMS-0857 | ☐      |
-| IT-0858 | Shadow / Wedge Validation Protocol Specification                          | IT-0855, IT-0856, IT-0857 | M    | AMS-0858 | ☐      |
-| IT-0859 | Final Z-PROF Architecture & Contract Readiness Audit                      | IT-0858                   | S    | AMS-0859 | ☐      |
+M08.5 is governed by `M08.5-PREP`, `Z-PROF-D1–D5`, `Z-PROF-001`, `M08.5-PLAN`, applicable Council closure artifacts, and the individually authorized AMS mandates.
+
+The authoritative M08.5 implementation program consists of fifteen workstreams, AMS-0851 through AMS-0865. Historical CAW task mappings that represented AMS-0851 through AMS-0859 as the complete M08.5 sequence are superseded by this expanded mapping.
+
+| ID | Workstream | Governing Question | Depends On | AMS | Status |
+| --- | --- | --- | --- | --- | --- |
+| IT-0851 | Foundations / Integration | What existing constitutional substrate does Z-PROF compose without replacing? | IT-0805 | AMS-0851 | ☑ |
+| IT-0852 | Domain Semantics | Where does domain meaning live without creating new Reality? | IT-0851 | AMS-0852 | ☑ |
+| IT-0853 | Interrogation | How does a Profile declare what it needs to know? | IT-0852 | AMS-0853 | ☑ |
+| IT-0854 | Authorized Reality Surface | What Reality may a Profile legitimately observe? | IT-0853 | AMS-0854 | ☑ |
+| IT-0855 | Projection Relationship | How do Profiles relate to governed derived projections? | IT-0854 | AMS-0855 | ☑ |
+| IT-0856 | Translation Relationship | How does domain language connect to constitutional concepts? | IT-0855 | AMS-0856 | ☑ |
+| IT-0857 | Intelligence / Judgment | Where does interpretation and judgment belong? | IT-0856 | AMS-0857 | ☑ |
+| IT-0858 | Composition | How are multiple governed Profiles/capabilities composed without creating Profile dependency? | IT-0857 | AMS-0858 | ☑ |
+| IT-0859 | Conflict | What happens when governed composition requirements conflict? | IT-0858 | AMS-0859 | ☐ |
+| IT-0860 | Lifecycle / Versioning | How is semantic configuration versioned and reproduced? | IT-0859 | AMS-0860 | ☐ |
+| IT-0861 | GS1 Wedge | Can the architecture operate physically through the GS1 wedge? | IT-0860 | AMS-0861 | ☐ |
+| IT-0862 | Multi-Domain Stress | Does the architecture survive domain multiplication without Profile or subsystem explosion? | IT-0861 | AMS-0862 | ☐ |
+| IT-0863 | Replay / Provenance | Can derived interpretation be deterministically reproduced and traced? | IT-0862 | AMS-0863 | ☐ |
+| IT-0864 | Security / Authorization | How does Profile participation remain governed by SEC/POL authority? | IT-0863 | AMS-0864 | ☐ |
+| IT-0865 | Evaluation Architecture | How does the complete Z-PROF model participate in deterministic constitutional execution? | IT-0864 | AMS-0865 | ☐ |
+
+M08.5 SHALL NOT be considered implementation-complete until all fifteen workstreams have individually completed their authorized implementation and verification requirements.
+
+Completion of any individual AMS does not grant implementation authority to a subsequent AMS.
+
+The sequence remains:
+
+Council constitutional authority → closed governing meaning/contracts → individual AMS authorization → Jules implementation → verification → milestone closure.
 
 ## M09 — API Layer
 

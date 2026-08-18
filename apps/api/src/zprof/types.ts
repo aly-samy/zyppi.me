@@ -219,6 +219,7 @@ export interface GenericCompositionOptions {
   readonly evidenceResolver?: EvidenceReferenceResolver;
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
+  readonly explicitConflictInputs?: import("./conflict.js").ConflictEvaluationInputs;
 }
 
 /**
