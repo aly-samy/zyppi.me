@@ -20,7 +20,38 @@ export type ConflictDiagnosticCategory =
   | "UNRESOLVED_CONFLICT";
 
 /**
- * Structural representation of an explicit authorized resolution rule supplied to evaluation per AMS-0859 §8, §25.
+ * Explicit Governed Incompatibility Rule supplied to evaluation per CORR-0859-1 §4.
+ * Z-PROF compares values against this rule; it does NOT guess or infer conflict.
+ */
+export interface ExplicitIncompatibilityRule {
+  readonly ruleId: string;
+  readonly diagnostic: ConflictDiagnosticCategory;
+  readonly disposition: CompositionErrorCode;
+  readonly targetReferences: readonly string[];
+  readonly condition: {
+    readonly mutuallyExclusiveValues?: readonly unknown[];
+    readonly mutuallyExclusiveJurisdictions?: readonly string[];
+    readonly mutuallyExclusiveAuthorities?: readonly string[];
+    readonly mutuallyExclusiveContexts?: readonly string[];
+    readonly coordinate?: string;
+  };
+}
+
+/**
+ * Explicit Governed Conflict Assertion supplied from upstream per CORR-0859-1 §5.
+ * Carries already-determined incompatibility into Z-PROF without Z-PROF inventing facts.
+ */
+export interface ExplicitConflictAssertion {
+  readonly assertionId: string;
+  readonly diagnostic: ConflictDiagnosticCategory;
+  readonly disposition: CompositionErrorCode;
+  readonly involvedReferences: readonly string[];
+  readonly governingRuleRef: string;
+  readonly details: string;
+}
+
+/**
+ * Structural representation of an explicit resolution rule supplied to evaluation per AMS-0859 §8, §25.
  * RESOLVED requires explicit authorityRef AND explicit ruleRef.
  */
 export interface AuthorizedResolutionRule {
@@ -33,7 +64,7 @@ export interface AuthorizedResolutionRule {
 }
 
 /**
- * Declaration input item for semantic, jurisdiction, context, or authority evaluation.
+ * Declaration input item for evaluation.
  */
 export interface GovernedDeclaration {
   readonly id: string;
@@ -51,7 +82,7 @@ export interface GovernedDeclaration {
 }
 
 /**
- * Inputs supplied to deterministic conflict evaluation per AMS-0859 §12, §13, §14.
+ * Inputs supplied to deterministic conflict evaluation per AMS-0859 §12, §13, §14 and CORR-0859-1.
  */
 export interface ConflictEvaluationInputs {
   readonly participants?: readonly Participant[];
@@ -76,6 +107,8 @@ export interface ConflictEvaluationInputs {
     readonly key: string;
     readonly candidates: readonly string[];
   }[];
+  readonly explicitIncompatibilityRules?: readonly ExplicitIncompatibilityRule[];
+  readonly explicitConflictAssertions?: readonly ExplicitConflictAssertion[];
   readonly authorizedRules?: readonly AuthorizedResolutionRule[];
 }
 
@@ -129,61 +162,8 @@ function deepFreeze<T>(obj: T): T {
 }
 
 /**
- * Maps an internal conflict diagnostic category to its canonical CONTRACT-12 validation disposition per AMS-0859 §6.
- */
-export function mapDiagnosticToDisposition(
-  category: ConflictDiagnosticCategory,
-  context?: {
-    readonly epistemicStatus?: string;
-    readonly isMissing?: boolean;
-    readonly isUnauthorized?: boolean;
-  },
-): CompositionErrorCode {
-  switch (category) {
-    case "ABSENCE":
-      return "missing";
-
-    case "STRUCTURAL_CONFLICT":
-      return "incompatible";
-
-    case "VERSION_CONFLICT":
-      return "incompatible";
-
-    case "CONTEXT_CONFLICT":
-      return "incompatible";
-
-    case "SEMANTIC_REQUIREMENT_CONFLICT":
-      return "conflicting";
-
-    case "AMBIGUITY":
-      return "conflicting";
-
-    case "JURISDICTION_CONFLICT":
-      return context?.isUnauthorized ? "unauthorized" : "conflicting";
-
-    case "AUTHORITY_CONFLICT":
-      return context?.isUnauthorized ? "unauthorized" : "conflicting";
-
-    case "EVIDENCE_CONFLICT":
-      if (context?.epistemicStatus === "UNAVAILABLE") return "unavailable";
-      if (context?.epistemicStatus === "UNVERIFIED") return "unverified";
-      if (context?.epistemicStatus === "UNKNOWN" || context?.isMissing)
-        return "missing";
-      return "conflicting";
-
-    case "UNRESOLVED_CONFLICT":
-      return "conflicting";
-
-    default: {
-      const _exhaustiveCheck: never = category;
-      return _exhaustiveCheck;
-    }
-  }
-}
-
-/**
- * Attempts to apply explicit authorized resolution rules to a detected conflict per AMS-0859 §8, §25.
- * Fail closed if authorityRef missing, ruleRef missing, rule not applicable, or authority not applicable.
+ * Attempts to apply explicit authorized resolution rules to a detected conflict per AMS-0859 §8, §25 and CORR-0859-1 §7.
+ * Fail closed if authorityRef missing, ruleRef missing, rule not applicable, or target references do not match.
  */
 export function resolveConflictWithRules(
   diagnostic: ConflictDiagnosticCategory,
@@ -202,9 +182,7 @@ export function resolveConflictWithRules(
     });
   }
 
-  // Find a matching rule
   for (const rule of authorizedRules) {
-    // AuthorityRef and RuleRef must both be non-empty strings (§8)
     if (
       !rule.authorityRef ||
       typeof rule.authorityRef !== "string" ||
@@ -220,7 +198,6 @@ export function resolveConflictWithRules(
       continue;
     }
 
-    // Verify target references match
     const ruleTargets = new Set(rule.targetReferences || []);
     const targetsMatch =
       involvedReferences.length > 0 &&
@@ -250,22 +227,44 @@ export function resolveConflictWithRules(
 }
 
 /**
- * Evaluates composition inputs for deterministic conflicts per AMS-0859 §12, §13, §14.
- * Deterministic, explicit-input-driven, side-effect-free, independent of ambient state/time/randomness.
+ * Evaluates composition inputs for deterministic conflicts per AMS-0859 and CORR-0859-1.
+ * Z-PROF NEVER infers conflict solely because values, jurisdictions, authorities, or contexts differ.
+ * Conflict must be grounded strictly in:
+ * 1. Explicit structural/version contract incompatibility (e.g. conflicting versions bound to same ID)
+ * 2. Explicit Evidence status CONFLICTING
+ * 3. Explicit Missing declarations
+ * 4. Explicit Governed Conflict Assertions supplied from upstream
+ * 5. Explicit Governed Incompatibility Rules matching input declarations
  */
 export function evaluateConflict(
   inputs: ConflictEvaluationInputs,
 ): ConflictEvaluationResult {
   const {
     versionRequirements,
-    contextRequirements,
     evidenceRequirements,
     declarations,
-    ambiguousInterpretations,
+    explicitIncompatibilityRules,
+    explicitConflictAssertions,
     authorizedRules,
   } = inputs;
 
-  // 1. Version Conflict Detection (§5.4)
+  // 1. Explicit Governed Conflict Assertions (CORR-0859-1 §5)
+  if (explicitConflictAssertions && explicitConflictAssertions.length > 0) {
+    for (const assertion of explicitConflictAssertions) {
+      const involved = assertion.involvedReferences || [];
+      const details = `Explicit conflict assertion '${assertion.assertionId}' under rule '${assertion.governingRuleRef}': ${assertion.details}`;
+      return resolveConflictWithRules(
+        assertion.diagnostic,
+        assertion.disposition,
+        involved,
+        details,
+        authorizedRules,
+      );
+    }
+  }
+
+  // 2. Structural Version Conflict Detection (AMS-0859 §5.4 / CORR-0859-1 §9)
+  // Differing versions bound to the same explicit component identifier is a structural incompatibility.
   if (versionRequirements && versionRequirements.length > 1) {
     const versionMap = new Map<string, Set<string>>();
     for (const vReq of versionRequirements) {
@@ -279,13 +278,10 @@ export function evaluateConflict(
       if (versions.size > 1) {
         const sortedVersions = Array.from(versions).sort();
         const involved = [id];
-        const details = `Incompatible version requirements for '${id}': [${sortedVersions.join(", ")}]`;
-        const diag = "VERSION_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag);
-
+        const details = `Incompatible version requirements bound to same identifier '${id}': [${sortedVersions.join(", ")}]`;
         return resolveConflictWithRules(
-          diag,
-          disp,
+          "VERSION_CONFLICT",
+          "incompatible",
           involved,
           details,
           authorizedRules,
@@ -294,128 +290,102 @@ export function evaluateConflict(
     }
   }
 
-  // 2. Semantic Requirement Conflict Detection (§5.2)
-  if (declarations && declarations.length > 0) {
-    const semMap = new Map<string, Map<string, string[]>>(); // key -> (valueStr -> id[])
-    for (const d of declarations) {
-      if (d.requirementKey && d.requiredValue !== undefined) {
-        if (!semMap.has(d.requirementKey)) {
-          semMap.set(d.requirementKey, new Map());
+  // 3. Explicit Incompatibility Rule Evaluation (CORR-0859-1 §4)
+  if (
+    explicitIncompatibilityRules &&
+    explicitIncompatibilityRules.length > 0 &&
+    declarations &&
+    declarations.length > 0
+  ) {
+    for (const rule of explicitIncompatibilityRules) {
+      if (
+        rule.condition.mutuallyExclusiveJurisdictions &&
+        rule.condition.mutuallyExclusiveJurisdictions.length > 0
+      ) {
+        const found = declarations.filter(
+          (d) =>
+            d.jurisdiction &&
+            rule.condition.mutuallyExclusiveJurisdictions!.includes(
+              d.jurisdiction,
+            ),
+        );
+        const uniqueJur = new Set(found.map((f) => f.jurisdiction!));
+        if (uniqueJur.size > 1) {
+          const involved = found.map((f) => f.id).sort();
+          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for mutually exclusive jurisdictions [${Array.from(uniqueJur).sort().join(", ")}]`;
+          return resolveConflictWithRules(
+            rule.diagnostic,
+            rule.disposition,
+            involved,
+            details,
+            authorizedRules,
+          );
         }
-        const valStr = JSON.stringify(d.requiredValue);
-        const valMap = semMap.get(d.requirementKey)!;
-        if (!valMap.has(valStr)) {
-          valMap.set(valStr, []);
+      }
+
+      if (
+        rule.condition.mutuallyExclusiveAuthorities &&
+        rule.condition.mutuallyExclusiveAuthorities.length > 0
+      ) {
+        const found = declarations.filter(
+          (d) =>
+            d.authorityRef &&
+            rule.condition.mutuallyExclusiveAuthorities!.includes(
+              d.authorityRef,
+            ),
+        );
+        const uniqueAuth = new Set(found.map((f) => f.authorityRef!));
+        if (uniqueAuth.size > 1) {
+          const involved = found.map((f) => f.id).sort();
+          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for mutually exclusive authorities [${Array.from(uniqueAuth).sort().join(", ")}]`;
+          return resolveConflictWithRules(
+            rule.diagnostic,
+            rule.disposition,
+            involved,
+            details,
+            authorizedRules,
+          );
         }
-        valMap.get(valStr)!.push(d.id);
       }
-    }
 
-    for (const [reqKey, valMap] of semMap.entries()) {
-      if (valMap.size > 1) {
-        const involvedIds = Array.from(valMap.values()).flat().sort();
-        const details = `Mutually incompatible requirement values declared for key '${reqKey}' across [${involvedIds.join(", ")}]`;
-        const diag = "SEMANTIC_REQUIREMENT_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag);
-
-        return resolveConflictWithRules(
-          diag,
-          disp,
-          involvedIds,
-          details,
-          authorizedRules,
+      if (
+        rule.condition.coordinate &&
+        rule.condition.mutuallyExclusiveValues &&
+        rule.condition.mutuallyExclusiveValues.length > 0
+      ) {
+        const found = declarations.filter(
+          (d) =>
+            d.requirementKey === rule.condition.coordinate &&
+            d.requiredValue !== undefined &&
+            rule.condition.mutuallyExclusiveValues!.includes(d.requiredValue),
         );
-      }
-    }
-
-    // 3. Jurisdiction Conflict Detection (§5.3)
-    const jurDeclarations = declarations.filter(
-      (d) => d.jurisdiction !== undefined,
-    );
-    if (jurDeclarations.length > 1) {
-      const jurSet = new Set(jurDeclarations.map((d) => d.jurisdiction!));
-      if (jurSet.size > 1) {
-        const involvedIds = jurDeclarations.map((d) => d.id).sort();
-        const details = `Conflicting jurisdictional declarations [${Array.from(jurSet).sort().join(", ")}] across participants [${involvedIds.join(", ")}]`;
-        const diag = "JURISDICTION_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag);
-
-        return resolveConflictWithRules(
-          diag,
-          disp,
-          involvedIds,
-          details,
-          authorizedRules,
+        const uniqueVals = new Set(
+          found.map((f) => JSON.stringify(f.requiredValue)),
         );
-      }
-    }
-
-    // 4. Authority Conflict Detection (§5.7)
-    const authDeclarations = declarations.filter(
-      (d) => d.authorityRef !== undefined,
-    );
-    if (authDeclarations.length > 1) {
-      const authSet = new Set(authDeclarations.map((d) => d.authorityRef!));
-      if (authSet.size > 1) {
-        const involvedIds = authDeclarations.map((d) => d.id).sort();
-        const details = `Conflicting authority declarations [${Array.from(authSet).sort().join(", ")}] across participants [${involvedIds.join(", ")}]`;
-        const diag = "AUTHORITY_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag);
-
-        return resolveConflictWithRules(
-          diag,
-          disp,
-          involvedIds,
-          details,
-          authorizedRules,
-        );
+        if (uniqueVals.size > 1) {
+          const involved = found.map((f) => f.id).sort();
+          const details = `Explicit incompatibility rule '${rule.ruleId}' triggered for coordinate '${rule.condition.coordinate}' with mutually exclusive values`;
+          return resolveConflictWithRules(
+            rule.diagnostic,
+            rule.disposition,
+            involved,
+            details,
+            authorizedRules,
+          );
+        }
       }
     }
   }
 
-  // 5. Context Conflict Detection (§5.5)
-  if (contextRequirements && contextRequirements.length > 1) {
-    const ctxMap = new Map<string, Set<string>>();
-    for (const cReq of contextRequirements) {
-      if (!ctxMap.has(cReq.key)) {
-        ctxMap.set(cReq.key, new Set());
-      }
-      ctxMap.get(cReq.key)!.add(cReq.value);
-    }
-
-    for (const [key, values] of ctxMap.entries()) {
-      if (values.size > 1) {
-        const sortedValues = Array.from(values).sort();
-        const involved = [key];
-        const details = `Incompatible context requirement values for key '${key}': [${sortedValues.join(", ")}]`;
-        const diag = "CONTEXT_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag);
-
-        return resolveConflictWithRules(
-          diag,
-          disp,
-          involved,
-          details,
-          authorizedRules,
-        );
-      }
-    }
-  }
-
-  // 6. Evidence Conflict Detection (§5.6)
+  // 4. Evidence Conflict Detection (AMS-0859 §5.6 / CORR-0859-1 §9)
   if (evidenceRequirements && evidenceRequirements.length > 0) {
     for (const eReq of evidenceRequirements) {
       if (eReq.isConflicting || eReq.status === "CONFLICTING") {
         const involved = [eReq.id];
-        const details = `Conflicting evidence state declared for evidence '${eReq.id}'`;
-        const diag = "EVIDENCE_CONFLICT";
-        const disp = mapDiagnosticToDisposition(diag, {
-          epistemicStatus: "CONFLICTING",
-        });
-
+        const details = `Explicit conflicting evidence state declared for evidence '${eReq.id}'`;
         return resolveConflictWithRules(
-          diag,
-          disp,
+          "EVIDENCE_CONFLICT",
+          "conflicting",
           involved,
           details,
           authorizedRules,
@@ -424,38 +394,15 @@ export function evaluateConflict(
     }
   }
 
-  // 7. Ambiguity Detection (§5.9)
-  if (ambiguousInterpretations && ambiguousInterpretations.length > 0) {
-    for (const amb of ambiguousInterpretations) {
-      if (amb.candidates && amb.candidates.length > 1) {
-        const involved = [amb.key];
-        const details = `Ambiguous governed declarations for key '${amb.key}' with candidates [${amb.candidates.slice().sort().join(", ")}]`;
-        const diag = "AMBIGUITY";
-        const disp = mapDiagnosticToDisposition(diag);
-
-        return resolveConflictWithRules(
-          diag,
-          disp,
-          involved,
-          details,
-          authorizedRules,
-        );
-      }
-    }
-  }
-
-  // 8. Absence Detection (§5.8)
+  // 5. Explicit Absence Detection (AMS-0859 §5.8 / CORR-0859-1 §9)
   if (declarations) {
     const missingDecls = declarations.filter((d) => d.isMissing);
     if (missingDecls.length > 0) {
       const involved = missingDecls.map((d) => d.id).sort();
-      const details = `Required declarations missing for [${involved.join(", ")}]`;
-      const diag = "ABSENCE";
-      const disp = mapDiagnosticToDisposition(diag, { isMissing: true });
-
+      const details = `Explicitly declared missing required inputs for [${involved.join(", ")}]`;
       return resolveConflictWithRules(
-        diag,
-        disp,
+        "ABSENCE",
+        "missing",
         involved,
         details,
         authorizedRules,
