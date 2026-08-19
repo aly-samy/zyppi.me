@@ -305,7 +305,8 @@ function resolveEndpointCandidate(
  * Performs exact transitive dependency closure and constructs complete Bound Configuration Graph (BCG).
  * Enforces exact version-bound node keying (${id}@${version}) per CORR-0860-A-1 §3 and unambiguous
  * endpoint resolution per CORR-0860-A-2 §1-§3.
- * Enforces that BCG node membership follows explicit evaluation-affecting binding closure per CORR-0860-A-2 §5.
+ * Enforces that BCG node membership follows explicit evaluation-affecting binding closure per CORR-0860-A-2 §5
+ * and CORR-0860-A-3 §4 (zero binding edges -> zero BCG dependency nodes).
  */
 export function buildBoundConfigurationGraph(
   options: BcgClosureOptions,
@@ -377,14 +378,28 @@ export function buildBoundConfigurationGraph(
     resolvedNodesMap.set(targetRes.exactKey, targetRes.node);
   }
 
-  // If there are zero binding edges, include only the root DTC node if present (CORR-0860-A-2 §5)
+  // If there are zero binding edges, BCG node closure contains zero dependency nodes (CORR-0860-A-3 §4)
   if (resolvedEdges.length === 0) {
-    const dtcRoot =
-      options.initialNodes.find((n) => n.kind === "DTC") ||
-      options.initialNodes[0];
-    if (dtcRoot) {
-      resolvedNodesMap.set(`${dtcRoot.id}@${dtcRoot.version}`, dtcRoot);
-    }
+    const unnormalizedBcg: BoundConfigurationGraph = {
+      semanticConfigurationRef: options.semanticConfigurationRef,
+      nodes: [],
+      bindingEdges: [],
+      ...(options.opacityBoundaries
+        ? { opacityBoundaries: options.opacityBoundaries }
+        : {}),
+      ...(options.externalIntegrityReferences
+        ? { externalIntegrityReferences: options.externalIntegrityReferences }
+        : {}),
+    };
+
+    const bcg = normalizeBcg(unnormalizedBcg);
+    const bcgId = deriveBcgIdentity(bcg);
+
+    return {
+      ok: true,
+      bcg,
+      bcgId,
+    };
   }
 
   // Detect binding cycles on exact resolved node keys

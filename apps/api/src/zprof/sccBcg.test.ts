@@ -61,7 +61,7 @@ const baseManifest: CompositionManifest = Object.freeze({
   }),
 });
 
-describe("AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2 — Identity & Configuration Closure", () => {
+describe("AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2 / CORR-0860-A-3 — Identity & Configuration Closure", () => {
   describe("Phase A1 — Canonical SCC Collection Permutation Tests", () => {
     it("CORR-0860-A-1 Test 1 — Permutation of boundEpistemicRequirements yields same SCC_ID", () => {
       const id1 = deriveSccIdentityInternal(baseManifest);
@@ -417,11 +417,10 @@ describe("AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2 — Identity & Configuratio
 
       // Epistemic requirements exist on manifest/SCC, but do NOT acquire a BCG dependency node
       const bcgNodeIds = res.bcg?.nodes.map((n) => n.id);
-      expect(bcgNodeIds).toContain("dtc:zyppi:domain:gs1:v1");
       expect(bcgNodeIds).not.toContain("epistemic:req:gtin:v1");
     });
 
-    it("CORR-0860-A-2 Test H — explicitBindingEdges transports governed binding declarations without caller-manufactured dependency semantics", async () => {
+    it("CORR-0860-A-3 Test H — compositionDefinition (governed binder output) transports governed binding declarations", async () => {
       const repo: RegistryRepository = new FrozenRegistryRepository({});
       const resolver = new ApplicationCompositionResolver();
 
@@ -436,12 +435,15 @@ describe("AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2 — Identity & Configuratio
         versions: ["1.0.0"],
         policyContext: mockPolicyContext,
         resolvedPolicyGraph: mockPolicyGraph,
-        explicitBindingEdges: [
-          {
-            from: "dtc:zyppi:domain:gs1:v1",
-            to: "arm:profile:trade_item:v1",
-          },
-        ],
+        compositionDefinition: {
+          bindingEdges: [
+            {
+              sourceId: "dtc:zyppi:domain:gs1:v1",
+              targetId: "arm:profile:trade_item:v1",
+              dependencyKind: "REQUIRES",
+            },
+          ],
+        },
         explicitAcv: {
           identity: {
             identityId: "id_1",
@@ -506,6 +508,63 @@ describe("AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2 — Identity & Configuratio
       expect(res.bcg?.bindingEdges[0]?.targetRef).toBe(
         "arm:profile:trade_item:v1@1.0.0",
       );
+    });
+
+    it("CORR-0860-A-3 Test I — Zero T_bind edges produces BCG with zero nodes and zero edges (Semantic Configuration Membership ≠ Binding Dependency Membership)", async () => {
+      const repo: RegistryRepository = new FrozenRegistryRepository({});
+      const resolver = new ApplicationCompositionResolver();
+
+      const res = await resolver.resolveComposition({
+        registryRepository: repo,
+        identifier: mockIdentifier,
+        requestId: "req_zero_bind",
+        executionId: "exec_zero_bind",
+        constitutionalTimestamp: "2026-08-19T00:00:00Z",
+        budget: 100,
+        entropy: "entropy_zero_bind",
+        versions: ["1.0.0"],
+        policyContext: mockPolicyContext,
+        resolvedPolicyGraph: mockPolicyGraph,
+        explicitAcv: {
+          identity: {
+            identityId: "id_1",
+            identityType: "product",
+            canonicalReference: "gtin:01",
+            referentId: "ref_1",
+            status: "active",
+            createdAt: "2026-08-19T00:00:00Z",
+            updatedAt: "2026-08-19T00:00:00Z",
+          },
+          relationships: [],
+          standings: [],
+          authorities: [
+            {
+              authorityId: "auth_1",
+              subjectId: "id_1",
+              scope: "trade_item",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
+          ],
+          capabilities: [
+            {
+              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              subjectId: "arm:profile:trade_item:v1",
+              scope: "prj:spec:gs1_digital_link_projection:v1",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
+          ],
+          evidenceReferences: [],
+          applicablePolicies: [],
+        },
+      });
+
+      expect(res.ok).toBe(true);
+      if (!res.ok) return;
+
+      expect(res.bcg?.bindingEdges).toHaveLength(0);
+      expect(res.bcg?.nodes).toHaveLength(0);
     });
   });
 });

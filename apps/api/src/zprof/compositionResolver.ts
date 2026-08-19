@@ -68,10 +68,7 @@ export interface GS1CompositionOptions {
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
   readonly explicitConflictInputs?: import("./conflict.js").ConflictEvaluationInputs;
-  readonly explicitBindingEdges?: readonly {
-    readonly from: string;
-    readonly to: string;
-  }[];
+  readonly compositionDefinition?: import("./bind.js").CompositionDefinition;
 }
 
 export type ApplicationCompositionBridgeResult =
@@ -467,9 +464,9 @@ export class ApplicationCompositionResolver {
           ...dtc.requiredRsnBlueprints,
         ]),
         edges: Object.freeze(
-          options.explicitBindingEdges
-            ? options.explicitBindingEdges.map((e) =>
-                Object.freeze({ from: e.from, to: e.to }),
+          options.compositionDefinition?.bindingEdges
+            ? options.compositionDefinition.bindingEdges.map((e) =>
+                Object.freeze({ from: e.sourceId, to: e.targetId }),
               )
             : [],
         ),
