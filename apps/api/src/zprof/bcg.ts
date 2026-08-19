@@ -78,15 +78,19 @@ export interface BcgClosureOptions {
 /**
  * Normalizes BCG identity-bearing collections using stable lexical sorting keys per AMS-0860-A.
  */
-export function normalizeBcg(bcg: BoundConfigurationGraph): BoundConfigurationGraph {
+export function normalizeBcg(
+  bcg: BoundConfigurationGraph,
+): BoundConfigurationGraph {
   const nodes = [...bcg.nodes].sort((a, b) => {
     if (a.id !== b.id) return a.id.localeCompare(b.id);
     return a.version.localeCompare(b.version);
   });
 
   const bindingEdges = [...bcg.bindingEdges].sort((a, b) => {
-    if (a.sourceRef !== b.sourceRef) return a.sourceRef.localeCompare(b.sourceRef);
-    if (a.targetRef !== b.targetRef) return a.targetRef.localeCompare(b.targetRef);
+    if (a.sourceRef !== b.sourceRef)
+      return a.sourceRef.localeCompare(b.sourceRef);
+    if (a.targetRef !== b.targetRef)
+      return a.targetRef.localeCompare(b.targetRef);
     return a.dependencyKind.localeCompare(b.dependencyKind);
   });
 
@@ -169,13 +173,12 @@ export function deriveBcgIdentity(bcg: BoundConfigurationGraph): string {
       : {}),
     ...(normalized.externalIntegrityReferences
       ? {
-          externalIntegrityReferences: normalized.externalIntegrityReferences.map(
-            (i) => ({
+          externalIntegrityReferences:
+            normalized.externalIntegrityReferences.map((i) => ({
               referenceId: i.referenceId,
               foreignInterfaceRef: i.foreignInterfaceRef,
               digest: i.digest,
-            }),
-          ),
+            })),
         }
       : {}),
   };
@@ -280,13 +283,18 @@ export function buildBoundConfigurationGraph(
 
   while (queue.length > 0) {
     const currentId = queue.shift()!;
-    const outgoingEdges = validatedEdges.filter((e) => e.sourceRef === currentId);
+    const outgoingEdges = validatedEdges.filter(
+      (e) => e.sourceRef === currentId,
+    );
 
     for (const edge of outgoingEdges) {
       const targetId = edge.targetRef;
       if (!nodeMap.has(targetId)) {
         // Look up target in available universe if provided
-        if (options.availableUniverse && options.availableUniverse.has(targetId)) {
+        if (
+          options.availableUniverse &&
+          options.availableUniverse.has(targetId)
+        ) {
           const resolvedNode = options.availableUniverse.get(targetId)!;
           nodeMap.set(targetId, resolvedNode);
         } else {

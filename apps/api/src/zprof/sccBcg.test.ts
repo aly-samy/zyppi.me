@@ -15,7 +15,8 @@ import { FrozenRegistryRepository } from "@zyppi/testing";
 import type { ValidatedCanonicalIdentifier } from "@zyppi/contracts";
 import type { PolicyContext, ResolvedPolicyGraph } from "@zyppi/domain";
 
-const mockIdentifier: ValidatedCanonicalIdentifier = "01/09501101530003" as ValidatedCanonicalIdentifier;
+const mockIdentifier: ValidatedCanonicalIdentifier =
+  "01/09501101530003" as ValidatedCanonicalIdentifier;
 
 const mockPolicyContext: PolicyContext = {
   policies: [],
@@ -47,7 +48,10 @@ const baseManifest: CompositionManifest = Object.freeze({
   boundSecRequirements: Object.freeze([]),
   boundRiCapabilities: Object.freeze([]),
   dependencyTopology: Object.freeze({
-    nodes: Object.freeze(["dtc:zyppi:domain:gs1:v1", "arm:profile:trade_item:v1"]),
+    nodes: Object.freeze([
+      "dtc:zyppi:domain:gs1:v1",
+      "arm:profile:trade_item:v1",
+    ]),
     edges: Object.freeze([
       { from: "dtc:zyppi:domain:gs1:v1", to: "arm:profile:trade_item:v1" },
     ]),
@@ -87,7 +91,12 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
           manifestAuthor: "identity:council:admin",
         },
         dependencyTopology: {
-          edges: [{ to: "arm:profile:trade_item:v1", from: "dtc:zyppi:domain:gs1:v1" }],
+          edges: [
+            {
+              to: "arm:profile:trade_item:v1",
+              from: "dtc:zyppi:domain:gs1:v1",
+            },
+          ],
           nodes: ["dtc:zyppi:domain:gs1:v1", "arm:profile:trade_item:v1"],
         },
         boundRiCapabilities: [],
@@ -128,7 +137,9 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         },
       };
 
-      const id2 = deriveSccIdentityInternal(manifestWithDifferentInstanceCoords);
+      const id2 = deriveSccIdentityInternal(
+        manifestWithDifferentInstanceCoords,
+      );
       expect(id1).toBe(id2);
     });
 
@@ -163,10 +174,15 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
   });
 
   describe("Phase A2 — Bound Configuration Graph (BCG)", () => {
-    const sccId = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
+    const sccId =
+      "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 
     const nodeA: BcgNode = { id: "node:A", version: "1.0.0", kind: "DTC" };
-    const nodeB: BcgNode = { id: "node:B", version: "1.0.0", kind: "ARMProfile" };
+    const nodeB: BcgNode = {
+      id: "node:B",
+      version: "1.0.0",
+      kind: "ARMProfile",
+    };
     const nodeC: BcgNode = { id: "node:C", version: "1.0.0", kind: "PrjSpec" };
 
     it("TEST 0860.5 — Node Permutation produces same BCG_ID", () => {
@@ -174,8 +190,16 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB, nodeC],
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
-          { sourceRef: "node:B", targetRef: "node:C", dependencyKind: "REQUIRES" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:B",
+            targetRef: "node:C",
+            dependencyKind: "REQUIRES",
+          },
         ],
       });
       expect(res1.ok).toBe(true);
@@ -185,8 +209,16 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeC, nodeA, nodeB], // Permuted node order
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
-          { sourceRef: "node:B", targetRef: "node:C", dependencyKind: "REQUIRES" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:B",
+            targetRef: "node:C",
+            dependencyKind: "REQUIRES",
+          },
         ],
       });
       expect(res2.ok).toBe(true);
@@ -200,8 +232,16 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB, nodeC],
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
-          { sourceRef: "node:B", targetRef: "node:C", dependencyKind: "REQUIRES" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:B",
+            targetRef: "node:C",
+            dependencyKind: "REQUIRES",
+          },
         ],
       });
       expect(res1.ok).toBe(true);
@@ -211,8 +251,16 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB, nodeC],
         bindingEdges: [
-          { sourceRef: "node:B", targetRef: "node:C", dependencyKind: "REQUIRES" },
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" }, // Permuted edge order
+          {
+            sourceRef: "node:B",
+            targetRef: "node:C",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          }, // Permuted edge order
         ],
       });
       expect(res2.ok).toBe(true);
@@ -226,7 +274,11 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA], // nodeB is missing
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
         ],
       });
 
@@ -241,9 +293,21 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB, nodeC],
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
-          { sourceRef: "node:B", targetRef: "node:C", dependencyKind: "REQUIRES" },
-          { sourceRef: "node:C", targetRef: "node:A", dependencyKind: "REQUIRES" }, // Cycle
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:B",
+            targetRef: "node:C",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:C",
+            targetRef: "node:A",
+            dependencyKind: "REQUIRES",
+          }, // Cycle
         ],
       });
 
@@ -258,7 +322,11 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB],
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "SEMANTICALLY_DEPENDS_ON" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "SEMANTICALLY_DEPENDS_ON",
+          },
         ],
       });
 
@@ -272,14 +340,16 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
       const opacityBoundary: BcgOpacityBoundary = {
         foreignInterfaceRef: "interface:foreign:v1",
         foreignAuthorityRef: "auth:foreign:v1",
-        foreignReceiptDigest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        foreignReceiptDigest:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         localFederationPolicyRef: "pol:fed:v1",
       };
 
       const foreignRef1: BcgForeignIntegrityReference = {
         referenceId: "ref:1",
         foreignInterfaceRef: "interface:foreign:v1",
-        digest: "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        digest:
+          "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       };
 
       const res1 = buildBoundConfigurationGraph({
@@ -294,7 +364,8 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
 
       const foreignRef2: BcgForeignIntegrityReference = {
         ...foreignRef1,
-        digest: "sha256:2222222222222222222222222222222222222222222222222222222222222222", // Different receipt digest
+        digest:
+          "sha256:2222222222222222222222222222222222222222222222222222222222222222", // Different receipt digest
       };
 
       const res2 = buildBoundConfigurationGraph({
@@ -315,7 +386,11 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB],
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
         ],
       });
 
@@ -323,7 +398,11 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
         semanticConfigurationRef: sccId,
         initialNodes: [nodeA, nodeB],
         bindingEdges: [
-          { sourceRef: "node:A", targetRef: "node:B", dependencyKind: "REQUIRES" },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B",
+            dependencyKind: "REQUIRES",
+          },
         ],
       });
 
@@ -404,10 +483,22 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
           relationships: [],
           standings: [],
           authorities: [
-            { authorityId: "auth_1", subjectId: "id_1", scope: "trade_item", validFrom: "2026-01-01T00:00:00Z", validTo: "2030-01-01T00:00:00Z" },
+            {
+              authorityId: "auth_1",
+              subjectId: "id_1",
+              scope: "trade_item",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
           ],
           capabilities: [
-            { capabilityId: "prj:spec:gs1_digital_link_projection:v1", subjectId: "arm:profile:trade_item:v1", scope: "prj:spec:gs1_digital_link_projection:v1", validFrom: "2026-01-01T00:00:00Z", validTo: "2030-01-01T00:00:00Z" },
+            {
+              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              subjectId: "arm:profile:trade_item:v1",
+              scope: "prj:spec:gs1_digital_link_projection:v1",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
           ],
           evidenceReferences: [],
           applicablePolicies: [],

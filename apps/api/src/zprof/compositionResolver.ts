@@ -499,7 +499,11 @@ export class ApplicationCompositionResolver {
 
     // Build Bound Configuration Graph (BCG) and derive BCG identity from exact manifest references
     const initialNodes = [
-      { id: manifest.dtcReference.dtcId, version: manifest.dtcReference.version, kind: "DTC" },
+      {
+        id: manifest.dtcReference.dtcId,
+        version: manifest.dtcReference.version,
+        kind: "DTC",
+      },
       {
         id: manifest.armProfileReference.profileId,
         version: manifest.armProfileReference.version,

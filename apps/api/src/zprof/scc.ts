@@ -37,10 +37,12 @@ export function projectSccIdentity(
       profileId: manifest.armProfileReference.profileId,
       version: manifest.armProfileReference.version,
     },
-    boundEpistemicRequirements: manifest.boundEpistemicRequirements.map((r) => ({
-      requirementId: r.requirementId,
-      version: r.version,
-    })),
+    boundEpistemicRequirements: manifest.boundEpistemicRequirements.map(
+      (r) => ({
+        requirementId: r.requirementId,
+        version: r.version,
+      }),
+    ),
     boundPrjSpecifications: manifest.boundPrjSpecifications.map((s) => ({
       specId: s.specId,
       version: s.version,
