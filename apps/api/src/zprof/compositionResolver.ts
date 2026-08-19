@@ -45,6 +45,8 @@ import {
 } from "./versionValidator.js";
 import { deriveSccIdentityInternal } from "./scc.js";
 import { buildBoundConfigurationGraph } from "./bcg.js";
+import { validateParticipantCollection } from "./participant.js";
+import { validateTopologyGraph } from "./topology.js";
 
 export interface GS1CompositionOptions {
   readonly registryRepository: RegistryRepository;
@@ -355,6 +357,63 @@ export class ApplicationCompositionResolver {
 
     const domainSlug = dtc.domainIdentifier.replace("domain:", "");
 
+    // Validate governed CompositionDefinition topology per AMS-0858 / CORR-0860-A-4 §3
+    let governedBindingEdges: readonly {
+      readonly from: string;
+      readonly to: string;
+    }[] = [];
+
+    if (options.compositionDefinition) {
+      const compDef = options.compositionDefinition;
+      let compParticipants = compDef.participants;
+      if (!compParticipants || compParticipants.length === 0) {
+        compParticipants = [
+          {
+            identity: dtc.dtcId,
+            kind: "DTC",
+            version: dtc.version,
+            owner: "identity:council:admin",
+            role: "domain_template",
+            reference: { id: dtc.dtcId, version: dtc.version },
+          },
+          ...dtc.applicableArmProfiles.map((p) => ({
+            identity: p,
+            kind: "ARM_PROFILE" as const,
+            version: "1.0.0",
+            owner: "identity:council:admin",
+            role: "asset_profile" as const,
+            reference: { id: p, version: "1.0.0" },
+          })),
+        ];
+      }
+
+      const pRes = validateParticipantCollection(compParticipants);
+      if (!pRes.ok) {
+        return {
+          ok: false,
+          error: pRes.error,
+        };
+      }
+
+      const topoRes = validateTopologyGraph(
+        pRes.participants,
+        compDef.structuralEdges || [],
+        compDef.bindingEdges || [],
+      );
+
+      if (!topoRes.ok) {
+        return {
+          ok: false,
+          error: topoRes.error,
+        };
+      }
+
+      governedBindingEdges = topoRes.graph.eBind.map((e) => ({
+        from: e.sourceId,
+        to: e.targetId,
+      }));
+    }
+
     // Detect structural divergence if multiple conflicting CL-16 artifacts are present
     let epistemicDivergence = false;
     const boundCl16Artifacts: Cl16IntelligenceReference[] = [];
@@ -464,11 +523,9 @@ export class ApplicationCompositionResolver {
           ...dtc.requiredRsnBlueprints,
         ]),
         edges: Object.freeze(
-          options.compositionDefinition?.bindingEdges
-            ? options.compositionDefinition.bindingEdges.map((e) =>
-                Object.freeze({ from: e.sourceId, to: e.targetId }),
-              )
-            : [],
+          governedBindingEdges.map((e) =>
+            Object.freeze({ from: e.from, to: e.to }),
+          ),
         ),
       }),
       provenanceReferences: Object.freeze({

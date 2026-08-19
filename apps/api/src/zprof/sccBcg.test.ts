@@ -510,6 +510,85 @@ describe("AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2 / CORR-0860-A-3 — Identit
       );
     });
 
+    it("CORR-0860-A-4 Negative Test — Cyclic CompositionDefinition fails topology validation closed without producing SCC or BCG", async () => {
+      const repo: RegistryRepository = new FrozenRegistryRepository({});
+      const resolver = new ApplicationCompositionResolver();
+
+      const res = await resolver.resolveComposition({
+        registryRepository: repo,
+        identifier: mockIdentifier,
+        requestId: "req_cyclic_def",
+        executionId: "exec_cyclic_def",
+        constitutionalTimestamp: "2026-08-19T00:00:00Z",
+        budget: 100,
+        entropy: "entropy_cyclic_def",
+        versions: ["1.0.0"],
+        policyContext: mockPolicyContext,
+        resolvedPolicyGraph: mockPolicyGraph,
+        compositionDefinition: {
+          bindingEdges: [
+            {
+              sourceId: "dtc:zyppi:domain:gs1:v1",
+              targetId: "arm:profile:trade_item:v1",
+              dependencyKind: "REQUIRES",
+            },
+            {
+              sourceId: "arm:profile:trade_item:v1",
+              targetId: "dtc:zyppi:domain:gs1:v1",
+              dependencyKind: "REQUIRES",
+            },
+          ],
+        },
+        explicitAcv: {
+          identity: {
+            identityId: "id_1",
+            identityType: "product",
+            canonicalReference: "gtin:01",
+            referentId: "ref_1",
+            status: "active",
+            createdAt: "2026-08-19T00:00:00Z",
+            updatedAt: "2026-08-19T00:00:00Z",
+          },
+          relationships: [],
+          standings: [],
+          authorities: [
+            {
+              authorityId: "auth_1",
+              subjectId: "id_1",
+              scope: "trade_item",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
+          ],
+          capabilities: [
+            {
+              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              subjectId: "arm:profile:trade_item:v1",
+              scope: "prj:spec:gs1_digital_link_projection:v1",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
+          ],
+          evidenceReferences: [],
+          applicablePolicies: [],
+        },
+      });
+
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("incompatible");
+        expect(res.error.message).toContain("dependency cycle");
+        const checkRes = res as unknown as {
+          sccId?: string;
+          bcgId?: string;
+          bcg?: unknown;
+        };
+        expect(checkRes.sccId).toBeUndefined();
+        expect(checkRes.bcgId).toBeUndefined();
+        expect(checkRes.bcg).toBeUndefined();
+      }
+    });
+
     it("CORR-0860-A-3 Test I — Zero T_bind edges produces BCG with zero nodes and zero edges (Semantic Configuration Membership ≠ Binding Dependency Membership)", async () => {
       const repo: RegistryRepository = new FrozenRegistryRepository({});
       const resolver = new ApplicationCompositionResolver();
