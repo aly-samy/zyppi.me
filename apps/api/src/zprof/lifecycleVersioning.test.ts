@@ -861,4 +861,143 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
       expect(badTimeRes.error.code).toBe("invalid");
     }
   });
+
+  // ==========================================================================
+  // Section H: CORR-0860-B-3 Mandatory Tests (B34–B39)
+  // ==========================================================================
+
+  it("Test B34 — Missing dependency kind fails closed without REQUIRES synthesis", () => {
+    const compTarget = {
+      kind: "COMPOSITION_AUTHORING",
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "dtc:1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: "owner:1",
+            role: "domain_template",
+            reference: { id: "dtc:1", version: "1.0.0" },
+          },
+        ],
+        bindingEdges: [
+          { sourceId: "dtc:1", targetId: "arm:1" /* missing dependencyKind */ },
+        ],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: compTarget,
+      operation: "NEW_COMPOSITION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B35 — Forged EC missing temporalCoordinates -> invalid", () => {
+    const forgedEc = { ...getValidEc() } as Record<string, unknown>;
+    delete forgedEc.temporalCoordinates;
+
+    const forgedTarget: AssessmentTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: forgedEc as unknown as EvaluationCoordinate,
+    };
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B36 — Forged EC missing authorizedInputs -> invalid", () => {
+    const forgedEc = { ...getValidEc() } as Record<string, unknown>;
+    delete forgedEc.authorizedInputs;
+
+    const forgedTarget: AssessmentTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: forgedEc as unknown as EvaluationCoordinate,
+    };
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B37 — Forged EC missing evaluationParameters -> invalid", () => {
+    const forgedEc = { ...getValidEc() } as Record<string, unknown>;
+    delete forgedEc.evaluationParameters;
+
+    const forgedTarget: AssessmentTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: forgedEc as unknown as EvaluationCoordinate,
+    };
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B38 — Direct reconstruction with malformed historical EC -> invalid", () => {
+    const malformedHistTarget: AssessmentTarget = {
+      kind: "HISTORICAL_EVALUATION_COORDINATE",
+      ref: "ec:hist:123",
+      coordinate: { sccId: "bad_scc" } as unknown as EvaluationCoordinate,
+    };
+
+    const boundaryRes =
+      evaluateHistoricalReconstructionBoundary(malformedHistTarget);
+
+    expect(boundaryRes.ok).toBe(false);
+    if (!boundaryRes.ok) {
+      expect(boundaryRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B39 — Complete empty-coordinate EC remains valid", () => {
+    const emptyEcRes = buildEvaluationCoordinate({
+      sccId: validSccId,
+      bcgId: validBcgId,
+      pinnedSemanticStateRef: validPinnedSemanticState,
+      boundContext: validBoundContext,
+      evidenceIntegrityCoordinates: validEvidenceCoords,
+      authorizedInputs: {},
+      evaluationParameters: {},
+      temporalCoordinates: {},
+    });
+
+    expect(emptyEcRes.ok).toBe(true);
+    if (emptyEcRes.ok) {
+      expect(emptyEcRes.coordinate.temporalCoordinates).toEqual({});
+      expect(emptyEcRes.coordinate.authorizedInputs).toEqual({});
+      expect(emptyEcRes.coordinate.evaluationParameters).toEqual({});
+    }
+  });
 });

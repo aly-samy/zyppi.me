@@ -28,7 +28,7 @@ const CLOSED_OPERATIONS: readonly PrimitiveOperation[] = [
 ];
 
 /**
- * Validates Target × OP compatibility AND target payload structure per CORR-0860-B-1 §3 / CORR-0860-B-2 §1-§2.
+ * Validates Target × OP compatibility AND target payload structure per CORR-0860-B-1 §3 / CORR-0860-B-2 §1-§2 / CORR-0860-B-3 §1.
  */
 export function validateTargetOperationCompatibility(
   target: AssessmentTarget,
@@ -115,18 +115,46 @@ export function validateTargetOperationCompatibility(
         };
       }
 
+      // Enforce explicit dependencyKind with zero "REQUIRES" synthesis per CORR-0860-B-3 §1
+      for (let i = 0; i < compDef.bindingEdges.length; i++) {
+        const edge = compDef.bindingEdges[i] as Record<string, unknown>;
+        if (!edge || typeof edge !== "object") {
+          return {
+            ok: false,
+            error: {
+              code: "invalid",
+              category: "Composition Failure",
+              message: `CompositionAuthoringTarget.bindingEdges[${i}] is not an object.`,
+            },
+          };
+        }
+        if (
+          typeof edge.dependencyKind !== "string" ||
+          edge.dependencyKind.trim().length === 0
+        ) {
+          return {
+            ok: false,
+            error: {
+              code: "invalid",
+              category: "Composition Failure",
+              message: `CompositionAuthoringTarget.bindingEdges[${i}] missing explicit dependencyKind.`,
+            },
+          };
+        }
+      }
+
       const rawBindingEdges = compDef.bindingEdges.map((e) => {
         const edge = e as {
           sourceId?: string;
           sourceRef?: string;
           targetId?: string;
           targetRef?: string;
-          dependencyKind?: string;
+          dependencyKind: string;
         };
         return {
           sourceId: edge.sourceId || edge.sourceRef || "",
           targetId: edge.targetId || edge.targetRef || "",
-          dependencyKind: edge.dependencyKind || "REQUIRES",
+          dependencyKind: edge.dependencyKind,
         };
       });
 
@@ -246,7 +274,7 @@ export function validateTargetOperationCompatibility(
 }
 
 /**
- * Builds an AssessmentRequestCoordinate (ARC) per AMS-0860-B §22-§28 / CORR-0860-B-1 / CORR-0860-B-2.
+ * Builds an AssessmentRequestCoordinate (ARC) per AMS-0860-B §22-§28 / CORR-0860-B-1 / CORR-0860-B-2 / CORR-0860-B-3.
  * Enforces closed OP vocabulary, Target × OP matrix, structural target payload validation,
  * explicit pinnedAssessmentStateRef with zero fallback, and explicit T_trust.
  */
@@ -357,8 +385,9 @@ export function buildAssessmentRequestCoordinate(
 }
 
 /**
- * Establishes the non-authoritative historical reconstruction boundary per AMS-0860-B §29-§31 / CORR-0860-B-1 §1-§2.
+ * Establishes the non-authoritative historical reconstruction boundary per AMS-0860-B §29-§31 / CORR-0860-B-1 / CORR-0860-B-3 §3.
  * Produces a NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION result without executing Runtime, fabricating temporal facts, or taking caller booleans as authority.
+ * Reuses validateEvaluationCoordinatePayload whenever target.coordinate is present to prevent direct call validation bypasses.
  */
 export function evaluateHistoricalReconstructionBoundary(
   target: AssessmentTarget,
@@ -388,6 +417,16 @@ export function evaluateHistoricalReconstructionBoundary(
           "HistoricalEvaluationCoordinateTarget.ref must be a non-empty string.",
       },
     };
+  }
+
+  if (target.coordinate !== undefined) {
+    const ecRes = validateEvaluationCoordinatePayload(
+      target.coordinate,
+      "target.coordinate",
+    );
+    if (!ecRes.ok) {
+      return ecRes;
+    }
   }
 
   const result: HistoricalReconstructionResult = Object.freeze({

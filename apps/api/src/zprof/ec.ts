@@ -15,10 +15,11 @@ import {
 } from "./validation.js";
 
 /**
- * Completely and deeply validates an EvaluationCoordinate payload per CORR-0860-B-2 §1.
+ * Completely and deeply validates an EvaluationCoordinate payload per CORR-0860-B-2 §1 / CORR-0860-B-3 §2.
  * Validates sccId, bcgId, pinnedSemanticStateRef, boundContext plain-data legality,
  * every EvidenceIntegrityCoordinate's evidenceRef & SHA-256 digest, every supplied temporal coordinate,
  * and authorizedInputs/evaluationParameters plain-data legality.
+ * Enforces that all required EvaluationCoordinate fields exist as explicit plain data objects on already-materialized ECs.
  */
 export function validateEvaluationCoordinatePayload(
   coord: unknown,
@@ -161,88 +162,114 @@ export function validateEvaluationCoordinatePayload(
     }
   }
 
-  if (ec.temporalCoordinates !== undefined) {
-    if (
-      typeof ec.temporalCoordinates !== "object" ||
-      ec.temporalCoordinates === null
-    ) {
-      return {
-        ok: false,
-        error: {
-          code: "invalid",
-          category: "Composition Failure",
-          message: `${label}.temporalCoordinates must be an object.`,
-        },
-      };
-    }
-    const temp = ec.temporalCoordinates;
-    if (temp.tValid !== undefined) {
-      const res = validateIsoTimestamp(
-        temp.tValid,
-        `${label}.temporalCoordinates.tValid`,
-      );
-      if (!res.ok) return res;
-    }
-    if (temp.tObservation !== undefined) {
-      const res = validateIsoTimestamp(
-        temp.tObservation,
-        `${label}.temporalCoordinates.tObservation`,
-      );
-      if (!res.ok) return res;
-    }
-    if (temp.tEInput !== undefined) {
-      const res = validateIsoTimestamp(
-        temp.tEInput,
-        `${label}.temporalCoordinates.tEInput`,
-      );
-      if (!res.ok) return res;
-    }
+  // Already-materialized EC MUST contain temporalCoordinates object per CORR-0860-B-3 §2
+  if (
+    !ec.temporalCoordinates ||
+    typeof ec.temporalCoordinates !== "object" ||
+    ec.temporalCoordinates === null
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message: `${label}.temporalCoordinates must be present as an object on an EvaluationCoordinate.`,
+      },
+    };
+  }
+  const temp = ec.temporalCoordinates;
+  if (temp.tValid !== undefined) {
+    const res = validateIsoTimestamp(
+      temp.tValid,
+      `${label}.temporalCoordinates.tValid`,
+    );
+    if (!res.ok) return res;
+  }
+  if (temp.tObservation !== undefined) {
+    const res = validateIsoTimestamp(
+      temp.tObservation,
+      `${label}.temporalCoordinates.tObservation`,
+    );
+    if (!res.ok) return res;
+  }
+  if (temp.tEInput !== undefined) {
+    const res = validateIsoTimestamp(
+      temp.tEInput,
+      `${label}.temporalCoordinates.tEInput`,
+    );
+    if (!res.ok) return res;
   }
 
-  if (ec.authorizedInputs !== undefined) {
-    try {
-      deepFreezePlainData(ec.authorizedInputs, `${label}.authorizedInputs`);
-    } catch (err: unknown) {
-      return {
-        ok: false,
-        error: {
-          code: "invalid",
-          category: "Composition Failure",
-          message:
-            err instanceof Error
-              ? err.message
-              : "authorizedInputs contains non-plain data.",
-        },
-      };
-    }
+  // Already-materialized EC MUST contain authorizedInputs object per CORR-0860-B-3 §2
+  if (
+    !ec.authorizedInputs ||
+    typeof ec.authorizedInputs !== "object" ||
+    ec.authorizedInputs === null
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message: `${label}.authorizedInputs must be present as an object on an EvaluationCoordinate.`,
+      },
+    };
+  }
+  try {
+    deepFreezePlainData(ec.authorizedInputs, `${label}.authorizedInputs`);
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message:
+          err instanceof Error
+            ? err.message
+            : "authorizedInputs contains non-plain data.",
+      },
+    };
   }
 
-  if (ec.evaluationParameters !== undefined) {
-    try {
-      deepFreezePlainData(
-        ec.evaluationParameters,
-        `${label}.evaluationParameters`,
-      );
-    } catch (err: unknown) {
-      return {
-        ok: false,
-        error: {
-          code: "invalid",
-          category: "Composition Failure",
-          message:
-            err instanceof Error
-              ? err.message
-              : "evaluationParameters contains non-plain data.",
-        },
-      };
-    }
+  // Already-materialized EC MUST contain evaluationParameters object per CORR-0860-B-3 §2
+  if (
+    !ec.evaluationParameters ||
+    typeof ec.evaluationParameters !== "object" ||
+    ec.evaluationParameters === null
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message: `${label}.evaluationParameters must be present as an object on an EvaluationCoordinate.`,
+      },
+    };
+  }
+  try {
+    deepFreezePlainData(
+      ec.evaluationParameters,
+      `${label}.evaluationParameters`,
+    );
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message:
+          err instanceof Error
+            ? err.message
+            : "evaluationParameters contains non-plain data.",
+      },
+    };
   }
 
   return { ok: true };
 }
 
 /**
- * Builds an EvaluationCoordinate (EC) per AMS-0860-B §10-§21 / CORR-0860-B-1 / CORR-0860-B-2.
+ * Builds an EvaluationCoordinate (EC) per AMS-0860-B §10-§21 / CORR-0860-B-1 / CORR-0860-B-2 / CORR-0860-B-3.
  * Consumes pre-computed sccId and bcgId from AMS-0860-A without recomputing them.
  * Guarantees OP ∉ EC, PinnedAssessmentState ∉ EC, T_trust ∉ EC, ExecutionReceipt ∉ EC, T_e_observed ∉ EC.
  */
