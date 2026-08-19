@@ -3,7 +3,7 @@ import { canonicalizeJcs } from "@zyppi/domain";
 import type { CompositionError, CompositionErrorCode } from "./types.js";
 
 /**
- * BCG Node representing an exact governed configuration constituent per AMS-0860-A / CORR-0860-A-1.
+ * BCG Node representing an exact governed configuration constituent per AMS-0860-A / CORR-0860-A-1 / CORR-0860-A-2.
  */
 export interface BcgNode {
   readonly id: string;
@@ -173,7 +173,8 @@ export function deriveBcgIdentity(bcg: BoundConfigurationGraph): string {
 }
 
 /**
- * Detects circular REQUIRES binding dependency topologies per AMS-0860-A §20.
+ * Detects circular REQUIRES binding dependency topologies per AMS-0860-A §20 / CORR-0860-A-2 §4.
+ * Operates strictly on exact resolved node coordinates (${id}@${version}).
  * A circular REQUIRES dependency topology fails closed with CONTRACT-12 disposition 'invalid'.
  */
 export function detectBcgBindingCycle(
@@ -181,8 +182,8 @@ export function detectBcgBindingCycle(
   edges: readonly BcgBindingEdge[],
 ): { readonly hasCycle: boolean; readonly cycleNodes?: readonly string[] } {
   const adj = new Map<string, string[]>();
-  for (const node of nodes) {
-    adj.set(node, []);
+  for (const nodeKey of nodes) {
+    adj.set(nodeKey, []);
   }
   for (const edge of edges) {
     if (!adj.has(edge.sourceRef)) adj.set(edge.sourceRef, []);
@@ -213,9 +214,9 @@ export function detectBcgBindingCycle(
     return null;
   }
 
-  for (const node of nodes) {
-    if (!visited.has(node)) {
-      const cycle = dfs(node, []);
+  for (const nodeKey of nodes) {
+    if (!visited.has(nodeKey)) {
+      const cycle = dfs(nodeKey, []);
       if (cycle) {
         return { hasCycle: true, cycleNodes: cycle };
       }
@@ -226,25 +227,108 @@ export function detectBcgBindingCycle(
 }
 
 /**
+ * Resolves a sourceRef or targetRef endpoint reference to an exact candidate node per CORR-0860-A-2 §1-§3.
+ * - Exact version endpoint (e.g. Y@v3): matches strictly Y@v3.
+ * - Bare endpoint (e.g. Y): matches candidates with id === 'Y'.
+ *   - Exactly 1 candidate -> resolves to that candidate.
+ *   - 0 candidates -> fails closed with 'missing'.
+ *   - >1 candidates -> fails closed with 'conflicting' (no first/latest/default selection allowed).
+ */
+function resolveEndpointCandidate(
+  ref: string,
+  candidateMap: Map<string, BcgNode>,
+):
+  | { readonly ok: true; readonly node: BcgNode; readonly exactKey: string }
+  | {
+      readonly ok: false;
+      readonly code: CompositionErrorCode;
+      readonly message: string;
+    } {
+  if (ref.includes("@")) {
+    const directNode = candidateMap.get(ref);
+    if (directNode) {
+      return { ok: true, node: directNode, exactKey: ref };
+    }
+    // Try matching id and version split
+    const [refId, refVer] = ref.split("@");
+    const matched = Array.from(candidateMap.values()).find(
+      (n) => n.id === refId && n.version === refVer,
+    );
+    if (matched) {
+      return {
+        ok: true,
+        node: matched,
+        exactKey: `${matched.id}@${matched.version}`,
+      };
+    }
+    return {
+      ok: false,
+      code: "missing",
+      message: `Exact dependency node '${ref}' is missing or unavailable.`,
+    };
+  }
+
+  // Bare reference (e.g., 'Y')
+  const matchingCandidates = Array.from(candidateMap.values()).filter(
+    (n) => n.id === ref,
+  );
+
+  if (matchingCandidates.length === 1) {
+    const matched = matchingCandidates[0]!;
+    return {
+      ok: true,
+      node: matched,
+      exactKey: `${matched.id}@${matched.version}`,
+    };
+  }
+
+  if (matchingCandidates.length === 0) {
+    return {
+      ok: false,
+      code: "missing",
+      message: `Exact dependency node '${ref}' is missing or unavailable.`,
+    };
+  }
+
+  // matchingCandidates.length > 1 -> Ambiguous reference!
+  const candidateKeys = matchingCandidates
+    .map((n) => `${n.id}@${n.version}`)
+    .join(", ");
+  return {
+    ok: false,
+    code: "conflicting",
+    message: `Ambiguous endpoint reference '${ref}' matches multiple exact candidates: [${candidateKeys}]. Automatic first/latest resolution prohibited.`,
+  };
+}
+
+/**
  * Performs exact transitive dependency closure and constructs complete Bound Configuration Graph (BCG).
- * Enforces exact version-bound node keying (${id}@${version}) per CORR-0860-A-1 §3 to prevent silent overwriting
- * of different exact versions of the same artifact ID.
- * Enforces explicit REQUIRES binding relations, cycle rejection (mapping to CONTRACT-12 'invalid'),
- * and fail-closed missing/unavailable dependency handling per AMS-0860-A.
+ * Enforces exact version-bound node keying (${id}@${version}) per CORR-0860-A-1 §3 and unambiguous
+ * endpoint resolution per CORR-0860-A-2 §1-§3.
+ * Enforces that BCG node membership follows explicit evaluation-affecting binding closure per CORR-0860-A-2 §5.
  */
 export function buildBoundConfigurationGraph(
   options: BcgClosureOptions,
 ): BcgClosureResult {
-  // Key nodes by exact coordinate `${id}@${version}` per CORR-0860-A-1 §3
-  const nodeMap = new Map<string, BcgNode>();
+  // Populate full available node candidate universe
+  const candidateMap = new Map<string, BcgNode>();
   for (const node of options.initialNodes) {
     const exactKey = `${node.id}@${node.version}`;
-    nodeMap.set(exactKey, node);
+    candidateMap.set(exactKey, node);
+  }
+  if (options.availableUniverse) {
+    for (const [key, node] of options.availableUniverse.entries()) {
+      const exactKey = key.includes("@") ? key : `${node.id}@${node.version}`;
+      if (!candidateMap.has(exactKey)) {
+        candidateMap.set(exactKey, node);
+      }
+    }
   }
 
-  const validatedEdges: BcgBindingEdge[] = [];
+  const resolvedEdges: BcgBindingEdge[] = [];
+  const resolvedNodesMap = new Map<string, BcgNode>();
 
-  // Validate relation kinds and populate edges
+  // Process raw binding edges
   for (const edge of options.bindingEdges) {
     if (edge.dependencyKind !== "REQUIRES") {
       return {
@@ -256,77 +340,56 @@ export function buildBoundConfigurationGraph(
         },
       };
     }
-    validatedEdges.push({
-      sourceRef: edge.sourceRef,
-      targetRef: edge.targetRef,
+
+    // Resolve source endpoint unambiguously
+    const sourceRes = resolveEndpointCandidate(edge.sourceRef, candidateMap);
+    if (!sourceRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: sourceRes.code,
+          category: "Composition Failure",
+          message: sourceRes.message,
+        },
+      };
+    }
+
+    // Resolve target endpoint unambiguously
+    const targetRes = resolveEndpointCandidate(edge.targetRef, candidateMap);
+    if (!targetRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: targetRes.code,
+          category: "Composition Failure",
+          message: targetRes.message,
+        },
+      };
+    }
+
+    resolvedEdges.push({
+      sourceRef: sourceRes.exactKey,
+      targetRef: targetRes.exactKey,
       dependencyKind: "REQUIRES",
     });
+
+    resolvedNodesMap.set(sourceRes.exactKey, sourceRes.node);
+    resolvedNodesMap.set(targetRes.exactKey, targetRes.node);
   }
 
-  // Transitive closure matching exact targetRef or matching node ID
-  const queue: BcgNode[] = Array.from(nodeMap.values());
-  const visitedKeys = new Set<string>(queue.map((n) => `${n.id}@${n.version}`));
-
-  while (queue.length > 0) {
-    const currentNode = queue.shift()!;
-    const outgoingEdges = validatedEdges.filter(
-      (e) =>
-        e.sourceRef === currentNode.id ||
-        e.sourceRef === `${currentNode.id}@${currentNode.version}`,
-    );
-
-    for (const edge of outgoingEdges) {
-      const targetRef = edge.targetRef;
-
-      // Find target node in nodeMap by exact key or ID matching
-      let foundNodeKey = Array.from(nodeMap.keys()).find(
-        (key) => key === targetRef || key.startsWith(`${targetRef}@`),
-      );
-
-      if (!foundNodeKey && options.availableUniverse) {
-        // Search availableUniverse
-        const resolvedEntry = Array.from(
-          options.availableUniverse.entries(),
-        ).find(
-          ([key, node]) =>
-            key === targetRef ||
-            node.id === targetRef ||
-            `${node.id}@${node.version}` === targetRef,
-        );
-
-        if (resolvedEntry) {
-          const resolvedNode = resolvedEntry[1];
-          foundNodeKey = `${resolvedNode.id}@${resolvedNode.version}`;
-          nodeMap.set(foundNodeKey, resolvedNode);
-        }
-      }
-
-      if (!foundNodeKey) {
-        return {
-          ok: false,
-          error: {
-            code: "missing" as CompositionErrorCode,
-            category: "Composition Failure",
-            message: `Exact dependency '${targetRef}' required by '${currentNode.id}' is missing or unavailable.`,
-          },
-        };
-      }
-
-      if (!visitedKeys.has(foundNodeKey)) {
-        visitedKeys.add(foundNodeKey);
-        queue.push(nodeMap.get(foundNodeKey)!);
-      }
+  // If there are zero binding edges, include only the root DTC node if present (CORR-0860-A-2 §5)
+  if (resolvedEdges.length === 0) {
+    const dtcRoot =
+      options.initialNodes.find((n) => n.kind === "DTC") ||
+      options.initialNodes[0];
+    if (dtcRoot) {
+      resolvedNodesMap.set(`${dtcRoot.id}@${dtcRoot.version}`, dtcRoot);
     }
   }
 
-  // Detect binding cycles
-  const nodeIdsForCycle = Array.from(
-    new Set([
-      ...Array.from(nodeMap.values()).map((n) => n.id),
-      ...Array.from(nodeMap.keys()),
-    ]),
-  );
-  const cycleCheck = detectBcgBindingCycle(nodeIdsForCycle, validatedEdges);
+  // Detect binding cycles on exact resolved node keys
+  const exactNodeKeys = Array.from(resolvedNodesMap.keys());
+  const cycleCheck = detectBcgBindingCycle(exactNodeKeys, resolvedEdges);
   if (cycleCheck.hasCycle) {
     return {
       ok: false,
@@ -340,8 +403,8 @@ export function buildBoundConfigurationGraph(
 
   const unnormalizedBcg: BoundConfigurationGraph = {
     semanticConfigurationRef: options.semanticConfigurationRef,
-    nodes: Array.from(nodeMap.values()),
-    bindingEdges: validatedEdges,
+    nodes: Array.from(resolvedNodesMap.values()),
+    bindingEdges: resolvedEdges,
     ...(options.opacityBoundaries
       ? { opacityBoundaries: options.opacityBoundaries }
       : {}),
