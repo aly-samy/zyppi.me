@@ -68,6 +68,7 @@ export interface GS1CompositionOptions {
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
   readonly explicitConflictInputs?: import("./conflict.js").ConflictEvaluationInputs;
+  readonly explicitBindingEdges?: readonly { readonly from: string; readonly to: string }[];
 }
 
 export type ApplicationCompositionBridgeResult =
@@ -458,15 +459,17 @@ export class ApplicationCompositionResolver {
       dependencyTopology: Object.freeze({
         nodes: Object.freeze([
           dtc.dtcId,
-          dtc.applicableArmProfiles[0] || "arm:profile:trade_item:v1",
+          ...dtc.applicableArmProfiles,
           ...dtc.requiredPrjSpecifications,
+          ...dtc.requiredRsnBlueprints,
         ]),
-        edges: Object.freeze([
-          Object.freeze({
-            from: dtc.dtcId,
-            to: dtc.applicableArmProfiles[0] || "arm:profile:trade_item:v1",
-          }),
-        ]),
+        edges: Object.freeze(
+          options.explicitBindingEdges
+            ? options.explicitBindingEdges.map((e) =>
+                Object.freeze({ from: e.from, to: e.to }),
+              )
+            : [],
+        ),
       }),
       provenanceReferences: Object.freeze({
         manifestAuthor: "identity:council:admin",
@@ -497,7 +500,8 @@ export class ApplicationCompositionResolver {
     // Derive SCC identity strictly on the successful validated composition path
     const sccId = deriveSccIdentityInternal(manifest);
 
-    // Build Bound Configuration Graph (BCG) and derive BCG identity from exact manifest references
+    // Build Bound Configuration Graph (BCG) from full explicit governed configuration (CORR-0860-A-1 §5)
+    // Include all explicitly bound constituents on the validated manifest
     const initialNodes = [
       {
         id: manifest.dtcReference.dtcId,
@@ -509,6 +513,11 @@ export class ApplicationCompositionResolver {
         version: manifest.armProfileReference.version,
         kind: "ARMProfile",
       },
+      ...manifest.boundEpistemicRequirements.map((r) => ({
+        id: r.requirementId,
+        version: r.version,
+        kind: "EpistemicRequirement",
+      })),
       ...manifest.boundPrjSpecifications.map((s) => ({
         id: s.specId,
         version: s.version,
@@ -519,15 +528,30 @@ export class ApplicationCompositionResolver {
         version: b.version,
         kind: "RsnBlueprint",
       })),
+      ...manifest.boundPolRequirements.map((p) => ({
+        id: p.policyId,
+        version: p.version,
+        kind: "PolRequirement",
+      })),
+      ...manifest.boundSecRequirements.map((s) => ({
+        id: s.securityReqId,
+        version: s.version,
+        kind: "SecRequirement",
+      })),
+      ...manifest.boundRiCapabilities.map((c) => ({
+        id: c.capabilityId,
+        version: c.version,
+        kind: "RiCapability",
+      })),
     ];
 
-    const initialBindingEdges = [
-      {
-        sourceRef: manifest.dtcReference.dtcId,
-        targetRef: manifest.armProfileReference.profileId,
-        dependencyKind: "REQUIRES",
-      },
-    ];
+    // Source binding edges strictly from explicit governed T_bind declarations on manifest (CORR-0860-A-1 §1)
+    // Zero invented REQUIRES edges
+    const initialBindingEdges = manifest.dependencyTopology.edges.map((e) => ({
+      sourceRef: e.from,
+      targetRef: e.to,
+      dependencyKind: "REQUIRES",
+    }));
 
     const bcgResult = buildBoundConfigurationGraph({
       semanticConfigurationRef: sccId,

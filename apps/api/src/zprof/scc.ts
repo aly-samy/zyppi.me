@@ -24,10 +24,87 @@ export interface SccIdentityProjection {
  * Strictly enforces inclusion of authorized semantic configuration fields and exclusion
  * of instance coordinates (manifestId, provenanceReferences) and evaluation/result layers
  * (boundCl16IntelligenceArtifacts, boundAttestationProofReferences, epistemicDivergence).
+ *
+ * Deterministically normalizes and sorts all array collections by complete stable semantic coordinates
+ * per CORR-0860-A-1 §2 to guarantee permutation-invariant SCC identity.
  */
 export function projectSccIdentity(
   manifest: CompositionManifest,
 ): SccIdentityProjection {
+  const boundEpistemicRequirements = [...manifest.boundEpistemicRequirements]
+    .map((r) => ({
+      requirementId: r.requirementId,
+      version: r.version,
+    }))
+    .sort(
+      (a, b) =>
+        a.requirementId.localeCompare(b.requirementId) ||
+        a.version.localeCompare(b.version),
+    );
+
+  const boundPrjSpecifications = [...manifest.boundPrjSpecifications]
+    .map((s) => ({
+      specId: s.specId,
+      version: s.version,
+    }))
+    .sort(
+      (a, b) =>
+        a.specId.localeCompare(b.specId) || a.version.localeCompare(b.version),
+    );
+
+  const boundRsnBlueprints = [...manifest.boundRsnBlueprints]
+    .map((b) => ({
+      blueprintId: b.blueprintId,
+      version: b.version,
+    }))
+    .sort(
+      (a, b) =>
+        a.blueprintId.localeCompare(b.blueprintId) ||
+        a.version.localeCompare(b.version),
+    );
+
+  const boundPolRequirements = [...manifest.boundPolRequirements]
+    .map((p) => ({
+      policyId: p.policyId,
+      version: p.version,
+    }))
+    .sort(
+      (a, b) =>
+        a.policyId.localeCompare(b.policyId) ||
+        a.version.localeCompare(b.version),
+    );
+
+  const boundSecRequirements = [...manifest.boundSecRequirements]
+    .map((s) => ({
+      securityReqId: s.securityReqId,
+      version: s.version,
+    }))
+    .sort(
+      (a, b) =>
+        a.securityReqId.localeCompare(b.securityReqId) ||
+        a.version.localeCompare(b.version),
+    );
+
+  const boundRiCapabilities = [...manifest.boundRiCapabilities]
+    .map((c) => ({
+      capabilityId: c.capabilityId,
+      version: c.version,
+    }))
+    .sort(
+      (a, b) =>
+        a.capabilityId.localeCompare(b.capabilityId) ||
+        a.version.localeCompare(b.version),
+    );
+
+  const nodes = Array.from(new Set(manifest.dependencyTopology.nodes)).sort();
+
+  const edges = [...manifest.dependencyTopology.edges]
+    .map((e) => ({
+      from: e.from,
+      to: e.to,
+    }))
+    .sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to));
+
   return {
     dtcReference: {
       dtcId: manifest.dtcReference.dtcId,
@@ -37,38 +114,15 @@ export function projectSccIdentity(
       profileId: manifest.armProfileReference.profileId,
       version: manifest.armProfileReference.version,
     },
-    boundEpistemicRequirements: manifest.boundEpistemicRequirements.map(
-      (r) => ({
-        requirementId: r.requirementId,
-        version: r.version,
-      }),
-    ),
-    boundPrjSpecifications: manifest.boundPrjSpecifications.map((s) => ({
-      specId: s.specId,
-      version: s.version,
-    })),
-    boundRsnBlueprints: manifest.boundRsnBlueprints.map((b) => ({
-      blueprintId: b.blueprintId,
-      version: b.version,
-    })),
-    boundPolRequirements: manifest.boundPolRequirements.map((p) => ({
-      policyId: p.policyId,
-      version: p.version,
-    })),
-    boundSecRequirements: manifest.boundSecRequirements.map((s) => ({
-      securityReqId: s.securityReqId,
-      version: s.version,
-    })),
-    boundRiCapabilities: manifest.boundRiCapabilities.map((c) => ({
-      capabilityId: c.capabilityId,
-      version: c.version,
-    })),
+    boundEpistemicRequirements,
+    boundPrjSpecifications,
+    boundRsnBlueprints,
+    boundPolRequirements,
+    boundSecRequirements,
+    boundRiCapabilities,
     dependencyTopology: {
-      nodes: [...manifest.dependencyTopology.nodes],
-      edges: manifest.dependencyTopology.edges.map((e) => ({
-        from: e.from,
-        to: e.to,
-      })),
+      nodes,
+      edges,
     },
   };
 }

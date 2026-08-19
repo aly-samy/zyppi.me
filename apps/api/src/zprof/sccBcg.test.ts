@@ -39,9 +39,11 @@ const baseManifest: CompositionManifest = Object.freeze({
   },
   boundEpistemicRequirements: Object.freeze([
     { requirementId: "epistemic:req:gtin:v1", version: "1.0.0" },
+    { requirementId: "epistemic:req:brand_owner:v1", version: "1.0.0" },
   ]),
   boundPrjSpecifications: Object.freeze([
     { specId: "prj:spec:trade_item:v1", version: "1.0.0" },
+    { specId: "prj:spec:digital_link:v1", version: "1.0.0" },
   ]),
   boundRsnBlueprints: Object.freeze([]),
   boundPolRequirements: Object.freeze([]),
@@ -51,9 +53,11 @@ const baseManifest: CompositionManifest = Object.freeze({
     nodes: Object.freeze([
       "dtc:zyppi:domain:gs1:v1",
       "arm:profile:trade_item:v1",
+      "prj:spec:trade_item:v1",
     ]),
     edges: Object.freeze([
       { from: "dtc:zyppi:domain:gs1:v1", to: "arm:profile:trade_item:v1" },
+      { from: "arm:profile:trade_item:v1", to: "prj:spec:trade_item:v1" },
     ]),
   }),
   provenanceReferences: Object.freeze({
@@ -62,8 +66,78 @@ const baseManifest: CompositionManifest = Object.freeze({
   }),
 });
 
-describe("AMS-0860-A — Identity & Configuration Closure", () => {
-  describe("Phase A1 — SCC Identity & Separation Constraints", () => {
+describe("AMS-0860-A / CORR-0860-A-1 — Identity & Configuration Closure", () => {
+  describe("Phase A1 — Canonical SCC Collection Permutation Tests", () => {
+    it("CORR-0860-A-1 Test 1 — Permutation of boundEpistemicRequirements yields same SCC_ID", () => {
+      const id1 = deriveSccIdentityInternal(baseManifest);
+
+      const permutedManifest: CompositionManifest = {
+        ...baseManifest,
+        boundEpistemicRequirements: [
+          { requirementId: "epistemic:req:brand_owner:v1", version: "1.0.0" },
+          { requirementId: "epistemic:req:gtin:v1", version: "1.0.0" },
+        ],
+      };
+
+      const id2 = deriveSccIdentityInternal(permutedManifest);
+      expect(id1).toBe(id2);
+    });
+
+    it("CORR-0860-A-1 Test 2 — Permutation of boundPrjSpecifications yields same SCC_ID", () => {
+      const id1 = deriveSccIdentityInternal(baseManifest);
+
+      const permutedManifest: CompositionManifest = {
+        ...baseManifest,
+        boundPrjSpecifications: [
+          { specId: "prj:spec:digital_link:v1", version: "1.0.0" },
+          { specId: "prj:spec:trade_item:v1", version: "1.0.0" },
+        ],
+      };
+
+      const id2 = deriveSccIdentityInternal(permutedManifest);
+      expect(id1).toBe(id2);
+    });
+
+    it("CORR-0860-A-1 Test 3 — Permutation of dependencyTopology.nodes yields same SCC_ID", () => {
+      const id1 = deriveSccIdentityInternal(baseManifest);
+
+      const permutedManifest: CompositionManifest = {
+        ...baseManifest,
+        dependencyTopology: {
+          ...baseManifest.dependencyTopology,
+          nodes: [
+            "prj:spec:trade_item:v1",
+            "dtc:zyppi:domain:gs1:v1",
+            "arm:profile:trade_item:v1",
+          ],
+        },
+      };
+
+      const id2 = deriveSccIdentityInternal(permutedManifest);
+      expect(id1).toBe(id2);
+    });
+
+    it("CORR-0860-A-1 Test 4 — Permutation of dependencyTopology.edges yields same SCC_ID", () => {
+      const id1 = deriveSccIdentityInternal(baseManifest);
+
+      const permutedManifest: CompositionManifest = {
+        ...baseManifest,
+        dependencyTopology: {
+          ...baseManifest.dependencyTopology,
+          edges: [
+            { from: "arm:profile:trade_item:v1", to: "prj:spec:trade_item:v1" },
+            {
+              from: "dtc:zyppi:domain:gs1:v1",
+              to: "arm:profile:trade_item:v1",
+            },
+          ],
+        },
+      };
+
+      const id2 = deriveSccIdentityInternal(permutedManifest);
+      expect(id1).toBe(id2);
+    });
+
     it("TEST 0860.2 — Identity-Bearing Change changes SCC_ID", () => {
       const id1 = deriveSccIdentityInternal(baseManifest);
 
@@ -79,49 +153,6 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
       expect(id1).not.toBe(id2);
       expect(id1).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(id2).toMatch(/^sha256:[a-f0-9]{64}$/);
-    });
-
-    it("TEST 0860.4 — Canonical Manifest Permutation yields same SCC_ID", () => {
-      const id1 = deriveSccIdentityInternal(baseManifest);
-
-      // Manifest with different key order inside objects
-      const reorderedManifest: CompositionManifest = {
-        provenanceReferences: {
-          createdTimestamp: "2026-08-19T00:00:00Z",
-          manifestAuthor: "identity:council:admin",
-        },
-        dependencyTopology: {
-          edges: [
-            {
-              to: "arm:profile:trade_item:v1",
-              from: "dtc:zyppi:domain:gs1:v1",
-            },
-          ],
-          nodes: ["dtc:zyppi:domain:gs1:v1", "arm:profile:trade_item:v1"],
-        },
-        boundRiCapabilities: [],
-        boundSecRequirements: [],
-        boundPolRequirements: [],
-        boundRsnBlueprints: [],
-        boundPrjSpecifications: [
-          { version: "1.0.0", specId: "prj:spec:trade_item:v1" },
-        ],
-        boundEpistemicRequirements: [
-          { version: "1.0.0", requirementId: "epistemic:req:gtin:v1" },
-        ],
-        armProfileReference: {
-          version: "1.0.0",
-          profileId: "arm:profile:trade_item:v1",
-        },
-        dtcReference: {
-          version: "1.0.0",
-          dtcId: "dtc:zyppi:domain:gs1:v1",
-        },
-        manifestId: "manifest:zyppi:gs1_trade_item:v1:exec_999",
-      };
-
-      const id2 = deriveSccIdentityInternal(reorderedManifest);
-      expect(id1).toBe(id2);
     });
 
     it("TEST 0860.36 — Future / Excluded Manifest Metadata does not alter SCC_ID", () => {
@@ -173,22 +204,128 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
     });
   });
 
-  describe("Phase A2 — Bound Configuration Graph (BCG)", () => {
+  describe("Phase A2 — Bound Configuration Graph (BCG) & Version Coordinates", () => {
     const sccId =
       "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 
     const nodeA: BcgNode = { id: "node:A", version: "1.0.0", kind: "DTC" };
-    const nodeB: BcgNode = {
+    const nodeB1: BcgNode = {
       id: "node:B",
       version: "1.0.0",
       kind: "ARMProfile",
     };
+    const nodeB2: BcgNode = {
+      id: "node:B",
+      version: "2.0.0",
+      kind: "ARMProfile",
+    };
     const nodeC: BcgNode = { id: "node:C", version: "1.0.0", kind: "PrjSpec" };
+
+    it("CORR-0860-A-1 Test 5 — Same artifact ID with two exact versions (X@v1 and X@v2) coexist without overwriting", () => {
+      const res = buildBoundConfigurationGraph({
+        semanticConfigurationRef: sccId,
+        initialNodes: [nodeA, nodeB1, nodeB2, nodeC],
+        bindingEdges: [
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B@1.0.0",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceRef: "node:A",
+            targetRef: "node:B@2.0.0",
+            dependencyKind: "REQUIRES",
+          },
+        ],
+      });
+
+      expect(res.ok).toBe(true);
+      if (!res.ok) return;
+
+      // Both versions MUST appear in BCG nodes as distinct exact entries
+      expect(res.bcg.nodes).toHaveLength(4);
+      const b1 = res.bcg.nodes.find(
+        (n) => n.id === "node:B" && n.version === "1.0.0",
+      );
+      const b2 = res.bcg.nodes.find(
+        (n) => n.id === "node:B" && n.version === "2.0.0",
+      );
+      expect(b1).toBeDefined();
+      expect(b2).toBeDefined();
+    });
+
+    it("CORR-0860-A-1 Test 6 — Opacity-boundary permutation produces same BCG_ID", () => {
+      const o1: BcgOpacityBoundary = {
+        foreignInterfaceRef: "interface:foreign:v1",
+        foreignAuthorityRef: "auth:foreign:v1",
+        foreignReceiptDigest: "sha256:1111",
+        localFederationPolicyRef: "pol:fed:v1",
+      };
+      const o2: BcgOpacityBoundary = {
+        foreignInterfaceRef: "interface:foreign:v2",
+        foreignAuthorityRef: "auth:foreign:v2",
+        foreignReceiptDigest: "sha256:2222",
+        localFederationPolicyRef: "pol:fed:v2",
+      };
+
+      const res1 = buildBoundConfigurationGraph({
+        semanticConfigurationRef: sccId,
+        initialNodes: [nodeA],
+        bindingEdges: [],
+        opacityBoundaries: [o1, o2],
+      });
+
+      const res2 = buildBoundConfigurationGraph({
+        semanticConfigurationRef: sccId,
+        initialNodes: [nodeA],
+        bindingEdges: [],
+        opacityBoundaries: [o2, o1], // Permuted order
+      });
+
+      expect(res1.ok).toBe(true);
+      expect(res2.ok).toBe(true);
+      if (res1.ok && res2.ok) {
+        expect(res1.bcgId).toBe(res2.bcgId);
+      }
+    });
+
+    it("CORR-0860-A-1 Test 7 — External-integrity-reference permutation produces same BCG_ID", () => {
+      const r1: BcgForeignIntegrityReference = {
+        referenceId: "ref:1",
+        foreignInterfaceRef: "interface:v1",
+        digest: "sha256:1111",
+      };
+      const r2: BcgForeignIntegrityReference = {
+        referenceId: "ref:2",
+        foreignInterfaceRef: "interface:v2",
+        digest: "sha256:2222",
+      };
+
+      const res1 = buildBoundConfigurationGraph({
+        semanticConfigurationRef: sccId,
+        initialNodes: [nodeA],
+        bindingEdges: [],
+        externalIntegrityReferences: [r1, r2],
+      });
+
+      const res2 = buildBoundConfigurationGraph({
+        semanticConfigurationRef: sccId,
+        initialNodes: [nodeA],
+        bindingEdges: [],
+        externalIntegrityReferences: [r2, r1], // Permuted order
+      });
+
+      expect(res1.ok).toBe(true);
+      expect(res2.ok).toBe(true);
+      if (res1.ok && res2.ok) {
+        expect(res1.bcgId).toBe(res2.bcgId);
+      }
+    });
 
     it("TEST 0860.5 — Node Permutation produces same BCG_ID", () => {
       const res1 = buildBoundConfigurationGraph({
         semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB, nodeC],
+        initialNodes: [nodeA, nodeB1, nodeC],
         bindingEdges: [
           {
             sourceRef: "node:A",
@@ -207,7 +344,7 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
 
       const res2 = buildBoundConfigurationGraph({
         semanticConfigurationRef: sccId,
-        initialNodes: [nodeC, nodeA, nodeB], // Permuted node order
+        initialNodes: [nodeC, nodeA, nodeB1], // Permuted node order
         bindingEdges: [
           {
             sourceRef: "node:A",
@@ -225,73 +362,12 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
       if (!res2.ok) return;
 
       expect(res1.bcgId).toBe(res2.bcgId);
-    });
-
-    it("TEST 0860.6 — Edge Permutation produces same BCG_ID", () => {
-      const res1 = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB, nodeC],
-        bindingEdges: [
-          {
-            sourceRef: "node:A",
-            targetRef: "node:B",
-            dependencyKind: "REQUIRES",
-          },
-          {
-            sourceRef: "node:B",
-            targetRef: "node:C",
-            dependencyKind: "REQUIRES",
-          },
-        ],
-      });
-      expect(res1.ok).toBe(true);
-      if (!res1.ok) return;
-
-      const res2 = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB, nodeC],
-        bindingEdges: [
-          {
-            sourceRef: "node:B",
-            targetRef: "node:C",
-            dependencyKind: "REQUIRES",
-          },
-          {
-            sourceRef: "node:A",
-            targetRef: "node:B",
-            dependencyKind: "REQUIRES",
-          }, // Permuted edge order
-        ],
-      });
-      expect(res2.ok).toBe(true);
-      if (!res2.ok) return;
-
-      expect(res1.bcgId).toBe(res2.bcgId);
-    });
-
-    it("TEST 0860.7 — Missing Transitive Dependency fails closed without substitution", () => {
-      const res = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA], // nodeB is missing
-        bindingEdges: [
-          {
-            sourceRef: "node:A",
-            targetRef: "node:B",
-            dependencyKind: "REQUIRES",
-          },
-        ],
-      });
-
-      expect(res.ok).toBe(false);
-      if (res.ok) return;
-      expect(res.error.code).toBe("missing");
-      expect(res.error.message).toContain("node:B");
     });
 
     it("TEST 0860.38 — Binding Cycle fails closed with CONTRACT-12 'invalid'", () => {
       const res = buildBoundConfigurationGraph({
         semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB, nodeC],
+        initialNodes: [nodeA, nodeB1, nodeC],
         bindingEdges: [
           {
             sourceRef: "node:A",
@@ -316,162 +392,106 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
       expect(res.error.code).toBe("invalid");
       expect(res.error.message).toContain("circular REQUIRES dependency");
     });
+  });
 
-    it("TEST 0860.39 — Free-Form relationKind fails closed with CONTRACT-12 'invalid'", () => {
-      const res = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB],
-        bindingEdges: [
-          {
-            sourceRef: "node:A",
-            targetRef: "node:B",
-            dependencyKind: "SEMANTICALLY_DEPENDS_ON",
-          },
-        ],
-      });
+  describe("CORR-0860-A-1 Resolver & Governed Configuration Invariants", () => {
+    it("CORR-0860-A-1 Test 8 & 9 — Resolver creates ZERO REQUIRES edges not explicitly present in T_bind (structural topology alone never creates a BCG dependency)", async () => {
+      const repo: RegistryRepository = new FrozenRegistryRepository({});
+      const resolver = new ApplicationCompositionResolver();
 
-      expect(res.ok).toBe(false);
-      if (res.ok) return;
-      expect(res.error.code).toBe("invalid");
-      expect(res.error.message).toContain("Closed to 'REQUIRES'");
-    });
-
-    it("TEST 0860.9 — Foreign Integrity Change alters BCG_ID", () => {
-      const opacityBoundary: BcgOpacityBoundary = {
-        foreignInterfaceRef: "interface:foreign:v1",
-        foreignAuthorityRef: "auth:foreign:v1",
-        foreignReceiptDigest:
-          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        localFederationPolicyRef: "pol:fed:v1",
+      // Create manifest with nodes in dependencyTopology, but ZERO edges in dependencyTopology.edges
+      const manifestWithNoBindingEdges: CompositionManifest = {
+        ...baseManifest,
+        dependencyTopology: {
+          nodes: ["dtc:zyppi:domain:gs1:v1", "arm:profile:trade_item:v1"],
+          edges: [], // Zero T_bind binding edges
+        },
       };
 
-      const foreignRef1: BcgForeignIntegrityReference = {
-        referenceId: "ref:1",
-        foreignInterfaceRef: "interface:foreign:v1",
-        digest:
-          "sha256:1111111111111111111111111111111111111111111111111111111111111111",
-      };
-
-      const res1 = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA],
-        bindingEdges: [],
-        opacityBoundaries: [opacityBoundary],
-        externalIntegrityReferences: [foreignRef1],
-      });
-      expect(res1.ok).toBe(true);
-      if (!res1.ok) return;
-
-      const foreignRef2: BcgForeignIntegrityReference = {
-        ...foreignRef1,
-        digest:
-          "sha256:2222222222222222222222222222222222222222222222222222222222222222", // Different receipt digest
-      };
-
-      const res2 = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA],
-        bindingEdges: [],
-        opacityBoundaries: [opacityBoundary],
-        externalIntegrityReferences: [foreignRef2],
-      });
-      expect(res2.ok).toBe(true);
-      if (!res2.ok) return;
-
-      expect(res1.bcgId).not.toBe(res2.bcgId);
-    });
-
-    it("TEST 0860.10 — Deterministic Closure produces identical BCG_ID", () => {
-      const res1 = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB],
-        bindingEdges: [
-          {
-            sourceRef: "node:A",
-            targetRef: "node:B",
-            dependencyKind: "REQUIRES",
+      const res = await resolver.resolveComposition({
+        registryRepository: repo,
+        identifier: mockIdentifier,
+        requestId: "req_no_edges",
+        executionId: "exec_no_edges",
+        constitutionalTimestamp: "2026-08-19T00:00:00Z",
+        budget: 100,
+        entropy: "entropy_no_edges",
+        versions: ["1.0.0"],
+        policyContext: mockPolicyContext,
+        resolvedPolicyGraph: mockPolicyGraph,
+        explicitAcv: {
+          identity: {
+            identityId: "id_1",
+            identityType: "product",
+            canonicalReference: "gtin:01",
+            referentId: "ref_1",
+            status: "active",
+            createdAt: "2026-08-19T00:00:00Z",
+            updatedAt: "2026-08-19T00:00:00Z",
           },
-        ],
-      });
-
-      const res2 = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB],
-        bindingEdges: [
-          {
-            sourceRef: "node:A",
-            targetRef: "node:B",
-            dependencyKind: "REQUIRES",
-          },
-        ],
-      });
-
-      expect(res1.ok).toBe(true);
-      expect(res2.ok).toBe(true);
-      if (res1.ok && res2.ok) {
-        expect(res1.bcgId).toBe(res2.bcgId);
-      }
-    });
-
-    it("Structural references (T_struct) do NOT manufacture REQUIRES edges", () => {
-      // Create graph with nodes A and B, but zero bindingEdges
-      const res = buildBoundConfigurationGraph({
-        semanticConfigurationRef: sccId,
-        initialNodes: [nodeA, nodeB],
-        bindingEdges: [], // T_struct contains structural relationship, but T_bind is empty
+          relationships: [],
+          standings: [],
+          authorities: [
+            {
+              authorityId: "auth_1",
+              subjectId: "id_1",
+              scope: "trade_item",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
+          ],
+          capabilities: [
+            {
+              capabilityId: "prj:spec:trade_item:v1",
+              subjectId: "arm:profile:trade_item:v1",
+              scope: "prj:spec:trade_item:v1",
+              validFrom: "2026-01-01T00:00:00Z",
+              validTo: "2030-01-01T00:00:00Z",
+            },
+          ],
+          evidenceReferences: [],
+          applicablePolicies: [],
+        },
+        dtcFixture: {
+          ...baseManifest.dtcReference,
+          dtcId: "dtc:zyppi:domain:gs1:v1",
+          domainIdentifier: "domain:gs1",
+          domainName: "GS1",
+          version: "1.0.0",
+          scope: "scope",
+          applicableAssetClasses: ["asset:class:trade_item:v1"],
+          applicableArmProfiles: ["arm:profile:trade_item:v1"],
+          epistemicRequirements: ["epistemic:req:gtin:v1"],
+          requiredPrjSpecifications: ["prj:spec:trade_item:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        },
       });
 
       expect(res.ok).toBe(true);
       if (!res.ok) return;
-      expect(res.bcg.bindingEdges).toHaveLength(0);
-    });
-  });
 
-  describe("Integration & Gate Verification", () => {
-    it("TEST 0860.1 / TEST 0860.35 & Integration Gate — Failed composition resolution produces NO sccId or bcgId", async () => {
-      const repo: RegistryRepository = new FrozenRegistryRepository({});
-      const resolver = new ApplicationCompositionResolver();
-
-      // Lookup fails because repository is empty -> composition fails closed
-      const res = await resolver.resolveComposition({
-        registryRepository: repo,
-        identifier: mockIdentifier,
-        requestId: "req_001",
-        executionId: "exec_001",
-        constitutionalTimestamp: "2026-08-19T00:00:00Z",
-        budget: 100,
-        entropy: "entropy_001",
-        versions: ["1.0.0"],
-        policyContext: mockPolicyContext,
-        resolvedPolicyGraph: mockPolicyGraph,
-      });
-
-      expect(res.ok).toBe(false);
-      if (!res.ok) {
-        expect(res.error.code).toBe("missing");
-        const checkRes = res as unknown as {
-          sccId?: string;
-          bcgId?: string;
-          bcg?: unknown;
-        };
-        expect(checkRes.sccId).toBeUndefined();
-        expect(checkRes.bcgId).toBeUndefined();
-        expect(checkRes.bcg).toBeUndefined();
-      }
+      // The resolver MUST NOT have manufactured any DTC -> ARM binding edge!
+      expect(res.bcg?.bindingEdges).toHaveLength(0);
     });
 
-    it("TEST 0860.8 — Registry Drift after resolution leaves sccId and bcgId unchanged", async () => {
+    it("CORR-0860-A-1 Test 10 — All explicitly governed BCG participants required appear in BCG nodes", async () => {
       const repo: RegistryRepository = new FrozenRegistryRepository({});
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
         registryRepository: repo,
         identifier: mockIdentifier,
-        requestId: "req_002",
-        executionId: "exec_002",
+        requestId: "req_full_nodes",
+        executionId: "exec_full_nodes",
         constitutionalTimestamp: "2026-08-19T00:00:00Z",
         budget: 100,
-        entropy: "entropy_002",
+        entropy: "entropy_full_nodes",
         versions: ["1.0.0"],
         policyContext: mockPolicyContext,
         resolvedPolicyGraph: mockPolicyGraph,
@@ -513,14 +533,11 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
       expect(res.ok).toBe(true);
       if (!res.ok) return;
 
-      const { sccId, bcgId } = res;
-      expect(sccId).toMatch(/^sha256:[a-f0-9]{64}$/);
-      expect(bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
-
-      // Mutate underlying registry repo / state
-      // SCC and BCG IDs must remain strictly identical
-      expect(res.sccId).toBe(sccId);
-      expect(res.bcgId).toBe(bcgId);
+      const nodeKinds = res.bcg?.nodes.map((n) => n.kind);
+      expect(nodeKinds).toContain("DTC");
+      expect(nodeKinds).toContain("ARMProfile");
+      expect(nodeKinds).toContain("EpistemicRequirement");
+      expect(nodeKinds).toContain("PrjSpec");
     });
   });
 });

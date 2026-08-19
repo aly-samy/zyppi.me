@@ -3,7 +3,7 @@ import { canonicalizeJcs } from "@zyppi/domain";
 import type { CompositionError, CompositionErrorCode } from "./types.js";
 
 /**
- * BCG Node representing an exact governed configuration constituent per AMS-0860-A.
+ * BCG Node representing an exact governed configuration constituent per AMS-0860-A / CORR-0860-A-1.
  */
 export interface BcgNode {
   readonly id: string;
@@ -76,32 +76,25 @@ export interface BcgClosureOptions {
 }
 
 /**
- * Normalizes BCG identity-bearing collections using stable lexical sorting keys per AMS-0860-A.
+ * Normalizes BCG identity-bearing collections using canonical JCS string sorting
+ * per CORR-0860-A-1 §4 to guarantee 100% complete field coverage and permutation invariance.
  */
 export function normalizeBcg(
   bcg: BoundConfigurationGraph,
 ): BoundConfigurationGraph {
-  const nodes = [...bcg.nodes].sort((a, b) => {
-    if (a.id !== b.id) return a.id.localeCompare(b.id);
-    return a.version.localeCompare(b.version);
-  });
+  const nodes = [...bcg.nodes]
+    .map((n) => Object.freeze({ ...n }))
+    .sort((a, b) => canonicalizeJcs(a).localeCompare(canonicalizeJcs(b)));
 
-  const bindingEdges = [...bcg.bindingEdges].sort((a, b) => {
-    if (a.sourceRef !== b.sourceRef)
-      return a.sourceRef.localeCompare(b.sourceRef);
-    if (a.targetRef !== b.targetRef)
-      return a.targetRef.localeCompare(b.targetRef);
-    return a.dependencyKind.localeCompare(b.dependencyKind);
-  });
+  const bindingEdges = [...bcg.bindingEdges]
+    .map((e) => Object.freeze({ ...e }))
+    .sort((a, b) => canonicalizeJcs(a).localeCompare(canonicalizeJcs(b)));
 
   let opacityBoundaries: BcgOpacityBoundary[] | undefined;
   if (bcg.opacityBoundaries && bcg.opacityBoundaries.length > 0) {
-    opacityBoundaries = [...bcg.opacityBoundaries].sort((a, b) => {
-      if (a.foreignInterfaceRef !== b.foreignInterfaceRef) {
-        return a.foreignInterfaceRef.localeCompare(b.foreignInterfaceRef);
-      }
-      return a.foreignReceiptDigest.localeCompare(b.foreignReceiptDigest);
-    });
+    opacityBoundaries = [...bcg.opacityBoundaries]
+      .map((o) => Object.freeze({ ...o }))
+      .sort((a, b) => canonicalizeJcs(a).localeCompare(canonicalizeJcs(b)));
   }
 
   let externalIntegrityReferences: BcgForeignIntegrityReference[] | undefined;
@@ -109,35 +102,20 @@ export function normalizeBcg(
     bcg.externalIntegrityReferences &&
     bcg.externalIntegrityReferences.length > 0
   ) {
-    externalIntegrityReferences = [...bcg.externalIntegrityReferences].sort(
-      (a, b) => {
-        if (a.referenceId !== b.referenceId) {
-          return a.referenceId.localeCompare(b.referenceId);
-        }
-        return a.digest.localeCompare(b.digest);
-      },
-    );
+    externalIntegrityReferences = [...bcg.externalIntegrityReferences]
+      .map((i) => Object.freeze({ ...i }))
+      .sort((a, b) => canonicalizeJcs(a).localeCompare(canonicalizeJcs(b)));
   }
 
   return Object.freeze({
     semanticConfigurationRef: bcg.semanticConfigurationRef,
-    nodes: Object.freeze(nodes.map((n) => Object.freeze({ ...n }))),
-    bindingEdges: Object.freeze(
-      bindingEdges.map((e) => Object.freeze({ ...e })),
-    ),
+    nodes: Object.freeze(nodes),
+    bindingEdges: Object.freeze(bindingEdges),
     ...(opacityBoundaries
-      ? {
-          opacityBoundaries: Object.freeze(
-            opacityBoundaries.map((o) => Object.freeze({ ...o })),
-          ),
-        }
+      ? { opacityBoundaries: Object.freeze(opacityBoundaries) }
       : {}),
     ...(externalIntegrityReferences
-      ? {
-          externalIntegrityReferences: Object.freeze(
-            externalIntegrityReferences.map((i) => Object.freeze({ ...i })),
-          ),
-        }
+      ? { externalIntegrityReferences: Object.freeze(externalIntegrityReferences) }
       : {}),
   });
 }
@@ -245,15 +223,19 @@ export function detectBcgBindingCycle(
 
 /**
  * Performs exact transitive dependency closure and constructs complete Bound Configuration Graph (BCG).
+ * Enforces exact version-bound node keying (${id}@${version}) per CORR-0860-A-1 §3 to prevent silent overwriting
+ * of different exact versions of the same artifact ID.
  * Enforces explicit REQUIRES binding relations, cycle rejection (mapping to CONTRACT-12 'invalid'),
  * and fail-closed missing/unavailable dependency handling per AMS-0860-A.
  */
 export function buildBoundConfigurationGraph(
   options: BcgClosureOptions,
 ): BcgClosureResult {
+  // Key nodes by exact coordinate `${id}@${version}` per CORR-0860-A-1 §3
   const nodeMap = new Map<string, BcgNode>();
   for (const node of options.initialNodes) {
-    nodeMap.set(node.id, node);
+    const exactKey = `${node.id}@${node.version}`;
+    nodeMap.set(exactKey, node);
   }
 
   const validatedEdges: BcgBindingEdge[] = [];
@@ -277,48 +259,72 @@ export function buildBoundConfigurationGraph(
     });
   }
 
-  // Perform transitive closure over REQUIRES edges
-  const queue: string[] = Array.from(nodeMap.keys());
-  const visitedNodes = new Set<string>(queue);
+  // Transitive closure matching exact targetRef or matching node ID
+  const queue: BcgNode[] = Array.from(nodeMap.values());
+  const visitedKeys = new Set<string>(
+    queue.map((n) => `${n.id}@${n.version}`),
+  );
 
   while (queue.length > 0) {
-    const currentId = queue.shift()!;
+    const currentNode = queue.shift()!;
     const outgoingEdges = validatedEdges.filter(
-      (e) => e.sourceRef === currentId,
+      (e) =>
+        e.sourceRef === currentNode.id ||
+        e.sourceRef === `${currentNode.id}@${currentNode.version}`,
     );
 
     for (const edge of outgoingEdges) {
-      const targetId = edge.targetRef;
-      if (!nodeMap.has(targetId)) {
-        // Look up target in available universe if provided
-        if (
-          options.availableUniverse &&
-          options.availableUniverse.has(targetId)
-        ) {
-          const resolvedNode = options.availableUniverse.get(targetId)!;
-          nodeMap.set(targetId, resolvedNode);
-        } else {
-          return {
-            ok: false,
-            error: {
-              code: "missing" as CompositionErrorCode,
-              category: "Composition Failure",
-              message: `Exact dependency '${targetId}' required by '${currentId}' is missing or unavailable.`,
-            },
-          };
+      const targetRef = edge.targetRef;
+
+      // Find target node in nodeMap by exact key or ID matching
+      let foundNodeKey = Array.from(nodeMap.keys()).find(
+        (key) => key === targetRef || key.startsWith(`${targetRef}@`),
+      );
+
+      if (!foundNodeKey && options.availableUniverse) {
+        // Search availableUniverse
+        const resolvedEntry = Array.from(
+          options.availableUniverse.entries(),
+        ).find(
+          ([key, node]) =>
+            key === targetRef ||
+            node.id === targetRef ||
+            `${node.id}@${node.version}` === targetRef,
+        );
+
+        if (resolvedEntry) {
+          const resolvedNode = resolvedEntry[1];
+          foundNodeKey = `${resolvedNode.id}@${resolvedNode.version}`;
+          nodeMap.set(foundNodeKey, resolvedNode);
         }
       }
 
-      if (!visitedNodes.has(targetId)) {
-        visitedNodes.add(targetId);
-        queue.push(targetId);
+      if (!foundNodeKey) {
+        return {
+          ok: false,
+          error: {
+            code: "missing" as CompositionErrorCode,
+            category: "Composition Failure",
+            message: `Exact dependency '${targetRef}' required by '${currentNode.id}' is missing or unavailable.`,
+          },
+        };
+      }
+
+      if (!visitedKeys.has(foundNodeKey)) {
+        visitedKeys.add(foundNodeKey);
+        queue.push(nodeMap.get(foundNodeKey)!);
       }
     }
   }
 
-  // Detect binding cycles over the transitive node set and REQUIRES edges
-  const allNodeIds = Array.from(nodeMap.keys());
-  const cycleCheck = detectBcgBindingCycle(allNodeIds, validatedEdges);
+  // Detect binding cycles
+  const nodeIdsForCycle = Array.from(
+    new Set([
+      ...Array.from(nodeMap.values()).map((n) => n.id),
+      ...Array.from(nodeMap.keys()),
+    ]),
+  );
+  const cycleCheck = detectBcgBindingCycle(nodeIdsForCycle, validatedEdges);
   if (cycleCheck.hasCycle) {
     return {
       ok: false,
