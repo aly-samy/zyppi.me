@@ -259,3 +259,203 @@ export type CompositionResolutionResult =
       readonly error: CompositionError;
       readonly epistemicStatus?: EpistemicStatus;
     };
+
+// ============================================================================
+// AMS-0860-B — Evaluation & Assessment Coordinate Type Contracts
+// ============================================================================
+
+/**
+ * Explicit structural reference contract for pinned constitutional states per AMS-0860-B.
+ */
+export interface PinnedStateReference {
+  readonly ref: string;
+  readonly digest?: string;
+  readonly version?: string;
+}
+
+/**
+ * Explicit evaluation temporal coordinates per AMS-0860-B.
+ * Preserves strict separation: T_v (Reality Valid Time), T_o (Evidence Observation Time), T_e_input (Execution Time Input).
+ * Runtime-observed execution timestamp (T_e_observed) SHALL NOT exist inside EvaluationCoordinate.
+ */
+export interface EvaluationTemporalCoordinates {
+  readonly tValid?: string;       // T_v — Reality Valid Time
+  readonly tObservation?: string; // T_o — Evidence Observation Time
+  readonly tEInput?: string;      // T_e_input — evaluation-affecting execution time input
+}
+
+/**
+ * Explicit governed temporal requirement declarations per AMS-0860-B.
+ */
+export interface TemporalRequirements {
+  readonly requiresTValid?: boolean;
+  readonly requiresTObservation?: boolean;
+  readonly requiresTEInput?: boolean;
+}
+
+/**
+ * Integrity coordinate binding Evidence per AMS-0860-B.
+ * Pure integrity reference; decoupled from Evidence payload maps and current trust calculations.
+ */
+export interface EvidenceIntegrityCoordinate {
+  readonly evidenceRef: string;
+  readonly digest: string;
+}
+
+/**
+ * EvaluationCoordinate (EC) per AMS-0860-B §10.
+ * Pre-execution coordinate describing WHAT WAS / WILL BE EVALUATED.
+ * Laws: OP ∉ EC, PinnedAssessmentState ∉ EC, T_trust ∉ EC, ExecutionReceipt ∉ EC, T_e_observed ∉ EC.
+ */
+export interface EvaluationCoordinate {
+  readonly sccId: string;
+  readonly bcgId: string;
+  readonly pinnedSemanticStateRef: PinnedStateReference;
+  readonly boundContext: PolicyContext | Readonly<Record<string, unknown>>;
+  readonly evidenceIntegrityCoordinates: readonly EvidenceIntegrityCoordinate[];
+  readonly authorizedInputs: Readonly<Record<string, unknown>>;
+  readonly evaluationParameters: Readonly<Record<string, unknown>>;
+  readonly temporalCoordinates: EvaluationTemporalCoordinates;
+}
+
+/**
+ * Closed primitive operation vocabulary per AMS-0860-B §23.
+ */
+export type PrimitiveOperation =
+  | "NEW_COMPOSITION"
+  | "NEW_EVALUATION"
+  | "HISTORICAL_RECONSTRUCTION"
+  | "RECEIPT_VERIFICATION";
+
+/**
+ * Governed composition-authoring target for NEW_COMPOSITION operation.
+ */
+export interface CompositionAuthoringTarget {
+  readonly kind: "COMPOSITION_AUTHORING";
+  readonly compositionDefinition:
+    | import("./bind.js").CompositionDefinition
+    | Readonly<Record<string, unknown>>;
+}
+
+/**
+ * Complete pre-execution EvaluationCoordinate target for NEW_EVALUATION operation.
+ */
+export interface EvaluationCoordinateTarget {
+  readonly kind: "EVALUATION_COORDINATE";
+  readonly coordinate: EvaluationCoordinate;
+}
+
+/**
+ * Historical EvaluationCoordinate target for HISTORICAL_RECONSTRUCTION operation.
+ */
+export interface HistoricalEvaluationCoordinateTarget {
+  readonly kind: "HISTORICAL_EVALUATION_COORDINATE";
+  readonly ref: string;
+  readonly coordinate?: EvaluationCoordinate;
+}
+
+/**
+ * ExecutionReceipt reference target for RECEIPT_VERIFICATION operation.
+ */
+export interface ExecutionReceiptTarget {
+  readonly kind: "EXECUTION_RECEIPT";
+  readonly receiptRef: string;
+  readonly receiptDigest?: string;
+}
+
+/**
+ * Strict discriminated union of lawful assessment targets per AMS-0860-B §24.
+ */
+export type AssessmentTarget =
+  | CompositionAuthoringTarget
+  | EvaluationCoordinateTarget
+  | HistoricalEvaluationCoordinateTarget
+  | ExecutionReceiptTarget;
+
+/**
+ * AssessmentRequestCoordinate (ARC) per AMS-0860-B §22.
+ * Describes WHAT OPERATION IS BEING REQUESTED AGAINST A GOVERNED TARGET.
+ */
+export interface AssessmentRequestCoordinate {
+  readonly target: AssessmentTarget;
+  readonly operation: PrimitiveOperation;
+  readonly pinnedAssessmentStateRef: PinnedStateReference;
+  readonly tTrust: string;
+  readonly applicableAssessmentRules?: readonly PinnedStateReference[];
+}
+
+/**
+ * Analytical non-authoritative historical reconstruction result marker per AMS-0860-B §30.
+ */
+export interface HistoricalReconstructionResult {
+  readonly status: "NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION";
+  readonly targetRef: string;
+  readonly historicalCoordinate?: EvaluationCoordinate;
+  readonly reconstructionTimestamp: string;
+}
+
+/**
+ * Input options for buildEvaluationCoordinate.
+ */
+export interface EvaluationCoordinateInput {
+  readonly sccId: string;
+  readonly bcgId: string;
+  readonly pinnedSemanticStateRef: PinnedStateReference;
+  readonly boundContext: PolicyContext | Readonly<Record<string, unknown>>;
+  readonly evidenceIntegrityCoordinates: readonly EvidenceIntegrityCoordinate[];
+  readonly authorizedInputs?: Readonly<Record<string, unknown>>;
+  readonly evaluationParameters?: Readonly<Record<string, unknown>>;
+  readonly temporalCoordinates?: EvaluationTemporalCoordinates;
+  readonly temporalRequirements?: TemporalRequirements;
+}
+
+/**
+ * Input options for buildAssessmentRequestCoordinate.
+ */
+export interface AssessmentRequestCoordinateInput {
+  readonly target: AssessmentTarget;
+  readonly operation: PrimitiveOperation;
+  readonly pinnedAssessmentStateRef: PinnedStateReference;
+  readonly tTrust: string;
+  readonly applicableAssessmentRules?: readonly PinnedStateReference[];
+  readonly prohibitHistoricalReconstruction?: boolean;
+}
+
+/**
+ * Result of EvaluationCoordinate construction.
+ */
+export type EvaluationCoordinateResult =
+  | {
+      readonly ok: true;
+      readonly coordinate: EvaluationCoordinate;
+    }
+  | {
+      readonly ok: false;
+      readonly error: CompositionError;
+    };
+
+/**
+ * Result of AssessmentRequestCoordinate construction.
+ */
+export type AssessmentRequestCoordinateResult =
+  | {
+      readonly ok: true;
+      readonly coordinate: AssessmentRequestCoordinate;
+    }
+  | {
+      readonly ok: false;
+      readonly error: CompositionError;
+    };
+
+/**
+ * Result of historical reconstruction boundary evaluation.
+ */
+export type HistoricalReconstructionBoundaryResult =
+  | {
+      readonly ok: true;
+      readonly result: HistoricalReconstructionResult;
+    }
+  | {
+      readonly ok: false;
+      readonly error: CompositionError;
+    };

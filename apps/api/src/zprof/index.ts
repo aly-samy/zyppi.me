@@ -9,3 +9,9 @@ export * from "./participant.js";
 export * from "./topology.js";
 export * from "./compositionId.js";
 export * from "./bind.js";
+export { buildEvaluationCoordinate } from "./ec.js";
+export {
+  buildAssessmentRequestCoordinate,
+  evaluateHistoricalReconstructionBoundary,
+} from "./arc.js";
+export { validateTemporalRequirements } from "./temporal.js";
