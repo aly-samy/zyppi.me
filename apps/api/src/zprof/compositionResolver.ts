@@ -365,26 +365,20 @@ export class ApplicationCompositionResolver {
 
     if (options.compositionDefinition) {
       const compDef = options.compositionDefinition;
-      let compParticipants = compDef.participants;
+      const compParticipants = compDef.participants;
+
+      // CORR-0860-A-5 §1-§4: Zero participant synthesis or owner/version fabrication permitted.
+      // If participants are absent or empty, fail closed with invalid.
       if (!compParticipants || compParticipants.length === 0) {
-        compParticipants = [
-          {
-            identity: dtc.dtcId,
-            kind: "DTC",
-            version: dtc.version,
-            owner: "identity:council:admin",
-            role: "domain_template",
-            reference: { id: dtc.dtcId, version: dtc.version },
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message:
+              "compositionDefinition provided without explicit governed participants collection P",
           },
-          ...dtc.applicableArmProfiles.map((p) => ({
-            identity: p,
-            kind: "ARM_PROFILE" as const,
-            version: "1.0.0",
-            owner: "identity:council:admin",
-            role: "asset_profile" as const,
-            reference: { id: p, version: "1.0.0" },
-          })),
-        ];
+        };
       }
 
       const pRes = validateParticipantCollection(compParticipants);
