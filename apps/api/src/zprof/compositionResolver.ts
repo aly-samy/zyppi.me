@@ -43,6 +43,8 @@ import {
   validateExplicitVersionList,
   validateVersionConstraints,
 } from "./versionValidator.js";
+import { deriveSccIdentityInternal } from "./scc.js";
+import { buildBoundConfigurationGraph } from "./bcg.js";
 
 export interface GS1CompositionOptions {
   readonly registryRepository: RegistryRepository;
@@ -74,6 +76,9 @@ export type ApplicationCompositionBridgeResult =
       readonly manifest: CompositionManifest;
       readonly boundPayload: BoundConstitutionalPayload;
       readonly pipelineResult: PipelineResult;
+      readonly sccId?: string;
+      readonly bcgId?: string;
+      readonly bcg?: import("./bcg.js").BoundConfigurationGraph;
     }
   | {
       readonly ok: false;
@@ -489,11 +494,60 @@ export class ApplicationCompositionResolver {
       ...(epistemicDivergence ? { epistemicDivergence: true } : {}),
     });
 
+    // Derive SCC identity strictly on the successful validated composition path
+    const sccId = deriveSccIdentityInternal(manifest);
+
+    // Build Bound Configuration Graph (BCG) and derive BCG identity from exact manifest references
+    const initialNodes = [
+      { id: manifest.dtcReference.dtcId, version: manifest.dtcReference.version, kind: "DTC" },
+      {
+        id: manifest.armProfileReference.profileId,
+        version: manifest.armProfileReference.version,
+        kind: "ARMProfile",
+      },
+      ...manifest.boundPrjSpecifications.map((s) => ({
+        id: s.specId,
+        version: s.version,
+        kind: "PrjSpec",
+      })),
+      ...manifest.boundRsnBlueprints.map((b) => ({
+        id: b.blueprintId,
+        version: b.version,
+        kind: "RsnBlueprint",
+      })),
+    ];
+
+    const initialBindingEdges = [
+      {
+        sourceRef: manifest.dtcReference.dtcId,
+        targetRef: manifest.armProfileReference.profileId,
+        dependencyKind: "REQUIRES",
+      },
+    ];
+
+    const bcgResult = buildBoundConfigurationGraph({
+      semanticConfigurationRef: sccId,
+      initialNodes,
+      bindingEdges: initialBindingEdges,
+    });
+
+    if (!bcgResult.ok) {
+      return {
+        ok: false,
+        error: bcgResult.error,
+      };
+    }
+
+    const { bcg, bcgId } = bcgResult;
+
     return {
       ok: true,
       manifest,
       boundPayload,
       evidencePayloads,
+      sccId,
+      bcgId,
+      bcg,
     };
   }
 
@@ -513,7 +567,7 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    const { manifest, boundPayload, evidencePayloads } = res;
+    const { manifest, boundPayload, evidencePayloads, sccId, bcgId, bcg } = res;
 
     // Construct explicit ExecutionRequest
     const executionRequest: ExecutionRequest = {
@@ -538,6 +592,9 @@ export class ApplicationCompositionResolver {
       manifest,
       boundPayload,
       pipelineResult,
+      sccId,
+      bcgId,
+      bcg,
     };
   }
 }

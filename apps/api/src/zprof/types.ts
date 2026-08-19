@@ -249,6 +249,9 @@ export type CompositionResolutionResult =
       readonly manifest: CompositionManifest;
       readonly boundPayload: BoundConstitutionalPayload;
       readonly evidencePayloads: ReadonlyMap<string, unknown>;
+      readonly sccId?: string;
+      readonly bcgId?: string;
+      readonly bcg?: import("./bcg.js").BoundConfigurationGraph;
     }
   | {
       readonly ok: false;
