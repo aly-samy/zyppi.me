@@ -328,13 +328,12 @@ export type PrimitiveOperation =
   | "RECEIPT_VERIFICATION";
 
 /**
- * Governed composition-authoring target for NEW_COMPOSITION operation.
+ * Governed composition-authoring target for NEW_COMPOSITION operation per CORR-0860-B-1 §3.
+ * Requires governed CompositionDefinition contract (no arbitrary plain object escape hatches).
  */
 export interface CompositionAuthoringTarget {
   readonly kind: "COMPOSITION_AUTHORING";
-  readonly compositionDefinition:
-    | import("./bind.js").CompositionDefinition
-    | Readonly<Record<string, unknown>>;
+  readonly compositionDefinition: import("./bind.js").CompositionDefinition;
 }
 
 /**
@@ -385,13 +384,13 @@ export interface AssessmentRequestCoordinate {
 }
 
 /**
- * Analytical non-authoritative historical reconstruction result marker per AMS-0860-B §30.
+ * Analytical non-authoritative historical reconstruction result marker per AMS-0860-B §30 / CORR-0860-B-1 §2.
+ * Contains no fake or fabricated timestamp fact.
  */
 export interface HistoricalReconstructionResult {
   readonly status: "NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION";
   readonly targetRef: string;
   readonly historicalCoordinate?: EvaluationCoordinate;
-  readonly reconstructionTimestamp: string;
 }
 
 /**
@@ -410,7 +409,7 @@ export interface EvaluationCoordinateInput {
 }
 
 /**
- * Input options for buildAssessmentRequestCoordinate.
+ * Input options for buildAssessmentRequestCoordinate per CORR-0860-B-1 §1.
  */
 export interface AssessmentRequestCoordinateInput {
   readonly target: AssessmentTarget;
@@ -418,7 +417,6 @@ export interface AssessmentRequestCoordinateInput {
   readonly pinnedAssessmentStateRef: PinnedStateReference;
   readonly tTrust: string;
   readonly applicableAssessmentRules?: readonly PinnedStateReference[];
-  readonly prohibitHistoricalReconstruction?: boolean;
 }
 
 /**

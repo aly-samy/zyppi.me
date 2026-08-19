@@ -1,3 +1,4 @@
+import { validateIsoTimestamp } from "./ec.js";
 import type {
   CompositionError,
   EvaluationTemporalCoordinates,
@@ -15,13 +16,41 @@ export type BuildTemporalCoordinatesResult =
     };
 
 /**
- * Validates temporal requirement constraints against supplied temporal coordinates per AMS-0860-B §18-§21.
+ * Validates temporal requirement constraints against supplied temporal coordinates per AMS-0860-B §18-§21 / CORR-0860-B-1 §5.
+ * Enforces ISO-8601 structural timestamp format validation when temporal coordinates are present.
  * Governed rule requirements consume explicit declarations; does not infer applicability or consult ambient clocks.
  */
 export function validateTemporalRequirements(
   temporalCoordinates?: EvaluationTemporalCoordinates,
   temporalRequirements?: TemporalRequirements,
 ): BuildTemporalCoordinatesResult {
+  if (temporalCoordinates?.tValid !== undefined) {
+    const tValidRes = validateIsoTimestamp(
+      temporalCoordinates.tValid,
+      "tValid",
+    );
+    if (!tValidRes.ok) {
+      return tValidRes;
+    }
+  }
+
+  if (temporalCoordinates?.tObservation !== undefined) {
+    const tObsRes = validateIsoTimestamp(
+      temporalCoordinates.tObservation,
+      "tObservation",
+    );
+    if (!tObsRes.ok) {
+      return tObsRes;
+    }
+  }
+
+  if (temporalCoordinates?.tEInput !== undefined) {
+    const tERes = validateIsoTimestamp(temporalCoordinates.tEInput, "tEInput");
+    if (!tERes.ok) {
+      return tERes;
+    }
+  }
+
   const coords: EvaluationTemporalCoordinates = {
     ...(temporalCoordinates?.tValid
       ? { tValid: temporalCoordinates.tValid }

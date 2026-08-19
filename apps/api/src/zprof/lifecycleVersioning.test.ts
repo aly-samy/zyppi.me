@@ -9,8 +9,12 @@ import { validateTemporalRequirements } from "./temporal.js";
 import type {
   AssessmentRequestCoordinateInput,
   AssessmentTarget,
+  CompositionAuthoringTarget,
+  EvaluationCoordinate,
   EvaluationCoordinateInput,
   EvaluationTemporalCoordinates,
+  ExecutionReceiptTarget,
+  HistoricalEvaluationCoordinateTarget,
   PinnedStateReference,
   PrimitiveOperation,
   TemporalRequirements,
@@ -38,8 +42,16 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     purpose: "trade_item_evaluation",
   };
   const validEvidenceCoords = [
-    { evidenceRef: "ev:1", digest: "sha256:aaa" },
-    { evidenceRef: "ev:2", digest: "sha256:bbb" },
+    {
+      evidenceRef: "ev:1",
+      digest:
+        "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    },
+    {
+      evidenceRef: "ev:2",
+      digest:
+        "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    },
   ];
 
   const defaultEcInput: EvaluationCoordinateInput = {
@@ -52,6 +64,14 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     evaluationParameters: { threshold: 100 },
     temporalCoordinates: { tValid: "2026-01-01T00:00:00Z" },
   };
+
+  function getValidEc(): EvaluationCoordinate {
+    const res = buildEvaluationCoordinate(defaultEcInput);
+    if (!res.ok) {
+      throw new Error("Failed to construct valid EC in test helper");
+    }
+    return res.coordinate;
+  }
 
   // ==========================================================================
   // Section A: Evaluation Coordinate (EC) Tests (B1–B4, §40 1–5, 11–12)
@@ -201,14 +221,7 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   it("B5 / §40.13: Pinned assessment state state role equality without role collapse", () => {
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
-      coordinate: buildEvaluationCoordinate(defaultEcInput).ok
-        ? (
-            buildEvaluationCoordinate(defaultEcInput) as {
-              ok: true;
-              coordinate: any;
-            }
-          ).coordinate
-        : ({} as any),
+      coordinate: getValidEc(),
     };
 
     const arcRes = buildAssessmentRequestCoordinate({
@@ -229,14 +242,7 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   it("B5 / §40.13: Omitted pinned assessment state fails closed with 'missing' (no fallback to semantic state)", () => {
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
-      coordinate: buildEvaluationCoordinate(defaultEcInput).ok
-        ? (
-            buildEvaluationCoordinate(defaultEcInput) as {
-              ok: true;
-              coordinate: any;
-            }
-          ).coordinate
-        : ({} as any),
+      coordinate: getValidEc(),
     };
 
     const arcRes = buildAssessmentRequestCoordinate({
@@ -255,7 +261,7 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   it("B6 / §40.15: NEW_EVALUATION + EvaluationCoordinate target -> valid ARC", () => {
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
-      coordinate: (buildEvaluationCoordinate(defaultEcInput) as any).coordinate,
+      coordinate: getValidEc(),
     };
 
     const arcRes = buildAssessmentRequestCoordinate({
@@ -289,7 +295,19 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   it("B6 / §40.17: RECEIPT_VERIFICATION + COMPOSITION_AUTHORING target -> invalid", () => {
     const compTarget: AssessmentTarget = {
       kind: "COMPOSITION_AUTHORING",
-      compositionDefinition: { participants: ["p1"] },
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "dtc:1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: "owner:1",
+            role: "domain_template",
+            reference: { id: "dtc:1", version: "1.0.0" },
+          },
+        ],
+        bindingEdges: [],
+      },
     };
 
     const arcRes = buildAssessmentRequestCoordinate({
@@ -327,7 +345,7 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   it("§40.19-20: Unknown OP or forbidden OP (e.g., CURRENT_TRUSTED_REPLAY) fails closed", () => {
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
-      coordinate: (buildEvaluationCoordinate(defaultEcInput) as any).coordinate,
+      coordinate: getValidEc(),
     };
 
     const opRes = validateTargetOperationCompatibility(
@@ -344,7 +362,7 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   it("§40.21-23: Determinism - Same ARC inputs yield identical ARC, different T_trust yields different ARC", () => {
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
-      coordinate: (buildEvaluationCoordinate(defaultEcInput) as any).coordinate,
+      coordinate: getValidEc(),
     };
 
     const input1: AssessmentRequestCoordinateInput = {
@@ -379,7 +397,7 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     const histTarget: AssessmentTarget = {
       kind: "HISTORICAL_EVALUATION_COORDINATE",
       ref: "ec:hist:999",
-      coordinate: (buildEvaluationCoordinate(defaultEcInput) as any).coordinate,
+      coordinate: getValidEc(),
     };
 
     const boundaryRes = evaluateHistoricalReconstructionBoundary(histTarget);
@@ -412,22 +430,6 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     }
   });
 
-  it("B10 / §40.26: Explicit bound sovereign prohibition on historical reconstruction fails closed with 'unauthorized'", () => {
-    const histTarget: AssessmentTarget = {
-      kind: "HISTORICAL_EVALUATION_COORDINATE",
-      ref: "ec:hist:999",
-    };
-
-    const boundaryRes = evaluateHistoricalReconstructionBoundary(
-      histTarget,
-      true,
-    );
-    expect(boundaryRes.ok).toBe(false);
-    if (!boundaryRes.ok) {
-      expect(boundaryRes.error.code).toBe("unauthorized");
-    }
-  });
-
   // ==========================================================================
   // Section E: Deep Immutability Tests (B13, §40 28–31)
   // ==========================================================================
@@ -443,15 +445,23 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     if (ecRes.ok) {
       const ec = ecRes.coordinate;
       expect(() => {
-        (ec as any).sccId = "modified";
+        (ec as unknown as Record<string, unknown>).sccId = "modified";
       }).toThrow();
 
       expect(() => {
-        (ec.boundContext as any).jurisdiction = "US";
+        (ec.boundContext as unknown as Record<string, unknown>).jurisdiction =
+          "US";
       }).toThrow();
 
       expect(() => {
-        (ec.boundContext as any).inner.key = "changed";
+        (
+          (
+            ec.boundContext as unknown as Record<
+              string,
+              Record<string, unknown>
+            >
+          ).inner as Record<string, unknown>
+        ).key = "changed";
       }).toThrow();
     }
   });
@@ -465,5 +475,173 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     if (ec1.ok && ec2.ok) {
       expect(ec1.coordinate).toEqual(ec2.coordinate);
     }
+  });
+
+  // ==========================================================================
+  // Section F: CORR-0860-B-1 Mandatory Tests (B16–B25)
+  // ==========================================================================
+
+  it("Test B16 — Malformed A Identity fails closed with 'invalid'", () => {
+    const badSccRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      sccId: "abc",
+    });
+    expect(badSccRes.ok).toBe(false);
+    if (!badSccRes.ok) {
+      expect(badSccRes.error.code).toBe("invalid");
+    }
+
+    const badBcgRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      bcgId: "sha256:abc",
+    });
+    expect(badBcgRes.ok).toBe(false);
+    if (!badBcgRes.ok) {
+      expect(badBcgRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B17 — Malformed Evidence Digest fails closed with 'unverified'", () => {
+    const badEvidenceRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      evidenceIntegrityCoordinates: [
+        { evidenceRef: "ev:1", digest: "sha256:aaa" },
+      ],
+    });
+    expect(badEvidenceRes.ok).toBe(false);
+    if (!badEvidenceRes.ok) {
+      expect(badEvidenceRes.error.code).toBe("unverified");
+    }
+  });
+
+  it("Test B18 — Malformed State Digest fails closed with 'invalid'", () => {
+    const badStateRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      pinnedSemanticStateRef: {
+        ref: "acv:1",
+        digest: "sha256:123",
+      },
+    });
+    expect(badStateRes.ok).toBe(false);
+    if (!badStateRes.ok) {
+      expect(badStateRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B19 — Malformed Temporal Coordinate fails closed with 'invalid'", () => {
+    const badTempRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      temporalCoordinates: { tEInput: "tomorrow" },
+    });
+    expect(badTempRes.ok).toBe(false);
+    if (!badTempRes.ok) {
+      expect(badTempRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B20 — Valid Kind, Invalid EC Payload fails closed with 'invalid'", () => {
+    const malformedEcTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: { sccId: "bad" },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: malformedEcTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B21 — Empty Receipt Reference fails closed with 'invalid'", () => {
+    const emptyReceiptTarget: ExecutionReceiptTarget = {
+      kind: "EXECUTION_RECEIPT",
+      receiptRef: "",
+    };
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: emptyReceiptTarget,
+      operation: "RECEIPT_VERIFICATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B22 — Arbitrary Composition Object Rejected", () => {
+    const ungovernedAuthoringTarget = {
+      kind: "COMPOSITION_AUTHORING",
+      compositionDefinition: { arbitrary: "bag" },
+    } as unknown as CompositionAuthoringTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: ungovernedAuthoringTarget,
+      operation: "NEW_COMPOSITION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B23 — Generic Class Instance Rejected in authorizedInputs", () => {
+    class ExecutableHandle {
+      execute() {
+        return true;
+      }
+    }
+
+    const ecRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      authorizedInputs: {
+        handle: new ExecutableHandle() as unknown as Record<string, unknown>,
+      },
+    });
+
+    expect(ecRes.ok).toBe(false);
+    if (!ecRes.ok) {
+      expect(ecRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B24 — Reconstruction Has No Fabricated Timestamp", () => {
+    const histTarget: HistoricalEvaluationCoordinateTarget = {
+      kind: "HISTORICAL_EVALUATION_COORDINATE",
+      ref: "ec:hist:123",
+    };
+
+    const boundaryRes = evaluateHistoricalReconstructionBoundary(histTarget);
+    expect(boundaryRes.ok).toBe(true);
+    if (boundaryRes.ok) {
+      const resObj = boundaryRes.result as unknown as Record<string, unknown>;
+      expect(resObj.reconstructionTimestamp).toBeUndefined();
+      expect(boundaryRes.result.status).toBe(
+        "NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION",
+      );
+      expect(boundaryRes.result.targetRef).toBe("ec:hist:123");
+    }
+  });
+
+  it("Test B25 — Boolean Cannot Manufacture Sovereign Prohibition", () => {
+    const histTarget: HistoricalEvaluationCoordinateTarget = {
+      kind: "HISTORICAL_EVALUATION_COORDINATE",
+      ref: "ec:hist:123",
+    };
+
+    // evaluateHistoricalReconstructionBoundary accepts only target (no boolean parameter)
+    const boundaryRes = evaluateHistoricalReconstructionBoundary(histTarget);
+    expect(boundaryRes.ok).toBe(true);
   });
 });

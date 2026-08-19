@@ -9,6 +9,56 @@ import type {
   PinnedStateReference,
 } from "./types.js";
 
+const SHA256_REGEX = /^sha256:[0-9a-f]{64}$/;
+
+/**
+ * Validates structural format of SHA-256 digest (sha256:<64 lowercase hex characters>).
+ */
+export function validateSha256Digest(
+  digest: string,
+  fieldLabel = "digest",
+):
+  | { readonly ok: true }
+  | { readonly ok: false; readonly error: CompositionError } {
+  if (typeof digest !== "string" || !SHA256_REGEX.test(digest)) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message: `${fieldLabel} must be a valid SHA-256 digest string formatted as 'sha256:<64 lowercase hex chars>'. Received '${digest}'.`,
+      },
+    };
+  }
+  return { ok: true };
+}
+
+/**
+ * Validates ISO-8601 structural format for timestamp coordinates.
+ */
+export function validateIsoTimestamp(
+  timestamp: string,
+  fieldLabel = "timestamp",
+):
+  | { readonly ok: true }
+  | { readonly ok: false; readonly error: CompositionError } {
+  if (
+    typeof timestamp !== "string" ||
+    timestamp.trim().length === 0 ||
+    Number.isNaN(Date.parse(timestamp))
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "invalid",
+        category: "Composition Failure",
+        message: `${fieldLabel} must be a valid ISO-8601 timestamp string. Received '${timestamp}'.`,
+      },
+    };
+  }
+  return { ok: true };
+}
+
 /**
  * Validates structural presence and format of PinnedStateReference.
  */
@@ -55,15 +105,9 @@ export function validatePinnedStateReference(
   }
 
   if (ref.digest !== undefined) {
-    if (typeof ref.digest !== "string" || ref.digest.trim().length === 0) {
-      return {
-        ok: false,
-        error: {
-          code: "invalid",
-          category: "Composition Failure",
-          message: `${roleName}.digest, when supplied, must be an explicit non-empty string.`,
-        },
-      };
+    const digestRes = validateSha256Digest(ref.digest, `${roleName}.digest`);
+    if (!digestRes.ok) {
+      return digestRes;
     }
   }
 
@@ -90,22 +134,19 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
     return val;
   }
 
-  if (
-    val instanceof Promise ||
-    val instanceof Map ||
-    val instanceof Set ||
-    val instanceof Date
-  ) {
-    throw new Error(
-      `Class instance or non-plain data structure at ${path} is prohibited.`,
-    );
-  }
-
   if (Array.isArray(val)) {
     const frozenArray = val.map((item, idx) =>
       deepFreezePlainData(item, `${path}[${idx}]`),
     );
     return Object.freeze(frozenArray) as unknown as T;
+  }
+
+  // Check prototype for plain objects per CORR-0860-B-1 §6
+  const proto = Object.getPrototypeOf(val);
+  if (proto !== Object.prototype && proto !== null) {
+    throw new Error(
+      `Class instance or non-plain object structure at ${path} is prohibited.`,
+    );
   }
 
   const obj = val as Record<string, unknown>;
@@ -125,7 +166,7 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
 }
 
 /**
- * Builds an EvaluationCoordinate (EC) per AMS-0860-B §10-§21.
+ * Builds an EvaluationCoordinate (EC) per AMS-0860-B §10-§21 / CORR-0860-B-1.
  * Consumes pre-computed sccId and bcgId from AMS-0860-A without recomputing them.
  * Guarantees OP ∉ EC, PinnedAssessmentState ∉ EC, T_trust ∉ EC, ExecutionReceipt ∉ EC, T_e_observed ∉ EC.
  */
@@ -147,6 +188,11 @@ export function buildEvaluationCoordinate(
     };
   }
 
+  const sccDigestRes = validateSha256Digest(input.sccId, "sccId");
+  if (!sccDigestRes.ok) {
+    return { ok: false, error: sccDigestRes.error };
+  }
+
   if (
     !input.bcgId ||
     typeof input.bcgId !== "string" ||
@@ -160,6 +206,11 @@ export function buildEvaluationCoordinate(
         message: "Required bcgId from AMS-0860-A is absent.",
       },
     };
+  }
+
+  const bcgDigestRes = validateSha256Digest(input.bcgId, "bcgId");
+  if (!bcgDigestRes.ok) {
+    return { ok: false, error: bcgDigestRes.error };
   }
 
   const pinRes = validatePinnedStateReference(
@@ -210,13 +261,29 @@ export function buildEvaluationCoordinate(
         },
       };
     }
+
+    const evDigestRes = validateSha256Digest(
+      item.digest,
+      `evidenceIntegrityCoordinates[${i}].digest`,
+    );
+    if (!evDigestRes.ok) {
+      return {
+        ok: false,
+        error: {
+          code: "unverified",
+          category: "Composition Failure",
+          message: evDigestRes.error.message,
+        },
+      };
+    }
+
     validatedEvidenceCoords.push({
       evidenceRef: item.evidenceRef,
       digest: item.digest,
     });
   }
 
-  // Validate temporal requirements
+  // Validate temporal requirements and ISO-8601 timestamp formats
   const temporalRes = validateTemporalRequirements(
     input.temporalCoordinates,
     input.temporalRequirements,
