@@ -1,18 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { ApplicationCompositionResolver } from "./compositionResolver.js";
-import { projectSccIdentity, deriveSccIdentityInternal } from "./scc.js";
+import { deriveSccIdentityInternal } from "./scc.js";
 import {
   buildBoundConfigurationGraph,
-  deriveBcgIdentity,
-  normalizeBcg,
-  type BoundConfigurationGraph,
   type BcgNode,
   type BcgOpacityBoundary,
   type BcgForeignIntegrityReference,
 } from "./bcg.js";
 import type { CompositionManifest } from "./types.js";
 import { FrozenRegistryRepository } from "@zyppi/testing";
-import type { ValidatedCanonicalIdentifier } from "@zyppi/contracts";
+import type {
+  RegistryRepository,
+  ValidatedCanonicalIdentifier,
+} from "@zyppi/contracts";
 import type { PolicyContext, ResolvedPolicyGraph } from "@zyppi/domain";
 
 const mockIdentifier: ValidatedCanonicalIdentifier =
@@ -429,12 +429,12 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
 
   describe("Integration & Gate Verification", () => {
     it("TEST 0860.1 / TEST 0860.35 & Integration Gate — Failed composition resolution produces NO sccId or bcgId", async () => {
-      const repo = new FrozenRegistryRepository({});
+      const repo: RegistryRepository = new FrozenRegistryRepository({});
       const resolver = new ApplicationCompositionResolver();
 
       // Lookup fails because repository is empty -> composition fails closed
       const res = await resolver.resolveComposition({
-        registryRepository: repo as any,
+        registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_001",
         executionId: "exec_001",
@@ -449,18 +449,23 @@ describe("AMS-0860-A — Identity & Configuration Closure", () => {
       expect(res.ok).toBe(false);
       if (!res.ok) {
         expect(res.error.code).toBe("missing");
-        expect((res as any).sccId).toBeUndefined();
-        expect((res as any).bcgId).toBeUndefined();
-        expect((res as any).bcg).toBeUndefined();
+        const checkRes = res as unknown as {
+          sccId?: string;
+          bcgId?: string;
+          bcg?: unknown;
+        };
+        expect(checkRes.sccId).toBeUndefined();
+        expect(checkRes.bcgId).toBeUndefined();
+        expect(checkRes.bcg).toBeUndefined();
       }
     });
 
     it("TEST 0860.8 — Registry Drift after resolution leaves sccId and bcgId unchanged", async () => {
-      const repo = new FrozenRegistryRepository({});
+      const repo: RegistryRepository = new FrozenRegistryRepository({});
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
-        registryRepository: repo as any,
+        registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_002",
         executionId: "exec_002",
