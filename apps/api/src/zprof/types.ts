@@ -220,7 +220,10 @@ export interface GenericCompositionOptions {
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
   readonly explicitConflictInputs?: import("./conflict.js").ConflictEvaluationInputs;
-  readonly explicitBindingEdges?: readonly { readonly from: string; readonly to: string }[];
+  readonly explicitBindingEdges?: readonly {
+    readonly from: string;
+    readonly to: string;
+  }[];
 }
 
 /**

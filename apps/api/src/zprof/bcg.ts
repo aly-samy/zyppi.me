@@ -115,7 +115,11 @@ export function normalizeBcg(
       ? { opacityBoundaries: Object.freeze(opacityBoundaries) }
       : {}),
     ...(externalIntegrityReferences
-      ? { externalIntegrityReferences: Object.freeze(externalIntegrityReferences) }
+      ? {
+          externalIntegrityReferences: Object.freeze(
+            externalIntegrityReferences,
+          ),
+        }
       : {}),
   });
 }
@@ -261,9 +265,7 @@ export function buildBoundConfigurationGraph(
 
   // Transitive closure matching exact targetRef or matching node ID
   const queue: BcgNode[] = Array.from(nodeMap.values());
-  const visitedKeys = new Set<string>(
-    queue.map((n) => `${n.id}@${n.version}`),
-  );
+  const visitedKeys = new Set<string>(queue.map((n) => `${n.id}@${n.version}`));
 
   while (queue.length > 0) {
     const currentNode = queue.shift()!;

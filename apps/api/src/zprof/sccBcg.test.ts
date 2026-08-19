@@ -419,6 +419,8 @@ describe("AMS-0860-A / CORR-0860-A-1 — Identity & Configuration Closure", () =
         versions: ["1.0.0"],
         policyContext: mockPolicyContext,
         resolvedPolicyGraph: mockPolicyGraph,
+        explicitBindingEdges:
+          manifestWithNoBindingEdges.dependencyTopology.edges,
         explicitAcv: {
           identity: {
             identityId: "id_1",
