@@ -43,6 +43,10 @@ import {
   validateExplicitVersionList,
   validateVersionConstraints,
 } from "./versionValidator.js";
+import { deriveSccIdentityInternal } from "./scc.js";
+import { buildBoundConfigurationGraph } from "./bcg.js";
+import { validateParticipantCollection } from "./participant.js";
+import { validateTopologyGraph } from "./topology.js";
 
 export interface GS1CompositionOptions {
   readonly registryRepository: RegistryRepository;
@@ -66,6 +70,7 @@ export interface GS1CompositionOptions {
   readonly evidencePayloadProvider?: EvidencePayloadProvider;
   readonly objectStorageClient?: ObjectStorageClient;
   readonly explicitConflictInputs?: import("./conflict.js").ConflictEvaluationInputs;
+  readonly compositionDefinition?: import("./bind.js").CompositionDefinition;
 }
 
 export type ApplicationCompositionBridgeResult =
@@ -74,6 +79,9 @@ export type ApplicationCompositionBridgeResult =
       readonly manifest: CompositionManifest;
       readonly boundPayload: BoundConstitutionalPayload;
       readonly pipelineResult: PipelineResult;
+      readonly sccId?: string;
+      readonly bcgId?: string;
+      readonly bcg?: import("./bcg.js").BoundConfigurationGraph;
     }
   | {
       readonly ok: false;
@@ -349,6 +357,57 @@ export class ApplicationCompositionResolver {
 
     const domainSlug = dtc.domainIdentifier.replace("domain:", "");
 
+    // Validate governed CompositionDefinition topology per AMS-0858 / CORR-0860-A-4 §3
+    let governedBindingEdges: readonly {
+      readonly from: string;
+      readonly to: string;
+    }[] = [];
+
+    if (options.compositionDefinition) {
+      const compDef = options.compositionDefinition;
+      const compParticipants = compDef.participants;
+
+      // CORR-0860-A-5 §1-§4: Zero participant synthesis or owner/version fabrication permitted.
+      // If participants are absent or empty, fail closed with invalid.
+      if (!compParticipants || compParticipants.length === 0) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message:
+              "compositionDefinition provided without explicit governed participants collection P",
+          },
+        };
+      }
+
+      const pRes = validateParticipantCollection(compParticipants);
+      if (!pRes.ok) {
+        return {
+          ok: false,
+          error: pRes.error,
+        };
+      }
+
+      const topoRes = validateTopologyGraph(
+        pRes.participants,
+        compDef.structuralEdges || [],
+        compDef.bindingEdges || [],
+      );
+
+      if (!topoRes.ok) {
+        return {
+          ok: false,
+          error: topoRes.error,
+        };
+      }
+
+      governedBindingEdges = topoRes.graph.eBind.map((e) => ({
+        from: e.sourceId,
+        to: e.targetId,
+      }));
+    }
+
     // Detect structural divergence if multiple conflicting CL-16 artifacts are present
     let epistemicDivergence = false;
     const boundCl16Artifacts: Cl16IntelligenceReference[] = [];
@@ -453,15 +512,15 @@ export class ApplicationCompositionResolver {
       dependencyTopology: Object.freeze({
         nodes: Object.freeze([
           dtc.dtcId,
-          dtc.applicableArmProfiles[0] || "arm:profile:trade_item:v1",
+          ...dtc.applicableArmProfiles,
           ...dtc.requiredPrjSpecifications,
+          ...dtc.requiredRsnBlueprints,
         ]),
-        edges: Object.freeze([
-          Object.freeze({
-            from: dtc.dtcId,
-            to: dtc.applicableArmProfiles[0] || "arm:profile:trade_item:v1",
-          }),
-        ]),
+        edges: Object.freeze(
+          governedBindingEdges.map((e) =>
+            Object.freeze({ from: e.from, to: e.to }),
+          ),
+        ),
       }),
       provenanceReferences: Object.freeze({
         manifestAuthor: "identity:council:admin",
@@ -489,11 +548,85 @@ export class ApplicationCompositionResolver {
       ...(epistemicDivergence ? { epistemicDivergence: true } : {}),
     });
 
+    // Derive SCC identity strictly on the successful validated composition path
+    const sccId = deriveSccIdentityInternal(manifest);
+
+    // Build Bound Configuration Graph (BCG) from full explicit governed configuration (CORR-0860-A-1 §5)
+    // Include all explicitly bound constituents on the validated manifest
+    const initialNodes = [
+      {
+        id: manifest.dtcReference.dtcId,
+        version: manifest.dtcReference.version,
+        kind: "DTC",
+      },
+      {
+        id: manifest.armProfileReference.profileId,
+        version: manifest.armProfileReference.version,
+        kind: "ARMProfile",
+      },
+      ...manifest.boundEpistemicRequirements.map((r) => ({
+        id: r.requirementId,
+        version: r.version,
+        kind: "EpistemicRequirement",
+      })),
+      ...manifest.boundPrjSpecifications.map((s) => ({
+        id: s.specId,
+        version: s.version,
+        kind: "PrjSpec",
+      })),
+      ...manifest.boundRsnBlueprints.map((b) => ({
+        id: b.blueprintId,
+        version: b.version,
+        kind: "RsnBlueprint",
+      })),
+      ...manifest.boundPolRequirements.map((p) => ({
+        id: p.policyId,
+        version: p.version,
+        kind: "PolRequirement",
+      })),
+      ...manifest.boundSecRequirements.map((s) => ({
+        id: s.securityReqId,
+        version: s.version,
+        kind: "SecRequirement",
+      })),
+      ...manifest.boundRiCapabilities.map((c) => ({
+        id: c.capabilityId,
+        version: c.version,
+        kind: "RiCapability",
+      })),
+    ];
+
+    // Source binding edges strictly from explicit governed T_bind declarations on manifest (CORR-0860-A-1 §1)
+    // Zero invented REQUIRES edges
+    const initialBindingEdges = manifest.dependencyTopology.edges.map((e) => ({
+      sourceRef: e.from,
+      targetRef: e.to,
+      dependencyKind: "REQUIRES",
+    }));
+
+    const bcgResult = buildBoundConfigurationGraph({
+      semanticConfigurationRef: sccId,
+      initialNodes,
+      bindingEdges: initialBindingEdges,
+    });
+
+    if (!bcgResult.ok) {
+      return {
+        ok: false,
+        error: bcgResult.error,
+      };
+    }
+
+    const { bcg, bcgId } = bcgResult;
+
     return {
       ok: true,
       manifest,
       boundPayload,
       evidencePayloads,
+      sccId,
+      bcgId,
+      bcg,
     };
   }
 
@@ -513,7 +646,7 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    const { manifest, boundPayload, evidencePayloads } = res;
+    const { manifest, boundPayload, evidencePayloads, sccId, bcgId, bcg } = res;
 
     // Construct explicit ExecutionRequest
     const executionRequest: ExecutionRequest = {
@@ -538,6 +671,9 @@ export class ApplicationCompositionResolver {
       manifest,
       boundPayload,
       pipelineResult,
+      sccId,
+      bcgId,
+      bcg,
     };
   }
 }
