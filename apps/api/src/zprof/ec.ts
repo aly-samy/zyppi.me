@@ -6,108 +6,235 @@ import type {
   EvaluationCoordinateInput,
   EvaluationCoordinateResult,
   EvidenceIntegrityCoordinate,
-  PinnedStateReference,
 } from "./types.js";
-
-const SHA256_REGEX = /^sha256:[0-9a-f]{64}$/;
+import {
+  deepFreezePlainData,
+  validateIsoTimestamp,
+  validatePinnedStateReference,
+  validateSha256Digest,
+} from "./validation.js";
 
 /**
- * Validates structural format of SHA-256 digest (sha256:<64 lowercase hex characters>).
+ * Completely and deeply validates an EvaluationCoordinate payload per CORR-0860-B-2 §1.
+ * Validates sccId, bcgId, pinnedSemanticStateRef, boundContext plain-data legality,
+ * every EvidenceIntegrityCoordinate's evidenceRef & SHA-256 digest, every supplied temporal coordinate,
+ * and authorizedInputs/evaluationParameters plain-data legality.
  */
-export function validateSha256Digest(
-  digest: string,
-  fieldLabel = "digest",
+export function validateEvaluationCoordinatePayload(
+  coord: unknown,
+  label = "coordinate",
 ):
   | { readonly ok: true }
   | { readonly ok: false; readonly error: CompositionError } {
-  if (typeof digest !== "string" || !SHA256_REGEX.test(digest)) {
+  if (!coord || typeof coord !== "object") {
     return {
       ok: false,
       error: {
         code: "invalid",
         category: "Composition Failure",
-        message: `${fieldLabel} must be a valid SHA-256 digest string formatted as 'sha256:<64 lowercase hex chars>'. Received '${digest}'.`,
+        message: `${label} must be a valid EvaluationCoordinate object.`,
       },
     };
   }
-  return { ok: true };
-}
 
-/**
- * Validates ISO-8601 structural format for timestamp coordinates.
- */
-export function validateIsoTimestamp(
-  timestamp: string,
-  fieldLabel = "timestamp",
-):
-  | { readonly ok: true }
-  | { readonly ok: false; readonly error: CompositionError } {
+  const ec = coord as Partial<EvaluationCoordinate>;
+
   if (
-    typeof timestamp !== "string" ||
-    timestamp.trim().length === 0 ||
-    Number.isNaN(Date.parse(timestamp))
+    !ec.sccId ||
+    typeof ec.sccId !== "string" ||
+    ec.sccId.trim().length === 0
   ) {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${fieldLabel} must be a valid ISO-8601 timestamp string. Received '${timestamp}'.`,
-      },
-    };
-  }
-  return { ok: true };
-}
-
-/**
- * Validates structural presence and format of PinnedStateReference.
- */
-export function validatePinnedStateReference(
-  ref: PinnedStateReference,
-  roleName: string,
-):
-  | { readonly ok: true }
-  | { readonly ok: false; readonly error: CompositionError } {
-  if (!ref || typeof ref !== "object" || Array.isArray(ref)) {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${roleName} must be an object with an explicit 'ref' property.`,
-      },
-    };
-  }
-
-  if (!ref.ref || typeof ref.ref !== "string" || ref.ref.trim().length === 0) {
     return {
       ok: false,
       error: {
         code: "missing",
         category: "Composition Failure",
-        message: `${roleName}.ref must be an explicit non-empty string reference identifier.`,
+        message: `${label}.sccId is absent or empty.`,
       },
     };
   }
+  const sccRes = validateSha256Digest(ec.sccId, `${label}.sccId`);
+  if (!sccRes.ok) return sccRes;
 
   if (
-    ref.version !== undefined &&
-    (typeof ref.version !== "string" || ref.version.trim().length === 0)
+    !ec.bcgId ||
+    typeof ec.bcgId !== "string" ||
+    ec.bcgId.trim().length === 0
   ) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message: `${label}.bcgId is absent or empty.`,
+      },
+    };
+  }
+  const bcgRes = validateSha256Digest(ec.bcgId, `${label}.bcgId`);
+  if (!bcgRes.ok) return bcgRes;
+
+  if (!ec.pinnedSemanticStateRef) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message: `${label}.pinnedSemanticStateRef is absent.`,
+      },
+    };
+  }
+  const pinRes = validatePinnedStateReference(
+    ec.pinnedSemanticStateRef,
+    `${label}.pinnedSemanticStateRef`,
+  );
+  if (!pinRes.ok) return pinRes;
+
+  if (!ec.boundContext || typeof ec.boundContext !== "object") {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message: `${label}.boundContext must be an object.`,
+      },
+    };
+  }
+  try {
+    deepFreezePlainData(ec.boundContext, `${label}.boundContext`);
+  } catch (err: unknown) {
     return {
       ok: false,
       error: {
         code: "invalid",
         category: "Composition Failure",
-        message: `${roleName}.version, when supplied, must be an explicit non-empty string.`,
+        message:
+          err instanceof Error
+            ? err.message
+            : "boundContext contains non-plain data.",
       },
     };
   }
 
-  if (ref.digest !== undefined) {
-    const digestRes = validateSha256Digest(ref.digest, `${roleName}.digest`);
+  if (!Array.isArray(ec.evidenceIntegrityCoordinates)) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message: `${label}.evidenceIntegrityCoordinates must be an array.`,
+      },
+    };
+  }
+
+  for (let i = 0; i < ec.evidenceIntegrityCoordinates.length; i++) {
+    const item = ec.evidenceIntegrityCoordinates[i];
+    if (
+      !item ||
+      typeof item !== "object" ||
+      !item.evidenceRef ||
+      typeof item.evidenceRef !== "string" ||
+      item.evidenceRef.trim().length === 0
+    ) {
+      return {
+        ok: false,
+        error: {
+          code: "unverified",
+          category: "Composition Failure",
+          message: `${label}.evidenceIntegrityCoordinates[${i}].evidenceRef is absent or empty.`,
+        },
+      };
+    }
+
+    const digestRes = validateSha256Digest(
+      item.digest,
+      `${label}.evidenceIntegrityCoordinates[${i}].digest`,
+    );
     if (!digestRes.ok) {
-      return digestRes;
+      return {
+        ok: false,
+        error: {
+          code: "unverified",
+          category: "Composition Failure",
+          message: digestRes.error.message,
+        },
+      };
+    }
+  }
+
+  if (ec.temporalCoordinates !== undefined) {
+    if (
+      typeof ec.temporalCoordinates !== "object" ||
+      ec.temporalCoordinates === null
+    ) {
+      return {
+        ok: false,
+        error: {
+          code: "invalid",
+          category: "Composition Failure",
+          message: `${label}.temporalCoordinates must be an object.`,
+        },
+      };
+    }
+    const temp = ec.temporalCoordinates;
+    if (temp.tValid !== undefined) {
+      const res = validateIsoTimestamp(
+        temp.tValid,
+        `${label}.temporalCoordinates.tValid`,
+      );
+      if (!res.ok) return res;
+    }
+    if (temp.tObservation !== undefined) {
+      const res = validateIsoTimestamp(
+        temp.tObservation,
+        `${label}.temporalCoordinates.tObservation`,
+      );
+      if (!res.ok) return res;
+    }
+    if (temp.tEInput !== undefined) {
+      const res = validateIsoTimestamp(
+        temp.tEInput,
+        `${label}.temporalCoordinates.tEInput`,
+      );
+      if (!res.ok) return res;
+    }
+  }
+
+  if (ec.authorizedInputs !== undefined) {
+    try {
+      deepFreezePlainData(ec.authorizedInputs, `${label}.authorizedInputs`);
+    } catch (err: unknown) {
+      return {
+        ok: false,
+        error: {
+          code: "invalid",
+          category: "Composition Failure",
+          message:
+            err instanceof Error
+              ? err.message
+              : "authorizedInputs contains non-plain data.",
+        },
+      };
+    }
+  }
+
+  if (ec.evaluationParameters !== undefined) {
+    try {
+      deepFreezePlainData(
+        ec.evaluationParameters,
+        `${label}.evaluationParameters`,
+      );
+    } catch (err: unknown) {
+      return {
+        ok: false,
+        error: {
+          code: "invalid",
+          category: "Composition Failure",
+          message:
+            err instanceof Error
+              ? err.message
+              : "evaluationParameters contains non-plain data.",
+        },
+      };
     }
   }
 
@@ -115,58 +242,7 @@ export function validatePinnedStateReference(
 }
 
 /**
- * Deeply clones and freezes a plain data object, ensuring no executable functions,
- * promises, getters, or classes with behavior exist.
- */
-export function deepFreezePlainData<T>(val: T, path = "input"): T {
-  if (val === null || val === undefined) {
-    return val;
-  }
-
-  const type = typeof val;
-  if (type === "function" || type === "symbol") {
-    throw new Error(
-      `Non-serializable/executable value at ${path} is prohibited.`,
-    );
-  }
-
-  if (type !== "object") {
-    return val;
-  }
-
-  if (Array.isArray(val)) {
-    const frozenArray = val.map((item, idx) =>
-      deepFreezePlainData(item, `${path}[${idx}]`),
-    );
-    return Object.freeze(frozenArray) as unknown as T;
-  }
-
-  // Check prototype for plain objects per CORR-0860-B-1 §6
-  const proto = Object.getPrototypeOf(val);
-  if (proto !== Object.prototype && proto !== null) {
-    throw new Error(
-      `Class instance or non-plain object structure at ${path} is prohibited.`,
-    );
-  }
-
-  const obj = val as Record<string, unknown>;
-  const frozenObj: Record<string, unknown> = {};
-
-  for (const key of Object.keys(obj)) {
-    const propDesc = Object.getOwnPropertyDescriptor(obj, key);
-    if (propDesc && (propDesc.get || propDesc.set)) {
-      throw new Error(
-        `Getter or setter property at ${path}.${key} is prohibited.`,
-      );
-    }
-    frozenObj[key] = deepFreezePlainData(obj[key], `${path}.${key}`);
-  }
-
-  return Object.freeze(frozenObj) as unknown as T;
-}
-
-/**
- * Builds an EvaluationCoordinate (EC) per AMS-0860-B §10-§21 / CORR-0860-B-1.
+ * Builds an EvaluationCoordinate (EC) per AMS-0860-B §10-§21 / CORR-0860-B-1 / CORR-0860-B-2.
  * Consumes pre-computed sccId and bcgId from AMS-0860-A without recomputing them.
  * Guarantees OP ∉ EC, PinnedAssessmentState ∉ EC, T_trust ∉ EC, ExecutionReceipt ∉ EC, T_e_observed ∉ EC.
  */
@@ -250,7 +326,8 @@ export function buildEvaluationCoordinate(
       !item ||
       typeof item !== "object" ||
       !item.evidenceRef ||
-      !item.digest
+      typeof item.evidenceRef !== "string" ||
+      item.evidenceRef.trim().length === 0
     ) {
       return {
         ok: false,
@@ -283,7 +360,7 @@ export function buildEvaluationCoordinate(
     });
   }
 
-  // Validate temporal requirements and ISO-8601 timestamp formats
+  // Validate temporal requirements and strict ISO-8601 timestamp formats
   const temporalRes = validateTemporalRequirements(
     input.temporalCoordinates,
     input.temporalRequirements,

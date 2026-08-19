@@ -1,4 +1,4 @@
-import { validateIsoTimestamp } from "./ec.js";
+import { validateIsoTimestamp } from "./validation.js";
 import type {
   CompositionError,
   EvaluationTemporalCoordinates,
@@ -16,8 +16,8 @@ export type BuildTemporalCoordinatesResult =
     };
 
 /**
- * Validates temporal requirement constraints against supplied temporal coordinates per AMS-0860-B §18-§21 / CORR-0860-B-1 §5.
- * Enforces ISO-8601 structural timestamp format validation when temporal coordinates are present.
+ * Validates temporal requirement constraints against supplied temporal coordinates per AMS-0860-B §18-§21 / CORR-0860-B-1 §5 / CORR-0860-B-2 §3.
+ * Enforces strict ISO-8601 timestamp format validation when temporal coordinates are present.
  * Governed rule requirements consume explicit declarations; does not infer applicability or consult ambient clocks.
  */
 export function validateTemporalRequirements(

@@ -1,22 +1,24 @@
 import { canonicalizeJcs } from "@zyppi/domain";
-import {
-  deepFreezePlainData,
-  validateIsoTimestamp,
-  validatePinnedStateReference,
-  validateSha256Digest,
-} from "./ec.js";
+import { validateEvaluationCoordinatePayload } from "./ec.js";
+import { validateParticipantCollection } from "./participant.js";
+import { validateTopologyGraph } from "./topology.js";
 import type {
   AssessmentRequestCoordinate,
   AssessmentRequestCoordinateInput,
   AssessmentRequestCoordinateResult,
   AssessmentTarget,
   CompositionError,
-  EvaluationCoordinate,
   HistoricalReconstructionBoundaryResult,
   HistoricalReconstructionResult,
   PinnedStateReference,
   PrimitiveOperation,
 } from "./types.js";
+import {
+  deepFreezePlainData,
+  validateIsoTimestamp,
+  validatePinnedStateReference,
+  validateSha256Digest,
+} from "./validation.js";
 
 const CLOSED_OPERATIONS: readonly PrimitiveOperation[] = [
   "NEW_COMPOSITION",
@@ -26,96 +28,7 @@ const CLOSED_OPERATIONS: readonly PrimitiveOperation[] = [
 ];
 
 /**
- * Validates structural integrity of an EvaluationCoordinate payload per CORR-0860-B-1 §3.
- */
-function validateEvaluationCoordinatePayload(
-  coord: unknown,
-  label = "coordinate",
-):
-  | { readonly ok: true }
-  | { readonly ok: false; readonly error: CompositionError } {
-  if (!coord || typeof coord !== "object") {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${label} must be a valid EvaluationCoordinate object.`,
-      },
-    };
-  }
-
-  const ec = coord as Partial<EvaluationCoordinate>;
-
-  if (!ec.sccId || typeof ec.sccId !== "string") {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${label}.sccId must be a valid non-empty string.`,
-      },
-    };
-  }
-  const sccRes = validateSha256Digest(ec.sccId, `${label}.sccId`);
-  if (!sccRes.ok) return sccRes;
-
-  if (!ec.bcgId || typeof ec.bcgId !== "string") {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${label}.bcgId must be a valid non-empty string.`,
-      },
-    };
-  }
-  const bcgRes = validateSha256Digest(ec.bcgId, `${label}.bcgId`);
-  if (!bcgRes.ok) return bcgRes;
-
-  if (!ec.pinnedSemanticStateRef) {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${label}.pinnedSemanticStateRef is absent.`,
-      },
-    };
-  }
-  const pinRes = validatePinnedStateReference(
-    ec.pinnedSemanticStateRef,
-    `${label}.pinnedSemanticStateRef`,
-  );
-  if (!pinRes.ok) return pinRes;
-
-  if (!ec.boundContext || typeof ec.boundContext !== "object") {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${label}.boundContext must be an object.`,
-      },
-    };
-  }
-
-  if (!Array.isArray(ec.evidenceIntegrityCoordinates)) {
-    return {
-      ok: false,
-      error: {
-        code: "invalid",
-        category: "Composition Failure",
-        message: `${label}.evidenceIntegrityCoordinates must be an array.`,
-      },
-    };
-  }
-
-  return { ok: true };
-}
-
-/**
- * Validates Target × OP compatibility AND target payload structure per CORR-0860-B-1 §3.
+ * Validates Target × OP compatibility AND target payload structure per CORR-0860-B-1 §3 / CORR-0860-B-2 §1-§2.
  */
 export function validateTargetOperationCompatibility(
   target: AssessmentTarget,
@@ -159,13 +72,7 @@ export function validateTargetOperationCompatibility(
         };
       }
       const compDef = target.compositionDefinition;
-      if (
-        !compDef ||
-        typeof compDef !== "object" ||
-        !Array.isArray(compDef.participants) ||
-        compDef.participants.length === 0 ||
-        !Array.isArray(compDef.bindingEdges)
-      ) {
+      if (!compDef || typeof compDef !== "object") {
         return {
           ok: false,
           error: {
@@ -176,6 +83,70 @@ export function validateTargetOperationCompatibility(
           },
         };
       }
+
+      if (!Array.isArray(compDef.participants)) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message:
+              "CompositionAuthoringTarget.participants must be an array.",
+          },
+        };
+      }
+
+      // Reuse AMS-0858 governed participant validation per CORR-0860-B-2 §2
+      const partRes = validateParticipantCollection(compDef.participants);
+      if (!partRes.ok) {
+        return partRes;
+      }
+      const validParticipants = partRes.participants;
+
+      if (!Array.isArray(compDef.bindingEdges)) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message:
+              "CompositionAuthoringTarget.bindingEdges must be an array.",
+          },
+        };
+      }
+
+      const rawBindingEdges = compDef.bindingEdges.map((e) => {
+        const edge = e as {
+          sourceId?: string;
+          sourceRef?: string;
+          targetId?: string;
+          targetRef?: string;
+          dependencyKind?: string;
+        };
+        return {
+          sourceId: edge.sourceId || edge.sourceRef || "",
+          targetId: edge.targetId || edge.targetRef || "",
+          dependencyKind: edge.dependencyKind || "REQUIRES",
+        };
+      });
+
+      // Reuse AMS-0858 governed topology validation per CORR-0860-B-2 §2
+      const topoRes = validateTopologyGraph(
+        validParticipants,
+        [],
+        rawBindingEdges,
+      );
+      if (!topoRes.ok) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message: topoRes.error.message,
+          },
+        };
+      }
+
       break;
     }
 
@@ -275,7 +246,7 @@ export function validateTargetOperationCompatibility(
 }
 
 /**
- * Builds an AssessmentRequestCoordinate (ARC) per AMS-0860-B §22-§28 / CORR-0860-B-1.
+ * Builds an AssessmentRequestCoordinate (ARC) per AMS-0860-B §22-§28 / CORR-0860-B-1 / CORR-0860-B-2.
  * Enforces closed OP vocabulary, Target × OP matrix, structural target payload validation,
  * explicit pinnedAssessmentStateRef with zero fallback, and explicit T_trust.
  */

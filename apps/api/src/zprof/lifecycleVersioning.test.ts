@@ -644,4 +644,221 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     const boundaryRes = evaluateHistoricalReconstructionBoundary(histTarget);
     expect(boundaryRes.ok).toBe(true);
   });
+
+  // ==========================================================================
+  // Section G: CORR-0860-B-2 Mandatory Tests (B26–B33)
+  // ==========================================================================
+
+  it("Test B26 — Forged EC target with malformed evidence digest -> invalid", () => {
+    const forgedEcTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: {
+        ...getValidEc(),
+        evidenceIntegrityCoordinates: [
+          { evidenceRef: "ev:1", digest: "invalid_digest" },
+        ],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedEcTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("unverified");
+    }
+  });
+
+  it("Test B27 — Forged EC target with blank evidenceRef -> invalid", () => {
+    const forgedEcTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: {
+        ...getValidEc(),
+        evidenceIntegrityCoordinates: [
+          {
+            evidenceRef: "",
+            digest:
+              "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+          },
+        ],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedEcTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("unverified");
+    }
+  });
+
+  it("Test B28 — Forged EC target with malformed temporal coordinate -> invalid", () => {
+    const forgedEcTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: {
+        ...getValidEc(),
+        temporalCoordinates: { tEInput: "tomorrow" },
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedEcTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B29 — Forged EC target containing class instance in context/input -> invalid", () => {
+    class CustomHandle {}
+    const forgedEcTarget = {
+      kind: "EVALUATION_COORDINATE",
+      coordinate: {
+        ...getValidEc(),
+        boundContext: { handle: new CustomHandle() },
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: forgedEcTarget,
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B30 — NEW_COMPOSITION + participant missing owner -> invalid", () => {
+    const compTarget = {
+      kind: "COMPOSITION_AUTHORING",
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "dtc:1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: "", // Missing owner!
+            role: "domain_template",
+            reference: { id: "dtc:1", version: "1.0.0" },
+          },
+        ],
+        bindingEdges: [],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: compTarget,
+      operation: "NEW_COMPOSITION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B31 — NEW_COMPOSITION + participant missing version -> invalid", () => {
+    const compTarget = {
+      kind: "COMPOSITION_AUTHORING",
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "dtc:1",
+            kind: "DTC",
+            version: "", // Missing version!
+            owner: "owner:1",
+            role: "domain_template",
+            reference: { id: "dtc:1", version: "1.0.0" },
+          },
+        ],
+        bindingEdges: [],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: compTarget,
+      operation: "NEW_COMPOSITION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B32 — NEW_COMPOSITION + cyclic T_bind -> invalid", () => {
+    const compTarget = {
+      kind: "COMPOSITION_AUTHORING",
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "p:1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: "owner:1",
+            role: "domain_template",
+            reference: { id: "p:1", version: "1.0.0" },
+          },
+          {
+            identity: "p:2",
+            kind: "ARM_PROFILE",
+            version: "1.0.0",
+            owner: "owner:1",
+            role: "asset_profile",
+            reference: { id: "p:2", version: "1.0.0" },
+          },
+        ],
+        bindingEdges: [
+          { sourceRef: "p:1", targetRef: "p:2", dependencyKind: "REQUIRES" },
+          { sourceRef: "p:2", targetRef: "p:1", dependencyKind: "REQUIRES" }, // Cycle!
+        ],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: compTarget,
+      operation: "NEW_COMPOSITION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B33 — non-ISO but Date.parse-compatible timestamp -> invalid", () => {
+    const badTimeRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      temporalCoordinates: { tEInput: "2026-08-19 18:08:00" }, // Non-ISO format!
+    });
+
+    expect(badTimeRes.ok).toBe(false);
+    if (!badTimeRes.ok) {
+      expect(badTimeRes.error.code).toBe("invalid");
+    }
+  });
 });
