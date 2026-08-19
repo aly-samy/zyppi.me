@@ -25,7 +25,9 @@ const CLOSED_OPERATIONS: readonly PrimitiveOperation[] = [
 export function validateTargetOperationCompatibility(
   target: AssessmentTarget,
   operation: PrimitiveOperation,
-): { readonly ok: true } | { readonly ok: false; readonly error: CompositionError } {
+):
+  | { readonly ok: true }
+  | { readonly ok: false; readonly error: CompositionError } {
   if (!CLOSED_OPERATIONS.includes(operation)) {
     return {
       ok: false,
@@ -43,7 +45,8 @@ export function validateTargetOperationCompatibility(
       error: {
         code: "invalid",
         category: "Composition Failure",
-        message: "Assessment target must be a valid discriminated AssessmentTarget structure with an explicit 'kind' property.",
+        message:
+          "Assessment target must be a valid discriminated AssessmentTarget structure with an explicit 'kind' property.",
       },
     };
   }
@@ -113,23 +116,34 @@ export function validateTargetOperationCompatibility(
 export function buildAssessmentRequestCoordinate(
   input: AssessmentRequestCoordinateInput,
 ): AssessmentRequestCoordinateResult {
-  const opTargetRes = validateTargetOperationCompatibility(input.target, input.operation);
+  const opTargetRes = validateTargetOperationCompatibility(
+    input.target,
+    input.operation,
+  );
   if (!opTargetRes.ok) {
     return { ok: false, error: opTargetRes.error };
   }
 
-  const pinRes = validatePinnedStateReference(input.pinnedAssessmentStateRef, "pinnedAssessmentStateRef");
+  const pinRes = validatePinnedStateReference(
+    input.pinnedAssessmentStateRef,
+    "pinnedAssessmentStateRef",
+  );
   if (!pinRes.ok) {
     return { ok: false, error: pinRes.error };
   }
 
-  if (!input.tTrust || typeof input.tTrust !== "string" || input.tTrust.trim().length === 0) {
+  if (
+    !input.tTrust ||
+    typeof input.tTrust !== "string" ||
+    input.tTrust.trim().length === 0
+  ) {
     return {
       ok: false,
       error: {
         code: "missing",
         category: "Composition Failure",
-        message: "Required assessment trust temporal coordinate 'tTrust' is absent.",
+        message:
+          "Required assessment trust temporal coordinate 'tTrust' is absent.",
       },
     };
   }
@@ -142,14 +156,18 @@ export function buildAssessmentRequestCoordinate(
         error: {
           code: "invalid",
           category: "Composition Failure",
-          message: "applicableAssessmentRules, when supplied, must be an array.",
+          message:
+            "applicableAssessmentRules, when supplied, must be an array.",
         },
       };
     }
 
     for (let i = 0; i < input.applicableAssessmentRules.length; i++) {
       const rule = input.applicableAssessmentRules[i]!;
-      const ruleRes = validatePinnedStateReference(rule, `applicableAssessmentRules[${i}]`);
+      const ruleRes = validatePinnedStateReference(
+        rule,
+        `applicableAssessmentRules[${i}]`,
+      );
       if (!ruleRes.ok) {
         return { ok: false, error: ruleRes.error };
       }
@@ -159,11 +177,15 @@ export function buildAssessmentRequestCoordinate(
 
   try {
     const frozenTarget = deepFreezePlainData(input.target, "target");
-    const frozenPinnedAssessmentStateRef = deepFreezePlainData(input.pinnedAssessmentStateRef, "pinnedAssessmentStateRef");
+    const frozenPinnedAssessmentStateRef = deepFreezePlainData(
+      input.pinnedAssessmentStateRef,
+      "pinnedAssessmentStateRef",
+    );
     const sortedRules = [...validatedRules]
       .map((r) => deepFreezePlainData(r))
       .sort((a, b) => canonicalizeJcs(a).localeCompare(canonicalizeJcs(b)));
-    const frozenRules = sortedRules.length > 0 ? Object.freeze(sortedRules) : undefined;
+    const frozenRules =
+      sortedRules.length > 0 ? Object.freeze(sortedRules) : undefined;
 
     const coordinate: AssessmentRequestCoordinate = Object.freeze({
       target: frozenTarget,
@@ -183,7 +205,10 @@ export function buildAssessmentRequestCoordinate(
       error: {
         code: "invalid",
         category: "Composition Failure",
-        message: err instanceof Error ? err.message : "Failed to deep-freeze assessment request coordinate data.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to deep-freeze assessment request coordinate data.",
       },
     };
   }
@@ -203,7 +228,8 @@ export function evaluateHistoricalReconstructionBoundary(
       error: {
         code: "unauthorized",
         category: "Composition Failure",
-        message: "Historical reconstruction is prohibited by explicitly bound sovereign rule.",
+        message:
+          "Historical reconstruction is prohibited by explicitly bound sovereign rule.",
       },
     };
   }

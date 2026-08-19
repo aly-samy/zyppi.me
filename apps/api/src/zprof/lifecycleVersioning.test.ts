@@ -17,16 +17,20 @@ import type {
 } from "./types.js";
 
 describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordinates", () => {
-  const validSccId = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
-  const validBcgId = "sha256:2222222222222222222222222222222222222222222222222222222222222222";
+  const validSccId =
+    "sha256:1111111111111111111111111111111111111111111111111111111111111111";
+  const validBcgId =
+    "sha256:2222222222222222222222222222222222222222222222222222222222222222";
   const validPinnedSemanticState: PinnedStateReference = {
     ref: "acv:trade_item:v1.0.0",
-    digest: "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    digest:
+      "sha256:3333333333333333333333333333333333333333333333333333333333333333",
     version: "1.0.0",
   };
   const validPinnedAssessmentState: PinnedStateReference = {
     ref: "acv:trade_item:v1.0.0",
-    digest: "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    digest:
+      "sha256:3333333333333333333333333333333333333333333333333333333333333333",
     version: "1.0.0",
   };
   const validBoundContext = {
@@ -74,7 +78,9 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     expect(res1.ok).toBe(true);
     expect(res2.ok).toBe(true);
     if (res1.ok && res2.ok) {
-      expect(res1.coordinate.boundContext).not.toEqual(res2.coordinate.boundContext);
+      expect(res1.coordinate.boundContext).not.toEqual(
+        res2.coordinate.boundContext,
+      );
     }
   });
 
@@ -127,15 +133,22 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   // ==========================================================================
 
   it("B7 / §40.6: Rule does not require T_e_input + tEInput absent -> valid", () => {
-    const coords: EvaluationTemporalCoordinates = { tValid: "2026-01-01T00:00:00Z" };
-    const reqs: TemporalRequirements = { requiresTValid: true, requiresTEInput: false };
+    const coords: EvaluationTemporalCoordinates = {
+      tValid: "2026-01-01T00:00:00Z",
+    };
+    const reqs: TemporalRequirements = {
+      requiresTValid: true,
+      requiresTEInput: false,
+    };
 
     const res = validateTemporalRequirements(coords, reqs);
     expect(res.ok).toBe(true);
   });
 
   it("B7 / §40.7: Rule requires T_e_input + tEInput supplied -> valid", () => {
-    const coords: EvaluationTemporalCoordinates = { tEInput: "2026-06-01T12:00:00Z" };
+    const coords: EvaluationTemporalCoordinates = {
+      tEInput: "2026-06-01T12:00:00Z",
+    };
     const reqs: TemporalRequirements = { requiresTEInput: true };
 
     const res = validateTemporalRequirements(coords, reqs);
@@ -143,7 +156,9 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
   });
 
   it("B7 / §40.8: Rule requires T_e_input + tEInput absent -> fails closed with 'missing'", () => {
-    const coords: EvaluationTemporalCoordinates = { tValid: "2026-01-01T00:00:00Z" };
+    const coords: EvaluationTemporalCoordinates = {
+      tValid: "2026-01-01T00:00:00Z",
+    };
     const reqs: TemporalRequirements = { requiresTEInput: true };
 
     const res = validateTemporalRequirements(coords, reqs);
@@ -167,8 +182,13 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
 
     expect(ecRes.ok).toBe(true);
     if (ecRes.ok) {
-      expect(ecRes.coordinate.temporalCoordinates.tObservation).toBe("2026-02-01T00:00:00Z");
-      const temp = ecRes.coordinate.temporalCoordinates as unknown as Record<string, unknown>;
+      expect(ecRes.coordinate.temporalCoordinates.tObservation).toBe(
+        "2026-02-01T00:00:00Z",
+      );
+      const temp = ecRes.coordinate.temporalCoordinates as unknown as Record<
+        string,
+        unknown
+      >;
       expect(temp.tObserved).toBeUndefined();
       expect(temp.tEObserved).toBeUndefined();
     }
@@ -182,7 +202,12 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
       coordinate: buildEvaluationCoordinate(defaultEcInput).ok
-        ? (buildEvaluationCoordinate(defaultEcInput) as { ok: true; coordinate: any }).coordinate
+        ? (
+            buildEvaluationCoordinate(defaultEcInput) as {
+              ok: true;
+              coordinate: any;
+            }
+          ).coordinate
         : ({} as any),
     };
 
@@ -195,7 +220,9 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
 
     expect(arcRes.ok).toBe(true);
     if (arcRes.ok) {
-      expect(arcRes.coordinate.pinnedAssessmentStateRef).toEqual(validPinnedAssessmentState);
+      expect(arcRes.coordinate.pinnedAssessmentStateRef).toEqual(
+        validPinnedAssessmentState,
+      );
     }
   });
 
@@ -203,7 +230,12 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     const ecTarget: AssessmentTarget = {
       kind: "EVALUATION_COORDINATE",
       coordinate: buildEvaluationCoordinate(defaultEcInput).ok
-        ? (buildEvaluationCoordinate(defaultEcInput) as { ok: true; coordinate: any }).coordinate
+        ? (
+            buildEvaluationCoordinate(defaultEcInput) as {
+              ok: true;
+              coordinate: any;
+            }
+          ).coordinate
         : ({} as any),
     };
 
@@ -240,7 +272,8 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     const receiptTarget: AssessmentTarget = {
       kind: "EXECUTION_RECEIPT",
       receiptRef: "rcpt:123",
-      receiptDigest: "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      receiptDigest:
+        "sha256:4444444444444444444444444444444444444444444444444444444444444444",
     };
 
     const arcRes = buildAssessmentRequestCoordinate({
@@ -352,7 +385,9 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
     const boundaryRes = evaluateHistoricalReconstructionBoundary(histTarget);
     expect(boundaryRes.ok).toBe(true);
     if (boundaryRes.ok) {
-      expect(boundaryRes.result.status).toBe("NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION");
+      expect(boundaryRes.result.status).toBe(
+        "NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION",
+      );
       expect(boundaryRes.result.targetRef).toBe("ec:hist:999");
       expect(boundaryRes.result.historicalCoordinate).toBeDefined();
     }
@@ -383,7 +418,10 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
       ref: "ec:hist:999",
     };
 
-    const boundaryRes = evaluateHistoricalReconstructionBoundary(histTarget, true);
+    const boundaryRes = evaluateHistoricalReconstructionBoundary(
+      histTarget,
+      true,
+    );
     expect(boundaryRes.ok).toBe(false);
     if (!boundaryRes.ok) {
       expect(boundaryRes.error.code).toBe("unauthorized");

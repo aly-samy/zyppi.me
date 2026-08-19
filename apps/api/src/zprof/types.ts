@@ -279,9 +279,9 @@ export interface PinnedStateReference {
  * Runtime-observed execution timestamp (T_e_observed) SHALL NOT exist inside EvaluationCoordinate.
  */
 export interface EvaluationTemporalCoordinates {
-  readonly tValid?: string;       // T_v — Reality Valid Time
+  readonly tValid?: string; // T_v — Reality Valid Time
   readonly tObservation?: string; // T_o — Evidence Observation Time
-  readonly tEInput?: string;      // T_e_input — evaluation-affecting execution time input
+  readonly tEInput?: string; // T_e_input — evaluation-affecting execution time input
 }
 
 /**

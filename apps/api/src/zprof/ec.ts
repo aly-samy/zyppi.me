@@ -15,7 +15,9 @@ import type {
 export function validatePinnedStateReference(
   ref: PinnedStateReference,
   roleName: string,
-): { readonly ok: true } | { readonly ok: false; readonly error: CompositionError } {
+):
+  | { readonly ok: true }
+  | { readonly ok: false; readonly error: CompositionError } {
   if (!ref || typeof ref !== "object" || Array.isArray(ref)) {
     return {
       ok: false,
@@ -38,7 +40,10 @@ export function validatePinnedStateReference(
     };
   }
 
-  if (ref.version !== undefined && (typeof ref.version !== "string" || ref.version.trim().length === 0)) {
+  if (
+    ref.version !== undefined &&
+    (typeof ref.version !== "string" || ref.version.trim().length === 0)
+  ) {
     return {
       ok: false,
       error: {
@@ -76,19 +81,30 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
 
   const type = typeof val;
   if (type === "function" || type === "symbol") {
-    throw new Error(`Non-serializable/executable value at ${path} is prohibited.`);
+    throw new Error(
+      `Non-serializable/executable value at ${path} is prohibited.`,
+    );
   }
 
   if (type !== "object") {
     return val;
   }
 
-  if (val instanceof Promise || val instanceof Map || val instanceof Set || val instanceof Date) {
-    throw new Error(`Class instance or non-plain data structure at ${path} is prohibited.`);
+  if (
+    val instanceof Promise ||
+    val instanceof Map ||
+    val instanceof Set ||
+    val instanceof Date
+  ) {
+    throw new Error(
+      `Class instance or non-plain data structure at ${path} is prohibited.`,
+    );
   }
 
   if (Array.isArray(val)) {
-    const frozenArray = val.map((item, idx) => deepFreezePlainData(item, `${path}[${idx}]`));
+    const frozenArray = val.map((item, idx) =>
+      deepFreezePlainData(item, `${path}[${idx}]`),
+    );
     return Object.freeze(frozenArray) as unknown as T;
   }
 
@@ -98,7 +114,9 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
   for (const key of Object.keys(obj)) {
     const propDesc = Object.getOwnPropertyDescriptor(obj, key);
     if (propDesc && (propDesc.get || propDesc.set)) {
-      throw new Error(`Getter or setter property at ${path}.${key} is prohibited.`);
+      throw new Error(
+        `Getter or setter property at ${path}.${key} is prohibited.`,
+      );
     }
     frozenObj[key] = deepFreezePlainData(obj[key], `${path}.${key}`);
   }
@@ -114,7 +132,11 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
 export function buildEvaluationCoordinate(
   input: EvaluationCoordinateInput,
 ): EvaluationCoordinateResult {
-  if (!input.sccId || typeof input.sccId !== "string" || input.sccId.trim().length === 0) {
+  if (
+    !input.sccId ||
+    typeof input.sccId !== "string" ||
+    input.sccId.trim().length === 0
+  ) {
     return {
       ok: false,
       error: {
@@ -125,7 +147,11 @@ export function buildEvaluationCoordinate(
     };
   }
 
-  if (!input.bcgId || typeof input.bcgId !== "string" || input.bcgId.trim().length === 0) {
+  if (
+    !input.bcgId ||
+    typeof input.bcgId !== "string" ||
+    input.bcgId.trim().length === 0
+  ) {
     return {
       ok: false,
       error: {
@@ -136,7 +162,10 @@ export function buildEvaluationCoordinate(
     };
   }
 
-  const pinRes = validatePinnedStateReference(input.pinnedSemanticStateRef, "pinnedSemanticStateRef");
+  const pinRes = validatePinnedStateReference(
+    input.pinnedSemanticStateRef,
+    "pinnedSemanticStateRef",
+  );
   if (!pinRes.ok) {
     return { ok: false, error: pinRes.error };
   }
@@ -166,7 +195,12 @@ export function buildEvaluationCoordinate(
   const validatedEvidenceCoords: EvidenceIntegrityCoordinate[] = [];
   for (let i = 0; i < input.evidenceIntegrityCoordinates.length; i++) {
     const item = input.evidenceIntegrityCoordinates[i]!;
-    if (!item || typeof item !== "object" || !item.evidenceRef || !item.digest) {
+    if (
+      !item ||
+      typeof item !== "object" ||
+      !item.evidenceRef ||
+      !item.digest
+    ) {
       return {
         ok: false,
         error: {
@@ -183,20 +217,35 @@ export function buildEvaluationCoordinate(
   }
 
   // Validate temporal requirements
-  const temporalRes = validateTemporalRequirements(input.temporalCoordinates, input.temporalRequirements);
+  const temporalRes = validateTemporalRequirements(
+    input.temporalCoordinates,
+    input.temporalRequirements,
+  );
   if (!temporalRes.ok) {
     return { ok: false, error: temporalRes.error };
   }
 
   try {
-    const frozenPinnedStateRef = deepFreezePlainData(input.pinnedSemanticStateRef, "pinnedSemanticStateRef");
-    const frozenBoundContext = deepFreezePlainData(input.boundContext, "boundContext");
+    const frozenPinnedStateRef = deepFreezePlainData(
+      input.pinnedSemanticStateRef,
+      "pinnedSemanticStateRef",
+    );
+    const frozenBoundContext = deepFreezePlainData(
+      input.boundContext,
+      "boundContext",
+    );
     const sortedEvidenceCoords = [...validatedEvidenceCoords]
       .map((e) => deepFreezePlainData(e))
       .sort((a, b) => canonicalizeJcs(a).localeCompare(canonicalizeJcs(b)));
     const frozenEvidenceCoords = Object.freeze(sortedEvidenceCoords);
-    const frozenAuthorizedInputs = deepFreezePlainData(input.authorizedInputs ?? {}, "authorizedInputs");
-    const frozenEvaluationParams = deepFreezePlainData(input.evaluationParameters ?? {}, "evaluationParameters");
+    const frozenAuthorizedInputs = deepFreezePlainData(
+      input.authorizedInputs ?? {},
+      "authorizedInputs",
+    );
+    const frozenEvaluationParams = deepFreezePlainData(
+      input.evaluationParameters ?? {},
+      "evaluationParameters",
+    );
 
     const coordinate: EvaluationCoordinate = Object.freeze({
       sccId: input.sccId,
@@ -219,7 +268,10 @@ export function buildEvaluationCoordinate(
       error: {
         code: "invalid",
         category: "Composition Failure",
-        message: err instanceof Error ? err.message : "Failed to deep-freeze evaluation coordinate data.",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to deep-freeze evaluation coordinate data.",
       },
     };
   }
