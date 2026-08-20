@@ -238,7 +238,8 @@ export function runValidation(workspaceRoot = process.cwd()) {
             resolved = path.join(resolved, "index.ts");
           } else if (!resolved.endsWith(".ts") && !resolved.endsWith(".tsx")) {
             if (fs.existsSync(resolved + ".ts")) resolved = resolved + ".ts";
-            else if (fs.existsSync(resolved + ".tsx")) resolved = resolved + ".tsx";
+            else if (fs.existsSync(resolved + ".tsx"))
+              resolved = resolved + ".tsx";
           }
           const relResolved = path
             .relative(workspaceRoot, resolved)

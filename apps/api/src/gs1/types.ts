@@ -43,5 +43,4 @@ export interface GS1AnchorBridgeSuccess {
 }
 
 export type GS1AnchorBridgeResult =
-  | GS1AnchorBridgeSuccess
-  | GS1AnchorBridgeFailure;
+  GS1AnchorBridgeSuccess | GS1AnchorBridgeFailure;

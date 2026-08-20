@@ -6,10 +6,7 @@ import {
   type RetrievedRegistryState,
   type ValidatedCanonicalIdentifier,
 } from "@zyppi/contracts";
-import type {
-  IdentityRecord,
-  ReferentRecord,
-} from "@zyppi/domain";
+import type { IdentityRecord, ReferentRecord } from "@zyppi/domain";
 // @ts-expect-error JS module without declaration file
 import { runValidation } from "../../../../tools/verify-dependency-graph.mjs";
 
@@ -81,7 +78,9 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
       expect(result.provenance.carrierInput).toBe(validGtin14Carrier);
       expect(result.provenance.resolvedCanonicalId).toBe(validK1);
       expect(result.anchor.normalizedCarrier.k1).toBe(validK1);
-      expect(result.anchor.registryState.identity.identityId).toBe("09506000134352");
+      expect(result.anchor.registryState.identity.identityId).toBe(
+        "09506000134352",
+      );
       expect(repo.lookupCalls).toEqual([validK1]);
     }
   });
@@ -103,7 +102,10 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
   it("A-0861-03: should fail validation on valid Digital Link missing primary identifier AI 01", async () => {
     const repo = new MockRegistryRepository(new Map());
     // URI with AI 10 batch only, missing AI 01
-    const result = await createGs1AnchorFromCarrier("https://id.gs1.org/10/BATCH123", repo);
+    const result = await createGs1AnchorFromCarrier(
+      "https://id.gs1.org/10/BATCH123",
+      repo,
+    );
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -158,9 +160,11 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
     expect(res1.ok).toBe(true);
     expect(res2.ok).toBe(true);
     if (res1.ok && res2.ok) {
-      expect(res1.provenance.normalizedCarrier.k1).toBe(res2.provenance.normalizedCarrier.k1);
+      expect(res1.provenance.normalizedCarrier.k1).toBe(
+        res2.provenance.normalizedCarrier.k1,
+      );
       expect(res1.provenance.normalizedCarrier.supportedQualifiers).toEqual(
-        res2.provenance.normalizedCarrier.supportedQualifiers
+        res2.provenance.normalizedCarrier.supportedQualifiers,
       );
     }
   });
@@ -202,7 +206,9 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.provenance.carrierInput).not.toEqual(result.anchor.registryState);
+      expect(result.provenance.carrierInput).not.toEqual(
+        result.anchor.registryState,
+      );
       expect(typeof result.provenance.carrierInput).toBe("string");
       expect(typeof result.anchor.registryState).toBe("object");
     }
@@ -211,7 +217,10 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
   // A-0861-10 — Domain Diagnostic Isolation
   it("A-0861-10: should return structured stage error without leaking GS1 generic codes into generic taxonomy", async () => {
     const repo = new MockRegistryRepository(new Map());
-    const result = await createGs1AnchorFromCarrier("https://id.gs1.org/01/123", repo); // Invalid length GTIN
+    const result = await createGs1AnchorFromCarrier(
+      "https://id.gs1.org/01/123",
+      repo,
+    ); // Invalid length GTIN
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -224,7 +233,7 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
   it("A-0861-11 & A-0861-12: should verify zero direct or transitive GS1 dependencies in generic modules via validator", () => {
     const { violations } = runValidation();
     const gs1Violations = violations.filter(
-      (v: { rule: string }) => v.rule === "gs1-domain-edge-contamination"
+      (v: { rule: string }) => v.rule === "gs1-domain-edge-contamination",
     );
     expect(gs1Violations.length).toBe(0);
   });
