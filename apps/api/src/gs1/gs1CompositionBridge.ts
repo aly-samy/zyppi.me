@@ -16,6 +16,9 @@ export interface GS1CompositionBridgeInputOptions extends Omit<
   "identifier"
 > {
   readonly anchorSuccess: GS1AnchorBridgeSuccess;
+  readonly tValid?: string;
+  readonly tObservation?: string;
+  readonly tEInput?: string;
 }
 
 export type GS1CompositionBridgeAssemblyResult =
@@ -35,7 +38,7 @@ export type GS1CompositionBridgeAssemblyResult =
     };
 
 /**
- * GS1 Domain-Edge Assembly Bridge (AMS-0861-B).
+ * GS1 Domain-Edge Assembly Bridge (AMS-0861-B / CORR-0861-B-1).
  *
  * Consumes the lawful constitutional anchor produced by Packet A (createGs1AnchorFromCarrier / GS1AnchorBridgeSuccess)
  * and adapts it into generic Z-PROF composition resolution and EvaluationCoordinate construction.
@@ -43,6 +46,12 @@ export type GS1CompositionBridgeAssemblyResult =
  * LAW-B-01: Does NOT reparse, revalidate, renormalize, or re-resolve the carrier/anchor. Preserves anchor identity.
  * LAW-B-11: Strictly stops before RI Execution (does NOT invoke runInternalPipeline or produce ExecutionReceipt).
  * LAW-B-09: Positioned strictly in the GS1 domain edge (apps/api/src/gs1/). Generic Z-PROF contains zero imports of this module.
+ *
+ * CORR-0861-B-1 Corrections:
+ * 1. Binds actual existing pinned ACV identity reference (boundPayload.resolvedActiveConstitutionalView.identity.canonicalReference)
+ *    to pinnedSemanticStateRef without synthesizing manifestId, sccId, or ARM version.
+ * 2. Consumes explicit temporal inputs (tValid, tObservation, tEInput) without automatically assigning constitutionalTimestamp to all three.
+ * 3. Binds actual governed options.policyContext directly as boundContext on EvaluationCoordinate (enabling pre-RI mapper compatibility).
  */
 export async function assembleGs1CompositionFromAnchor(
   options: GS1CompositionBridgeInputOptions,
@@ -112,20 +121,14 @@ export async function assembleGs1CompositionFromAnchor(
     };
   }
 
-  // Build EvaluationCoordinate (EC) using pre-computed sccId and bcgId from composition resolution
+  // 1. CORR-0861-B-1 §1: Bind actual existing pinned ACV identity reference without synthesizing manifest/scc/version
   const pinnedSemanticStateRef = Object.freeze({
-    ref: manifest.manifestId,
-    digest: sccId,
-    version: manifest.armProfileReference.version,
+    ref: boundPayload.resolvedActiveConstitutionalView.identity
+      .canonicalReference,
   });
 
-  const boundContext = Object.freeze({
-    requestId: options.requestId,
-    executionId: options.executionId,
-    constitutionalTimestamp: options.constitutionalTimestamp,
-    versions: options.versions,
-    canonicalIdentifier: canonicalIdStr,
-  });
+  // 3. CORR-0861-B-1 §3: Bind actual governed options.policyContext directly as boundContext
+  const boundContext = options.policyContext;
 
   const evidenceIntegrityCoordinates = Object.freeze(
     boundPayload.resolvedEvidenceBundle.evidenceRecords.map((rec) =>
@@ -136,6 +139,15 @@ export async function assembleGs1CompositionFromAnchor(
     ),
   );
 
+  // 2. CORR-0861-B-1 §2: Consume explicit temporal coordinates without automatic collapsing to constitutionalTimestamp
+  const temporalCoordinates = Object.freeze({
+    ...(options.tValid !== undefined ? { tValid: options.tValid } : {}),
+    ...(options.tObservation !== undefined
+      ? { tObservation: options.tObservation }
+      : {}),
+    ...(options.tEInput !== undefined ? { tEInput: options.tEInput } : {}),
+  });
+
   const ecResult = buildEvaluationCoordinate({
     sccId,
     bcgId,
@@ -145,16 +157,16 @@ export async function assembleGs1CompositionFromAnchor(
     authorizedInputs: Object.freeze({
       anchorCanonicalId: canonicalIdStr,
       provenanceCarrierInput: anchorSuccess.provenance.carrierInput,
+      requestId: options.requestId,
+      executionId: options.executionId,
+      canonicalIdentifier: canonicalIdStr,
     }),
     evaluationParameters: Object.freeze({
       budget: options.budget,
       entropy: options.entropy,
+      versions: options.versions,
     }),
-    temporalCoordinates: Object.freeze({
-      tValid: options.constitutionalTimestamp,
-      tObservation: options.constitutionalTimestamp,
-      tEInput: options.constitutionalTimestamp,
-    }),
+    temporalCoordinates,
   });
 
   if (!ecResult.ok) {

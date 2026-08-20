@@ -30,6 +30,7 @@ import type {
   DomainTemplateCard,
   EpistemicRequirementContract,
 } from "../zprof/types.js";
+import { mapEvaluationCoordinateToExecutionRequest } from "../zprof/lifecycle.js";
 // @ts-expect-error JS module without declaration file
 import { runValidation } from "../../../../tools/verify-dependency-graph.mjs";
 
@@ -154,11 +155,14 @@ function createDefaultBridgeInput(
     anchorSuccess,
     dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
     epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
-    manifestAuthor: "identity:council:admin",
+    manifestAuthor: "identity:test:manifest_author",
     registryRepository: repo,
     requestId: "req-123",
     executionId: "exec-456",
     constitutionalTimestamp: "2026-01-01T00:00:00Z",
+    tValid: "2026-01-01T00:00:00Z",
+    tObservation: "2026-01-01T00:00:00Z",
+    tEInput: "2026-01-01T00:00:00Z",
     budget: 1000,
     entropy: "test-entropy-string-1234567890",
     versions: defaultVersions,
@@ -173,7 +177,7 @@ function createDefaultBridgeInput(
           identity: "dtc:zyppi:domain:gs1:v1",
           kind: "DTC" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "domain_template" as const,
           reference: { id: "dtc:zyppi:domain:gs1:v1", version: "1.0.0" },
         },
@@ -182,7 +186,7 @@ function createDefaultBridgeInput(
           identity: "arm:profile:trade_item:v1",
           kind: "ARM_PROFILE" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "asset_profile" as const,
           reference: { id: "arm:profile:trade_item:v1", version: "1.0.0" },
         },
@@ -191,7 +195,7 @@ function createDefaultBridgeInput(
           identity: "prj:spec:gs1_digital_link_projection:v1",
           kind: "PRJ_SPECIFICATION" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "prj_specification" as const,
           reference: {
             id: "prj:spec:gs1_digital_link_projection:v1",
@@ -203,7 +207,7 @@ function createDefaultBridgeInput(
           identity: "rsn:blueprint:gs1_identity_verification:v1",
           kind: "RSN_BLUEPRINT" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "rsn_blueprint" as const,
           reference: {
             id: "rsn:blueprint:gs1_identity_verification:v1",
@@ -215,7 +219,7 @@ function createDefaultBridgeInput(
           identity: "pol:req:active_standing:v1",
           kind: "POL_REQUIREMENT" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "pol_requirement" as const,
           reference: { id: "pol:req:active_standing:v1", version: "1.0.0" },
         },
@@ -224,7 +228,7 @@ function createDefaultBridgeInput(
           identity: "sec:req:sha256_payload_integrity:v1",
           kind: "SEC_REQUIREMENT" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "sec_requirement" as const,
           reference: {
             id: "sec:req:sha256_payload_integrity:v1",
@@ -236,7 +240,7 @@ function createDefaultBridgeInput(
           identity: "ri:capability:stage7_ast_evaluation:v1",
           kind: "RI_CAPABILITY" as const,
           version: "1.0.0",
-          owner: "council",
+          owner: "identity:test:manifest_author",
           role: "ri_capability" as const,
           reference: {
             id: "ri:capability:stage7_ast_evaluation:v1",
@@ -267,7 +271,7 @@ function createDefaultBridgeInput(
   };
 }
 
-describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite", () => {
+describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (CORR-0861-B-1)", () => {
   // Setup common anchor
   async function getLawfulAnchor() {
     const knownMap = new Map<string, RetrievedRegistryState>([
@@ -301,6 +305,9 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
       expect(result.bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(result.evaluationCoordinate.sccId).toBe(result.sccId);
       expect(result.evaluationCoordinate.bcgId).toBe(result.bcgId);
+      expect(result.evaluationCoordinate.pinnedSemanticStateRef.ref).toBe(
+        mockIdentity.canonicalReference,
+      );
     }
   });
 
@@ -335,8 +342,8 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-04: Deterministic epistemic dependency closure
-  it("B-0861-04: should compute deterministic epistemic dependency closure and matching SCC/BCG identities", async () => {
+  // B-0861-04: Deterministic composition binding topology (T_bind) closure
+  it("B-0861-04: should compute deterministic composition binding topology (T_bind) closure and matching SCC/BCG identities", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input1 = createDefaultBridgeInput(anchorSuccess, repo);
     const input2 = createDefaultBridgeInput(anchorSuccess, repo);
@@ -352,8 +359,8 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-05: Fan-out dependency resolution
-  it("B-0861-05: should resolve fan-out dependency topologies cleanly into BCG graph nodes and edges", async () => {
+  // B-0861-05: Fan-out binding topology resolution
+  it("B-0861-05: should resolve fan-out composition binding topologies cleanly into BCG graph nodes and edges", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
@@ -366,12 +373,12 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-06: Fan-in/shared dependency resolution
-  it("B-0861-06: should resolve shared dependencies in fan-in topologies without duplicating nodes", async () => {
+  // B-0861-06: Fan-in/shared binding topology resolution
+  it("B-0861-06: should resolve shared dependencies in fan-in binding topologies without duplicating BCG nodes", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
-    // Add shared node dependency edges
+    // Add shared node binding edges
     input.compositionDefinition.bindingEdges = [
       {
         sourceId: "dtc:zyppi:domain:gs1:v1",
@@ -500,8 +507,8 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-11 & B-0861-12: Generic completeness is topology-driven & Topology Mutation Proof
-  it("B-0861-11 & B-0861-12: should demonstrate topology-driven resolution and topology mutation proof without generic code change", async () => {
+  // B-0861-11 & B-0861-12: Topology-driven resolution proof & Topology Mutation Proof
+  it("B-0861-11 & B-0861-12: should demonstrate topology-driven composition resolution and topology mutation proof without generic code change", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
 
     // Topology 1 — Simple Fan-Out
@@ -703,7 +710,7 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
       identity: "dtc:zyppi:domain:gs1:v2",
       kind: "DTC",
       version: "1.0.0",
-      owner: "council",
+      owner: "identity:test:manifest_author",
       role: "domain_template",
       reference: { id: "dtc:zyppi:domain:gs1:v2", version: "1.0.0" },
     };
@@ -813,26 +820,43 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-29: No Domain Diagnostic Control Flow
-  it("B-0861-29: should maintain identical generic control flow regardless of domain diagnostic messages", async () => {
-    const { anchorSuccess, repo } = await getLawfulAnchor();
+  // B-0861-29: Domain Diagnostic Isolation (CORR-0861-B-1 §5)
+  it("B-0861-29: should maintain identical generic control flow regardless of domain diagnostic errors", async () => {
+    const { repo } = await getLawfulAnchor();
 
-    const input1 = createDefaultBridgeInput(anchorSuccess, repo);
-    const input2 = createDefaultBridgeInput(anchorSuccess, repo);
+    // Two distinct Packet A domain diagnostic stage failures (PARSE vs VALIDATION)
+    const parseFailureAnchor = Object.freeze({
+      ok: false as const,
+      error: {
+        stage: "PARSE" as const,
+        error: {
+          code: "INVALID_URI_SCHEME",
+          message: "Unsupported URI scheme",
+        },
+      },
+    });
 
-    // Force missing DTC in both with different diagnostic messages in custom wrapper if any
-    const bad1 = {
-      ...input1,
-      dtcFixture: null as unknown as DomainTemplateCard,
-    };
-    const bad2 = {
-      ...input2,
-      dtcFixture: undefined as unknown as DomainTemplateCard,
-    };
+    const validationFailureAnchor = Object.freeze({
+      ok: false as const,
+      error: {
+        stage: "VALIDATION" as const,
+        error: { code: "MISSING_PRIMARY_IDENTIFIER", message: "AI 01 missing" },
+      },
+    });
 
-    const res1 = await assembleGs1CompositionFromAnchor(bad1);
-    const res2 = await assembleGs1CompositionFromAnchor(bad2);
+    const input1 = createDefaultBridgeInput(
+      parseFailureAnchor as unknown as GS1AnchorBridgeSuccess,
+      repo,
+    );
+    const input2 = createDefaultBridgeInput(
+      validationFailureAnchor as unknown as GS1AnchorBridgeSuccess,
+      repo,
+    );
 
+    const res1 = await assembleGs1CompositionFromAnchor(input1);
+    const res2 = await assembleGs1CompositionFromAnchor(input2);
+
+    // Both map to identical generic control flow disposition (ok: false, code: "invalid", epistemicStatus: "UNAVAILABLE")
     expect(res1.ok).toBe(false);
     expect(res2.ok).toBe(false);
     if (!res1.ok && !res2.ok) {
@@ -852,5 +876,62 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     expect(result.ok).toBe(true);
     // Verified exactly 1 ACV lookup call during composition resolution, zero network or extra M06 calls
     expect(repo.lookupCount).toBe(initialRepoCount + 1);
+  });
+
+  // CORR-0861-B-1 §2: Distinct Temporal Coordinate Verification
+  it("CORR-0861-B-1 §2: should preserve distinct temporal coordinates (tValid, tObservation, tEInput) when explicitly supplied", async () => {
+    const { anchorSuccess, repo } = await getLawfulAnchor();
+
+    const tValid = "2026-01-01T10:00:00Z";
+    const tObservation = "2026-01-02T12:00:00Z";
+    const tEInput = "2026-01-03T14:00:00Z";
+
+    const input = {
+      ...createDefaultBridgeInput(anchorSuccess, repo),
+      tValid,
+      tObservation,
+      tEInput,
+    };
+
+    const result = await assembleGs1CompositionFromAnchor(input);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const temps = result.evaluationCoordinate.temporalCoordinates;
+      expect(temps.tValid).toBe(tValid);
+      expect(temps.tObservation).toBe(tObservation);
+      expect(temps.tEInput).toBe(tEInput);
+      expect(temps.tValid).not.toBe(temps.tObservation);
+      expect(temps.tObservation).not.toBe(temps.tEInput);
+    }
+  });
+
+  // CORR-0861-B-1 §3: Pre-RI EvaluationCoordinate Mapper Compatibility Test
+  it("CORR-0861-B-1 §3: should produce an EvaluationCoordinate and BoundPayload that pass mapEvaluationCoordinateToExecutionRequest structurally without invoking RI", async () => {
+    const { anchorSuccess, repo } = await getLawfulAnchor();
+    const input = createDefaultBridgeInput(anchorSuccess, repo);
+
+    const assemblyRes = await assembleGs1CompositionFromAnchor(input);
+    expect(assemblyRes.ok).toBe(true);
+
+    if (assemblyRes.ok) {
+      const mapped = mapEvaluationCoordinateToExecutionRequest({
+        coordinate: assemblyRes.evaluationCoordinate,
+        boundPayload: assemblyRes.boundPayload,
+        requestId: input.requestId,
+        executionId: input.executionId,
+      });
+
+      expect(mapped.ok).toBe(true);
+      if (mapped.ok) {
+        expect(mapped.executionRequest.requestId).toBe(input.requestId);
+        expect(mapped.executionRequest.executionContext.executionId).toBe(
+          input.executionId,
+        );
+        expect(
+          mapped.executionRequest.activeConstitutionalView.identity.identityId,
+        ).toBe("09506000134352");
+      }
+    }
   });
 });
