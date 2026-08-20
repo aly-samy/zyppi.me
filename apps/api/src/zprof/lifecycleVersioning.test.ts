@@ -831,8 +831,16 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
           },
         ],
         bindingEdges: [
-          { sourceRef: "p:1", targetRef: "p:2", dependencyKind: "REQUIRES" },
-          { sourceRef: "p:2", targetRef: "p:1", dependencyKind: "REQUIRES" }, // Cycle!
+          {
+            sourceId: "p:1",
+            targetId: "p:2",
+            dependencyKind: "REQUIRES",
+          },
+          {
+            sourceId: "p:2",
+            targetId: "p:1",
+            dependencyKind: "REQUIRES",
+          }, // Cycle!
         ],
       },
     } as unknown as AssessmentTarget;
@@ -881,7 +889,10 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
           },
         ],
         bindingEdges: [
-          { sourceId: "dtc:1", targetId: "arm:1" /* missing dependencyKind */ },
+          {
+            sourceId: "dtc:1",
+            targetId: "arm:1" /* missing dependencyKind */,
+          },
         ],
       },
     } as unknown as AssessmentTarget;
@@ -999,5 +1010,110 @@ describe("AMS-0860-B — Lifecycle & Versioning Evaluation & Assessment Coordina
       expect(emptyEcRes.coordinate.authorizedInputs).toEqual({});
       expect(emptyEcRes.coordinate.evaluationParameters).toEqual({});
     }
+  });
+
+  // ==========================================================================
+  // Section I: CORR-0860-B-4 Mandatory Tests (B40–B45)
+  // ==========================================================================
+
+  it("Test B40 — authorizedInputs containing bigint -> invalid", () => {
+    const ecRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      authorizedInputs: { amount: 100n as unknown as number },
+    });
+
+    expect(ecRes.ok).toBe(false);
+    if (!ecRes.ok) {
+      expect(ecRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B41 — evaluationParameters containing NaN -> invalid", () => {
+    const ecRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      evaluationParameters: { limit: NaN },
+    });
+
+    expect(ecRes.ok).toBe(false);
+    if (!ecRes.ok) {
+      expect(ecRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B42 — authorizedInputs containing Infinity -> invalid", () => {
+    const ecRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      authorizedInputs: { limit: Infinity },
+    });
+
+    expect(ecRes.ok).toBe(false);
+    if (!ecRes.ok) {
+      expect(ecRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B43 — nested undefined data value -> invalid", () => {
+    const ecRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      evaluationParameters: { key: undefined as unknown as string },
+    });
+
+    expect(ecRes.ok).toBe(false);
+    if (!ecRes.ok) {
+      expect(ecRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B44 — binding edge using sourceRef/targetRef instead of sourceId/targetId -> invalid", () => {
+    const compTarget = {
+      kind: "COMPOSITION_AUTHORING",
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "dtc:1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: "owner:1",
+            role: "domain_template",
+            reference: { id: "dtc:1", version: "1.0.0" },
+          },
+        ],
+        bindingEdges: [
+          {
+            sourceRef: "dtc:1",
+            targetRef: "arm:1",
+            dependencyKind: "REQUIRES",
+          }, // Aliases instead of sourceId/targetId!
+        ],
+      },
+    } as unknown as AssessmentTarget;
+
+    const arcRes = buildAssessmentRequestCoordinate({
+      target: compTarget,
+      operation: "NEW_COMPOSITION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-06-01T00:00:00Z",
+    });
+
+    expect(arcRes.ok).toBe(false);
+    if (!arcRes.ok) {
+      expect(arcRes.error.code).toBe("invalid");
+    }
+  });
+
+  it("Test B45 — ordinary finite JSON-compatible nested data -> valid", () => {
+    const ecRes = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      authorizedInputs: {
+        num: 42,
+        str: "text",
+        flag: true,
+        none: null,
+        arr: [1, "a", false, null],
+        obj: { nestedKey: 10.5 },
+      },
+    });
+
+    expect(ecRes.ok).toBe(true);
   });
 });

@@ -28,7 +28,7 @@ const CLOSED_OPERATIONS: readonly PrimitiveOperation[] = [
 ];
 
 /**
- * Validates Target × OP compatibility AND target payload structure per CORR-0860-B-1 §3 / CORR-0860-B-2 §1-§2 / CORR-0860-B-3 §1.
+ * Validates Target × OP compatibility AND target payload structure per CORR-0860-B-1 §3 / CORR-0860-B-2 §1-§2 / CORR-0860-B-3 §1 / CORR-0860-B-4 §2.
  */
 export function validateTargetOperationCompatibility(
   target: AssessmentTarget,
@@ -143,17 +143,16 @@ export function validateTargetOperationCompatibility(
         }
       }
 
+      // Strictly map sourceId and targetId per CORR-0860-B-4 §2 (no sourceRef/targetRef alias fallback)
       const rawBindingEdges = compDef.bindingEdges.map((e) => {
         const edge = e as {
           sourceId?: string;
-          sourceRef?: string;
           targetId?: string;
-          targetRef?: string;
           dependencyKind: string;
         };
         return {
-          sourceId: edge.sourceId || edge.sourceRef || "",
-          targetId: edge.targetId || edge.targetRef || "",
+          sourceId: edge.sourceId || "",
+          targetId: edge.targetId || "",
           dependencyKind: edge.dependencyKind,
         };
       });

@@ -110,14 +110,34 @@ export function validatePinnedStateReference(
 
 /**
  * Deeply clones and freezes a plain data object, ensuring no executable functions,
- * promises, getters, or classes with behavior exist.
+ * promises, getters, or classes with behavior exist per CORR-0860-B-1 §6 / CORR-0860-B-4 §1.
+ * Fails closed on bigint, non-finite numbers (NaN, Infinity), and nested undefined values.
  */
 export function deepFreezePlainData<T>(val: T, path = "input"): T {
-  if (val === null || val === undefined) {
+  if (val === undefined) {
+    if (path !== "input") {
+      throw new Error(`Nested undefined value at ${path} is prohibited.`);
+    }
+    return val;
+  }
+
+  if (val === null) {
     return val;
   }
 
   const type = typeof val;
+
+  if (type === "bigint") {
+    throw new Error(`Bigint value at ${path} is prohibited.`);
+  }
+
+  if (type === "number") {
+    if (!Number.isFinite(val as unknown as number)) {
+      throw new Error(`Non-finite number (${val}) at ${path} is prohibited.`);
+    }
+    return val;
+  }
+
   if (type === "function" || type === "symbol") {
     throw new Error(
       `Non-serializable/executable value at ${path} is prohibited.`,
@@ -129,9 +149,14 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
   }
 
   if (Array.isArray(val)) {
-    const frozenArray = val.map((item, idx) =>
-      deepFreezePlainData(item, `${path}[${idx}]`),
-    );
+    const frozenArray = val.map((item, idx) => {
+      if (item === undefined) {
+        throw new Error(
+          `Nested undefined value at ${path}[${idx}] is prohibited.`,
+        );
+      }
+      return deepFreezePlainData(item, `${path}[${idx}]`);
+    });
     return Object.freeze(frozenArray) as unknown as T;
   }
 
@@ -151,6 +176,11 @@ export function deepFreezePlainData<T>(val: T, path = "input"): T {
     if (propDesc && (propDesc.get || propDesc.set)) {
       throw new Error(
         `Getter or setter property at ${path}.${key} is prohibited.`,
+      );
+    }
+    if (obj[key] === undefined) {
+      throw new Error(
+        `Nested undefined value at ${path}.${key} is prohibited.`,
       );
     }
     frozenObj[key] = deepFreezePlainData(obj[key], `${path}.${key}`);
