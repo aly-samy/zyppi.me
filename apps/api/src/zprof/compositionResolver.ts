@@ -35,6 +35,7 @@ import type {
 import { validateCompositionCompatibility } from "./compatibilityValidator.js";
 import { evaluateConflict } from "./conflict.js";
 import {
+  isExplicitVersion,
   validateExplicitVersionList,
   validateVersionConstraints,
 } from "./versionValidator.js";
@@ -91,7 +92,7 @@ export type ApplicationCompositionBridgeResult =
     };
 
 /**
- * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854).
+ * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854 / CORR-0861-PRE-1).
  *
  * Owned strictly by the Application layer.
  * Connects Z-PROF static domain declarations (GS1, DPP, etc.) to existing Application
@@ -221,7 +222,7 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // 4. Explicit ARM Profile Resolution (LAW-PRE1-05 / PRE1-T09 / PRE1-T10 / PRE1-T11 / PRE1-T19)
+    // 4. Explicit ARM Profile Resolution & Precedence (LAW-PRE1-05 / CORR-0861-PRE-1-1 Phase 2)
     if (!dtc.applicableArmProfiles || dtc.applicableArmProfiles.length === 0) {
       return {
         ok: false,
@@ -233,6 +234,11 @@ export class ApplicationCompositionResolver {
         },
       };
     }
+
+    const armParticipants =
+      options.compositionDefinition?.participants?.filter(
+        (p) => p.kind === "ARM_PROFILE",
+      ) ?? [];
 
     let selectedArmProfile: string | undefined;
 
@@ -247,27 +253,54 @@ export class ApplicationCompositionResolver {
           },
         };
       }
-      selectedArmProfile = options.applicableArmProfile;
-    } else if (options.compositionDefinition?.participants) {
-      const armPart = options.compositionDefinition.participants.find(
-        (p) => p.kind === "ARM_PROFILE",
-      );
-      if (armPart) {
-        if (!dtc.applicableArmProfiles.includes(armPart.identity)) {
+
+      if (armParticipants.length > 0) {
+        const mismatch = armParticipants.some(
+          (p) => p.identity !== options.applicableArmProfile,
+        );
+        if (mismatch) {
           return {
             ok: false,
             error: {
-              code: "incompatible",
+              code: "conflicting",
               category: "Composition Failure",
-              message: `Participant ARM Profile '${armPart.identity}' is not declared in DTC applicableArmProfiles`,
+              message: `Explicit option applicableArmProfile '${options.applicableArmProfile}' conflicts with compositionDefinition ARM participant '${armParticipants[0]?.identity}'`,
             },
           };
         }
-        selectedArmProfile = armPart.identity;
       }
-    }
 
-    if (!selectedArmProfile) {
+      selectedArmProfile = options.applicableArmProfile;
+    } else if (armParticipants.length > 0) {
+      const distinctArmIdentities = [
+        ...new Set(armParticipants.map((p) => p.identity)),
+      ];
+
+      if (distinctArmIdentities.length > 1) {
+        return {
+          ok: false,
+          error: {
+            code: "conflicting",
+            category: "Composition Failure",
+            message: `Multiple conflicting ARM Profile participants (${distinctArmIdentities.join(", ")}) in compositionDefinition without explicit selector`,
+          },
+        };
+      }
+
+      const candidate = distinctArmIdentities[0]!;
+      if (!dtc.applicableArmProfiles.includes(candidate)) {
+        return {
+          ok: false,
+          error: {
+            code: "incompatible",
+            category: "Composition Failure",
+            message: `Participant ARM Profile '${candidate}' is not declared in DTC applicableArmProfiles`,
+          },
+        };
+      }
+
+      selectedArmProfile = candidate;
+    } else {
       if (dtc.applicableArmProfiles.length === 1) {
         selectedArmProfile = dtc.applicableArmProfiles[0]!;
       } else {
@@ -544,24 +577,123 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // Helper: Extract exact constituent version from compositionDefinition participants or options.versions
-    const getConstituentVersion = (
+    // Helper: Strict Constituent Version Resolution (CORR-0861-PRE-1-1 Phase 1)
+    // No universal fallback. Every constituent version must resolve from an explicit governed coordinate.
+    const resolveConstituentVersion = (
       id: string,
       kind: ParticipantKind,
-    ): string => {
-      if (options.compositionDefinition?.participants) {
-        const match = options.compositionDefinition.participants.find(
+    ):
+      | { ok: true; version: string }
+      | { ok: false; error: CompositionError } => {
+      if (options.compositionDefinition) {
+        const compParticipants =
+          options.compositionDefinition.participants || [];
+        const matches = compParticipants.filter(
           (p) => p.kind === kind && p.identity === id,
         );
-        if (match?.version) return match.version;
+
+        if (matches.length > 1) {
+          const distinctVersions = [...new Set(matches.map((m) => m.version))];
+          if (distinctVersions.length > 1) {
+            return {
+              ok: false,
+              error: {
+                code: "conflicting",
+                category: "Composition Failure",
+                message: `Multiple conflicting participant versions (${distinctVersions.join(", ")}) for constituent '${id}'`,
+              },
+            };
+          }
+        }
+
+        if (matches.length === 1) {
+          const ver = matches[0]!.version;
+          if (!isExplicitVersion(ver)) {
+            return {
+              ok: false,
+              error: {
+                code: "invalid",
+                category: "Composition Failure",
+                message: `Invalid or floating version '${ver}' for participant '${id}'`,
+              },
+            };
+          }
+          return { ok: true, version: ver };
+        }
+
+        // compositionDefinition provided, but missing explicit participant for this required constituent
+        return {
+          ok: false,
+          error: {
+            code: "missing",
+            category: "Composition Failure",
+            message: `Missing explicit governed participant version for required constituent '${id}' in compositionDefinition`,
+          },
+        };
       }
-      return options.versions[0]!;
+
+      // If compositionDefinition is not provided, use explicit options.versions[0]
+      const optionsVersion = options.versions[0];
+      if (!optionsVersion || !isExplicitVersion(optionsVersion)) {
+        return {
+          ok: false,
+          error: {
+            code: "missing",
+            category: "Composition Failure",
+            message: `Missing exact explicit version for constituent '${id}'`,
+          },
+        };
+      }
+
+      return { ok: true, version: optionsVersion };
     };
 
-    const armProfileVersion = getConstituentVersion(
+    const armVerRes = resolveConstituentVersion(
       selectedArmProfile,
       "ARM_PROFILE",
     );
+    if (!armVerRes.ok) return { ok: false, error: armVerRes.error };
+    const armProfileVersion = armVerRes.version;
+
+    // Resolve PRJ Specifications
+    const boundPrjSpecs: { specId: string; version: string }[] = [];
+    for (const specId of dtc.requiredPrjSpecifications) {
+      const vRes = resolveConstituentVersion(specId, "PRJ_SPECIFICATION");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundPrjSpecs.push({ specId, version: vRes.version });
+    }
+
+    // Resolve RSN Blueprints
+    const boundRsnBlueprints: { blueprintId: string; version: string }[] = [];
+    for (const blueprintId of dtc.requiredRsnBlueprints) {
+      const vRes = resolveConstituentVersion(blueprintId, "RSN_BLUEPRINT");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundRsnBlueprints.push({ blueprintId, version: vRes.version });
+    }
+
+    // Resolve POL Requirements
+    const boundPolReqs: { policyId: string; version: string }[] = [];
+    for (const policyId of dtc.applicablePolRequirements) {
+      const vRes = resolveConstituentVersion(policyId, "POL_REQUIREMENT");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundPolReqs.push({ policyId, version: vRes.version });
+    }
+
+    // Resolve SEC Requirements
+    const boundSecReqs: { securityReqId: string; version: string }[] = [];
+    for (const securityReqId of dtc.applicableSecRequirements) {
+      const vRes = resolveConstituentVersion(securityReqId, "SEC_REQUIREMENT");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundSecReqs.push({ securityReqId, version: vRes.version });
+    }
+
+    // Resolve RI Capabilities
+    const boundRiCaps: { capabilityId: string; version: string }[] = [];
+    for (const capabilityId of dtc.requiredRiCapabilities) {
+      const vRes = resolveConstituentVersion(capabilityId, "RI_CAPABILITY");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundRiCaps.push({ capabilityId, version: vRes.version });
+    }
 
     // 8. Build Application-layer CompositionManifest (LAW-PRE1-03 / LAW-PRE1-04 / PRE1-T08 / PRE1-T20 / PRE1-T23)
     const manifest: CompositionManifest = Object.freeze({
@@ -584,44 +716,19 @@ export class ApplicationCompositionResolver {
         ),
       ),
       boundPrjSpecifications: Object.freeze(
-        dtc.requiredPrjSpecifications.map((s) =>
-          Object.freeze({
-            specId: s,
-            version: getConstituentVersion(s, "PRJ_SPECIFICATION"),
-          }),
-        ),
+        boundPrjSpecs.map((s) => Object.freeze(s)),
       ),
       boundRsnBlueprints: Object.freeze(
-        dtc.requiredRsnBlueprints.map((b) =>
-          Object.freeze({
-            blueprintId: b,
-            version: getConstituentVersion(b, "RSN_BLUEPRINT"),
-          }),
-        ),
+        boundRsnBlueprints.map((b) => Object.freeze(b)),
       ),
       boundPolRequirements: Object.freeze(
-        dtc.applicablePolRequirements.map((p) =>
-          Object.freeze({
-            policyId: p,
-            version: getConstituentVersion(p, "POL_REQUIREMENT"),
-          }),
-        ),
+        boundPolReqs.map((p) => Object.freeze(p)),
       ),
       boundSecRequirements: Object.freeze(
-        dtc.applicableSecRequirements.map((s) =>
-          Object.freeze({
-            securityReqId: s,
-            version: getConstituentVersion(s, "SEC_REQUIREMENT"),
-          }),
-        ),
+        boundSecReqs.map((s) => Object.freeze(s)),
       ),
       boundRiCapabilities: Object.freeze(
-        dtc.requiredRiCapabilities.map((c) =>
-          Object.freeze({
-            capabilityId: c,
-            version: getConstituentVersion(c, "RI_CAPABILITY"),
-          }),
-        ),
+        boundRiCaps.map((c) => Object.freeze(c)),
       ),
       ...(boundCl16Artifacts.length > 0
         ? { boundCl16IntelligenceArtifacts: Object.freeze(boundCl16Artifacts) }

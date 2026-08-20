@@ -476,6 +476,17 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
                 version: "1.0.0",
               },
             },
+            {
+              identity: "prj:spec:trade_item:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
           ],
           bindingEdges: [
             {
