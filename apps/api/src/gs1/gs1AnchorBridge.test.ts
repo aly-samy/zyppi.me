@@ -1,4 +1,7 @@
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
+import ts from "typescript";
 import { createGs1AnchorFromCarrier } from "./gs1AnchorBridge.js";
 import {
   type RegistryRepository,
@@ -199,6 +202,68 @@ describe("AMS-0861-A Physical GS1 Anchor Bridge Test Suite", () => {
 
     expect(repo.lookupCalls.length).toBe(1);
     expect(repo.lookupCalls[0]).toBe(validK1);
+  });
+
+  it("A-0861-08-AST: should mechanically prove that gs1AnchorBridge.ts imports and calls resolveGs1DigitalLink with zero direct repository.lookup calls", () => {
+    const bridgePath = path.resolve(__dirname, "gs1AnchorBridge.ts");
+    const sourceText = fs.readFileSync(bridgePath, "utf8");
+    const sourceFile = ts.createSourceFile(
+      "gs1AnchorBridge.ts",
+      sourceText,
+      ts.ScriptTarget.ES2022,
+      true,
+    );
+
+    let importsM06Resolver = false;
+    let callsM06Resolver = false;
+    let directRepoLookupCalls = 0;
+
+    const visit = (node: ts.Node) => {
+      // Check import declaration for resolveGs1DigitalLink
+      if (ts.isImportDeclaration(node)) {
+        const specifier = (node.moduleSpecifier as ts.StringLiteral).text;
+        if (
+          specifier === "@zyppi/contracts" ||
+          specifier.endsWith("gs1Resolver.js") ||
+          specifier.endsWith("gs1Resolver")
+        ) {
+          const clause = node.importClause;
+          if (
+            clause &&
+            clause.namedBindings &&
+            ts.isNamedImports(clause.namedBindings)
+          ) {
+            for (const element of clause.namedBindings.elements) {
+              if (element.name.text === "resolveGs1DigitalLink") {
+                importsM06Resolver = true;
+              }
+            }
+          }
+        }
+      }
+
+      // Check function call expressions
+      if (ts.isCallExpression(node)) {
+        const expr = node.expression;
+        if (ts.isIdentifier(expr) && expr.text === "resolveGs1DigitalLink") {
+          callsM06Resolver = true;
+        }
+        if (
+          ts.isPropertyAccessExpression(expr) &&
+          expr.name.text === "lookup"
+        ) {
+          directRepoLookupCalls++;
+        }
+      }
+
+      ts.forEachChild(node, visit);
+    };
+
+    visit(sourceFile);
+
+    expect(importsM06Resolver).toBe(true);
+    expect(callsM06Resolver).toBe(true);
+    expect(directRepoLookupCalls).toBe(0);
   });
 
   // A-0861-09 — Carrier / Anchor Separation

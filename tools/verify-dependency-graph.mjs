@@ -214,6 +214,94 @@ export function runValidation(workspaceRoot = process.cwd()) {
     return imports;
   };
 
+  // Load tsconfig path aliases if present in any workspace member
+  const loadWorkspaceTsconfigPaths = () => {
+    const aliases = []; // { prefix: string, targetPath: string }
+    for (const node of NODES) {
+      const tsconfigPath = path.resolve(workspaceRoot, node, "tsconfig.json");
+      if (fs.existsSync(tsconfigPath)) {
+        try {
+          const readResult = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+          if (!readResult.error && readResult.config) {
+            const compilerOptions = readResult.config.compilerOptions || {};
+            const pathsObj = compilerOptions.paths || {};
+            const baseUrl = compilerOptions.baseUrl || ".";
+            const absoluteBaseUrl = path.resolve(
+              path.dirname(tsconfigPath),
+              baseUrl,
+            );
+
+            for (const [aliasPattern, targetArray] of Object.entries(
+              pathsObj,
+            )) {
+              if (Array.isArray(targetArray) && targetArray.length > 0) {
+                const aliasPrefix = aliasPattern.replace(/\*$/, "");
+                const rawTarget = targetArray[0].replace(/\*$/, "");
+                const absoluteTargetDir = path.resolve(
+                  absoluteBaseUrl,
+                  rawTarget,
+                );
+                const relativeTarget = path
+                  .relative(workspaceRoot, absoluteTargetDir)
+                  .split(path.sep)
+                  .join("/");
+                aliases.push({ aliasPrefix, relativeTarget });
+              }
+            }
+          }
+        } catch {
+          // ignore parsing errors
+        }
+      }
+    }
+    return aliases;
+  };
+
+  const workspaceAliases = loadWorkspaceTsconfigPaths();
+
+  // Helper function to resolve specifier (relative, alias, or package export) to relative repo file path
+  const resolveSpecifierToRelativePath = (specifier, absoluteFilePath) => {
+    // 1. Relative imports
+    if (specifier.startsWith(".") || specifier.startsWith("/")) {
+      const fileDir = path.dirname(absoluteFilePath);
+      let resolved = path.normalize(path.join(fileDir, specifier));
+      if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
+        resolved = path.join(resolved, "index.ts");
+      } else if (!resolved.endsWith(".ts") && !resolved.endsWith(".tsx")) {
+        if (fs.existsSync(resolved + ".ts")) resolved = resolved + ".ts";
+        else if (fs.existsSync(resolved + ".tsx")) resolved = resolved + ".tsx";
+      }
+      return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
+    }
+
+    // 2. Tsconfig path aliases
+    for (const { aliasPrefix, relativeTarget } of workspaceAliases) {
+      if (specifier.startsWith(aliasPrefix)) {
+        const remainder = specifier.slice(aliasPrefix.length);
+        const resolved = path.normalize(
+          path.join(workspaceRoot, relativeTarget, remainder),
+        );
+        return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
+      }
+    }
+
+    // 3. Package imports (e.g., @zyppi/api/gs1)
+    if (specifier.startsWith("@zyppi/")) {
+      const parts = specifier.split("/");
+      const packageName = parts.slice(0, 2).join("/");
+      const targetNode = PACKAGE_TO_NODE[packageName];
+      if (targetNode) {
+        const remainder = parts.slice(2).join("/");
+        const resolved = path.normalize(
+          path.join(workspaceRoot, targetNode, "src", remainder),
+        );
+        return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
+      }
+    }
+
+    return null;
+  };
+
   // Helper to build internal module import graph for apps/api/src/
   const apiModuleGraph = new Map(); // relativeFilePath -> set of resolved relativeFilePaths inside apps/api/src/
   const absoluteApiDir = path.resolve(workspaceRoot, "apps/api");
@@ -230,24 +318,12 @@ export function runValidation(workspaceRoot = process.cwd()) {
       const targets = new Set();
 
       for (const imp of imports) {
-        const spec = imp.specifier;
-        if (spec.startsWith(".") || spec.startsWith("/")) {
-          const fileDir = path.dirname(absoluteFilePath);
-          let resolved = path.normalize(path.join(fileDir, spec));
-          if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
-            resolved = path.join(resolved, "index.ts");
-          } else if (!resolved.endsWith(".ts") && !resolved.endsWith(".tsx")) {
-            if (fs.existsSync(resolved + ".ts")) resolved = resolved + ".ts";
-            else if (fs.existsSync(resolved + ".tsx"))
-              resolved = resolved + ".tsx";
-          }
-          const relResolved = path
-            .relative(workspaceRoot, resolved)
-            .split(path.sep)
-            .join("/");
-          if (relResolved.startsWith("apps/api/src/")) {
-            targets.add(relResolved);
-          }
+        const relResolved = resolveSpecifierToRelativePath(
+          imp.specifier,
+          absoluteFilePath,
+        );
+        if (relResolved && relResolved.startsWith("apps/api/src/")) {
+          targets.add(relResolved);
         }
       }
       apiModuleGraph.set(relativeFilePath, targets);
