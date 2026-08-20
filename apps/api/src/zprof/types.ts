@@ -201,6 +201,7 @@ export interface BoundConstitutionalPayload {
 export interface GenericCompositionOptions {
   readonly dtcFixture: DomainTemplateCard;
   readonly epistemicRequirementsFixtures: readonly EpistemicRequirementContract[];
+  readonly manifestAuthor: string;
   readonly registryRepository: RegistryRepository;
   readonly identifier: ValidatedCanonicalIdentifier;
   readonly requestId: string;
@@ -211,6 +212,7 @@ export interface GenericCompositionOptions {
   readonly versions: readonly string[];
   readonly policyContext: PolicyContext;
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+  readonly applicableArmProfile?: string;
   readonly explicitAcv?: ActiveConstitutionalView;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
@@ -227,6 +229,9 @@ export interface GenericCompositionOptions {
  * GS1 Composition Resolution Request options (AMS-0853 compatibility alias / subset).
  */
 export interface GS1CompositionRequest {
+  readonly dtcFixture: DomainTemplateCard;
+  readonly epistemicRequirementsFixtures: readonly EpistemicRequirementContract[];
+  readonly manifestAuthor: string;
   readonly identifier: ValidatedCanonicalIdentifier;
   readonly requestId: string;
   readonly executionId: string;
@@ -236,6 +241,7 @@ export interface GS1CompositionRequest {
   readonly versions: readonly string[];
   readonly policyContext: PolicyContext;
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+  readonly applicableArmProfile?: string;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
   readonly overrides?: StageOverrideConfig;

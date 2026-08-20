@@ -153,6 +153,7 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
         GS1_GTIN_EPISTEMIC_REQUIREMENT,
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-c-01",
