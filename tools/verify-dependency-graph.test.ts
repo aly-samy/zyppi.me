@@ -306,4 +306,95 @@ describe("Zyppi Constitutional Dependency Graph Validator - Automated Negative &
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
+
+  it("Test 10 — Synthetic Forbidden Relative Import into GS1 Domain Edge", () => {
+    const tempDir = fs.realpathSync(
+      fs.mkdtempSync(path.join(os.tmpdir(), "zyppi-test-t10-")),
+    );
+    try {
+      setupBaseWorkspace(tempDir);
+
+      // Create gs1 dir in apps/api/src
+      const gs1Dir = path.join(tempDir, "apps/api/src/gs1");
+      fs.mkdirSync(gs1Dir, { recursive: true });
+      fs.writeFileSync(
+        path.join(gs1Dir, "gs1AnchorBridge.ts"),
+        "export const anchor = {};\n",
+      );
+
+      // Create zprof dir in apps/api/src
+      const zprofDir = path.join(tempDir, "apps/api/src/zprof");
+      fs.mkdirSync(zprofDir, { recursive: true });
+      // Forbidden relative import from zprof into gs1
+      fs.writeFileSync(
+        path.join(zprofDir, "forbidden.ts"),
+        "import { anchor } from '../gs1/gs1AnchorBridge.js';\n",
+      );
+
+      const { violations } = runValidation(tempDir);
+      expect(violations.length).toBeGreaterThan(0);
+      const v = violations.find(
+        (x) => x.rule === "gs1-domain-edge-contamination",
+      );
+      expect(v).toBeDefined();
+      expect(v.file).toBe("apps/api/src/zprof/forbidden.ts");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("Test 11 — Synthetic Forbidden Alias/Package Import into GS1 Domain Edge", () => {
+    const tempDir = fs.realpathSync(
+      fs.mkdtempSync(path.join(os.tmpdir(), "zyppi-test-t11-")),
+    );
+    try {
+      setupBaseWorkspace(tempDir);
+
+      // Configure tsconfig path alias in apps/api/tsconfig.json
+      const tsconfigPath = path.join(tempDir, "apps/api/tsconfig.json");
+      fs.writeFileSync(
+        tsconfigPath,
+        JSON.stringify(
+          {
+            compilerOptions: {
+              baseUrl: ".",
+              paths: {
+                "@api/*": ["src/*"],
+              },
+            },
+            references: [],
+          },
+          null,
+          2,
+        ),
+      );
+
+      // Create gs1 dir in apps/api/src
+      const gs1Dir = path.join(tempDir, "apps/api/src/gs1");
+      fs.mkdirSync(gs1Dir, { recursive: true });
+      fs.writeFileSync(
+        path.join(gs1Dir, "gs1AnchorBridge.ts"),
+        "export const anchor = {};\n",
+      );
+
+      // Create registry dir in apps/api/src
+      const registryDir = path.join(tempDir, "apps/api/src/registry");
+      fs.mkdirSync(registryDir, { recursive: true });
+      // Forbidden alias import from registry into gs1
+      fs.writeFileSync(
+        path.join(registryDir, "pipelineOrchestrator.ts"),
+        "import { anchor } from '@api/gs1/gs1AnchorBridge.js';\n",
+      );
+
+      const { violations } = runValidation(tempDir);
+      expect(violations.length).toBeGreaterThan(0);
+      const v = violations.find(
+        (x) => x.rule === "gs1-domain-edge-contamination",
+      );
+      expect(v).toBeDefined();
+      expect(v.file).toBe("apps/api/src/registry/pipelineOrchestrator.ts");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
 });

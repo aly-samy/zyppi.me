@@ -8,6 +8,7 @@ import ts from "typescript";
  * 1. package.json dependency declarations
  * 2. tsconfig.json project references
  * 3. Actual TypeScript source-level AST imports/exports
+ * 4. AMS-0861-A GS1 Domain-Edge Isolation Policy (GENERIC_ZPROF & GENERIC_APPLICATION_ORCHESTRATION)
  */
 export function runValidation(workspaceRoot = process.cwd()) {
   const violations = [];
@@ -211,6 +212,139 @@ export function runValidation(workspaceRoot = process.cwd()) {
 
     visit(sourceFile);
     return imports;
+  };
+
+  // Load tsconfig path aliases if present in any workspace member
+  const loadWorkspaceTsconfigPaths = () => {
+    const aliases = []; // { prefix: string, targetPath: string }
+    for (const node of NODES) {
+      const tsconfigPath = path.resolve(workspaceRoot, node, "tsconfig.json");
+      if (fs.existsSync(tsconfigPath)) {
+        try {
+          const readResult = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+          if (!readResult.error && readResult.config) {
+            const compilerOptions = readResult.config.compilerOptions || {};
+            const pathsObj = compilerOptions.paths || {};
+            const baseUrl = compilerOptions.baseUrl || ".";
+            const absoluteBaseUrl = path.resolve(
+              path.dirname(tsconfigPath),
+              baseUrl,
+            );
+
+            for (const [aliasPattern, targetArray] of Object.entries(
+              pathsObj,
+            )) {
+              if (Array.isArray(targetArray) && targetArray.length > 0) {
+                const aliasPrefix = aliasPattern.replace(/\*$/, "");
+                const rawTarget = targetArray[0].replace(/\*$/, "");
+                const absoluteTargetDir = path.resolve(
+                  absoluteBaseUrl,
+                  rawTarget,
+                );
+                const relativeTarget = path
+                  .relative(workspaceRoot, absoluteTargetDir)
+                  .split(path.sep)
+                  .join("/");
+                aliases.push({ aliasPrefix, relativeTarget });
+              }
+            }
+          }
+        } catch {
+          // ignore parsing errors
+        }
+      }
+    }
+    return aliases;
+  };
+
+  const workspaceAliases = loadWorkspaceTsconfigPaths();
+
+  // Helper function to resolve specifier (relative, alias, or package export) to relative repo file path
+  const resolveSpecifierToRelativePath = (specifier, absoluteFilePath) => {
+    // 1. Relative imports
+    if (specifier.startsWith(".") || specifier.startsWith("/")) {
+      const fileDir = path.dirname(absoluteFilePath);
+      let resolved = path.normalize(path.join(fileDir, specifier));
+      if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
+        resolved = path.join(resolved, "index.ts");
+      } else if (!resolved.endsWith(".ts") && !resolved.endsWith(".tsx")) {
+        if (fs.existsSync(resolved + ".ts")) resolved = resolved + ".ts";
+        else if (fs.existsSync(resolved + ".tsx")) resolved = resolved + ".tsx";
+      }
+      return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
+    }
+
+    // 2. Tsconfig path aliases
+    for (const { aliasPrefix, relativeTarget } of workspaceAliases) {
+      if (specifier.startsWith(aliasPrefix)) {
+        const remainder = specifier.slice(aliasPrefix.length);
+        const resolved = path.normalize(
+          path.join(workspaceRoot, relativeTarget, remainder),
+        );
+        return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
+      }
+    }
+
+    // 3. Package imports (e.g., @zyppi/api/gs1)
+    if (specifier.startsWith("@zyppi/")) {
+      const parts = specifier.split("/");
+      const packageName = parts.slice(0, 2).join("/");
+      const targetNode = PACKAGE_TO_NODE[packageName];
+      if (targetNode) {
+        const remainder = parts.slice(2).join("/");
+        const resolved = path.normalize(
+          path.join(workspaceRoot, targetNode, "src", remainder),
+        );
+        return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
+      }
+    }
+
+    return null;
+  };
+
+  // Helper to build internal module import graph for apps/api/src/
+  const apiModuleGraph = new Map(); // relativeFilePath -> set of resolved relativeFilePaths inside apps/api/src/
+  const absoluteApiDir = path.resolve(workspaceRoot, "apps/api");
+
+  if (fs.existsSync(absoluteApiDir)) {
+    const apiFiles = findTsFiles(absoluteApiDir);
+    for (const absoluteFilePath of apiFiles) {
+      const relativeFilePath = path
+        .relative(workspaceRoot, absoluteFilePath)
+        .split(path.sep)
+        .join("/");
+      const content = fs.readFileSync(absoluteFilePath, "utf8");
+      const imports = getImportsOfFile(content, relativeFilePath);
+      const targets = new Set();
+
+      for (const imp of imports) {
+        const relResolved = resolveSpecifierToRelativePath(
+          imp.specifier,
+          absoluteFilePath,
+        );
+        if (relResolved && relResolved.startsWith("apps/api/src/")) {
+          targets.add(relResolved);
+        }
+      }
+      apiModuleGraph.set(relativeFilePath, targets);
+    }
+  }
+
+  // Transitive reachability inside apps/api/src
+  const canReachGs1Module = (startFile) => {
+    const visited = new Set();
+    const queue = [startFile];
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      if (curr.startsWith("apps/api/src/gs1/")) return true;
+      if (visited.has(curr)) continue;
+      visited.add(curr);
+      const neighbors = apiModuleGraph.get(curr) || new Set();
+      for (const n of neighbors) {
+        queue.push(n);
+      }
+    }
+    return false;
   };
 
   // 1. Process each constitutional node
@@ -421,6 +555,26 @@ export function runValidation(workspaceRoot = process.cwd()) {
 
       const content = fs.readFileSync(absoluteFilePath, "utf8");
       const imports = getImportsOfFile(content, relativeFilePath);
+
+      // Check AMS-0861-A GS1 domain-edge isolation rule for generic modules
+      const isGenericZprof = relativeFilePath.startsWith("apps/api/src/zprof/");
+      const isGenericOrchestration =
+        relativeFilePath.startsWith("apps/api/src/registry/") ||
+        relativeFilePath.startsWith("apps/api/src/evidence/");
+
+      if (isGenericZprof || isGenericOrchestration) {
+        if (canReachGs1Module(relativeFilePath)) {
+          violations.push({
+            node,
+            layer: "source",
+            file: relativeFilePath,
+            line: 1,
+            column: 1,
+            rule: "gs1-domain-edge-contamination",
+            description: `Unauthorized direct or transitive GS1 domain-edge import in generic module "${relativeFilePath}". Generic orchestration/Z-PROF modules must not import GS1 implementations.`,
+          });
+        }
+      }
 
       for (const imp of imports) {
         const specifier = imp.specifier;
