@@ -2,7 +2,6 @@ import {
   parseGs1DigitalLink,
   validateGs1DigitalLink,
   normalizeGs1DigitalLink,
-  type ValidationResult,
 } from "@zyppi/domain";
 import {
   resolveGs1DigitalLink,

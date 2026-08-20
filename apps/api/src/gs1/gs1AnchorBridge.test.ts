@@ -6,7 +6,11 @@ import {
   type RetrievedRegistryState,
   type ValidatedCanonicalIdentifier,
 } from "@zyppi/contracts";
-import type { IdentityRecord, ReferentRecord } from "@zyppi/domain";
+import type {
+  EvidenceRecord,
+  IdentityRecord,
+  ReferentRecord,
+} from "@zyppi/domain";
 // @ts-expect-error JS module without declaration file
 import { runValidation } from "../../../../tools/verify-dependency-graph.mjs";
 
@@ -55,7 +59,9 @@ class MockRegistryRepository implements RegistryRepository {
     return { ok: true, value: state };
   }
 
-  async lookupEvidenceByIds(): Promise<RegistryResult<readonly any[]>> {
+  async lookupEvidenceByIds(): Promise<
+    RegistryResult<readonly EvidenceRecord[]>
+  > {
     return { ok: true, value: [] };
   }
 }
