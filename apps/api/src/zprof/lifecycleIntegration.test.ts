@@ -154,6 +154,78 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: {
+        participants: [
+          {
+            identity: "dtc:zyppi:domain:gs1:v1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "domain_template",
+            reference: { id: "dtc:zyppi:domain:gs1:v1", version: "1.0.0" },
+          },
+          {
+            identity: "arm:profile:trade_item:v1",
+            kind: "ARM_PROFILE",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "asset_profile",
+            reference: { id: "arm:profile:trade_item:v1", version: "1.0.0" },
+          },
+          {
+            identity: "prj:spec:gs1_digital_link_projection:v1",
+            kind: "PRJ_SPECIFICATION",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "prj_specification",
+            reference: {
+              id: "prj:spec:gs1_digital_link_projection:v1",
+              version: "1.0.0",
+            },
+          },
+          {
+            identity: "rsn:blueprint:gs1_identity_verification:v1",
+            kind: "RSN_BLUEPRINT",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "rsn_blueprint",
+            reference: {
+              id: "rsn:blueprint:gs1_identity_verification:v1",
+              version: "1.0.0",
+            },
+          },
+          {
+            identity: "pol:req:active_standing:v1",
+            kind: "POL_REQUIREMENT",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "pol_requirement",
+            reference: { id: "pol:req:active_standing:v1", version: "1.0.0" },
+          },
+          {
+            identity: "sec:req:sha256_payload_integrity:v1",
+            kind: "SEC_REQUIREMENT",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "sec_requirement",
+            reference: {
+              id: "sec:req:sha256_payload_integrity:v1",
+              version: "1.0.0",
+            },
+          },
+          {
+            identity: "ri:capability:stage7_ast_evaluation:v1",
+            kind: "RI_CAPABILITY",
+            version: "1.0.0",
+            owner: "identity:test:author",
+            role: "ri_capability",
+            reference: {
+              id: "ri:capability:stage7_ast_evaluation:v1",
+              version: "1.0.0",
+            },
+          },
+        ],
+      },
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-c-01",
@@ -169,7 +241,9 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
     });
 
     if (!compositionRes.ok) {
-      throw new Error("Composition resolution failed in test setup");
+      throw new Error(
+        `Composition resolution failed in test setup: ${compositionRes.error.message}`,
+      );
     }
     return compositionRes.boundPayload;
   }

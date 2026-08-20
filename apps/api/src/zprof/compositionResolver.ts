@@ -92,7 +92,7 @@ export type ApplicationCompositionBridgeResult =
     };
 
 /**
- * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854 / CORR-0861-PRE-1).
+ * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854 / CORR-0861-PRE-1 / CORR-0861-PRE-1-2).
  *
  * Owned strictly by the Application layer.
  * Connects Z-PROF static domain declarations (GS1, DPP, etc.) to existing Application
@@ -577,83 +577,87 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // Helper: Strict Constituent Version Resolution (CORR-0861-PRE-1-1 Phase 1)
-    // No universal fallback. Every constituent version must resolve from an explicit governed coordinate.
+    // Helper: Exact Constituent Version Resolution (CORR-0861-PRE-1-2 Phase 1)
+    // Resolves version strictly from explicit matching participant in compositionDefinition.participants.
+    // Zero fallback to options.versions[0] permitted.
     const resolveConstituentVersion = (
       id: string,
       kind: ParticipantKind,
     ):
       | { ok: true; version: string }
       | { ok: false; error: CompositionError } => {
-      if (options.compositionDefinition) {
-        const compParticipants =
-          options.compositionDefinition.participants || [];
-        const matches = compParticipants.filter(
-          (p) => p.kind === kind && p.identity === id,
-        );
+      const compParticipants =
+        options.compositionDefinition?.participants || [];
+      const matches = compParticipants.filter(
+        (p) => p.kind === kind && p.identity === id,
+      );
 
-        if (matches.length > 1) {
-          const distinctVersions = [...new Set(matches.map((m) => m.version))];
-          if (distinctVersions.length > 1) {
-            return {
-              ok: false,
-              error: {
-                code: "conflicting",
-                category: "Composition Failure",
-                message: `Multiple conflicting participant versions (${distinctVersions.join(", ")}) for constituent '${id}'`,
-              },
-            };
-          }
+      if (matches.length > 1) {
+        const distinctVersions = [...new Set(matches.map((m) => m.version))];
+        if (distinctVersions.length > 1) {
+          return {
+            ok: false,
+            error: {
+              code: "conflicting",
+              category: "Composition Failure",
+              message: `Multiple conflicting participant versions (${distinctVersions.join(", ")}) for constituent '${id}'`,
+            },
+          };
         }
-
-        if (matches.length === 1) {
-          const ver = matches[0]!.version;
-          if (!isExplicitVersion(ver)) {
-            return {
-              ok: false,
-              error: {
-                code: "invalid",
-                category: "Composition Failure",
-                message: `Invalid or floating version '${ver}' for participant '${id}'`,
-              },
-            };
-          }
-          return { ok: true, version: ver };
-        }
-
-        // compositionDefinition provided, but missing explicit participant for this required constituent
-        return {
-          ok: false,
-          error: {
-            code: "missing",
-            category: "Composition Failure",
-            message: `Missing explicit governed participant version for required constituent '${id}' in compositionDefinition`,
-          },
-        };
       }
 
-      // If compositionDefinition is not provided, use explicit options.versions[0]
-      const optionsVersion = options.versions[0];
-      if (!optionsVersion || !isExplicitVersion(optionsVersion)) {
-        return {
-          ok: false,
-          error: {
-            code: "missing",
-            category: "Composition Failure",
-            message: `Missing exact explicit version for constituent '${id}'`,
-          },
-        };
+      if (matches.length === 1) {
+        const ver = matches[0]!.version;
+        if (!isExplicitVersion(ver)) {
+          return {
+            ok: false,
+            error: {
+              code: "invalid",
+              category: "Composition Failure",
+              message: `Invalid or floating version '${ver}' for participant '${id}'`,
+            },
+          };
+        }
+        return { ok: true, version: ver };
       }
 
-      return { ok: true, version: optionsVersion };
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message: `Missing exact explicit participant version coordinate for required constituent '${id}'`,
+        },
+      };
     };
 
-    const armVerRes = resolveConstituentVersion(
-      selectedArmProfile,
-      "ARM_PROFILE",
+    // Helper: Resolve ARM Profile Version specifically
+    let armProfileVersion: string;
+    const armPartMatch = options.compositionDefinition?.participants?.find(
+      (p) => p.kind === "ARM_PROFILE" && p.identity === selectedArmProfile,
     );
-    if (!armVerRes.ok) return { ok: false, error: armVerRes.error };
-    const armProfileVersion = armVerRes.version;
+    if (armPartMatch) {
+      if (!isExplicitVersion(armPartMatch.version)) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message: `Invalid or floating version '${armPartMatch.version}' for ARM profile '${selectedArmProfile}'`,
+          },
+        };
+      }
+      armProfileVersion = armPartMatch.version;
+    } else {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message: `Missing exact explicit participant version coordinate for ARM Profile '${selectedArmProfile}'`,
+        },
+      };
+    }
 
     // Resolve PRJ Specifications
     const boundPrjSpecs: { specId: string; version: string }[] = [];

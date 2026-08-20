@@ -147,6 +147,231 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       ]),
     });
 
+  function createGs1CompositionDefinition(
+    versions = {
+      dtc: "1.0.0",
+      arm: "1.0.0",
+      prj: "1.0.0",
+      rsn: "1.0.0",
+      pol: "1.0.0",
+      sec: "1.0.0",
+      ri: "1.0.0",
+    },
+    owner = "identity:test:author",
+  ): import("./bind.js").CompositionDefinition {
+    return {
+      participants: [
+        {
+          identity: "dtc:zyppi:domain:gs1:v1",
+          kind: "DTC",
+          version: versions.dtc,
+          owner,
+          role: "domain_template",
+          reference: { id: "dtc:zyppi:domain:gs1:v1", version: versions.dtc },
+        },
+        {
+          identity: "arm:profile:trade_item:v1",
+          kind: "ARM_PROFILE",
+          version: versions.arm,
+          owner,
+          role: "asset_profile",
+          reference: { id: "arm:profile:trade_item:v1", version: versions.arm },
+        },
+        {
+          identity: "prj:spec:gs1_digital_link_projection:v1",
+          kind: "PRJ_SPECIFICATION",
+          version: versions.prj,
+          owner,
+          role: "prj_specification",
+          reference: {
+            id: "prj:spec:gs1_digital_link_projection:v1",
+            version: versions.prj,
+          },
+        },
+        {
+          identity: "rsn:blueprint:gs1_identity_verification:v1",
+          kind: "RSN_BLUEPRINT",
+          version: versions.rsn,
+          owner,
+          role: "rsn_blueprint",
+          reference: {
+            id: "rsn:blueprint:gs1_identity_verification:v1",
+            version: versions.rsn,
+          },
+        },
+        {
+          identity: "pol:req:active_standing:v1",
+          kind: "POL_REQUIREMENT",
+          version: versions.pol,
+          owner,
+          role: "pol_requirement",
+          reference: {
+            id: "pol:req:active_standing:v1",
+            version: versions.pol,
+          },
+        },
+        {
+          identity: "sec:req:sha256_payload_integrity:v1",
+          kind: "SEC_REQUIREMENT",
+          version: versions.sec,
+          owner,
+          role: "sec_requirement",
+          reference: {
+            id: "sec:req:sha256_payload_integrity:v1",
+            version: versions.sec,
+          },
+        },
+        {
+          identity: "ri:capability:stage7_ast_evaluation:v1",
+          kind: "RI_CAPABILITY",
+          version: versions.ri,
+          owner,
+          role: "ri_capability",
+          reference: {
+            id: "ri:capability:stage7_ast_evaluation:v1",
+            version: versions.ri,
+          },
+        },
+      ],
+    };
+  }
+
+  function createDppCompositionDefinition(
+    versions = {
+      dtc: "1.0.0",
+      arm: "1.0.0",
+      prj: "1.0.0",
+      rsn: "1.0.0",
+      pol: "1.0.0",
+      sec: "1.0.0",
+      ri: "1.0.0",
+    },
+    owner = "identity:test:author",
+  ): import("./bind.js").CompositionDefinition {
+    return {
+      participants: [
+        {
+          identity: "dtc:zyppi:domain:dpp:v1",
+          kind: "DTC",
+          version: versions.dtc,
+          owner,
+          role: "domain_template",
+          reference: { id: "dtc:zyppi:domain:dpp:v1", version: versions.dtc },
+        },
+        {
+          identity: "arm:profile:trade_item:v1",
+          kind: "ARM_PROFILE",
+          version: versions.arm,
+          owner,
+          role: "asset_profile",
+          reference: { id: "arm:profile:trade_item:v1", version: versions.arm },
+        },
+        {
+          identity: "prj:spec:dpp_passport_projection:v1",
+          kind: "PRJ_SPECIFICATION",
+          version: versions.prj,
+          owner,
+          role: "prj_specification",
+          reference: {
+            id: "prj:spec:dpp_passport_projection:v1",
+            version: versions.prj,
+          },
+        },
+        {
+          identity: "rsn:blueprint:dpp_passport_verification:v1",
+          kind: "RSN_BLUEPRINT",
+          version: versions.rsn,
+          owner,
+          role: "rsn_blueprint",
+          reference: {
+            id: "rsn:blueprint:dpp_passport_verification:v1",
+            version: versions.rsn,
+          },
+        },
+        {
+          identity: "pol:req:active_standing:v1",
+          kind: "POL_REQUIREMENT",
+          version: versions.pol,
+          owner,
+          role: "pol_requirement",
+          reference: {
+            id: "pol:req:active_standing:v1",
+            version: versions.pol,
+          },
+        },
+        {
+          identity: "sec:req:sha256_payload_integrity:v1",
+          kind: "SEC_REQUIREMENT",
+          version: versions.sec,
+          owner,
+          role: "sec_requirement",
+          reference: {
+            id: "sec:req:sha256_payload_integrity:v1",
+            version: versions.sec,
+          },
+        },
+        {
+          identity: "ri:capability:stage7_ast_evaluation:v1",
+          kind: "RI_CAPABILITY",
+          version: versions.ri,
+          owner,
+          role: "ri_capability",
+          reference: {
+            id: "ri:capability:stage7_ast_evaluation:v1",
+            version: versions.ri,
+          },
+        },
+      ],
+    };
+  }
+
+  function createSyntheticCompositionDefinition(
+    versions = {
+      dtc: "1.0.0",
+      arm: "1.0.0",
+      prj: "1.0.0",
+    },
+    owner = "identity:test:author",
+  ): import("./bind.js").CompositionDefinition {
+    return {
+      participants: [
+        {
+          identity: "dtc:zyppi:domain:synthetic_alpha:v1",
+          kind: "DTC",
+          version: versions.dtc,
+          owner,
+          role: "domain_template",
+          reference: {
+            id: "dtc:zyppi:domain:synthetic_alpha:v1",
+            version: versions.dtc,
+          },
+        },
+        {
+          identity: "arm:profile:synthetic_asset:v1",
+          kind: "ARM_PROFILE",
+          version: versions.arm,
+          owner,
+          role: "asset_profile",
+          reference: {
+            id: "arm:profile:synthetic_asset:v1",
+            version: versions.arm,
+          },
+        },
+        {
+          identity: "prj:spec:synthetic_projection:v1",
+          kind: "PRJ_SPECIFICATION",
+          version: versions.prj,
+          owner,
+          role: "prj_specification",
+          reference: {
+            id: "prj:spec:synthetic_projection:v1",
+            version: versions.prj,
+          },
+        },
+      ],
+    };
+  }
+
   it("TEST A — GS1 Success: resolves valid GS1 composition through Application Composition boundary", async () => {
     const registryRepo = new TestRegistryRepository(
       sampleCompleteSnapshotState,
@@ -161,6 +386,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-gs1-01",
@@ -203,6 +429,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-dpp-01",
@@ -283,6 +510,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-shared-dpp",
@@ -310,6 +538,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-shared-gs1",
@@ -371,6 +600,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-pol-gs1",
@@ -392,6 +622,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-pol-dpp",
@@ -438,6 +669,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-iso-gs1",
@@ -459,6 +691,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-iso-dpp",
@@ -509,6 +742,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-disappear-gs1",
@@ -588,6 +822,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
       manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-disappear-dpp",
@@ -934,6 +1169,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-arm-01",
@@ -1056,6 +1292,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-acv-01",
@@ -1141,6 +1378,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-exp-01",
@@ -1163,6 +1401,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-exp-02",
@@ -1208,6 +1447,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-att-opt-01",
@@ -1240,6 +1480,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-att-req-01",
@@ -1290,6 +1531,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-cl16-01",
@@ -1397,6 +1639,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-div-01",
@@ -1441,6 +1684,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-neg-02",
@@ -1490,6 +1734,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-crypto-01",
@@ -1529,6 +1774,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-01",
@@ -1760,6 +2006,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-07",
@@ -1803,6 +2050,18 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: "identity:council:admin",
+        compositionDefinition: createGs1CompositionDefinition(
+          {
+            dtc: "1.0.0",
+            arm: "1.0.0",
+            prj: "1.0.0",
+            rsn: "1.0.0",
+            pol: "1.0.0",
+            sec: "1.0.0",
+            ri: "1.0.0",
+          },
+          "identity:council:admin",
+        ),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-08",
@@ -1839,6 +2098,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-09",
@@ -1887,6 +2147,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [syntheticConceptRequirement],
         manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-10",
@@ -1994,6 +2255,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t03",
@@ -2033,6 +2295,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           DPP_MATERIAL_COMPOSITION_REQUIREMENT,
         ],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createDppCompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t04",
@@ -2431,6 +2694,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         ],
         applicableArmProfile: "arm:profile:trade_item:v1",
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t11",
@@ -2563,6 +2827,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         dtcFixture: pureSyntheticDtc,
         epistemicRequirementsFixtures: [pureSyntheticReq],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createSyntheticCompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t14",
@@ -2740,6 +3005,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t17",
@@ -2775,6 +3041,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t18-gs1",
@@ -2797,6 +3064,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           DPP_MATERIAL_COMPOSITION_REQUIREMENT,
         ],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createDppCompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t18-dpp",
@@ -2914,7 +3182,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const fullReq: import("./types.js").EpistemicRequirementContract =
         Object.freeze({
           requirementId: "epistemic:req:synthetic_identity:v1",
-          version: "1.1.1",
+          version: "3.3.0",
           targetDimension: "SYNTHETIC_ALPHA",
           goldenQuestionRef: "question:synthetic_alpha",
           requiredFacts: [],
@@ -2951,61 +3219,61 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           {
             identity: "arm:profile:synthetic_asset:v1",
             kind: "ARM_PROFILE",
-            version: "2.1.0",
+            version: "2.2.0",
             owner: defaultManifestAuthor,
             role: "asset_profile",
             reference: {
               id: "arm:profile:synthetic_asset:v1",
-              version: "2.1.0",
+              version: "2.2.0",
             },
           },
           {
             identity: "prj:spec:synthetic_projection:v1",
             kind: "PRJ_SPECIFICATION",
-            version: "2.2.0",
+            version: "4.4.0",
             owner: defaultManifestAuthor,
             role: "prj_specification",
             reference: {
               id: "prj:spec:synthetic_projection:v1",
-              version: "2.2.0",
+              version: "4.4.0",
             },
           },
           {
             identity: "rsn:blueprint:synthetic_rsn:v1",
             kind: "RSN_BLUEPRINT",
-            version: "2.3.0",
+            version: "5.5.0",
             owner: defaultManifestAuthor,
             role: "rsn_blueprint",
             reference: {
               id: "rsn:blueprint:synthetic_rsn:v1",
-              version: "2.3.0",
+              version: "5.5.0",
             },
           },
           {
             identity: "pol:req:synthetic_pol:v1",
             kind: "POL_REQUIREMENT",
-            version: "2.4.0",
+            version: "6.6.0",
             owner: defaultManifestAuthor,
             role: "pol_requirement",
-            reference: { id: "pol:req:synthetic_pol:v1", version: "2.4.0" },
+            reference: { id: "pol:req:synthetic_pol:v1", version: "6.6.0" },
           },
           {
             identity: "sec:req:synthetic_sec:v1",
             kind: "SEC_REQUIREMENT",
-            version: "2.5.0",
+            version: "7.7.0",
             owner: defaultManifestAuthor,
             role: "sec_requirement",
-            reference: { id: "sec:req:synthetic_sec:v1", version: "2.5.0" },
+            reference: { id: "sec:req:synthetic_sec:v1", version: "7.7.0" },
           },
           {
             identity: "ri:capability:synthetic_ri:v1",
             kind: "RI_CAPABILITY",
-            version: "2.6.0",
+            version: "8.8.0",
             owner: defaultManifestAuthor,
             role: "ri_capability",
             reference: {
               id: "ri:capability:synthetic_ri:v1",
-              version: "2.6.0",
+              version: "8.8.0",
             },
           },
         ],
@@ -3038,15 +3306,52 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.manifest.dtcReference.version).toBe("1.0.0");
-        expect(result.manifest.armProfileReference.version).toBe("2.1.0");
+        expect(result.manifest.armProfileReference.version).toBe("2.2.0");
         expect(result.manifest.boundEpistemicRequirements[0].version).toBe(
-          "1.1.1",
+          "3.3.0",
         );
-        expect(result.manifest.boundPrjSpecifications[0].version).toBe("2.2.0");
-        expect(result.manifest.boundRsnBlueprints[0].version).toBe("2.3.0");
-        expect(result.manifest.boundPolRequirements[0].version).toBe("2.4.0");
-        expect(result.manifest.boundSecRequirements[0].version).toBe("2.5.0");
-        expect(result.manifest.boundRiCapabilities[0].version).toBe("2.6.0");
+        expect(result.manifest.boundPrjSpecifications[0].version).toBe("4.4.0");
+        expect(result.manifest.boundRsnBlueprints[0].version).toBe("5.5.0");
+        expect(result.manifest.boundPolRequirements[0].version).toBe("6.6.0");
+        expect(result.manifest.boundSecRequirements[0].version).toBe("7.7.0");
+        expect(result.manifest.boundRiCapabilities[0].version).toBe("8.8.0");
+      }
+    });
+
+    it("PRE1-T29 — Universal Version Array Non-Fallback: Constituents without participant in compositionDefinition fail closed without options.versions[0] fallback", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t29",
+        executionId: "exec-t29",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"], // Pass valid SemVer satisfying DTC constraint, but omit compositionDefinition participants!
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        expect(result.error.message).toContain(
+          "Missing exact explicit participant version coordinate",
+        );
       }
     });
 
@@ -3237,6 +3542,10 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         dtcFixture: pureSyntheticDtc,
         epistemicRequirementsFixtures: [pureSyntheticReq],
         manifestAuthor: "identity:test:manifest_author",
+        compositionDefinition: createSyntheticCompositionDefinition(
+          { dtc: "1.0.0", arm: "1.0.0", prj: "1.0.0" },
+          "identity:test:manifest_author",
+        ),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t28",
@@ -3365,6 +3674,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         dtcFixture: pureSyntheticDtc,
         epistemicRequirementsFixtures: [pureSyntheticReq],
         manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createSyntheticCompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t22",
@@ -3418,6 +3728,18 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
         manifestAuthor: customAuthor,
+        compositionDefinition: createGs1CompositionDefinition(
+          {
+            dtc: "1.0.0",
+            arm: "1.0.0",
+            prj: "1.0.0",
+            rsn: "1.0.0",
+            pol: "1.0.0",
+            sec: "1.0.0",
+            ri: "1.0.0",
+          },
+          customAuthor,
+        ),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-t23",

@@ -358,6 +358,40 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
             requiredFacts: [],
           },
         ],
+        compositionDefinition: {
+          participants: [
+            {
+              identity: "dtc:zyppi:domain:gs1:v1",
+              kind: "DTC",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "domain_template",
+              reference: { id: "dtc:zyppi:domain:gs1:v1", version: "1.0.0" },
+            },
+            {
+              identity: "arm:profile:trade_item:v1",
+              kind: "ARM_PROFILE",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "asset_profile",
+              reference: {
+                id: "arm:profile:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "prj:spec:trade_item:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_non_binding",
@@ -1026,6 +1060,40 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
             requiredFacts: [],
           },
         ],
+        compositionDefinition: {
+          participants: [
+            {
+              identity: "dtc:zyppi:domain:gs1:v1",
+              kind: "DTC",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "domain_template",
+              reference: { id: "dtc:zyppi:domain:gs1:v1", version: "1.0.0" },
+            },
+            {
+              identity: "arm:profile:trade_item:v1",
+              kind: "ARM_PROFILE",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "asset_profile",
+              reference: {
+                id: "arm:profile:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "prj:spec:trade_item:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_zero_bind",
