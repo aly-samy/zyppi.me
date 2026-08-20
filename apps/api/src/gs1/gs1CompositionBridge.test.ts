@@ -30,7 +30,6 @@ import type {
   DomainTemplateCard,
   EpistemicRequirementContract,
 } from "../zprof/types.js";
-import { mapEvaluationCoordinateToExecutionRequest } from "../zprof/lifecycle.js";
 // @ts-expect-error JS module without declaration file
 import { runValidation } from "../../../../tools/verify-dependency-graph.mjs";
 
@@ -147,12 +146,6 @@ const defaultResolvedPolicyGraph: ResolvedPolicyGraph = {
 
 const defaultVersions = Object.freeze(["1.0.0"]);
 
-const mockExplicitPinnedStateRef = Object.freeze({
-  ref: "acv:pinned_state:09506000134352:v1",
-  digest:
-    "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-});
-
 function createDefaultBridgeInput(
   anchorSuccess: GS1AnchorBridgeSuccess,
   repo: RegistryRepository,
@@ -169,7 +162,6 @@ function createDefaultBridgeInput(
     tValid: "2026-01-01T00:00:00Z",
     tObservation: "2026-01-01T00:00:00Z",
     tEInput: "2026-01-01T00:00:00Z",
-    explicitPinnedStateRef: mockExplicitPinnedStateRef,
     budget: 1000,
     entropy: "test-entropy-string-1234567890",
     versions: defaultVersions,
@@ -278,7 +270,7 @@ function createDefaultBridgeInput(
   };
 }
 
-describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (CORR-0861-B-2)", () => {
+describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (CORR-0861-B-3)", () => {
   // Setup common anchor
   async function getLawfulAnchor() {
     const knownMap = new Map<string, RetrievedRegistryState>([
@@ -297,7 +289,7 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
   }
 
   // B-0861-01: A-anchor accepted through lawful public seam
-  it("B-0861-01: should accept packet A anchor through lawful public seam and assemble composition", async () => {
+  it("B-0861-01: should accept packet A anchor through lawful public seam and assemble composition with PINNED_SEMANTIC_STATE_REPRESENTATION_GAP", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
@@ -310,10 +302,9 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
       );
       expect(result.sccId).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(result.bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
-      expect(result.evaluationCoordinate?.sccId).toBe(result.sccId);
-      expect(result.evaluationCoordinate?.bcgId).toBe(result.bcgId);
-      expect(result.evaluationCoordinate?.pinnedSemanticStateRef.ref).toBe(
-        mockExplicitPinnedStateRef.ref,
+      expect(result.evaluationCoordinate).toBeUndefined();
+      expect(result.representationGap).toBe(
+        "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
       );
     }
   });
@@ -687,13 +678,11 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     const result = await assembleGs1CompositionFromAnchor(input);
 
     expect(result.ok).toBe(true);
-    if (result.ok && result.evaluationCoordinate) {
+    if (result.ok) {
       expect(
-        result.evaluationCoordinate.authorizedInputs.anchorCanonicalId,
-      ).toBe(anchorSuccess.anchor.normalizedCarrier.k1);
-      expect(
-        result.evaluationCoordinate.authorizedInputs.provenanceCarrierInput,
-      ).toBe(anchorSuccess.provenance.carrierInput);
+        result.boundPayload.resolvedActiveConstitutionalView.identity
+          .identityId,
+      ).toBe("09506000134352");
     }
   });
 
@@ -746,15 +735,12 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
 
     expect(res1.ok).toBe(true);
     expect(res2.ok).toBe(true);
-    if (
-      res1.ok &&
-      res2.ok &&
-      res1.evaluationCoordinate &&
-      res2.evaluationCoordinate
-    ) {
+    if (res1.ok && res2.ok) {
       // Anchor identity remains identical
-      expect(res1.evaluationCoordinate.authorizedInputs.anchorCanonicalId).toBe(
-        res2.evaluationCoordinate.authorizedInputs.anchorCanonicalId,
+      expect(
+        res1.boundPayload.resolvedActiveConstitutionalView.identity.identityId,
+      ).toBe(
+        res2.boundPayload.resolvedActiveConstitutionalView.identity.identityId,
       );
       // Semantic configuration identity differs
       expect(res1.sccId).not.toBe(res2.sccId);
@@ -909,65 +895,12 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-32: Execution Readiness tEInput Requirement (CORR-0861-B-2)
-  it("B-0861-32: should fail closed when explicit tEInput is missing for evaluation coordinate assembly", async () => {
+  // B-0861-34: Representation Gap Verification (CORR-0861-B-3)
+  it("B-0861-34: should report PINNED_SEMANTIC_STATE_REPRESENTATION_GAP and leave evaluationCoordinate absent when no ACV state reference exists", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
-
-    const missingTEInput = {
-      ...input,
-      tEInput: undefined,
-    };
-
-    const result = await assembleGs1CompositionFromAnchor(missingTEInput);
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.code).toBe("missing");
-      expect(result.error.message).toContain("tEInput");
-    }
-  });
-
-  // B-0861-33: Preserved Distinct Temporal Coordinates (CORR-0861-B-2)
-  it("B-0861-33: should preserve distinct tValid, tObservation, and tEInput timestamps exactly", async () => {
-    const { anchorSuccess, repo } = await getLawfulAnchor();
-
-    const tValid = "2026-01-01T10:00:00Z";
-    const tObservation = "2026-01-02T12:00:00Z";
-    const tEInput = "2026-01-03T14:00:00Z";
-
-    const input = {
-      ...createDefaultBridgeInput(anchorSuccess, repo),
-      tValid,
-      tObservation,
-      tEInput,
-    };
 
     const result = await assembleGs1CompositionFromAnchor(input);
-
-    expect(result.ok).toBe(true);
-    if (result.ok && result.evaluationCoordinate) {
-      const temps = result.evaluationCoordinate.temporalCoordinates;
-      expect(temps.tValid).toBe(tValid);
-      expect(temps.tObservation).toBe(tObservation);
-      expect(temps.tEInput).toBe(tEInput);
-      expect(temps.tValid).not.toBe(temps.tObservation);
-      expect(temps.tObservation).not.toBe(temps.tEInput);
-    }
-  });
-
-  // B-0861-34: Pinned Semantic State Representation Gap Verification (CORR-0861-B-2)
-  it("B-0861-34: should report PINNED_SEMANTIC_STATE_REPRESENTATION_GAP when no explicit ACV state reference is provided and zero fabrication occurs", async () => {
-    const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
-
-    // Omit explicitPinnedStateRef
-    const gapInput = {
-      ...input,
-      explicitPinnedStateRef: undefined,
-    };
-
-    const result = await assembleGs1CompositionFromAnchor(gapInput);
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -986,32 +919,28 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // Pre-RI EvaluationCoordinate Mapper Compatibility Test
-  it("should produce an EvaluationCoordinate and BoundPayload that pass mapEvaluationCoordinateToExecutionRequest structurally when explicitPinnedStateRef is supplied", async () => {
+  // CORR-0861-B-3 Negative Test: Caller object cannot force EC materialization
+  it("CORR-0861-B-3 Negative Test: should confirm an arbitrary caller object cannot cause EC materialization or bypass representation gap", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const input = {
+      ...createDefaultBridgeInput(anchorSuccess, repo),
+      // Pass arbitrary caller property
+      explicitPinnedStateRef: { ref: "acv:fake:pin" },
+    };
 
-    const assemblyRes = await assembleGs1CompositionFromAnchor(input);
-    expect(assemblyRes.ok).toBe(true);
+    const result = await assembleGs1CompositionFromAnchor(
+      input as unknown as Parameters<
+        typeof assembleGs1CompositionFromAnchor
+      >[0],
+    );
 
-    if (assemblyRes.ok && assemblyRes.evaluationCoordinate) {
-      const mapped = mapEvaluationCoordinateToExecutionRequest({
-        coordinate: assemblyRes.evaluationCoordinate,
-        boundPayload: assemblyRes.boundPayload,
-        requestId: input.requestId,
-        executionId: input.executionId,
-      });
-
-      expect(mapped.ok).toBe(true);
-      if (mapped.ok) {
-        expect(mapped.executionRequest.requestId).toBe(input.requestId);
-        expect(mapped.executionRequest.executionContext.executionId).toBe(
-          input.executionId,
-        );
-        expect(
-          mapped.executionRequest.activeConstitutionalView.identity.identityId,
-        ).toBe("09506000134352");
-      }
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // EC remains absent because no governed ACV state reference exists in the architecture
+      expect(result.evaluationCoordinate).toBeUndefined();
+      expect(result.representationGap).toBe(
+        "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
+      );
     }
   });
 });
