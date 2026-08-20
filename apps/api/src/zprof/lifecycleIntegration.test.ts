@@ -469,7 +469,10 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
 
     expect(execRes.ok).toBe(true);
     if (execRes.ok && execRes.provenanceLink) {
-      const rcpt = execRes.provenanceLink.executionReceipt as unknown as Record<string, unknown>;
+      const rcpt = execRes.provenanceLink.executionReceipt as unknown as Record<
+        string,
+        unknown
+      >;
       expect(() => {
         rcpt.receiptId = "modified-id";
       }).toThrow();
@@ -504,8 +507,8 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       execRes.pipelineResult.ok &&
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
-      const rcpt = execRes.pipelineResult.outcome.executionOutput
-        .executionReceipt;
+      const rcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
       const initialRcptDigest = rcpt.deterministicHash;
 
       const arcInput: AssessmentRequestCoordinate = {
@@ -608,8 +611,8 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       execRes.pipelineResult.ok &&
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
-      const rcpt = execRes.pipelineResult.outcome.executionOutput
-        .executionReceipt;
+      const rcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
       const verifyRes = verifyExecutionReceiptIntegrity(
         rcpt,
         execRes.executionRequest,
@@ -658,8 +661,8 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       execRes.pipelineResult.ok &&
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
-      const rcpt = execRes.pipelineResult.outcome.executionOutput
-        .executionReceipt;
+      const rcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
       const arcInput: AssessmentRequestCoordinate = {
         target: { kind: "EXECUTION_RECEIPT", receiptRef: rcpt.receiptId },
         operation: "RECEIPT_VERIFICATION",
@@ -707,8 +710,8 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       execRes.pipelineResult.ok &&
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
-      const rcpt = execRes.pipelineResult.outcome.executionOutput
-        .executionReceipt;
+      const rcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
       const verify1 = verifyExecutionReceiptIntegrity(
         rcpt,
         execRes.executionRequest,
@@ -926,8 +929,8 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       execRes.pipelineResult.ok &&
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
-      const rcpt = execRes.pipelineResult.outcome.executionOutput
-        .executionReceipt;
+      const rcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
       const initialRcptJson = JSON.stringify(rcpt);
 
       const updatedAssessmentState: PinnedStateReference = {

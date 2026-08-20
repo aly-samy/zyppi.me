@@ -51,7 +51,10 @@ export function mapEvaluationCoordinateToExecutionRequest(
   } = options;
 
   // 1. EC Completeness Check before RI
-  const ecValidation = validateEvaluationCoordinatePayload(coordinate, "coordinate");
+  const ecValidation = validateEvaluationCoordinatePayload(
+    coordinate,
+    "coordinate",
+  );
   if (!ecValidation.ok) {
     return {
       ok: false,
@@ -64,13 +67,18 @@ export function mapEvaluationCoordinateToExecutionRequest(
     coordinate.temporalCoordinates.tEInput ??
     boundPayload.executionContext.constitutionalTimestamp;
 
-  if (!explicitTEInput || typeof explicitTEInput !== "string" || explicitTEInput.trim().length === 0) {
+  if (
+    !explicitTEInput ||
+    typeof explicitTEInput !== "string" ||
+    explicitTEInput.trim().length === 0
+  ) {
     return {
       ok: false,
       error: {
         code: "missing",
         category: "Composition Failure",
-        message: "Required T_e_input (constitutionalTimestamp) is absent from EvaluationCoordinate and bound payload.",
+        message:
+          "Required T_e_input (constitutionalTimestamp) is absent from EvaluationCoordinate and bound payload.",
       },
     };
   }
@@ -82,9 +90,13 @@ export function mapEvaluationCoordinateToExecutionRequest(
     activeConstitutionalView: boundPayload.resolvedActiveConstitutionalView,
     evidenceBundle: boundPayload.resolvedEvidenceBundle,
     policyContext:
-      "policies" in coordinate.boundContext && Array.isArray(coordinate.boundContext.policies)
+      "policies" in coordinate.boundContext &&
+      Array.isArray(coordinate.boundContext.policies)
         ? coordinate.boundContext
-        : { policies: boundPayload.resolvedActiveConstitutionalView.applicablePolicies },
+        : {
+            policies:
+              boundPayload.resolvedActiveConstitutionalView.applicablePolicies,
+          },
     executionContext: {
       executionId,
       constitutionalTimestamp: explicitTEInput,
@@ -286,37 +298,71 @@ export function evaluateAssessmentRequest(options: {
   readonly executionReceipt?: ExecutionReceipt;
   readonly executionRequest?: ExecutionRequest;
   readonly authorityOutputs?: {
-    readonly executable?: { readonly value: boolean; readonly authorityRef: string; readonly details?: string };
-    readonly currentlyTrusted?: { readonly value: boolean; readonly authorityRef: string; readonly details?: string };
-    readonly currentlyAdmissible?: { readonly value: boolean; readonly authorityRef: string; readonly details?: string };
+    readonly executable?: {
+      readonly value: boolean;
+      readonly authorityRef: string;
+      readonly details?: string;
+    };
+    readonly currentlyTrusted?: {
+      readonly value: boolean;
+      readonly authorityRef: string;
+      readonly details?: string;
+    };
+    readonly currentlyAdmissible?: {
+      readonly value: boolean;
+      readonly authorityRef: string;
+      readonly details?: string;
+    };
   };
 }): AssessmentResultOutcome {
-  const { arc, historicalCoordinate, executionReceipt, executionRequest, authorityOutputs } = options;
+  const {
+    arc,
+    historicalCoordinate,
+    executionReceipt,
+    executionRequest,
+    authorityOutputs,
+  } = options;
 
   const assessedAtCoordinate = arc.tTrust;
   const stateRef = arc.pinnedAssessmentStateRef;
-  const ruleRef = arc.applicableAssessmentRules && arc.applicableAssessmentRules.length > 0 ? arc.applicableAssessmentRules[0] : undefined;
+  const ruleRef =
+    arc.applicableAssessmentRules && arc.applicableAssessmentRules.length > 0
+      ? arc.applicableAssessmentRules[0]
+      : undefined;
 
   // 1. Reproducible determination
   let reproducibleVal = false;
-  let reproducibleDetails = "Historical coordinate or required dependencies unavailable.";
+  let reproducibleDetails =
+    "Historical coordinate or required dependencies unavailable.";
 
-  if (historicalCoordinate || (arc.target.kind === "EVALUATION_COORDINATE" && arc.target.coordinate)) {
-    const targetCoord = historicalCoordinate ?? (arc.target.kind === "EVALUATION_COORDINATE" ? arc.target.coordinate : undefined);
+  if (
+    historicalCoordinate ||
+    (arc.target.kind === "EVALUATION_COORDINATE" && arc.target.coordinate)
+  ) {
+    const targetCoord =
+      historicalCoordinate ??
+      (arc.target.kind === "EVALUATION_COORDINATE"
+        ? arc.target.coordinate
+        : undefined);
     if (targetCoord) {
       const payloadVal = validateEvaluationCoordinatePayload(targetCoord);
       if (payloadVal.ok) {
         reproducibleVal = true;
-        reproducibleDetails = "Complete historical evaluation coordinate available and structurally valid.";
+        reproducibleDetails =
+          "Complete historical evaluation coordinate available and structurally valid.";
       } else {
         reproducibleDetails = `Historical evaluation coordinate structurally invalid: ${payloadVal.error.message}`;
       }
     }
   } else if (executionReceipt && executionRequest) {
-    const rcptVerification = verifyExecutionReceiptIntegrity(executionReceipt, executionRequest);
+    const rcptVerification = verifyExecutionReceiptIntegrity(
+      executionReceipt,
+      executionRequest,
+    );
     if (rcptVerification.ok && rcptVerification.verified) {
       reproducibleVal = true;
-      reproducibleDetails = "Execution receipt and input request cryptographically verified.";
+      reproducibleDetails =
+        "Execution receipt and input request cryptographically verified.";
     }
   }
 
@@ -337,7 +383,11 @@ export function evaluateAssessmentRequest(options: {
     stateRef,
     ruleRef,
     assessedAtCoordinate,
-    details: execAuth?.details ?? (execAuth ? "Evaluated against RI admission authority." : "No explicit RI admission authority output provided."),
+    details:
+      execAuth?.details ??
+      (execAuth
+        ? "Evaluated against RI admission authority."
+        : "No explicit RI admission authority output provided."),
   });
 
   // 3. CurrentlyTrusted determination (Sourced strictly from SEC / trust authority)
@@ -348,18 +398,28 @@ export function evaluateAssessmentRequest(options: {
     stateRef,
     ruleRef,
     assessedAtCoordinate,
-    details: trustAuth?.details ?? (trustAuth ? "Evaluated against SEC trust authority." : "No explicit SEC trust authority output provided."),
+    details:
+      trustAuth?.details ??
+      (trustAuth
+        ? "Evaluated against SEC trust authority."
+        : "No explicit SEC trust authority output provided."),
   });
 
   // 4. CurrentlyAdmissible determination (Sourced strictly from POL / policy authority)
   const admAuth = authorityOutputs?.currentlyAdmissible;
   const currentlyAdmissible: CurrentlyAdmissibleDetermination = Object.freeze({
     value: admAuth ? admAuth.value : false,
-    authorityRef: admAuth ? admAuth.authorityRef : "authority:pol:admissibility",
+    authorityRef: admAuth
+      ? admAuth.authorityRef
+      : "authority:pol:admissibility",
     stateRef,
     ruleRef,
     assessedAtCoordinate,
-    details: admAuth?.details ?? (admAuth ? "Evaluated against POL policy authority." : "No explicit POL policy authority output provided."),
+    details:
+      admAuth?.details ??
+      (admAuth
+        ? "Evaluated against POL policy authority."
+        : "No explicit POL policy authority output provided."),
   });
 
   const assessment: AssessmentResult = Object.freeze({
