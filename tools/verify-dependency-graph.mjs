@@ -8,6 +8,7 @@ import ts from "typescript";
  * 1. package.json dependency declarations
  * 2. tsconfig.json project references
  * 3. Actual TypeScript source-level AST imports/exports
+ * 4. AMS-0861-A GS1 Domain-Edge Isolation Policy (GENERIC_ZPROF & GENERIC_APPLICATION_ORCHESTRATION)
  */
 export function runValidation(workspaceRoot = process.cwd()) {
   const violations = [];
@@ -211,6 +212,62 @@ export function runValidation(workspaceRoot = process.cwd()) {
 
     visit(sourceFile);
     return imports;
+  };
+
+  // Helper to build internal module import graph for apps/api/src/
+  const apiModuleGraph = new Map(); // relativeFilePath -> set of resolved relativeFilePaths inside apps/api/src/
+  const absoluteApiDir = path.resolve(workspaceRoot, "apps/api");
+
+  if (fs.existsSync(absoluteApiDir)) {
+    const apiFiles = findTsFiles(absoluteApiDir);
+    for (const absoluteFilePath of apiFiles) {
+      const relativeFilePath = path
+        .relative(workspaceRoot, absoluteFilePath)
+        .split(path.sep)
+        .join("/");
+      const content = fs.readFileSync(absoluteFilePath, "utf8");
+      const imports = getImportsOfFile(content, relativeFilePath);
+      const targets = new Set();
+
+      for (const imp of imports) {
+        const spec = imp.specifier;
+        if (spec.startsWith(".") || spec.startsWith("/")) {
+          const fileDir = path.dirname(absoluteFilePath);
+          let resolved = path.normalize(path.join(fileDir, spec));
+          if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
+            resolved = path.join(resolved, "index.ts");
+          } else if (!resolved.endsWith(".ts") && !resolved.endsWith(".tsx")) {
+            if (fs.existsSync(resolved + ".ts")) resolved = resolved + ".ts";
+            else if (fs.existsSync(resolved + ".tsx")) resolved = resolved + ".tsx";
+          }
+          const relResolved = path
+            .relative(workspaceRoot, resolved)
+            .split(path.sep)
+            .join("/");
+          if (relResolved.startsWith("apps/api/src/")) {
+            targets.add(relResolved);
+          }
+        }
+      }
+      apiModuleGraph.set(relativeFilePath, targets);
+    }
+  }
+
+  // Transitive reachability inside apps/api/src
+  const canReachGs1Module = (startFile) => {
+    const visited = new Set();
+    const queue = [startFile];
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      if (curr.startsWith("apps/api/src/gs1/")) return true;
+      if (visited.has(curr)) continue;
+      visited.add(curr);
+      const neighbors = apiModuleGraph.get(curr) || new Set();
+      for (const n of neighbors) {
+        queue.push(n);
+      }
+    }
+    return false;
   };
 
   // 1. Process each constitutional node
@@ -421,6 +478,26 @@ export function runValidation(workspaceRoot = process.cwd()) {
 
       const content = fs.readFileSync(absoluteFilePath, "utf8");
       const imports = getImportsOfFile(content, relativeFilePath);
+
+      // Check AMS-0861-A GS1 domain-edge isolation rule for generic modules
+      const isGenericZprof = relativeFilePath.startsWith("apps/api/src/zprof/");
+      const isGenericOrchestration =
+        relativeFilePath.startsWith("apps/api/src/registry/") ||
+        relativeFilePath.startsWith("apps/api/src/evidence/");
+
+      if (isGenericZprof || isGenericOrchestration) {
+        if (canReachGs1Module(relativeFilePath)) {
+          violations.push({
+            node,
+            layer: "source",
+            file: relativeFilePath,
+            line: 1,
+            column: 1,
+            rule: "gs1-domain-edge-contamination",
+            description: `Unauthorized direct or transitive GS1 domain-edge import in generic module "${relativeFilePath}". Generic orchestration/Z-PROF modules must not import GS1 implementations.`,
+          });
+        }
+      }
 
       for (const imp of imports) {
         const specifier = imp.specifier;
