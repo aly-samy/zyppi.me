@@ -147,6 +147,12 @@ const defaultResolvedPolicyGraph: ResolvedPolicyGraph = {
 
 const defaultVersions = Object.freeze(["1.0.0"]);
 
+const mockExplicitPinnedStateRef = Object.freeze({
+  ref: "acv:pinned_state:09506000134352:v1",
+  digest:
+    "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+});
+
 function createDefaultBridgeInput(
   anchorSuccess: GS1AnchorBridgeSuccess,
   repo: RegistryRepository,
@@ -163,6 +169,7 @@ function createDefaultBridgeInput(
     tValid: "2026-01-01T00:00:00Z",
     tObservation: "2026-01-01T00:00:00Z",
     tEInput: "2026-01-01T00:00:00Z",
+    explicitPinnedStateRef: mockExplicitPinnedStateRef,
     budget: 1000,
     entropy: "test-entropy-string-1234567890",
     versions: defaultVersions,
@@ -271,7 +278,7 @@ function createDefaultBridgeInput(
   };
 }
 
-describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (CORR-0861-B-1)", () => {
+describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (CORR-0861-B-2)", () => {
   // Setup common anchor
   async function getLawfulAnchor() {
     const knownMap = new Map<string, RetrievedRegistryState>([
@@ -303,10 +310,10 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
       );
       expect(result.sccId).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(result.bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
-      expect(result.evaluationCoordinate.sccId).toBe(result.sccId);
-      expect(result.evaluationCoordinate.bcgId).toBe(result.bcgId);
-      expect(result.evaluationCoordinate.pinnedSemanticStateRef.ref).toBe(
-        mockIdentity.canonicalReference,
+      expect(result.evaluationCoordinate?.sccId).toBe(result.sccId);
+      expect(result.evaluationCoordinate?.bcgId).toBe(result.bcgId);
+      expect(result.evaluationCoordinate?.pinnedSemanticStateRef.ref).toBe(
+        mockExplicitPinnedStateRef.ref,
       );
     }
   });
@@ -680,7 +687,7 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     const result = await assembleGs1CompositionFromAnchor(input);
 
     expect(result.ok).toBe(true);
-    if (result.ok) {
+    if (result.ok && result.evaluationCoordinate) {
       expect(
         result.evaluationCoordinate.authorizedInputs.anchorCanonicalId,
       ).toBe(anchorSuccess.anchor.normalizedCarrier.k1);
@@ -739,7 +746,12 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
 
     expect(res1.ok).toBe(true);
     expect(res2.ok).toBe(true);
-    if (res1.ok && res2.ok) {
+    if (
+      res1.ok &&
+      res2.ok &&
+      res1.evaluationCoordinate &&
+      res2.evaluationCoordinate
+    ) {
       // Anchor identity remains identical
       expect(res1.evaluationCoordinate.authorizedInputs.anchorCanonicalId).toBe(
         res2.evaluationCoordinate.authorizedInputs.anchorCanonicalId,
@@ -878,8 +890,46 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     expect(repo.lookupCount).toBe(initialRepoCount + 1);
   });
 
-  // CORR-0861-B-1 §2: Distinct Temporal Coordinate Verification
-  it("CORR-0861-B-1 §2: should preserve distinct temporal coordinates (tValid, tObservation, tEInput) when explicitly supplied", async () => {
+  // B-0861-31: Mechanical Temporal Requirement Enforcement (CORR-0861-B-2)
+  it("B-0861-31: should fail closed with code 'missing' when validTimeRequired is true and tValid is missing", async () => {
+    const { anchorSuccess, repo } = await getLawfulAnchor();
+    const input = createDefaultBridgeInput(anchorSuccess, repo);
+
+    const missingTValidInput = {
+      ...input,
+      tValid: undefined,
+    };
+
+    const result = await assembleGs1CompositionFromAnchor(missingTValidInput);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("missing");
+      expect(result.error.message).toContain("tValid");
+    }
+  });
+
+  // B-0861-32: Execution Readiness tEInput Requirement (CORR-0861-B-2)
+  it("B-0861-32: should fail closed when explicit tEInput is missing for evaluation coordinate assembly", async () => {
+    const { anchorSuccess, repo } = await getLawfulAnchor();
+    const input = createDefaultBridgeInput(anchorSuccess, repo);
+
+    const missingTEInput = {
+      ...input,
+      tEInput: undefined,
+    };
+
+    const result = await assembleGs1CompositionFromAnchor(missingTEInput);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("missing");
+      expect(result.error.message).toContain("tEInput");
+    }
+  });
+
+  // B-0861-33: Preserved Distinct Temporal Coordinates (CORR-0861-B-2)
+  it("B-0861-33: should preserve distinct tValid, tObservation, and tEInput timestamps exactly", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
 
     const tValid = "2026-01-01T10:00:00Z";
@@ -896,7 +946,7 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     const result = await assembleGs1CompositionFromAnchor(input);
 
     expect(result.ok).toBe(true);
-    if (result.ok) {
+    if (result.ok && result.evaluationCoordinate) {
       const temps = result.evaluationCoordinate.temporalCoordinates;
       expect(temps.tValid).toBe(tValid);
       expect(temps.tObservation).toBe(tObservation);
@@ -906,15 +956,45 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // CORR-0861-B-1 §3: Pre-RI EvaluationCoordinate Mapper Compatibility Test
-  it("CORR-0861-B-1 §3: should produce an EvaluationCoordinate and BoundPayload that pass mapEvaluationCoordinateToExecutionRequest structurally without invoking RI", async () => {
+  // B-0861-34: Pinned Semantic State Representation Gap Verification (CORR-0861-B-2)
+  it("B-0861-34: should report PINNED_SEMANTIC_STATE_REPRESENTATION_GAP when no explicit ACV state reference is provided and zero fabrication occurs", async () => {
+    const { anchorSuccess, repo } = await getLawfulAnchor();
+    const input = createDefaultBridgeInput(anchorSuccess, repo);
+
+    // Omit explicitPinnedStateRef
+    const gapInput = {
+      ...input,
+      explicitPinnedStateRef: undefined,
+    };
+
+    const result = await assembleGs1CompositionFromAnchor(gapInput);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Manifest, BoundPayload, SCC, BCG are valid independently
+      expect(result.manifest.dtcReference.dtcId).toBe(
+        "dtc:zyppi:domain:gs1:v1",
+      );
+      expect(result.sccId).toMatch(/^sha256:[a-f0-9]{64}$/);
+      expect(result.bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
+
+      // EvaluationCoordinate is NOT materialized and gap is explicitly reported without subject identity fabrication
+      expect(result.evaluationCoordinate).toBeUndefined();
+      expect(result.representationGap).toBe(
+        "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
+      );
+    }
+  });
+
+  // Pre-RI EvaluationCoordinate Mapper Compatibility Test
+  it("should produce an EvaluationCoordinate and BoundPayload that pass mapEvaluationCoordinateToExecutionRequest structurally when explicitPinnedStateRef is supplied", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
     const assemblyRes = await assembleGs1CompositionFromAnchor(input);
     expect(assemblyRes.ok).toBe(true);
 
-    if (assemblyRes.ok) {
+    if (assemblyRes.ok && assemblyRes.evaluationCoordinate) {
       const mapped = mapEvaluationCoordinateToExecutionRequest({
         coordinate: assemblyRes.evaluationCoordinate,
         boundPayload: assemblyRes.boundPayload,

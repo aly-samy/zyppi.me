@@ -8,6 +8,7 @@ import {
   type CompositionError,
   type EpistemicStatus,
   type GS1CompositionOptions,
+  type PinnedStateReference,
 } from "../zprof/index.js";
 import { createValidatedCanonicalIdentifier } from "@zyppi/contracts";
 
@@ -19,6 +20,7 @@ export interface GS1CompositionBridgeInputOptions extends Omit<
   readonly tValid?: string;
   readonly tObservation?: string;
   readonly tEInput?: string;
+  readonly explicitPinnedStateRef?: PinnedStateReference;
 }
 
 export type GS1CompositionBridgeAssemblyResult =
@@ -29,7 +31,8 @@ export type GS1CompositionBridgeAssemblyResult =
       readonly sccId: string;
       readonly bcgId: string;
       readonly bcg: import("../zprof/bcg.js").BoundConfigurationGraph;
-      readonly evaluationCoordinate: EvaluationCoordinate;
+      readonly evaluationCoordinate?: EvaluationCoordinate;
+      readonly representationGap?: "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP";
     }
   | {
       readonly ok: false;
@@ -38,7 +41,7 @@ export type GS1CompositionBridgeAssemblyResult =
     };
 
 /**
- * GS1 Domain-Edge Assembly Bridge (AMS-0861-B / CORR-0861-B-1).
+ * GS1 Domain-Edge Assembly Bridge (AMS-0861-B / CORR-0861-B-2).
  *
  * Consumes the lawful constitutional anchor produced by Packet A (createGs1AnchorFromCarrier / GS1AnchorBridgeSuccess)
  * and adapts it into generic Z-PROF composition resolution and EvaluationCoordinate construction.
@@ -47,11 +50,15 @@ export type GS1CompositionBridgeAssemblyResult =
  * LAW-B-11: Strictly stops before RI Execution (does NOT invoke runInternalPipeline or produce ExecutionReceipt).
  * LAW-B-09: Positioned strictly in the GS1 domain edge (apps/api/src/gs1/). Generic Z-PROF contains zero imports of this module.
  *
- * CORR-0861-B-1 Corrections:
- * 1. Binds actual existing pinned ACV identity reference (boundPayload.resolvedActiveConstitutionalView.identity.canonicalReference)
- *    to pinnedSemanticStateRef without synthesizing manifestId, sccId, or ARM version.
- * 2. Consumes explicit temporal inputs (tValid, tObservation, tEInput) without automatically assigning constitutionalTimestamp to all three.
- * 3. Binds actual governed options.policyContext directly as boundContext on EvaluationCoordinate (enabling pre-RI mapper compatibility).
+ * CORR-0861-B-2 Rules:
+ * 1. Pinned Semantic State Reference Gap: Reconnaissance confirms ActiveConstitutionalView contains no top-level ACV
+ *    state reference or digest. Does NOT fabricate or synthesize a pin from subject canonicalReference or manifestId.
+ *    If explicitPinnedStateRef is provided, uses it. Otherwise, returns valid CompositionManifest, BoundConstitutionalPayload,
+ *    SCC_ID, BCG_ID, and BCG, while setting evaluationCoordinate to undefined and reporting PINNED_SEMANTIC_STATE_REPRESENTATION_GAP.
+ * 2. Mechanical Temporal Enforcement:
+ *    - If any bound EpistemicRequirementContract has temporalConstraints.validTimeRequired === true, tValid is mandatory; missing tValid fails closed with "missing".
+ *    - For execution readiness, tEInput must be explicitly supplied on options before EvaluationCoordinate materialization.
+ *    - Zero fallback to constitutionalTimestamp, Date.now(), or other timestamps.
  */
 export async function assembleGs1CompositionFromAnchor(
   options: GS1CompositionBridgeInputOptions,
@@ -68,6 +75,26 @@ export async function assembleGs1CompositionFromAnchor(
       },
       epistemicStatus: "UNAVAILABLE",
     };
+  }
+
+  // 1. Mechanical Temporal Requirement Verification from bound EpistemicRequirementContracts
+  const requiresTValid = (options.epistemicRequirementsFixtures || []).some(
+    (req) => req.temporalConstraints?.validTimeRequired === true,
+  );
+
+  if (requiresTValid) {
+    if (!options.tValid || options.tValid.trim().length === 0) {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message:
+            "Required valid time coordinate (tValid) is missing for epistemic requirement with validTimeRequired constraint",
+        },
+        epistemicStatus: "UNAVAILABLE",
+      };
+    }
   }
 
   const anchor = anchorSuccess.anchor;
@@ -121,13 +148,42 @@ export async function assembleGs1CompositionFromAnchor(
     };
   }
 
-  // 1. CORR-0861-B-1 §1: Bind actual existing pinned ACV identity reference without synthesizing manifest/scc/version
-  const pinnedSemanticStateRef = Object.freeze({
-    ref: boundPayload.resolvedActiveConstitutionalView.identity
-      .canonicalReference,
-  });
+  // 2. CORR-0861-B-2 §1: Check Pinned Semantic State Reference
+  // ActiveConstitutionalView contains identity, relationships, standings, authorities, capabilities, evidenceReferences, and applicablePolicies,
+  // but exposes zero top-level ACV state identifier or digest.
+  // Per CORR-0861-B-2 Decision Rule: Do NOT synthesize or fabricate a pin from subject identity canonicalReference, manifestId, or sccId.
+  let pinnedSemanticStateRef: PinnedStateReference | undefined;
+  if (options.explicitPinnedStateRef) {
+    pinnedSemanticStateRef = options.explicitPinnedStateRef;
+  }
 
-  // 3. CORR-0861-B-1 §3: Bind actual governed options.policyContext directly as boundContext
+  // If no explicit or lawful pinned state reference exists, report PINNED_SEMANTIC_STATE_REPRESENTATION_GAP
+  if (!pinnedSemanticStateRef) {
+    return Object.freeze({
+      ok: true,
+      manifest,
+      boundPayload,
+      sccId,
+      bcgId,
+      bcg,
+      evaluationCoordinate: undefined,
+      representationGap: "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
+    });
+  }
+
+  // If EvaluationCoordinate materialization is requested with explicit pinned state reference, enforce tEInput readiness
+  if (!options.tEInput || options.tEInput.trim().length === 0) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "Required execution time input coordinate (tEInput) is missing for evaluation coordinate assembly",
+      },
+    };
+  }
+
   const boundContext = options.policyContext;
 
   const evidenceIntegrityCoordinates = Object.freeze(
@@ -139,13 +195,18 @@ export async function assembleGs1CompositionFromAnchor(
     ),
   );
 
-  // 2. CORR-0861-B-1 §2: Consume explicit temporal coordinates without automatic collapsing to constitutionalTimestamp
   const temporalCoordinates = Object.freeze({
     ...(options.tValid !== undefined ? { tValid: options.tValid } : {}),
     ...(options.tObservation !== undefined
       ? { tObservation: options.tObservation }
       : {}),
     ...(options.tEInput !== undefined ? { tEInput: options.tEInput } : {}),
+  });
+
+  const temporalRequirements = Object.freeze({
+    requiresTValid,
+    requiresTObservation: false,
+    requiresTEInput: true,
   });
 
   const ecResult = buildEvaluationCoordinate({
@@ -167,6 +228,7 @@ export async function assembleGs1CompositionFromAnchor(
       versions: options.versions,
     }),
     temporalCoordinates,
+    temporalRequirements,
   });
 
   if (!ecResult.ok) {
