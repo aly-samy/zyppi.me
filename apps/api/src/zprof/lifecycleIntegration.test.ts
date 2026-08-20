@@ -1,14 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createValidatedCanonicalIdentifier } from "@zyppi/contracts";
 import {
-  type ActiveConstitutionalView,
   type CapabilityRecord,
   type EvidenceRecord,
-  type ExecutionReceipt,
-  type ExecutionRequest,
   type IdentityRecord,
   type PolicyContext,
-  type PolicyRecord,
   type ResolvedPolicyGraph,
 } from "@zyppi/domain";
 import type { StageOverrideConfig } from "@zyppi/runtime/dist/types.js";
