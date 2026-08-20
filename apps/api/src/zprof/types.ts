@@ -438,39 +438,50 @@ export type EvaluationCoordinateResult =
 
 /**
  * Options for mapping an EvaluationCoordinate (EC) into an ExecutionRequest for RI execution.
+ * Evaluation-affecting properties (budget, entropy, versions, resolvedPolicyGraph) MUST NOT float
+ * as free adapter options; they are extracted strictly from boundPayload.
  */
 export interface MapEcToExecutionRequestOptions {
   readonly coordinate: EvaluationCoordinate;
   readonly boundPayload: BoundConstitutionalPayload;
   readonly requestId: string;
   readonly executionId: string;
-  readonly budget: number;
-  readonly entropy: string;
-  readonly versions: readonly string[];
-  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+  readonly resolvedPolicyGraph?: ResolvedPolicyGraph;
 }
 
 /**
  * Historical Provenance Link binding an ExecutionReceipt to explicit Z-PROF coordinate provenance at the Application layer per AMS-0860-C.
+ * Includes exact execution input digests (inputHash & evidenceHash) to prove cryptographic linkage.
  */
 export interface HistoricalProvenanceLink {
   readonly receiptId: string;
   readonly executionId: string;
   readonly sccId: string;
   readonly bcgId: string;
+  readonly inputHash: string;
+  readonly evidenceHash: string;
   readonly coordinate: EvaluationCoordinate;
   readonly executionReceipt: import("@zyppi/domain").ExecutionReceipt;
   readonly observedExecutionTime: string; // T_e_observed captured from Runtime execution fact
-  readonly createdTimestamp: string;
 }
 
 /**
- * Result of receipt verification operation per AMS-0860-C.
+ * Detailed verification report distinguishing structural validity, hash bindings, and full receipt integrity.
+ */
+export interface ReceiptVerificationDetails {
+  readonly structuralValidity: boolean;
+  readonly inputBinding: "VERIFIED" | "MISMATCH" | "UNAVAILABLE";
+  readonly evidenceBinding: "VERIFIED" | "MISMATCH" | "UNAVAILABLE";
+  readonly fullReceiptIntegrity: "VERIFIED" | "UNAVAILABLE";
+}
+
+/**
+ * Result of receipt verification operation per AMS-0860-C §20 / CORR-0860-C-1 §4–§5.
  */
 export type ReceiptVerificationResult =
   | {
       readonly ok: true;
-      readonly verified: boolean;
+      readonly verification: ReceiptVerificationDetails;
       readonly receiptId: string;
       readonly deterministicHash: string;
       readonly details?: string;
@@ -481,56 +492,69 @@ export type ReceiptVerificationResult =
     };
 
 /**
- * Authority-attributed determination for Reproducible dimension per AMS-0860-C §25.
+ * Explicit determination status taxonomy supporting absence of authority output.
+ */
+export type DeterminationStatus = "DETERMINED" | "UNAVAILABLE";
+
+/**
+ * Authority-attributed determination for Reproducible dimension per AMS-0860-C §25 / CORR-0860-C-1 §6.
  */
 export interface ReproducibleDetermination {
-  readonly value: boolean;
-  readonly authorityRef: string;
+  readonly status: DeterminationStatus;
+  readonly value?: boolean;
+  readonly authorityRef?: string;
   readonly stateRef?: PinnedStateReference;
   readonly ruleRef?: PinnedStateReference;
-  readonly assessedAtCoordinate: string;
+  readonly assessedAtCoordinate?: string;
   readonly details?: string;
+  readonly reason?: string;
 }
 
 /**
- * Authority-attributed determination for Executable dimension per AMS-0860-C §26.
+ * Authority-attributed determination for Executable dimension per AMS-0860-C §26 / CORR-0860-C-1 §7–§8.
  */
 export interface ExecutableDetermination {
-  readonly value: boolean;
-  readonly authorityRef: string;
+  readonly status: DeterminationStatus;
+  readonly value?: boolean;
+  readonly authorityRef?: string;
   readonly stateRef?: PinnedStateReference;
   readonly ruleRef?: PinnedStateReference;
-  readonly assessedAtCoordinate: string;
+  readonly assessedAtCoordinate?: string;
   readonly details?: string;
+  readonly reason?: string;
 }
 
 /**
- * Authority-attributed determination for CurrentlyTrusted dimension per AMS-0860-C §27.
+ * Authority-attributed determination for CurrentlyTrusted dimension per AMS-0860-C §27 / CORR-0860-C-1 §7–§8.
  */
 export interface CurrentlyTrustedDetermination {
-  readonly value: boolean;
-  readonly authorityRef: string;
+  readonly status: DeterminationStatus;
+  readonly value?: boolean;
+  readonly authorityRef?: string;
   readonly stateRef?: PinnedStateReference;
   readonly ruleRef?: PinnedStateReference;
-  readonly assessedAtCoordinate: string;
+  readonly assessedAtCoordinate?: string;
   readonly details?: string;
+  readonly reason?: string;
 }
 
 /**
- * Authority-attributed determination for CurrentlyAdmissible dimension per AMS-0860-C §28.
+ * Authority-attributed determination for CurrentlyAdmissible dimension per AMS-0860-C §28 / CORR-0860-C-1 §7–§8.
  */
 export interface CurrentlyAdmissibleDetermination {
-  readonly value: boolean;
-  readonly authorityRef: string;
+  readonly status: DeterminationStatus;
+  readonly value?: boolean;
+  readonly authorityRef?: string;
   readonly stateRef?: PinnedStateReference;
   readonly ruleRef?: PinnedStateReference;
-  readonly assessedAtCoordinate: string;
+  readonly assessedAtCoordinate?: string;
   readonly details?: string;
+  readonly reason?: string;
 }
 
 /**
- * Aggregate 4-Dimensional Assessment Result per AMS-0860-C §24–§30.
- * Preserves four independent determinations with explicit authority provenance without collapsing into a single binary status.
+ * Aggregate 4-Dimensional Assessment Result per AMS-0860-C §24–§30 / CORR-0860-C-1 §7–§8.
+ * Preserves four independent determinations with explicit authority provenance without collapsing into a single binary status or defaulting absence to false.
  */
 export interface AssessmentResult {
   readonly reproducible: ReproducibleDetermination;

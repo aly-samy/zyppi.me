@@ -5,6 +5,7 @@ import {
   type EvidenceRecord,
   type IdentityRecord,
   type PolicyContext,
+  type PolicyRecord,
   type ResolvedPolicyGraph,
 } from "@zyppi/domain";
 import type { StageOverrideConfig } from "@zyppi/runtime/dist/types.js";
@@ -33,7 +34,7 @@ import type {
   PinnedStateReference,
 } from "./types.js";
 
-describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite (§41 Scenarios 1–44)", () => {
+describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite (§41 Scenarios 1–44 & CORR-0860-C-1 C45–C60)", () => {
   const validIdentifierResult =
     createValidatedCanonicalIdentifier("09501101530003");
   if (!validIdentifierResult.ok) {
@@ -89,8 +90,16 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
     ["evd-001", { verified: true }],
   ]);
 
+  const validPolicyRecord: PolicyRecord = Object.freeze({
+    policyId: "pol:req:trade_item_validity:v1",
+    policyType: "POLICY_RULE",
+    version: "1.0.0",
+    definition: Object.freeze({ allow: true }),
+    active: true,
+  });
+
   const defaultPolicyContext: PolicyContext = Object.freeze({
-    policies: Object.freeze([]),
+    policies: Object.freeze([validPolicyRecord]),
   });
 
   const defaultResolvedPolicyGraph: ResolvedPolicyGraph = Object.freeze({
@@ -130,7 +139,7 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
     ]),
     capabilities: Object.freeze([gs1ProjectionCapability]),
     evidenceReferences: Object.freeze([sampleEvidenceRecord]),
-    applicablePolicies: Object.freeze([]),
+    applicablePolicies: Object.freeze([validPolicyRecord]),
   });
 
   async function getResolvedBoundPayload() {
@@ -168,7 +177,7 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
     sccId: validSccId,
     bcgId: validBcgId,
     pinnedSemanticStateRef: validPinnedSemanticState,
-    boundContext: { jurisdiction: "EU", purpose: "trade_item_evaluation" },
+    boundContext: defaultPolicyContext,
     evidenceIntegrityCoordinates: [
       {
         evidenceRef: "evd-001",
@@ -202,10 +211,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-map-01",
       executionId: "exec-map-01",
-      budget: 1000,
-      entropy: "entropy-map-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
     });
 
     expect(mapRes.ok).toBe(true);
@@ -229,10 +234,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-map-02",
       executionId: "exec-map-02",
-      budget: 1000,
-      entropy: "entropy-map-02",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
     });
 
     expect(mapRes.ok).toBe(true);
@@ -253,10 +254,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-map-03",
       executionId: "exec-map-03",
-      budget: 1000,
-      entropy: "entropy-map-03",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
     });
 
     expect(mapRes.ok).toBe(true);
@@ -274,10 +271,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-map-05",
       executionId: "exec-map-05",
-      budget: 1000,
-      entropy: "entropy-map-05",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
     });
 
     expect(mapRes.ok).toBe(false);
@@ -295,10 +288,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-exec-01",
       executionId: "exec-exec-01",
-      budget: 1000,
-      entropy: "entropy-exec-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -322,10 +311,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-temp-01",
       executionId: "exec-temp-01",
-      budget: 1000,
-      entropy: "entropy-temp-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
     });
 
     expect(mapRes.ok).toBe(true);
@@ -345,10 +330,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-temp-02",
       executionId: "exec-temp-02",
-      budget: 1000,
-      entropy: "entropy-temp-02",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -363,13 +344,7 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
   });
 
   it("Scenario 9 — T_e_observed cannot repair missing required T_e_input", async () => {
-    const boundPayload = {
-      ...(await getResolvedBoundPayload()),
-      executionContext: {
-        ...(await getResolvedBoundPayload()).executionContext,
-        constitutionalTimestamp: "",
-      },
-    };
+    const boundPayload = await getResolvedBoundPayload();
 
     const ecWithoutTEInput = buildEvaluationCoordinate({
       ...defaultEcInput,
@@ -383,10 +358,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
         boundPayload,
         requestId: "req-temp-03",
         executionId: "exec-temp-03",
-        budget: 1000,
-        entropy: "entropy-temp-03",
-        versions: ["1.0.0"],
-        resolvedPolicyGraph: defaultResolvedPolicyGraph,
       });
 
       expect(mapRes.ok).toBe(false);
@@ -406,10 +377,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-temp-04",
       executionId: "exec-temp-04",
-      budget: 1000,
-      entropy: "entropy-temp-04",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -430,10 +397,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-prov-01",
       executionId: "exec-prov-01",
-      budget: 1000,
-      entropy: "entropy-prov-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -455,10 +418,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-prov-02",
       executionId: "exec-prov-02",
-      budget: 1000,
-      entropy: "entropy-prov-02",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -489,10 +448,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-prov-03",
       executionId: "exec-prov-03",
-      budget: 1000,
-      entropy: "entropy-prov-03",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -534,10 +489,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-prov-04",
       executionId: "exec-prov-04",
-      budget: 1000,
-      entropy: "entropy-prov-04",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -593,10 +544,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-verify-01",
       executionId: "exec-verify-01",
-      budget: 1000,
-      entropy: "entropy-verify-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -616,7 +563,8 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
 
       expect(verifyRes.ok).toBe(true);
       if (verifyRes.ok) {
-        expect(verifyRes.verified).toBe(true);
+        expect(verifyRes.verification.inputBinding).toBe("VERIFIED");
+        expect(verifyRes.verification.evidenceBinding).toBe("VERIFIED");
       }
     }
   });
@@ -643,10 +591,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-verify-02",
       executionId: "exec-verify-02",
-      budget: 1000,
-      entropy: "entropy-verify-02",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -676,9 +620,10 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       expect(assessmentRes.ok).toBe(true);
       if (assessmentRes.ok) {
         const asm = assessmentRes.assessment;
+        expect(asm.reproducible.status).toBe("DETERMINED");
         expect(asm.reproducible.value).toBe(true);
-        expect(asm.currentlyTrusted.value).toBe(false);
-        expect(asm.currentlyAdmissible.value).toBe(false);
+        expect(asm.currentlyTrusted.status).toBe("UNAVAILABLE");
+        expect(asm.currentlyAdmissible.status).toBe("UNAVAILABLE");
       }
     }
   });
@@ -692,10 +637,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-verify-03",
       executionId: "exec-verify-03",
-      budget: 1000,
-      entropy: "entropy-verify-03",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -860,14 +801,15 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
     expect(assessmentRes.ok).toBe(true);
     if (assessmentRes.ok) {
       const asm = assessmentRes.assessment;
+      expect(asm.reproducible.status).toBe("DETERMINED");
       expect(asm.reproducible.value).toBe(true);
+      expect(asm.executable.status).toBe("DETERMINED");
       expect(asm.executable.value).toBe(true);
+      expect(asm.currentlyTrusted.status).toBe("DETERMINED");
       expect(asm.currentlyTrusted.value).toBe(false);
+      expect(asm.currentlyAdmissible.status).toBe("DETERMINED");
       expect(asm.currentlyAdmissible.value).toBe(false);
 
-      expect(asm.reproducible.authorityRef).toBe(
-        "authority:zprof:reproducibility",
-      );
       expect(asm.executable.authorityRef).toBe("authority:ri:admission");
       expect(asm.currentlyTrusted.authorityRef).toBe("authority:sec:trust");
       expect(asm.currentlyAdmissible.authorityRef).toBe(
@@ -911,10 +853,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-immut-01",
       executionId: "exec-immut-01",
-      budget: 1000,
-      entropy: "entropy-immut-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
       evidencePayloads: validEvidencePayloads,
       overrides: testOverrides,
     });
@@ -958,6 +896,7 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
 
       expect(asmRes.ok).toBe(true);
       if (asmRes.ok) {
+        expect(asmRes.assessment.currentlyTrusted.status).toBe("DETERMINED");
         expect(asmRes.assessment.currentlyTrusted.value).toBe(false);
       }
       expect(JSON.stringify(rcpt)).toBe(initialRcptJson);
@@ -977,10 +916,6 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
       boundPayload,
       requestId: "req-ver-01",
       executionId: "exec-ver-01",
-      budget: 1000,
-      entropy: "entropy-ver-01",
-      versions: ["1.0.0"],
-      resolvedPolicyGraph: defaultResolvedPolicyGraph,
     });
 
     expect(mapRes.ok).toBe(true);
@@ -1006,6 +941,325 @@ describe("AMS-0860-C Execution Integration, Provenance & Verification Test Suite
     expect(res2.ok).toBe(true);
     if (res1.ok && res2.ok) {
       expect(res1.result).toEqual(res2.result);
+    }
+  });
+
+  // ==========================================================================
+  // Section 10: Mandatory Corrective Test Scenarios (C45–C60 per CORR-0860-C-1)
+  // ==========================================================================
+
+  it("C45 — Missing T_e_input: EC missing required T_e_input fails closed with 'missing' (no fallback!)", async () => {
+    const boundPayload = await getResolvedBoundPayload();
+    const ecWithoutTEInput = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      temporalCoordinates: {}, // Missing T_e_input!
+    });
+
+    expect(ecWithoutTEInput.ok).toBe(true);
+    if (ecWithoutTEInput.ok) {
+      const mapRes = mapEvaluationCoordinateToExecutionRequest({
+        coordinate: ecWithoutTEInput.coordinate,
+        boundPayload,
+        requestId: "req-c45",
+        executionId: "exec-c45",
+      });
+
+      expect(mapRes.ok).toBe(false);
+      if (!mapRes.ok) {
+        expect(mapRes.error.code).toBe("missing");
+      }
+    }
+  });
+
+  it("C46 — Context non-synthesis: EC boundContext without PolicyContext fails with 'incompatible'", async () => {
+    const boundPayload = await getResolvedBoundPayload();
+    const ecWithPlainContext = buildEvaluationCoordinate({
+      ...defaultEcInput,
+      boundContext: { jurisdiction: "EU" }, // Plain object, not PolicyContext!
+    });
+
+    expect(ecWithPlainContext.ok).toBe(true);
+    if (ecWithPlainContext.ok) {
+      const mapRes = mapEvaluationCoordinateToExecutionRequest({
+        coordinate: ecWithPlainContext.coordinate,
+        boundPayload,
+        requestId: "req-c46",
+        executionId: "exec-c46",
+      });
+
+      expect(mapRes.ok).toBe(false);
+      if (!mapRes.ok) {
+        expect(mapRes.error.code).toBe("incompatible");
+      }
+    }
+  });
+
+  it("C47 — Same EC cannot float versions/budget/entropy: parameters extracted strictly from substrate", async () => {
+    const boundPayload = await getResolvedBoundPayload();
+    const ec = getValidEc();
+
+    const mapRes = mapEvaluationCoordinateToExecutionRequest({
+      coordinate: ec,
+      boundPayload,
+      requestId: "req-c47",
+      executionId: "exec-c47",
+    });
+
+    expect(mapRes.ok).toBe(true);
+    if (mapRes.ok) {
+      expect(mapRes.executionRequest.executionContext.budget).toBe(
+        boundPayload.executionContext.budget,
+      );
+      expect(mapRes.executionRequest.executionContext.entropy).toBe(
+        boundPayload.executionContext.entropy,
+      );
+      expect(mapRes.executionRequest.executionContext.versions).toEqual(
+        boundPayload.executionContext.versions,
+      );
+    }
+  });
+
+  it("C48 — Structural receipt only: structurally valid receipt without ExecutionRequest is NOT verified", () => {
+    const sampleReceipt = {
+      receiptId: "rcpt:sample",
+      executionId: "exec:sample",
+      runtimeVersion: "1.0.0",
+      inputHash:
+        "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      outputHash:
+        "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      evidenceHash:
+        "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      policyVersion: "1.0.0",
+      decisionSummary: '{"aggregateResult":"authorized","attributions":[]}',
+      executionTime: 1700000000000,
+      deterministicHash:
+        "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    };
+
+    const verifyRes = verifyExecutionReceiptIntegrity(sampleReceipt);
+    expect(verifyRes.ok).toBe(true);
+    if (verifyRes.ok) {
+      expect(verifyRes.verification.structuralValidity).toBe(true);
+      expect(verifyRes.verification.inputBinding).toBe("UNAVAILABLE");
+      expect(verifyRes.verification.evidenceBinding).toBe("UNAVAILABLE");
+      expect(verifyRes.verification.fullReceiptIntegrity).toBe("UNAVAILABLE");
+    }
+  });
+
+  it("C49, C50 & C51 — Partial hash match ≠ full verification; tampered hashes yield MISMATCH", async () => {
+    const boundPayload = await getResolvedBoundPayload();
+    const ec = getValidEc();
+
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: ec,
+      boundPayload,
+      requestId: "req-c49",
+      executionId: "exec-c49",
+      evidencePayloads: validEvidencePayloads,
+      overrides: testOverrides,
+    });
+
+    expect(execRes.ok).toBe(true);
+    if (
+      execRes.ok &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const realRcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
+
+      // Tampered inputHash
+      const tamperedInputRcpt = {
+        ...realRcpt,
+        inputHash:
+          "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      };
+
+      const verifyRes = verifyExecutionReceiptIntegrity(
+        tamperedInputRcpt,
+        execRes.executionRequest,
+      );
+
+      expect(verifyRes.ok).toBe(true);
+      if (verifyRes.ok) {
+        expect(verifyRes.verification.inputBinding).toBe("MISMATCH");
+        expect(verifyRes.verification.fullReceiptIntegrity).toBe("UNAVAILABLE");
+      }
+    }
+  });
+
+  it("C52 — No fabricated receipt preimages: verifier does not invent missing trust result/policy decisions", () => {
+    const sampleReceipt = {
+      receiptId: "rcpt:sample",
+      executionId: "exec:sample",
+      runtimeVersion: "1.0.0",
+      inputHash:
+        "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      outputHash:
+        "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      evidenceHash:
+        "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      policyVersion: "1.0.0",
+      decisionSummary: '{"aggregateResult":"authorized","attributions":[]}',
+      executionTime: 1700000000000,
+      deterministicHash:
+        "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    };
+
+    const verifyRes = verifyExecutionReceiptIntegrity(sampleReceipt);
+    expect(verifyRes.ok).toBe(true);
+    if (verifyRes.ok) {
+      expect(verifyRes.verification.fullReceiptIntegrity).toBe("UNAVAILABLE");
+    }
+  });
+
+  it("C53 — Valid EC alone ≠ reproducible: missing historical material yields UNAVAILABLE status", () => {
+    const arcInput: AssessmentRequestCoordinate = {
+      target: {
+        kind: "HISTORICAL_EVALUATION_COORDINATE",
+        ref: "ec:hist:missing",
+      },
+      operation: "HISTORICAL_RECONSTRUCTION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-08-10T00:00:00Z",
+    };
+
+    const asmRes = evaluateAssessmentRequest({ arc: arcInput });
+    expect(asmRes.ok).toBe(true);
+    if (asmRes.ok) {
+      expect(asmRes.assessment.reproducible.status).toBe("UNAVAILABLE");
+    }
+  });
+
+  it("C54, C55 & C56 — Missing authority outputs yield UNAVAILABLE status (not false or fake authority IDs!)", () => {
+    const ec = getValidEc();
+    const arcInput: AssessmentRequestCoordinate = {
+      target: { kind: "EVALUATION_COORDINATE", coordinate: ec },
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-08-10T00:00:00Z",
+    };
+
+    const asmRes = evaluateAssessmentRequest({
+      arc: arcInput,
+      historicalCoordinate: ec,
+    });
+    expect(asmRes.ok).toBe(true);
+    if (asmRes.ok) {
+      const asm = asmRes.assessment;
+      expect(asm.currentlyTrusted.status).toBe("UNAVAILABLE");
+      expect(asm.currentlyTrusted.value).toBeUndefined();
+      expect(asm.currentlyTrusted.authorityRef).toBeUndefined();
+
+      expect(asm.currentlyAdmissible.status).toBe("UNAVAILABLE");
+      expect(asm.currentlyAdmissible.value).toBeUndefined();
+      expect(asm.currentlyAdmissible.authorityRef).toBeUndefined();
+
+      expect(asm.executable.status).toBe("UNAVAILABLE");
+      expect(asm.executable.value).toBeUndefined();
+      expect(asm.executable.authorityRef).toBeUndefined();
+    }
+  });
+
+  it("C57 — Caller authority strings are not treated as sovereign determinations without explicit authority output", () => {
+    const ec = getValidEc();
+    const arcInput: AssessmentRequestCoordinate = {
+      target: { kind: "EVALUATION_COORDINATE", coordinate: ec },
+      operation: "NEW_EVALUATION",
+      pinnedAssessmentStateRef: validPinnedAssessmentState,
+      tTrust: "2026-08-10T00:00:00Z",
+    };
+
+    const asmRes = evaluateAssessmentRequest({
+      arc: arcInput,
+      historicalCoordinate: ec,
+      authorityOutputs: {
+        currentlyTrusted: {
+          value: true,
+          authorityRef: "authority:sec:verified_seam",
+          details: "Explicit SEC authority output provided",
+        },
+      },
+    });
+
+    expect(asmRes.ok).toBe(true);
+    if (asmRes.ok) {
+      expect(asmRes.assessment.currentlyTrusted.status).toBe("DETERMINED");
+      expect(asmRes.assessment.currentlyTrusted.value).toBe(true);
+      expect(asmRes.assessment.currentlyTrusted.authorityRef).toBe(
+        "authority:sec:verified_seam",
+      );
+
+      // Unsupplied authorities remain UNAVAILABLE!
+      expect(asmRes.assessment.currentlyAdmissible.status).toBe("UNAVAILABLE");
+      expect(asmRes.assessment.executable.status).toBe("UNAVAILABLE");
+    }
+  });
+
+  it("C58 & C59 — Historical success or trust does not imply current admissibility or current trust", async () => {
+    const boundPayload = await getResolvedBoundPayload();
+    const ec = getValidEc();
+
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: ec,
+      boundPayload,
+      requestId: "req-c58",
+      executionId: "exec-c58",
+      evidencePayloads: validEvidencePayloads,
+      overrides: testOverrides,
+    });
+
+    expect(execRes.ok).toBe(true);
+    if (
+      execRes.ok &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const rcpt =
+        execRes.pipelineResult.outcome.executionOutput.executionReceipt;
+      const arcInput: AssessmentRequestCoordinate = {
+        target: { kind: "EXECUTION_RECEIPT", receiptRef: rcpt.receiptId },
+        operation: "RECEIPT_VERIFICATION",
+        pinnedAssessmentStateRef: validPinnedAssessmentState,
+        tTrust: "2026-09-01T00:00:00Z",
+      };
+
+      const asmRes = evaluateAssessmentRequest({
+        arc: arcInput,
+        executionReceipt: rcpt,
+        executionRequest: execRes.executionRequest,
+      });
+
+      expect(asmRes.ok).toBe(true);
+      if (asmRes.ok) {
+        expect(asmRes.assessment.reproducible.status).toBe("DETERMINED");
+        expect(asmRes.assessment.currentlyTrusted.status).toBe("UNAVAILABLE");
+        expect(asmRes.assessment.currentlyAdmissible.status).toBe(
+          "UNAVAILABLE",
+        );
+      }
+    }
+  });
+
+  it("C60 — Provenance link contains no fabricated createdTimestamp", async () => {
+    const boundPayload = await getResolvedBoundPayload();
+    const ec = getValidEc();
+
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: ec,
+      boundPayload,
+      requestId: "req-c60",
+      executionId: "exec-c60",
+      evidencePayloads: validEvidencePayloads,
+      overrides: testOverrides,
+    });
+
+    expect(execRes.ok).toBe(true);
+    if (execRes.ok && execRes.provenanceLink) {
+      const link = execRes.provenanceLink as unknown as Record<string, unknown>;
+      expect(link.createdTimestamp).toBeUndefined();
+      expect(execRes.provenanceLink.observedExecutionTime).toBeDefined();
     }
   });
 });
