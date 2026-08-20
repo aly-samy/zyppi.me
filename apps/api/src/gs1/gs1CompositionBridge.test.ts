@@ -270,7 +270,7 @@ function createDefaultBridgeInput(
   };
 }
 
-describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (CORR-0861-B-3)", () => {
+describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite (ACV-STATE-REF-GATE-01)", () => {
   // Setup common anchor
   async function getLawfulAnchor() {
     const knownMap = new Map<string, RetrievedRegistryState>([
@@ -288,8 +288,8 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     };
   }
 
-  // B-0861-01: A-anchor accepted through lawful public seam
-  it("B-0861-01: should accept packet A anchor through lawful public seam and assemble composition with PINNED_SEMANTIC_STATE_REPRESENTATION_GAP", async () => {
+  // B-0861-01: A-anchor accepted through lawful public seam and EvaluationCoordinate materialized with derived ACV state pin
+  it("B-0861-01: should accept packet A anchor through lawful public seam and assemble composition with derived EvaluationCoordinate", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
@@ -302,9 +302,12 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
       );
       expect(result.sccId).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(result.bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
-      expect(result.evaluationCoordinate).toBeUndefined();
-      expect(result.representationGap).toBe(
-        "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
+      expect(result.evaluationCoordinate).toBeDefined();
+      expect(
+        result.evaluationCoordinate?.pinnedSemanticStateRef.digest,
+      ).toMatch(/^sha256:[a-f0-9]{64}$/);
+      expect(result.evaluationCoordinate?.pinnedSemanticStateRef.ref).toBe(
+        result.evaluationCoordinate?.pinnedSemanticStateRef.digest,
       );
     }
   });
@@ -895,8 +898,8 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // B-0861-34: Representation Gap Verification (CORR-0861-B-3)
-  it("B-0861-34: should report PINNED_SEMANTIC_STATE_REPRESENTATION_GAP and leave evaluationCoordinate absent when no ACV state reference exists", async () => {
+  // B-0861-34: EvaluationCoordinate Materialization (ACV-STATE-REF-GATE-01)
+  it("B-0861-34: should materialize EvaluationCoordinate with derived ACV State Reference when tEInput is present", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
@@ -911,36 +914,27 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
       expect(result.sccId).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(result.bcgId).toMatch(/^sha256:[a-f0-9]{64}$/);
 
-      // EvaluationCoordinate is NOT materialized and gap is explicitly reported without subject identity fabrication
-      expect(result.evaluationCoordinate).toBeUndefined();
-      expect(result.representationGap).toBe(
-        "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
-      );
+      // EvaluationCoordinate is materialized with derived ACV state reference
+      expect(result.evaluationCoordinate).toBeDefined();
+      expect(
+        result.evaluationCoordinate?.pinnedSemanticStateRef.digest,
+      ).toMatch(/^sha256:[a-f0-9]{64}$/);
     }
   });
 
-  // CORR-0861-B-3 Negative Test: Caller object cannot force EC materialization
-  it("CORR-0861-B-3 Negative Test: should confirm an arbitrary caller object cannot cause EC materialization or bypass representation gap", async () => {
+  // ACV-STATE-REF-GATE-01: Absence of tEInput leaves evaluationCoordinate absent without error
+  it("ACV-STATE-REF-GATE-01: should leave evaluationCoordinate absent when tEInput is missing while returning successful composition", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = {
       ...createDefaultBridgeInput(anchorSuccess, repo),
-      // Pass arbitrary caller property
-      explicitPinnedStateRef: { ref: "acv:fake:pin" },
+      tEInput: undefined,
     };
 
-    const result = await assembleGs1CompositionFromAnchor(
-      input as unknown as Parameters<
-        typeof assembleGs1CompositionFromAnchor
-      >[0],
-    );
+    const result = await assembleGs1CompositionFromAnchor(input);
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      // EC remains absent because no governed ACV state reference exists in the architecture
       expect(result.evaluationCoordinate).toBeUndefined();
-      expect(result.representationGap).toBe(
-        "PINNED_SEMANTIC_STATE_REPRESENTATION_GAP",
-      );
     }
   });
 });
