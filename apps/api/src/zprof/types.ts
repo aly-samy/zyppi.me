@@ -432,6 +432,127 @@ export type EvaluationCoordinateResult =
       readonly error: CompositionError;
     };
 
+// ============================================================================
+// AMS-0860-C — Execution Integration, Provenance & Verification Types
+// ============================================================================
+
+/**
+ * Options for mapping an EvaluationCoordinate (EC) into an ExecutionRequest for RI execution.
+ */
+export interface MapEcToExecutionRequestOptions {
+  readonly coordinate: EvaluationCoordinate;
+  readonly boundPayload: BoundConstitutionalPayload;
+  readonly requestId: string;
+  readonly executionId: string;
+  readonly budget: number;
+  readonly entropy: string;
+  readonly versions: readonly string[];
+  readonly resolvedPolicyGraph: ResolvedPolicyGraph;
+}
+
+/**
+ * Historical Provenance Link binding an ExecutionReceipt to explicit Z-PROF coordinate provenance at the Application layer per AMS-0860-C.
+ */
+export interface HistoricalProvenanceLink {
+  readonly receiptId: string;
+  readonly executionId: string;
+  readonly sccId: string;
+  readonly bcgId: string;
+  readonly coordinate: EvaluationCoordinate;
+  readonly executionReceipt: import("@zyppi/domain").ExecutionReceipt;
+  readonly observedExecutionTime: string; // T_e_observed captured from Runtime execution fact
+  readonly createdTimestamp: string;
+}
+
+/**
+ * Result of receipt verification operation per AMS-0860-C.
+ */
+export type ReceiptVerificationResult =
+  | {
+      readonly ok: true;
+      readonly verified: boolean;
+      readonly receiptId: string;
+      readonly deterministicHash: string;
+      readonly details?: string;
+    }
+  | {
+      readonly ok: false;
+      readonly error: CompositionError;
+    };
+
+/**
+ * Authority-attributed determination for Reproducible dimension per AMS-0860-C §25.
+ */
+export interface ReproducibleDetermination {
+  readonly value: boolean;
+  readonly authorityRef: string;
+  readonly stateRef?: PinnedStateReference;
+  readonly ruleRef?: PinnedStateReference;
+  readonly assessedAtCoordinate: string;
+  readonly details?: string;
+}
+
+/**
+ * Authority-attributed determination for Executable dimension per AMS-0860-C §26.
+ */
+export interface ExecutableDetermination {
+  readonly value: boolean;
+  readonly authorityRef: string;
+  readonly stateRef?: PinnedStateReference;
+  readonly ruleRef?: PinnedStateReference;
+  readonly assessedAtCoordinate: string;
+  readonly details?: string;
+}
+
+/**
+ * Authority-attributed determination for CurrentlyTrusted dimension per AMS-0860-C §27.
+ */
+export interface CurrentlyTrustedDetermination {
+  readonly value: boolean;
+  readonly authorityRef: string;
+  readonly stateRef?: PinnedStateReference;
+  readonly ruleRef?: PinnedStateReference;
+  readonly assessedAtCoordinate: string;
+  readonly details?: string;
+}
+
+/**
+ * Authority-attributed determination for CurrentlyAdmissible dimension per AMS-0860-C §28.
+ */
+export interface CurrentlyAdmissibleDetermination {
+  readonly value: boolean;
+  readonly authorityRef: string;
+  readonly stateRef?: PinnedStateReference;
+  readonly ruleRef?: PinnedStateReference;
+  readonly assessedAtCoordinate: string;
+  readonly details?: string;
+}
+
+/**
+ * Aggregate 4-Dimensional Assessment Result per AMS-0860-C §24–§30.
+ * Preserves four independent determinations with explicit authority provenance without collapsing into a single binary status.
+ */
+export interface AssessmentResult {
+  readonly reproducible: ReproducibleDetermination;
+  readonly executable: ExecutableDetermination;
+  readonly currentlyTrusted: CurrentlyTrustedDetermination;
+  readonly currentlyAdmissible: CurrentlyAdmissibleDetermination;
+  readonly arc: AssessmentRequestCoordinate;
+}
+
+/**
+ * Result of 4-Dimensional Assessment evaluation.
+ */
+export type AssessmentResultOutcome =
+  | {
+      readonly ok: true;
+      readonly assessment: AssessmentResult;
+    }
+  | {
+      readonly ok: false;
+      readonly error: CompositionError;
+    };
+
 /**
  * Result of AssessmentRequestCoordinate construction.
  */

@@ -14,3 +14,9 @@ export {
   buildAssessmentRequestCoordinate,
   evaluateHistoricalReconstructionBoundary,
 } from "./arc.js";
+export {
+  mapEvaluationCoordinateToExecutionRequest,
+  executeEvaluationCoordinate,
+  verifyExecutionReceiptIntegrity,
+  evaluateAssessmentRequest,
+} from "./lifecycle.js";
