@@ -348,6 +348,50 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
 
       // Resolve composition with zero binding edges in manifest.dependencyTopology.edges
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
+        compositionDefinition: {
+          participants: [
+            {
+              identity: "dtc:zyppi:domain:gs1:v1",
+              kind: "DTC",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "domain_template",
+              reference: { id: "dtc:zyppi:domain:gs1:v1", version: "1.0.0" },
+            },
+            {
+              identity: "arm:profile:trade_item:v1",
+              kind: "ARM_PROFILE",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "asset_profile",
+              reference: {
+                id: "arm:profile:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "prj:spec:trade_item:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_non_binding",
@@ -425,6 +469,16 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_governed",
@@ -453,6 +507,17 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
               role: "asset_profile",
               reference: {
                 id: "arm:profile:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "prj:spec:trade_item:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:trade_item:v1",
                 version: "1.0.0",
               },
             },
@@ -536,6 +601,35 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        dtcFixture: {
+          ...baseManifest.dtcReference,
+          dtcId: "dtc:zyppi:domain:gs1:v1",
+          domainIdentifier: "domain:gs1",
+          domainName: "GS1",
+          version: "1.0.0",
+          scope: "scope",
+          applicableAssetClasses: ["asset:class:trade_item:v1"],
+          applicableArmProfiles: ["arm:profile:trade_item:v1"],
+          epistemicRequirements: ["epistemic:req:gtin:v1"],
+          requiredPrjSpecifications: ["prj:spec:trade_item:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        },
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_no_participants",
@@ -578,9 +672,9 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
           ],
           capabilities: [
             {
-              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              capabilityId: "prj:spec:trade_item:v1",
               subjectId: "arm:profile:trade_item:v1",
-              scope: "prj:spec:gs1_digital_link_projection:v1",
+              scope: "prj:spec:trade_item:v1",
               validFrom: "2026-01-01T00:00:00Z",
               validTo: "2030-01-01T00:00:00Z",
             },
@@ -612,6 +706,35 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        dtcFixture: {
+          ...baseManifest.dtcReference,
+          dtcId: "dtc:zyppi:domain:gs1:v1",
+          domainIdentifier: "domain:gs1",
+          domainName: "GS1",
+          version: "1.0.0",
+          scope: "scope",
+          applicableAssetClasses: ["asset:class:trade_item:v1"],
+          applicableArmProfiles: ["arm:profile:trade_item:v1"],
+          epistemicRequirements: ["epistemic:req:gtin:v1"],
+          requiredPrjSpecifications: ["prj:spec:trade_item:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        },
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_no_owner",
@@ -657,9 +780,9 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
           ],
           capabilities: [
             {
-              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              capabilityId: "prj:spec:trade_item:v1",
               subjectId: "arm:profile:trade_item:v1",
-              scope: "prj:spec:gs1_digital_link_projection:v1",
+              scope: "prj:spec:trade_item:v1",
               validFrom: "2026-01-01T00:00:00Z",
               validTo: "2030-01-01T00:00:00Z",
             },
@@ -681,6 +804,35 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        dtcFixture: {
+          ...baseManifest.dtcReference,
+          dtcId: "dtc:zyppi:domain:gs1:v1",
+          domainIdentifier: "domain:gs1",
+          domainName: "GS1",
+          version: "1.0.0",
+          scope: "scope",
+          applicableAssetClasses: ["asset:class:trade_item:v1"],
+          applicableArmProfiles: ["arm:profile:trade_item:v1"],
+          epistemicRequirements: ["epistemic:req:gtin:v1"],
+          requiredPrjSpecifications: ["prj:spec:trade_item:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        },
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_no_version",
@@ -726,9 +878,9 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
           ],
           capabilities: [
             {
-              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              capabilityId: "prj:spec:trade_item:v1",
               subjectId: "arm:profile:trade_item:v1",
-              scope: "prj:spec:gs1_digital_link_projection:v1",
+              scope: "prj:spec:trade_item:v1",
               validFrom: "2026-01-01T00:00:00Z",
               validTo: "2030-01-01T00:00:00Z",
             },
@@ -750,6 +902,35 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        dtcFixture: {
+          ...baseManifest.dtcReference,
+          dtcId: "dtc:zyppi:domain:gs1:v1",
+          domainIdentifier: "domain:gs1",
+          domainName: "GS1",
+          version: "1.0.0",
+          scope: "scope",
+          applicableAssetClasses: ["asset:class:trade_item:v1"],
+          applicableArmProfiles: ["arm:profile:trade_item:v1"],
+          epistemicRequirements: ["epistemic:req:gtin:v1"],
+          requiredPrjSpecifications: ["prj:spec:trade_item:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        },
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_cyclic_def",
@@ -818,9 +999,9 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
           ],
           capabilities: [
             {
-              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              capabilityId: "prj:spec:trade_item:v1",
               subjectId: "arm:profile:trade_item:v1",
-              scope: "prj:spec:gs1_digital_link_projection:v1",
+              scope: "prj:spec:trade_item:v1",
               validFrom: "2026-01-01T00:00:00Z",
               validTo: "2030-01-01T00:00:00Z",
             },
@@ -850,6 +1031,69 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
       const resolver = new ApplicationCompositionResolver();
 
       const res = await resolver.resolveComposition({
+        manifestAuthor: "identity:council:admin",
+        dtcFixture: {
+          ...baseManifest.dtcReference,
+          dtcId: "dtc:zyppi:domain:gs1:v1",
+          domainIdentifier: "domain:gs1",
+          domainName: "GS1",
+          version: "1.0.0",
+          scope: "scope",
+          applicableAssetClasses: ["asset:class:trade_item:v1"],
+          applicableArmProfiles: ["arm:profile:trade_item:v1"],
+          epistemicRequirements: ["epistemic:req:gtin:v1"],
+          requiredPrjSpecifications: ["prj:spec:trade_item:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        },
+        epistemicRequirementsFixtures: [
+          {
+            requirementId: "epistemic:req:gtin:v1",
+            version: "1.0.0",
+            targetDimension: "GTIN",
+            goldenQuestionRef: "question:gtin",
+            requiredFacts: [],
+          },
+        ],
+        compositionDefinition: {
+          participants: [
+            {
+              identity: "dtc:zyppi:domain:gs1:v1",
+              kind: "DTC",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "domain_template",
+              reference: { id: "dtc:zyppi:domain:gs1:v1", version: "1.0.0" },
+            },
+            {
+              identity: "arm:profile:trade_item:v1",
+              kind: "ARM_PROFILE",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "asset_profile",
+              reference: {
+                id: "arm:profile:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "prj:spec:trade_item:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: "identity:council:admin",
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:trade_item:v1",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
         registryRepository: repo,
         identifier: mockIdentifier,
         requestId: "req_zero_bind",
@@ -883,9 +1127,9 @@ describe("AMS-0860-A / CORR-0860-A-1 through CORR-0860-A-5 — Identity & Config
           ],
           capabilities: [
             {
-              capabilityId: "prj:spec:gs1_digital_link_projection:v1",
+              capabilityId: "prj:spec:trade_item:v1",
               subjectId: "arm:profile:trade_item:v1",
-              scope: "prj:spec:gs1_digital_link_projection:v1",
+              scope: "prj:spec:trade_item:v1",
               validFrom: "2026-01-01T00:00:00Z",
               validTo: "2030-01-01T00:00:00Z",
             },

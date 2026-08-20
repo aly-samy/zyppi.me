@@ -32,23 +32,25 @@ import type {
   Cl16IntelligenceReference,
   AttRProofReference,
 } from "./types.js";
-import { GS1_DOMAIN_TEMPLATE_CARD } from "./fixtures/gs1Dtc.js";
-import {
-  GS1_GTIN_EPISTEMIC_REQUIREMENT,
-  GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
-} from "./fixtures/gs1EpistemicRequirements.js";
 import { validateCompositionCompatibility } from "./compatibilityValidator.js";
 import { evaluateConflict } from "./conflict.js";
 import {
+  isExplicitVersion,
   validateExplicitVersionList,
   validateVersionConstraints,
 } from "./versionValidator.js";
 import { deriveSccIdentityInternal } from "./scc.js";
 import { buildBoundConfigurationGraph } from "./bcg.js";
-import { validateParticipantCollection } from "./participant.js";
+import {
+  validateParticipantCollection,
+  type ParticipantKind,
+} from "./participant.js";
 import { validateTopologyGraph } from "./topology.js";
 
 export interface GS1CompositionOptions {
+  readonly dtcFixture: DomainTemplateCard;
+  readonly epistemicRequirementsFixtures: readonly EpistemicRequirementContract[];
+  readonly manifestAuthor: string;
   readonly registryRepository: RegistryRepository;
   readonly identifier: ValidatedCanonicalIdentifier;
   readonly requestId: string;
@@ -59,8 +61,7 @@ export interface GS1CompositionOptions {
   readonly versions: readonly string[];
   readonly policyContext: PolicyContext;
   readonly resolvedPolicyGraph: ResolvedPolicyGraph;
-  readonly dtcFixture?: DomainTemplateCard;
-  readonly epistemicRequirementsFixtures?: readonly EpistemicRequirementContract[];
+  readonly applicableArmProfile?: string;
   readonly explicitAcv?: ActiveConstitutionalView;
   readonly explicitEvidenceBundle?: EvidenceBundle;
   readonly explicitEvidencePayloads?: ReadonlyMap<string, unknown>;
@@ -91,7 +92,7 @@ export type ApplicationCompositionBridgeResult =
     };
 
 /**
- * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854).
+ * Domain-Agnostic Application Composition Resolver (AMS-0853 / AMS-0854 / CORR-0861-PRE-1 / CORR-0861-PRE-1-2).
  *
  * Owned strictly by the Application layer.
  * Connects Z-PROF static domain declarations (GS1, DPP, etc.) to existing Application
@@ -107,13 +108,58 @@ export class ApplicationCompositionResolver {
   public async resolveComposition(
     options: GenericCompositionOptions | GS1CompositionOptions,
   ): Promise<CompositionResolutionResult> {
-    const dtc = options.dtcFixture ?? GS1_DOMAIN_TEMPLATE_CARD;
-    const reqs = options.epistemicRequirementsFixtures ?? [
-      GS1_GTIN_EPISTEMIC_REQUIREMENT,
-      GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
-    ];
+    // 1. Explicit Domain Injection Check (LAW-PRE1-01 / PRE1-T01 / PRE1-T02 / PRE1-T21)
+    if (!options.dtcFixture) {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message: "Domain Template Card (DTC) fixture is required but missing",
+        },
+        epistemicStatus: "UNAVAILABLE",
+      };
+    }
 
-    // 1. Structural Validation & Explicit Version Binding of DTC
+    if (
+      !options.epistemicRequirementsFixtures ||
+      options.epistemicRequirementsFixtures.length === 0
+    ) {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message:
+            "Epistemic requirements contract collection is required but missing or empty",
+        },
+        epistemicStatus: "UNAVAILABLE",
+      };
+    }
+
+    const dtc = options.dtcFixture;
+    const reqs = options.epistemicRequirementsFixtures;
+
+    // 2. Explicit Manifest Author Coordinate Check (LAW-PRE1-04 / PRE1-T05 / PRE1-T06)
+    if (
+      !options.manifestAuthor ||
+      typeof options.manifestAuthor !== "string" ||
+      options.manifestAuthor.trim() === ""
+    ) {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message: "Manifest author identity is required but missing or blank",
+        },
+        epistemicStatus: "UNAVAILABLE",
+      };
+    }
+
+    const manifestAuthor = options.manifestAuthor.trim();
+
+    // 3. Structural Validation & Explicit Version Binding of DTC
     if (!dtc.dtcId || !dtc.dtcId.startsWith("dtc:zyppi:domain:")) {
       return {
         ok: false,
@@ -176,6 +222,99 @@ export class ApplicationCompositionResolver {
       }
     }
 
+    // 4. Explicit ARM Profile Resolution & Precedence (LAW-PRE1-05 / CORR-0861-PRE-1-1 Phase 2)
+    if (!dtc.applicableArmProfiles || dtc.applicableArmProfiles.length === 0) {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message:
+            "Domain Template Card specifies zero applicable ARM Profiles",
+        },
+      };
+    }
+
+    const armParticipants =
+      options.compositionDefinition?.participants?.filter(
+        (p) => p.kind === "ARM_PROFILE",
+      ) ?? [];
+
+    let selectedArmProfile: string | undefined;
+
+    if (options.applicableArmProfile) {
+      if (!dtc.applicableArmProfiles.includes(options.applicableArmProfile)) {
+        return {
+          ok: false,
+          error: {
+            code: "incompatible",
+            category: "Composition Failure",
+            message: `Selected ARM Profile '${options.applicableArmProfile}' is not declared in DTC applicableArmProfiles`,
+          },
+        };
+      }
+
+      if (armParticipants.length > 0) {
+        const mismatch = armParticipants.some(
+          (p) => p.identity !== options.applicableArmProfile,
+        );
+        if (mismatch) {
+          return {
+            ok: false,
+            error: {
+              code: "conflicting",
+              category: "Composition Failure",
+              message: `Explicit option applicableArmProfile '${options.applicableArmProfile}' conflicts with compositionDefinition ARM participant '${armParticipants[0]?.identity}'`,
+            },
+          };
+        }
+      }
+
+      selectedArmProfile = options.applicableArmProfile;
+    } else if (armParticipants.length > 0) {
+      const distinctArmIdentities = [
+        ...new Set(armParticipants.map((p) => p.identity)),
+      ];
+
+      if (distinctArmIdentities.length > 1) {
+        return {
+          ok: false,
+          error: {
+            code: "conflicting",
+            category: "Composition Failure",
+            message: `Multiple conflicting ARM Profile participants (${distinctArmIdentities.join(", ")}) in compositionDefinition without explicit selector`,
+          },
+        };
+      }
+
+      const candidate = distinctArmIdentities[0]!;
+      if (!dtc.applicableArmProfiles.includes(candidate)) {
+        return {
+          ok: false,
+          error: {
+            code: "incompatible",
+            category: "Composition Failure",
+            message: `Participant ARM Profile '${candidate}' is not declared in DTC applicableArmProfiles`,
+          },
+        };
+      }
+
+      selectedArmProfile = candidate;
+    } else {
+      if (dtc.applicableArmProfiles.length === 1) {
+        selectedArmProfile = dtc.applicableArmProfiles[0]!;
+      } else {
+        return {
+          ok: false,
+          error: {
+            code: "conflicting",
+            category: "Composition Failure",
+            message: `Multiple applicable ARM Profiles declared in DTC (${dtc.applicableArmProfiles.join(", ")}) without explicit selection`,
+          },
+        };
+      }
+    }
+
     let retrievedState: RetrievedRegistryState;
     let resolvedActiveConstitutionalView: ActiveConstitutionalView;
 
@@ -191,7 +330,7 @@ export class ApplicationCompositionResolver {
         applicablePolicies: options.explicitAcv.applicablePolicies,
       };
     } else {
-      // 2. Fetch Registry state read-only if explicit ACV is not supplied
+      // 5. Fetch Registry state read-only if explicit ACV is not supplied
       const lookupResult = await options.registryRepository.lookup(
         options.identifier,
       );
@@ -232,7 +371,7 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // 4. Validate Composition Compatibility against explicit pinned ACV
+    // 6. Validate Composition Compatibility against explicit pinned ACV
     const compatResult = validateCompositionCompatibility(
       dtc,
       reqs,
@@ -249,7 +388,7 @@ export class ApplicationCompositionResolver {
       };
     }
 
-    // 4B. Deterministic Conflict Evaluation Boundary (AMS-0859 / CORR-0859-3 §3)
+    // 6B. Deterministic Conflict Evaluation Boundary (AMS-0859 / CORR-0859-3 §3)
     if (options.explicitConflictInputs) {
       const conflictEval = evaluateConflict(options.explicitConflictInputs);
       if (
@@ -270,7 +409,7 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // 4. Resolve Evidence Bundle & Payloads using existing Evidence mechanisms
+    // 7. Resolve Evidence Bundle & Payloads using existing Evidence mechanisms
     let evidenceBundle: EvidenceBundle;
     let evidencePayloads: ReadonlyMap<string, unknown>;
 
@@ -438,17 +577,139 @@ export class ApplicationCompositionResolver {
       }
     }
 
-    // 6. Build Application-layer CompositionManifest
+    // Helper: Exact Constituent Version Resolution (CORR-0861-PRE-1-2 Phase 1)
+    // Resolves version strictly from explicit matching participant in compositionDefinition.participants.
+    // Zero fallback to options.versions[0] permitted.
+    const resolveConstituentVersion = (
+      id: string,
+      kind: ParticipantKind,
+    ):
+      | { ok: true; version: string }
+      | { ok: false; error: CompositionError } => {
+      const compParticipants =
+        options.compositionDefinition?.participants || [];
+      const matches = compParticipants.filter(
+        (p) => p.kind === kind && p.identity === id,
+      );
+
+      if (matches.length > 1) {
+        const distinctVersions = [...new Set(matches.map((m) => m.version))];
+        if (distinctVersions.length > 1) {
+          return {
+            ok: false,
+            error: {
+              code: "conflicting",
+              category: "Composition Failure",
+              message: `Multiple conflicting participant versions (${distinctVersions.join(", ")}) for constituent '${id}'`,
+            },
+          };
+        }
+      }
+
+      if (matches.length === 1) {
+        const ver = matches[0]!.version;
+        if (!isExplicitVersion(ver)) {
+          return {
+            ok: false,
+            error: {
+              code: "invalid",
+              category: "Composition Failure",
+              message: `Invalid or floating version '${ver}' for participant '${id}'`,
+            },
+          };
+        }
+        return { ok: true, version: ver };
+      }
+
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message: `Missing exact explicit participant version coordinate for required constituent '${id}'`,
+        },
+      };
+    };
+
+    // Helper: Resolve ARM Profile Version specifically
+    let armProfileVersion: string;
+    const armPartMatch = options.compositionDefinition?.participants?.find(
+      (p) => p.kind === "ARM_PROFILE" && p.identity === selectedArmProfile,
+    );
+    if (armPartMatch) {
+      if (!isExplicitVersion(armPartMatch.version)) {
+        return {
+          ok: false,
+          error: {
+            code: "invalid",
+            category: "Composition Failure",
+            message: `Invalid or floating version '${armPartMatch.version}' for ARM profile '${selectedArmProfile}'`,
+          },
+        };
+      }
+      armProfileVersion = armPartMatch.version;
+    } else {
+      return {
+        ok: false,
+        error: {
+          code: "missing",
+          category: "Composition Failure",
+          message: `Missing exact explicit participant version coordinate for ARM Profile '${selectedArmProfile}'`,
+        },
+      };
+    }
+
+    // Resolve PRJ Specifications
+    const boundPrjSpecs: { specId: string; version: string }[] = [];
+    for (const specId of dtc.requiredPrjSpecifications) {
+      const vRes = resolveConstituentVersion(specId, "PRJ_SPECIFICATION");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundPrjSpecs.push({ specId, version: vRes.version });
+    }
+
+    // Resolve RSN Blueprints
+    const boundRsnBlueprints: { blueprintId: string; version: string }[] = [];
+    for (const blueprintId of dtc.requiredRsnBlueprints) {
+      const vRes = resolveConstituentVersion(blueprintId, "RSN_BLUEPRINT");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundRsnBlueprints.push({ blueprintId, version: vRes.version });
+    }
+
+    // Resolve POL Requirements
+    const boundPolReqs: { policyId: string; version: string }[] = [];
+    for (const policyId of dtc.applicablePolRequirements) {
+      const vRes = resolveConstituentVersion(policyId, "POL_REQUIREMENT");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundPolReqs.push({ policyId, version: vRes.version });
+    }
+
+    // Resolve SEC Requirements
+    const boundSecReqs: { securityReqId: string; version: string }[] = [];
+    for (const securityReqId of dtc.applicableSecRequirements) {
+      const vRes = resolveConstituentVersion(securityReqId, "SEC_REQUIREMENT");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundSecReqs.push({ securityReqId, version: vRes.version });
+    }
+
+    // Resolve RI Capabilities
+    const boundRiCaps: { capabilityId: string; version: string }[] = [];
+    for (const capabilityId of dtc.requiredRiCapabilities) {
+      const vRes = resolveConstituentVersion(capabilityId, "RI_CAPABILITY");
+      if (!vRes.ok) return { ok: false, error: vRes.error };
+      boundRiCaps.push({ capabilityId, version: vRes.version });
+    }
+
+    // 8. Build Application-layer CompositionManifest (LAW-PRE1-03 / LAW-PRE1-04 / PRE1-T08 / PRE1-T20 / PRE1-T23)
     const manifest: CompositionManifest = Object.freeze({
       $schema: "https://zyppi.org/schemas/v1/composition_manifest.json",
-      manifestId: `manifest:zyppi:${domainSlug}_trade_item:v1:${options.executionId}`,
+      manifestId: `manifest:zyppi:${domainSlug}:v1:${options.executionId}`,
       dtcReference: Object.freeze({
         dtcId: dtc.dtcId,
         version: dtc.version,
       }),
       armProfileReference: Object.freeze({
-        profileId: dtc.applicableArmProfiles[0] || "arm:profile:trade_item:v1",
-        version: "1.0.0",
+        profileId: selectedArmProfile,
+        version: armProfileVersion,
       }),
       boundEpistemicRequirements: Object.freeze(
         reqs.map((r) =>
@@ -459,44 +720,19 @@ export class ApplicationCompositionResolver {
         ),
       ),
       boundPrjSpecifications: Object.freeze(
-        dtc.requiredPrjSpecifications.map((s) =>
-          Object.freeze({
-            specId: s,
-            version: "1.0.0",
-          }),
-        ),
+        boundPrjSpecs.map((s) => Object.freeze(s)),
       ),
       boundRsnBlueprints: Object.freeze(
-        dtc.requiredRsnBlueprints.map((b) =>
-          Object.freeze({
-            blueprintId: b,
-            version: "1.0.0",
-          }),
-        ),
+        boundRsnBlueprints.map((b) => Object.freeze(b)),
       ),
       boundPolRequirements: Object.freeze(
-        dtc.applicablePolRequirements.map((p) =>
-          Object.freeze({
-            policyId: p,
-            version: "1.0.0",
-          }),
-        ),
+        boundPolReqs.map((p) => Object.freeze(p)),
       ),
       boundSecRequirements: Object.freeze(
-        dtc.applicableSecRequirements.map((s) =>
-          Object.freeze({
-            securityReqId: s,
-            version: "1.0.0",
-          }),
-        ),
+        boundSecReqs.map((s) => Object.freeze(s)),
       ),
       boundRiCapabilities: Object.freeze(
-        dtc.requiredRiCapabilities.map((c) =>
-          Object.freeze({
-            capabilityId: c,
-            version: "1.0.0",
-          }),
-        ),
+        boundRiCaps.map((c) => Object.freeze(c)),
       ),
       ...(boundCl16Artifacts.length > 0
         ? { boundCl16IntelligenceArtifacts: Object.freeze(boundCl16Artifacts) }
@@ -523,12 +759,12 @@ export class ApplicationCompositionResolver {
         ),
       }),
       provenanceReferences: Object.freeze({
-        manifestAuthor: "identity:council:admin",
+        manifestAuthor,
         createdTimestamp: options.constitutionalTimestamp,
       }),
     });
 
-    // 7. Build Bound Constitutional Payload
+    // 9. Build Bound Constitutional Payload
     const boundPayload: BoundConstitutionalPayload = Object.freeze({
       $schema: "https://zyppi.org/schemas/v1/bound_payload.json",
       payloadId: `bound:payload:${domainSlug}:${options.executionId}`,

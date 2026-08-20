@@ -147,6 +147,231 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       ]),
     });
 
+  function createGs1CompositionDefinition(
+    versions = {
+      dtc: "1.0.0",
+      arm: "1.0.0",
+      prj: "1.0.0",
+      rsn: "1.0.0",
+      pol: "1.0.0",
+      sec: "1.0.0",
+      ri: "1.0.0",
+    },
+    owner = "identity:test:author",
+  ): import("./bind.js").CompositionDefinition {
+    return {
+      participants: [
+        {
+          identity: "dtc:zyppi:domain:gs1:v1",
+          kind: "DTC",
+          version: versions.dtc,
+          owner,
+          role: "domain_template",
+          reference: { id: "dtc:zyppi:domain:gs1:v1", version: versions.dtc },
+        },
+        {
+          identity: "arm:profile:trade_item:v1",
+          kind: "ARM_PROFILE",
+          version: versions.arm,
+          owner,
+          role: "asset_profile",
+          reference: { id: "arm:profile:trade_item:v1", version: versions.arm },
+        },
+        {
+          identity: "prj:spec:gs1_digital_link_projection:v1",
+          kind: "PRJ_SPECIFICATION",
+          version: versions.prj,
+          owner,
+          role: "prj_specification",
+          reference: {
+            id: "prj:spec:gs1_digital_link_projection:v1",
+            version: versions.prj,
+          },
+        },
+        {
+          identity: "rsn:blueprint:gs1_identity_verification:v1",
+          kind: "RSN_BLUEPRINT",
+          version: versions.rsn,
+          owner,
+          role: "rsn_blueprint",
+          reference: {
+            id: "rsn:blueprint:gs1_identity_verification:v1",
+            version: versions.rsn,
+          },
+        },
+        {
+          identity: "pol:req:active_standing:v1",
+          kind: "POL_REQUIREMENT",
+          version: versions.pol,
+          owner,
+          role: "pol_requirement",
+          reference: {
+            id: "pol:req:active_standing:v1",
+            version: versions.pol,
+          },
+        },
+        {
+          identity: "sec:req:sha256_payload_integrity:v1",
+          kind: "SEC_REQUIREMENT",
+          version: versions.sec,
+          owner,
+          role: "sec_requirement",
+          reference: {
+            id: "sec:req:sha256_payload_integrity:v1",
+            version: versions.sec,
+          },
+        },
+        {
+          identity: "ri:capability:stage7_ast_evaluation:v1",
+          kind: "RI_CAPABILITY",
+          version: versions.ri,
+          owner,
+          role: "ri_capability",
+          reference: {
+            id: "ri:capability:stage7_ast_evaluation:v1",
+            version: versions.ri,
+          },
+        },
+      ],
+    };
+  }
+
+  function createDppCompositionDefinition(
+    versions = {
+      dtc: "1.0.0",
+      arm: "1.0.0",
+      prj: "1.0.0",
+      rsn: "1.0.0",
+      pol: "1.0.0",
+      sec: "1.0.0",
+      ri: "1.0.0",
+    },
+    owner = "identity:test:author",
+  ): import("./bind.js").CompositionDefinition {
+    return {
+      participants: [
+        {
+          identity: "dtc:zyppi:domain:dpp:v1",
+          kind: "DTC",
+          version: versions.dtc,
+          owner,
+          role: "domain_template",
+          reference: { id: "dtc:zyppi:domain:dpp:v1", version: versions.dtc },
+        },
+        {
+          identity: "arm:profile:trade_item:v1",
+          kind: "ARM_PROFILE",
+          version: versions.arm,
+          owner,
+          role: "asset_profile",
+          reference: { id: "arm:profile:trade_item:v1", version: versions.arm },
+        },
+        {
+          identity: "prj:spec:dpp_passport_projection:v1",
+          kind: "PRJ_SPECIFICATION",
+          version: versions.prj,
+          owner,
+          role: "prj_specification",
+          reference: {
+            id: "prj:spec:dpp_passport_projection:v1",
+            version: versions.prj,
+          },
+        },
+        {
+          identity: "rsn:blueprint:dpp_passport_verification:v1",
+          kind: "RSN_BLUEPRINT",
+          version: versions.rsn,
+          owner,
+          role: "rsn_blueprint",
+          reference: {
+            id: "rsn:blueprint:dpp_passport_verification:v1",
+            version: versions.rsn,
+          },
+        },
+        {
+          identity: "pol:req:active_standing:v1",
+          kind: "POL_REQUIREMENT",
+          version: versions.pol,
+          owner,
+          role: "pol_requirement",
+          reference: {
+            id: "pol:req:active_standing:v1",
+            version: versions.pol,
+          },
+        },
+        {
+          identity: "sec:req:sha256_payload_integrity:v1",
+          kind: "SEC_REQUIREMENT",
+          version: versions.sec,
+          owner,
+          role: "sec_requirement",
+          reference: {
+            id: "sec:req:sha256_payload_integrity:v1",
+            version: versions.sec,
+          },
+        },
+        {
+          identity: "ri:capability:stage7_ast_evaluation:v1",
+          kind: "RI_CAPABILITY",
+          version: versions.ri,
+          owner,
+          role: "ri_capability",
+          reference: {
+            id: "ri:capability:stage7_ast_evaluation:v1",
+            version: versions.ri,
+          },
+        },
+      ],
+    };
+  }
+
+  function createSyntheticCompositionDefinition(
+    versions = {
+      dtc: "1.0.0",
+      arm: "1.0.0",
+      prj: "1.0.0",
+    },
+    owner = "identity:test:author",
+  ): import("./bind.js").CompositionDefinition {
+    return {
+      participants: [
+        {
+          identity: "dtc:zyppi:domain:synthetic_alpha:v1",
+          kind: "DTC",
+          version: versions.dtc,
+          owner,
+          role: "domain_template",
+          reference: {
+            id: "dtc:zyppi:domain:synthetic_alpha:v1",
+            version: versions.dtc,
+          },
+        },
+        {
+          identity: "arm:profile:synthetic_asset:v1",
+          kind: "ARM_PROFILE",
+          version: versions.arm,
+          owner,
+          role: "asset_profile",
+          reference: {
+            id: "arm:profile:synthetic_asset:v1",
+            version: versions.arm,
+          },
+        },
+        {
+          identity: "prj:spec:synthetic_projection:v1",
+          kind: "PRJ_SPECIFICATION",
+          version: versions.prj,
+          owner,
+          role: "prj_specification",
+          reference: {
+            id: "prj:spec:synthetic_projection:v1",
+            version: versions.prj,
+          },
+        },
+      ],
+    };
+  }
+
   it("TEST A — GS1 Success: resolves valid GS1 composition through Application Composition boundary", async () => {
     const registryRepo = new TestRegistryRepository(
       sampleCompleteSnapshotState,
@@ -160,6 +385,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_GTIN_EPISTEMIC_REQUIREMENT,
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-gs1-01",
@@ -201,6 +428,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-dpp-01",
@@ -242,6 +471,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-dpp-02",
@@ -279,6 +509,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-shared-dpp",
@@ -305,6 +537,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_GTIN_EPISTEMIC_REQUIREMENT,
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-shared-gs1",
@@ -365,6 +599,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_GTIN_EPISTEMIC_REQUIREMENT,
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-pol-gs1",
@@ -385,6 +621,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-pol-dpp",
@@ -430,6 +668,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_GTIN_EPISTEMIC_REQUIREMENT,
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-iso-gs1",
@@ -450,6 +690,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-iso-dpp",
@@ -499,6 +741,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         GS1_GTIN_EPISTEMIC_REQUIREMENT,
         GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createGs1CompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-disappear-gs1",
@@ -577,6 +821,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
         DPP_MATERIAL_COMPOSITION_REQUIREMENT,
       ],
+      manifestAuthor: "identity:test:author",
+      compositionDefinition: createDppCompositionDefinition(),
       registryRepository: registryRepo,
       identifier: validIdentifier,
       requestId: "req-disappear-dpp",
@@ -656,6 +902,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-ver-01",
@@ -690,6 +937,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-ver-02",
@@ -731,6 +979,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-ver-03",
@@ -774,6 +1023,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-auth-01",
@@ -828,6 +1078,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-owner-01",
@@ -877,6 +1128,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           healthcarePatientRequirement,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-neg-01",
@@ -916,6 +1168,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-arm-01",
@@ -958,6 +1212,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-arm-02",
@@ -999,6 +1254,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-arm-03",
@@ -1035,6 +1291,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-acv-01",
@@ -1119,6 +1377,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-exp-01",
@@ -1140,6 +1400,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-exp-02",
@@ -1184,6 +1446,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-att-opt-01",
@@ -1215,6 +1479,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-att-req-01",
@@ -1264,6 +1530,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-cl16-01",
@@ -1318,6 +1586,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-cl16-02",
@@ -1369,6 +1638,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-div-01",
@@ -1412,6 +1683,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-neg-02",
@@ -1460,6 +1733,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           GS1_GTIN_EPISTEMIC_REQUIREMENT,
           GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-crypto-01",
@@ -1498,6 +1773,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           SIOS_GTIN_EPISTEMIC_REQUIREMENT,
           SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-01",
@@ -1538,6 +1815,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-02",
@@ -1573,6 +1851,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: malformedDtc,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-03",
@@ -1615,6 +1894,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: dtcWithConstraint,
         epistemicRequirementsFixtures: [incompatibleSiosReq],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-04",
@@ -1656,6 +1936,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-05",
@@ -1693,6 +1974,7 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "identity:test:author",
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-06",
@@ -1723,6 +2005,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-07",
@@ -1765,6 +2049,19 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
           SIOS_GTIN_EPISTEMIC_REQUIREMENT,
           SIOS_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
         ],
+        manifestAuthor: "identity:council:admin",
+        compositionDefinition: createGs1CompositionDefinition(
+          {
+            dtc: "1.0.0",
+            arm: "1.0.0",
+            prj: "1.0.0",
+            rsn: "1.0.0",
+            pol: "1.0.0",
+            sec: "1.0.0",
+            ri: "1.0.0",
+          },
+          "identity:council:admin",
+        ),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-08",
@@ -1800,6 +2097,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [SIOS_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-09",
@@ -1847,6 +2146,8 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
       const result = await resolver.resolveComposition({
         dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
         epistemicRequirementsFixtures: [syntheticConceptRequirement],
+        manifestAuthor: "identity:test:author",
+        compositionDefinition: createGs1CompositionDefinition(),
         registryRepository: registryRepo,
         identifier: validIdentifier,
         requestId: "req-sios-10",
@@ -1866,6 +2167,1633 @@ describe("AMS-0854 Z-PROF Multi-Domain Factorization & Second-Domain Validation 
         expect(
           result.manifest.boundEpistemicRequirements[0].requirementId,
         ).toBe("epistemic:req:sios:synthetic_domain_concept:v1");
+      }
+    });
+  });
+
+  describe("CORR-0861-PRE-1 Z-PROF Domain-Neutral Composition Cleanup Test Suite (PRE1-T01 – PRE1-T24)", () => {
+    const defaultManifestAuthor = "identity:test:author";
+
+    it("PRE1-T01 — No GS1 Default: Invoke generic resolver without DTC fixture fails closed", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const options = {
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t01",
+        executionId: "exec-t01",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      } as unknown as import("./types.js").GenericCompositionOptions;
+
+      const result = await resolver.resolveComposition(options);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        expect(result.epistemicStatus).toBe("UNAVAILABLE");
+        expect(result.error.message).toContain(
+          "Domain Template Card (DTC) fixture is required",
+        );
+      }
+    });
+
+    it("PRE1-T02 — No GS1 Epistemic Default: Supply DTC but omit epistemic requirements fails closed", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const options = {
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t02",
+        executionId: "exec-t02",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      };
+
+      const result = await resolver.resolveComposition(options);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        expect(result.epistemicStatus).toBe("UNAVAILABLE");
+        expect(result.error.message).toContain(
+          "Epistemic requirements contract collection is required",
+        );
+      }
+    });
+
+    it("PRE1-T03 — Explicit GS1 Injection Still Works", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t03",
+        executionId: "exec-t03",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.dtcReference.dtcId).toBe(
+          GS1_DOMAIN_TEMPLATE_CARD.dtcId,
+        );
+        expect(result.manifest.provenanceReferences.manifestAuthor).toBe(
+          defaultManifestAuthor,
+        );
+      }
+    });
+
+    it("PRE1-T04 — DPP Uses Same Resolver", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+          DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createDppCompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t04",
+        executionId: "exec-t04",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.dtcReference.dtcId).toBe(
+          DPP_DOMAIN_TEMPLATE_CARD.dtcId,
+        );
+        expect(result.boundPayload.payloadId).toBe(
+          "bound:payload:dpp:exec-t04",
+        );
+      }
+    });
+
+    it("PRE1-T05 — Missing Manifest Author: Omit required explicit author fails closed", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const options = {
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t05",
+        executionId: "exec-t05",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      } as unknown as import("./types.js").GenericCompositionOptions;
+
+      const result = await resolver.resolveComposition(options);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        expect(result.error.message).toContain(
+          "Manifest author identity is required",
+        );
+      }
+    });
+
+    it("PRE1-T06 — Blank Manifest Author: Whitespace or empty author fails closed", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: "   ",
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t06",
+        executionId: "exec-t06",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+      }
+    });
+
+    it("PRE1-T07 — No Fabricated Version: Exact supplied version is bound without synthesis", async () => {
+      const pureSyntheticDtc: import("./types.js").DomainTemplateCard =
+        Object.freeze({
+          dtcId: "dtc:zyppi:domain:synthetic_alpha:v1",
+          domainIdentifier: "domain:synthetic_alpha",
+          domainName: "Pure Synthetic Domain",
+          version: "1.0.0",
+          scope: "Synthetic domain testing",
+          applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+          applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+          epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+          requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        });
+
+      const pureSyntheticReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "1.0.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const pureSyntheticCap: CapabilityRecord = Object.freeze({
+        capabilityId: "prj:spec:synthetic_projection:v1",
+        subjectId: "arm:profile:synthetic_asset:v1",
+        scope: "projection:synthetic_alpha",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
+      });
+
+      const pureSyntheticSnapshotState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: Object.freeze([pureSyntheticCap]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        pureSyntheticSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: pureSyntheticDtc,
+        epistemicRequirementsFixtures: [pureSyntheticReq],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: {
+          participants: [
+            {
+              identity: "dtc:zyppi:domain:synthetic_alpha:v1",
+              kind: "DTC",
+              version: "1.0.0",
+              owner: defaultManifestAuthor,
+              role: "domain_template",
+              reference: {
+                id: "dtc:zyppi:domain:synthetic_alpha:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "arm:profile:synthetic_asset:v1",
+              kind: "ARM_PROFILE",
+              version: "2.5.0",
+              owner: defaultManifestAuthor,
+              role: "asset_profile",
+              reference: {
+                id: "arm:profile:synthetic_asset:v1",
+                version: "2.5.0",
+              },
+            },
+            {
+              identity: "prj:spec:synthetic_projection:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: defaultManifestAuthor,
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:synthetic_projection:v1",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t07",
+        executionId: "exec-t07",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.armProfileReference.version).toBe("2.5.0");
+      }
+    });
+
+    it("PRE1-T08 — Explicit Version Preserved", async () => {
+      const pureSyntheticDtc: import("./types.js").DomainTemplateCard =
+        Object.freeze({
+          dtcId: "dtc:zyppi:domain:synthetic_alpha:v1",
+          domainIdentifier: "domain:synthetic_alpha",
+          domainName: "Pure Synthetic Domain",
+          version: "1.0.0",
+          scope: "Synthetic domain testing",
+          applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+          applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+          epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+          requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        });
+
+      const pureSyntheticReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "1.0.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const pureSyntheticCap: CapabilityRecord = Object.freeze({
+        capabilityId: "prj:spec:synthetic_projection:v1",
+        subjectId: "arm:profile:synthetic_asset:v1",
+        scope: "projection:synthetic_alpha",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
+      });
+
+      const pureSyntheticSnapshotState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: Object.freeze([pureSyntheticCap]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        pureSyntheticSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: pureSyntheticDtc,
+        epistemicRequirementsFixtures: [pureSyntheticReq],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: {
+          participants: [
+            {
+              identity: "dtc:zyppi:domain:synthetic_alpha:v1",
+              kind: "DTC",
+              version: "1.0.0",
+              owner: defaultManifestAuthor,
+              role: "domain_template",
+              reference: {
+                id: "dtc:zyppi:domain:synthetic_alpha:v1",
+                version: "1.0.0",
+              },
+            },
+            {
+              identity: "arm:profile:synthetic_asset:v1",
+              kind: "ARM_PROFILE",
+              version: "3.1.4",
+              owner: defaultManifestAuthor,
+              role: "asset_profile",
+              reference: {
+                id: "arm:profile:synthetic_asset:v1",
+                version: "3.1.4",
+              },
+            },
+            {
+              identity: "prj:spec:synthetic_projection:v1",
+              kind: "PRJ_SPECIFICATION",
+              version: "1.0.0",
+              owner: defaultManifestAuthor,
+              role: "prj_specification",
+              reference: {
+                id: "prj:spec:synthetic_projection:v1",
+                version: "1.0.0",
+              },
+            },
+          ],
+        },
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t08",
+        executionId: "exec-t08",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.armProfileReference.version).toBe("3.1.4");
+      }
+    });
+
+    it("PRE1-T09 — Missing ARM Binding: DTC specifying zero ARM profiles fails closed", async () => {
+      const dtcNoArm = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: [],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcNoArm,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t09",
+        executionId: "exec-t09",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        expect(result.error.message).toContain("zero applicable ARM Profiles");
+      }
+    });
+
+    it("PRE1-T10 — Ambiguous ARM Binding: Multiple candidates without selection fail closed with conflicting", async () => {
+      const dtcMultiArm = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: ["arm:profile:A:v1", "arm:profile:B:v1"],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcMultiArm,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t10",
+        executionId: "exec-t10",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("conflicting");
+      }
+    });
+
+    it("PRE1-T11 — Explicit ARM Binding: Explicit selection binds requested ARM profile", async () => {
+      const dtcMultiArm = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: [
+          "arm:profile:trade_item:v1",
+          "arm:profile:B:v1",
+        ],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcMultiArm,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        applicableArmProfile: "arm:profile:trade_item:v1",
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t11",
+        executionId: "exec-t11",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.armProfileReference.profileId).toBe(
+          "arm:profile:trade_item:v1",
+        );
+      }
+    });
+
+    it("PRE1-T12 — Missing Authority Does Not Reach RI", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const options = {
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t12",
+        executionId: "exec-t12",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        overrides: testOverrides,
+      } as unknown as import("./types.js").GenericCompositionOptions;
+
+      const result = await resolver.composeAndExecute(options);
+
+      expect(result.ok).toBe(false);
+      expect("pipelineResult" in result).toBe(false);
+    });
+
+    it("PRE1-T13 — Missing Version Does Not Reach RI", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.composeAndExecute({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t13",
+        executionId: "exec-t13",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["latest"], // Floating version!
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        overrides: testOverrides,
+      });
+
+      expect(result.ok).toBe(false);
+      expect("pipelineResult" in result).toBe(false);
+    });
+
+    it("PRE1-T14 — Domain Mutation: Synthetic non-GS1 DTC succeeds without GS1 namespace dependency", async () => {
+      const pureSyntheticDtc: import("./types.js").DomainTemplateCard =
+        Object.freeze({
+          dtcId: "dtc:zyppi:domain:synthetic_alpha:v1",
+          domainIdentifier: "domain:synthetic_alpha",
+          domainName: "Pure Synthetic Domain",
+          version: "1.0.0",
+          scope: "Synthetic domain testing",
+          applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+          applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+          epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+          requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        });
+
+      const pureSyntheticReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "1.0.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const pureSyntheticCap: CapabilityRecord = Object.freeze({
+        capabilityId: "prj:spec:synthetic_projection:v1",
+        subjectId: "arm:profile:synthetic_asset:v1",
+        scope: "projection:synthetic_alpha",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
+      });
+
+      const pureSyntheticSnapshotState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: Object.freeze([pureSyntheticCap]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        pureSyntheticSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: pureSyntheticDtc,
+        epistemicRequirementsFixtures: [pureSyntheticReq],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createSyntheticCompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t14",
+        executionId: "exec-t14",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.dtcReference.dtcId).toBe(
+          "dtc:zyppi:domain:synthetic_alpha:v1",
+        );
+        expect(result.boundPayload.payloadId).toBe(
+          "bound:payload:synthetic_alpha:exec-t14",
+        );
+      }
+    });
+
+    it("PRE1-T15 — GS1 Namespace Negative Search: Generic compositionResolver imports no GS1 fixtures", async () => {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const resolverCode = fs.readFileSync(
+        path.resolve(__dirname, "compositionResolver.ts"),
+        "utf-8",
+      );
+
+      expect(resolverCode).not.toContain("GS1_DOMAIN_TEMPLATE_CARD");
+      expect(resolverCode).not.toContain("GS1_GTIN_EPISTEMIC_REQUIREMENT");
+      expect(resolverCode).not.toContain(
+        "GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT",
+      );
+    });
+
+    it("PRE1-T16 — Exact Topology Preservation", async () => {
+      const pureSyntheticDtc: import("./types.js").DomainTemplateCard =
+        Object.freeze({
+          dtcId: "dtc:zyppi:domain:synthetic_alpha:v1",
+          domainIdentifier: "domain:synthetic_alpha",
+          domainName: "Pure Synthetic Domain",
+          version: "1.0.0",
+          scope: "Synthetic domain testing",
+          applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+          applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+          epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+          requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        });
+
+      const pureSyntheticReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "1.0.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const pureSyntheticCap: CapabilityRecord = Object.freeze({
+        capabilityId: "prj:spec:synthetic_projection:v1",
+        subjectId: "arm:profile:synthetic_asset:v1",
+        scope: "projection:synthetic_alpha",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
+      });
+
+      const pureSyntheticSnapshotState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: Object.freeze([pureSyntheticCap]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        pureSyntheticSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const compDef: import("./bind.js").CompositionDefinition = {
+        participants: [
+          {
+            identity: "dtc:zyppi:domain:synthetic_alpha:v1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "domain_template",
+            reference: {
+              id: "dtc:zyppi:domain:synthetic_alpha:v1",
+              version: "1.0.0",
+            },
+          },
+          {
+            identity: "arm:profile:synthetic_asset:v1",
+            kind: "ARM_PROFILE",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "asset_profile",
+            reference: {
+              id: "arm:profile:synthetic_asset:v1",
+              version: "1.0.0",
+            },
+          },
+          {
+            identity: "prj:spec:synthetic_projection:v1",
+            kind: "PRJ_SPECIFICATION",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "prj_specification",
+            reference: {
+              id: "prj:spec:synthetic_projection:v1",
+              version: "1.0.0",
+            },
+          },
+        ],
+        bindingEdges: [
+          {
+            sourceId: "dtc:zyppi:domain:synthetic_alpha:v1",
+            targetId: "arm:profile:synthetic_asset:v1",
+            dependencyKind: "REQUIRES",
+          },
+        ],
+      };
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: pureSyntheticDtc,
+        epistemicRequirementsFixtures: [pureSyntheticReq],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: compDef,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t16",
+        executionId: "exec-t16",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.dependencyTopology.edges).toHaveLength(1);
+        expect(result.manifest.dependencyTopology.edges[0]).toEqual({
+          from: "dtc:zyppi:domain:synthetic_alpha:v1",
+          to: "arm:profile:synthetic_asset:v1",
+        });
+      }
+    });
+
+    it("PRE1-T17 — Zero Binding Means Zero BCG Dependencies", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t17",
+        executionId: "exec-t17",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.bcg?.bindingEdges).toHaveLength(0);
+        expect(result.bcg?.nodes).toHaveLength(0);
+      }
+    });
+
+    it("PRE1-T18 — Receipt Neutrality Regression", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const gs1Res = await resolver.composeAndExecute({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createGs1CompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t18-gs1",
+        executionId: "exec-t18-gs1",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        overrides: testOverrides,
+      });
+
+      const dppRes = await resolver.composeAndExecute({
+        dtcFixture: DPP_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          DPP_PASSPORT_IDENTIFICATION_REQUIREMENT,
+          DPP_MATERIAL_COMPOSITION_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createDppCompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t18-dpp",
+        executionId: "exec-t18-dpp",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+        overrides: testOverrides,
+      });
+
+      expect(gs1Res.ok).toBe(true);
+      expect(dppRes.ok).toBe(true);
+
+      if (
+        gs1Res.ok &&
+        dppRes.ok &&
+        gs1Res.pipelineResult.ok &&
+        dppRes.pipelineResult.ok &&
+        gs1Res.pipelineResult.outcome.kind === "materialized" &&
+        dppRes.pipelineResult.outcome.kind === "materialized"
+      ) {
+        const gs1Rcpt =
+          gs1Res.pipelineResult.outcome.executionOutput.executionReceipt;
+        const dppRcpt =
+          dppRes.pipelineResult.outcome.executionOutput.executionReceipt;
+
+        expect(gs1Rcpt.runtimeVersion).toBe(dppRcpt.runtimeVersion);
+        expect(gs1Rcpt.policyVersion).toBe(dppRcpt.policyVersion);
+        expect("domainIdentifier" in gs1Rcpt).toBe(false);
+        expect("domainIdentifier" in dppRcpt).toBe(false);
+      }
+    });
+
+    it("PRE1-T19 — No First-Array-Member ARM Selection", async () => {
+      const dtcPermut1 = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: ["arm:profile:A:v1", "arm:profile:B:v1"],
+      };
+      const dtcPermut2 = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: ["arm:profile:B:v1", "arm:profile:A:v1"],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const res1 = await resolver.resolveComposition({
+        dtcFixture: dtcPermut1,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t19-1",
+        executionId: "exec-t19-1",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      const res2 = await resolver.resolveComposition({
+        dtcFixture: dtcPermut2,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t19-2",
+        executionId: "exec-t19-2",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(res1.ok).toBe(false);
+      expect(res2.ok).toBe(false);
+      if (!res1.ok && !res2.ok) {
+        expect(res1.error.code).toBe("conflicting");
+        expect(res2.error.code).toBe("conflicting");
+      }
+    });
+
+    it("PRE1-T20 — Every Manifest Version Has Provenance across all constituent categories", async () => {
+      const fullDtc: import("./types.js").DomainTemplateCard = Object.freeze({
+        dtcId: "dtc:zyppi:domain:full_test:v1",
+        domainIdentifier: "domain:full_test",
+        domainName: "Full Test Domain",
+        version: "1.0.0",
+        scope: "Full test scope",
+        applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+        applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+        epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+        requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+        requiredRsnBlueprints: ["rsn:blueprint:synthetic_rsn:v1"],
+        requiredContextDimensions: [],
+        applicablePolRequirements: ["pol:req:synthetic_pol:v1"],
+        applicableSecRequirements: ["sec:req:synthetic_sec:v1"],
+        requiredRiCapabilities: ["ri:capability:synthetic_ri:v1"],
+        versionConstraints: {},
+        provenanceRequirements: {},
+      });
+
+      const fullReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "3.3.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const fullCaps: readonly CapabilityRecord[] = Object.freeze([
+        {
+          capabilityId: "prj:spec:synthetic_projection:v1",
+          subjectId: "arm:profile:synthetic_asset:v1",
+          scope: "projection:synthetic_alpha",
+          validFrom: "2026-01-01T00:00:00Z",
+          validTo: "2030-01-01T00:00:00Z",
+        },
+      ]);
+
+      const fullState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: fullCaps,
+      });
+
+      const compDef: import("./bind.js").CompositionDefinition = {
+        participants: [
+          {
+            identity: "dtc:zyppi:domain:full_test:v1",
+            kind: "DTC",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "domain_template",
+            reference: {
+              id: "dtc:zyppi:domain:full_test:v1",
+              version: "1.0.0",
+            },
+          },
+          {
+            identity: "arm:profile:synthetic_asset:v1",
+            kind: "ARM_PROFILE",
+            version: "2.2.0",
+            owner: defaultManifestAuthor,
+            role: "asset_profile",
+            reference: {
+              id: "arm:profile:synthetic_asset:v1",
+              version: "2.2.0",
+            },
+          },
+          {
+            identity: "prj:spec:synthetic_projection:v1",
+            kind: "PRJ_SPECIFICATION",
+            version: "4.4.0",
+            owner: defaultManifestAuthor,
+            role: "prj_specification",
+            reference: {
+              id: "prj:spec:synthetic_projection:v1",
+              version: "4.4.0",
+            },
+          },
+          {
+            identity: "rsn:blueprint:synthetic_rsn:v1",
+            kind: "RSN_BLUEPRINT",
+            version: "5.5.0",
+            owner: defaultManifestAuthor,
+            role: "rsn_blueprint",
+            reference: {
+              id: "rsn:blueprint:synthetic_rsn:v1",
+              version: "5.5.0",
+            },
+          },
+          {
+            identity: "pol:req:synthetic_pol:v1",
+            kind: "POL_REQUIREMENT",
+            version: "6.6.0",
+            owner: defaultManifestAuthor,
+            role: "pol_requirement",
+            reference: { id: "pol:req:synthetic_pol:v1", version: "6.6.0" },
+          },
+          {
+            identity: "sec:req:synthetic_sec:v1",
+            kind: "SEC_REQUIREMENT",
+            version: "7.7.0",
+            owner: defaultManifestAuthor,
+            role: "sec_requirement",
+            reference: { id: "sec:req:synthetic_sec:v1", version: "7.7.0" },
+          },
+          {
+            identity: "ri:capability:synthetic_ri:v1",
+            kind: "RI_CAPABILITY",
+            version: "8.8.0",
+            owner: defaultManifestAuthor,
+            role: "ri_capability",
+            reference: {
+              id: "ri:capability:synthetic_ri:v1",
+              version: "8.8.0",
+            },
+          },
+        ],
+      };
+
+      const registryRepo = new TestRegistryRepository(fullState, [
+        sampleEvidenceRecord,
+      ]);
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: fullDtc,
+        epistemicRequirementsFixtures: [fullReq],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: compDef,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t20",
+        executionId: "exec-t20",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.dtcReference.version).toBe("1.0.0");
+        expect(result.manifest.armProfileReference.version).toBe("2.2.0");
+        expect(result.manifest.boundEpistemicRequirements[0].version).toBe(
+          "3.3.0",
+        );
+        expect(result.manifest.boundPrjSpecifications[0].version).toBe("4.4.0");
+        expect(result.manifest.boundRsnBlueprints[0].version).toBe("5.5.0");
+        expect(result.manifest.boundPolRequirements[0].version).toBe("6.6.0");
+        expect(result.manifest.boundSecRequirements[0].version).toBe("7.7.0");
+        expect(result.manifest.boundRiCapabilities[0].version).toBe("8.8.0");
+      }
+    });
+
+    it("PRE1-T29 — Universal Version Array Non-Fallback: Constituents without participant in compositionDefinition fail closed without options.versions[0] fallback", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t29",
+        executionId: "exec-t29",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"], // Pass valid SemVer satisfying DTC constraint, but omit compositionDefinition participants!
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        expect(result.error.message).toContain(
+          "Missing exact explicit participant version coordinate",
+        );
+      }
+    });
+
+    it("PRE1-T25 — Multiple ARM Participants Permutation: Reversed array order of ARM participants fails closed with conflicting", async () => {
+      const dtcMultiArm = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: ["arm:profile:A:v1", "arm:profile:B:v1"],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const compDefReversed: import("./bind.js").CompositionDefinition = {
+        participants: [
+          {
+            identity: "arm:profile:B:v1",
+            kind: "ARM_PROFILE",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "asset_profile",
+            reference: { id: "arm:profile:B:v1", version: "1.0.0" },
+          },
+          {
+            identity: "arm:profile:A:v1",
+            kind: "ARM_PROFILE",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "asset_profile",
+            reference: { id: "arm:profile:A:v1", version: "1.0.0" },
+          },
+        ],
+      };
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcMultiArm,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: compDefReversed,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t25",
+        executionId: "exec-t25",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("conflicting");
+      }
+    });
+
+    it("PRE1-T26 — ARM Selector Conflict: Disagreement between applicableArmProfile and compositionDefinition ARM participant fails closed", async () => {
+      const dtcMultiArm = {
+        ...GS1_DOMAIN_TEMPLATE_CARD,
+        applicableArmProfiles: ["arm:profile:A:v1", "arm:profile:B:v1"],
+      };
+
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const compDef: import("./bind.js").CompositionDefinition = {
+        participants: [
+          {
+            identity: "arm:profile:B:v1",
+            kind: "ARM_PROFILE",
+            version: "1.0.0",
+            owner: defaultManifestAuthor,
+            role: "asset_profile",
+            reference: { id: "arm:profile:B:v1", version: "1.0.0" },
+          },
+        ],
+      };
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: dtcMultiArm,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        applicableArmProfile: "arm:profile:A:v1", // Disagrees with B in compDef!
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: compDef,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t26",
+        executionId: "exec-t26",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("conflicting");
+      }
+    });
+
+    it("PRE1-T27 — PRJ Missing Exact Version: Required PRJ exists in DTC but no explicit version coordinate fails closed", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t27",
+        executionId: "exec-t27",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["*"], // Wildcard / missing version!
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("invalid");
+      }
+    });
+
+    it("PRE1-T28 — Pure Synthetic Domain Recursive Neutrality: Successful synthetic composition contains no GS1 vocabulary or GS1 artifacts", async () => {
+      const pureSyntheticDtc: import("./types.js").DomainTemplateCard =
+        Object.freeze({
+          dtcId: "dtc:zyppi:domain:synthetic_alpha:v1",
+          domainIdentifier: "domain:synthetic_alpha",
+          domainName: "Pure Synthetic Domain",
+          version: "1.0.0",
+          scope: "Synthetic domain",
+          applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+          applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+          epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+          requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        });
+
+      const pureSyntheticReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "1.0.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const pureSyntheticCap: CapabilityRecord = Object.freeze({
+        capabilityId: "prj:spec:synthetic_projection:v1",
+        subjectId: "arm:profile:synthetic_asset:v1",
+        scope: "projection:synthetic_alpha",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
+      });
+
+      const pureSyntheticSnapshotState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: Object.freeze([pureSyntheticCap]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        pureSyntheticSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: pureSyntheticDtc,
+        epistemicRequirementsFixtures: [pureSyntheticReq],
+        manifestAuthor: "identity:test:manifest_author",
+        compositionDefinition: createSyntheticCompositionDefinition(
+          { dtc: "1.0.0", arm: "1.0.0", prj: "1.0.0" },
+          "identity:test:manifest_author",
+        ),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t28",
+        executionId: "exec-t28",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        const manifestStr = JSON.stringify(result.manifest);
+        const sccStr = JSON.stringify(result.sccId);
+        const bcgStr = JSON.stringify(result.bcg);
+        const boundPayloadStr = JSON.stringify(result.boundPayload);
+
+        const forbidden = [
+          "gs1",
+          "gtin",
+          "gln",
+          "digital_link",
+          "trade_item",
+          "arm:profile:trade_item",
+          "gs1_digital_link_projection",
+        ];
+
+        for (const term of forbidden) {
+          expect(manifestStr).not.toContain(term);
+          expect(sccStr).not.toContain(term);
+          expect(bcgStr).not.toContain(term);
+          expect(boundPayloadStr).not.toContain(term);
+        }
+      }
+    });
+
+    it("PRE1-T21 — Empty Epistemic Requirements Fail", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t21",
+        executionId: "exec-t21",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("missing");
+        const checkRes = result as unknown as {
+          sccId?: string;
+          bcgId?: string;
+        };
+        expect(checkRes.sccId).toBeUndefined();
+        expect(checkRes.bcgId).toBeUndefined();
+      }
+    });
+
+    it("PRE1-T22 — Synthetic Domain Has Zero GS1 Dependency", async () => {
+      const pureSyntheticDtc: import("./types.js").DomainTemplateCard =
+        Object.freeze({
+          dtcId: "dtc:zyppi:domain:synthetic_alpha:v1",
+          domainIdentifier: "domain:synthetic_alpha",
+          domainName: "Pure Synthetic Domain",
+          version: "1.0.0",
+          scope: "Synthetic domain",
+          applicableAssetClasses: ["asset:class:synthetic_asset:v1"],
+          applicableArmProfiles: ["arm:profile:synthetic_asset:v1"],
+          epistemicRequirements: ["epistemic:req:synthetic_identity:v1"],
+          requiredPrjSpecifications: ["prj:spec:synthetic_projection:v1"],
+          requiredRsnBlueprints: [],
+          requiredContextDimensions: [],
+          applicablePolRequirements: [],
+          applicableSecRequirements: [],
+          requiredRiCapabilities: [],
+          versionConstraints: {},
+          provenanceRequirements: {},
+        });
+
+      const pureSyntheticReq: import("./types.js").EpistemicRequirementContract =
+        Object.freeze({
+          requirementId: "epistemic:req:synthetic_identity:v1",
+          version: "1.0.0",
+          targetDimension: "SYNTHETIC_ALPHA",
+          goldenQuestionRef: "question:synthetic_alpha",
+          requiredFacts: [],
+        });
+
+      const pureSyntheticCap: CapabilityRecord = Object.freeze({
+        capabilityId: "prj:spec:synthetic_projection:v1",
+        subjectId: "arm:profile:synthetic_asset:v1",
+        scope: "projection:synthetic_alpha",
+        validFrom: "2026-01-01T00:00:00Z",
+        validTo: "2030-01-01T00:00:00Z",
+      });
+
+      const pureSyntheticSnapshotState: RetrievedRegistryState = Object.freeze({
+        ...sampleCompleteSnapshotState,
+        capabilities: Object.freeze([pureSyntheticCap]),
+      });
+
+      const registryRepo = new TestRegistryRepository(
+        pureSyntheticSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: pureSyntheticDtc,
+        epistemicRequirementsFixtures: [pureSyntheticReq],
+        manifestAuthor: defaultManifestAuthor,
+        compositionDefinition: createSyntheticCompositionDefinition(),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t22",
+        executionId: "exec-t22",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        const manifestStr = JSON.stringify(result.manifest);
+        const sccStr = JSON.stringify(result.sccId);
+        const bcgStr = JSON.stringify(result.bcg);
+
+        const forbidden = [
+          "gs1",
+          "gtin",
+          "gln",
+          "digital_link",
+          "trade_item",
+          "arm:profile:trade_item",
+          "gs1_digital_link_projection",
+        ];
+
+        for (const term of forbidden) {
+          expect(manifestStr).not.toContain(term);
+          expect(sccStr).not.toContain(term);
+          expect(bcgStr).not.toContain(term);
+        }
+      }
+    });
+
+    it("PRE1-T23 — Explicit Author Is Preserved Exactly", async () => {
+      const customAuthor = "identity:custom_author:org_999";
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [
+          GS1_GTIN_EPISTEMIC_REQUIREMENT,
+          GS1_BRAND_OWNER_EPISTEMIC_REQUIREMENT,
+        ],
+        manifestAuthor: customAuthor,
+        compositionDefinition: createGs1CompositionDefinition(
+          {
+            dtc: "1.0.0",
+            arm: "1.0.0",
+            prj: "1.0.0",
+            rsn: "1.0.0",
+            pol: "1.0.0",
+            sec: "1.0.0",
+            ri: "1.0.0",
+          },
+          customAuthor,
+        ),
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t23",
+        executionId: "exec-t23",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["1.0.0"],
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+        explicitEvidenceBundle: validEvidenceBundle,
+        explicitEvidencePayloads: validEvidencePayloads,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.manifest.provenanceReferences.manifestAuthor).toBe(
+          customAuthor,
+        );
+      }
+    });
+
+    it("PRE1-T24 — Missing Exact Constituent Version Never Reaches Identity Derivation", async () => {
+      const registryRepo = new TestRegistryRepository(
+        sampleCompleteSnapshotState,
+        [sampleEvidenceRecord],
+      );
+      const resolver = new ApplicationCompositionResolver();
+
+      const result = await resolver.resolveComposition({
+        dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
+        epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
+        manifestAuthor: defaultManifestAuthor,
+        registryRepository: registryRepo,
+        identifier: validIdentifier,
+        requestId: "req-t24",
+        executionId: "exec-t24",
+        constitutionalTimestamp: "2026-08-10T00:00:00Z",
+        budget: 1000,
+        entropy: "entropy-123",
+        versions: ["*"], // Wildcard version!
+        policyContext: defaultPolicyContext,
+        resolvedPolicyGraph: defaultResolvedPolicyGraph,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("invalid");
+        const checkRes = result as unknown as {
+          sccId?: string;
+          bcgId?: string;
+        };
+        expect(checkRes.sccId).toBeUndefined();
+        expect(checkRes.bcgId).toBeUndefined();
       }
     });
   });
