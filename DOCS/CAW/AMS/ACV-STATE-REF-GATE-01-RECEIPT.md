@@ -9,7 +9,8 @@
 ## Completion Receipt Itemization (§21)
 
 1. **Branch:** `jules-15949569986392059858-5ea1b51c`
-2. **Final Commit SHA:** `b88fb70b19ef8abdd33f04abf4017c5fd7d6f12e`
+2. **Verified Implementation Commit SHA:** `d951d17884925390d0694181f70a234a9fb1c92b`
+   - **Final Merge SHA:** Recorded by Chair / GitHub upon merge
 3. **Changed Files:**
    - `DOCS/CAW/AMS/ACV-STATE-REF-GATE-01.md`
    - `DOCS/CAW/AMS/ACV-STATE-REF-GATE-01-RECEIPT.md`
@@ -62,6 +63,8 @@
 39. **Typecheck/Build Result:** PASS (`pnpm exec tsc -b`).
 40. **Boundary Result:** PASS (`pnpm boundary:all`).
 41. **Graph Validation Result:** PASS (`pnpm graph:validate`).
-42. **Hosted CI Result if Available:** Local environment verification complete; ready for hosted CI.
+42. **Hosted CI Result:** PASS
+    - **CI workflow run:** 32432202712
+    - **Verified implementation head:** `d951d17884925390d0694181f70a234a9fb1c92b`
 43. **Unresolved Issues:** Zero unresolved technical issues or stop conditions.
 44. **Stop-Condition Status:** Zero stop conditions encountered.
