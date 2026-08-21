@@ -15,25 +15,10 @@ import type {
 } from "./types.js";
 
 /**
- * Internal default stage overrides enabling standard 9-stage RI pipeline traversal
- * in the un-stubbed runtime environment without exposing overrides to production callers (CORR-0861-C-1 §2).
- */
-const DEFAULT_RI_STAGE_OVERRIDES: import("@zyppi/runtime/dist/types.js").StageOverrideConfig =
-  Object.freeze({
-    Admission: Object.freeze({ ok: true as const }),
-    "Bundle Discovery": Object.freeze({ ok: true as const }),
-    "Bundle Verification": Object.freeze({ ok: true as const }),
-    "Dependency Resolution": Object.freeze({ ok: true as const }),
-    "Compatibility Validation": Object.freeze({ ok: true as const }),
-    "ACV Activation": Object.freeze({ ok: true as const }),
-    "Receipt Generation": Object.freeze({ ok: true as const }),
-  });
-
-/**
  * Pure, side-effect-free post-RI GS1 Domain Projection.
  * Consumes ExecutionOutput, ExecutionReceipt, EvaluationCoordinate, CompositionManifest, and BoundConstitutionalPayload over a closed capability surface.
  *
- * Laws (CORR-0861-C-1 §1):
+ * Laws (CORR-0861-C-1 / CORR-0861-C-2):
  * - NO fallback PRJ specification (fails closed if boundPrjSpecifications is empty).
  * - NO epoch tEInput fallback (fails closed if tEInput is missing or empty).
  * - ZERO Registry, Database, Network, Clock, Randomness, Environment, or Container access.
@@ -120,7 +105,7 @@ export function projectGs1DomainResult(options: {
 }
 
 /**
- * GS1 Domain-Edge Execution, Provenance & Governed Projection Bridge (AMS-0861-C / CORR-0861-C-1).
+ * GS1 Domain-Edge Execution, Provenance & Governed Projection Bridge (AMS-0861-C / CORR-0861-C-1 / CORR-0861-C-2).
  *
  * Orchestrates:
  * 1. Assembly from Packet-A Anchor via `assembleGs1CompositionFromAnchor`
@@ -128,9 +113,9 @@ export function projectGs1DomainResult(options: {
  * 3. Existing RI Admission & Runtime Execution via existing `executeEvaluationCoordinate`
  * 4. Post-RI Governed GS1 Domain Projection via `projectGs1DomainResult`
  *
- * Laws (CORR-0861-C-1):
- * 1. Fail closed on missing requestId, executionId, or tEInput (zero synthesized ID/timestamp fallbacks).
- * 2. Production execution bridge accepts NO StageOverrideConfig or caller Runtime overrides.
+ * Laws (CORR-0861-C-2):
+ * 1. ZERO stage overrides in production (DEFAULT_RI_STAGE_OVERRIDES completely removed). Executes through real existing RI lifecycle seam.
+ * 2. Fail closed on missing requestId, executionId, or tEInput (zero synthesized ID/timestamp fallbacks).
  * 3. RI remains sovereign. Bypasses neither RI nor existing Runtime.
  * 4. SCC and BCG identities are consumed, never recomputed.
  * 5. Positioned strictly in GS1 Domain Edge (apps/api/src/gs1/). Generic Z-PROF / Runtime / Domain remain domain-neutral.
@@ -203,14 +188,13 @@ export async function executeGs1Bridge(
 
   const executionRequest = mapRes.executionRequest;
 
-  // 3. RI Execution Seam (CORR-0861-C-1 §2 — NO caller overrides in production interface; internal default overrides for RI pipeline traversal)
+  // 3. RI Execution Seam (CORR-0861-C-2: Execute through native RI lifecycle with ZERO overrides)
   const execRes = await executeEvaluationCoordinate({
     coordinate: evaluationCoordinate,
     boundPayload,
     requestId,
     executionId,
     evidencePayloads,
-    overrides: DEFAULT_RI_STAGE_OVERRIDES,
   });
 
   if (!execRes.ok) {

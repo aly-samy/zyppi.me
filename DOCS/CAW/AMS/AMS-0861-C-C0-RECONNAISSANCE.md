@@ -1,20 +1,20 @@
-# AMS-0861-C — C0 RECONNAISSANCE REPORT (REVISED UNDER CORR-0861-C-1)
+# AMS-0861-C — C0 RECONNAISSANCE REPORT (REVISED UNDER CORR-0861-C-2)
 
 **Program:** CAW-011 — Commerce Atlas Wedge
 **Milestone:** M08.5 — Z-PROF Profile Architecture
 **Execution Packet:** AMS-0861-C — RI Execution, Provenance & Governed Projection
 **Document Class:** Phase C0 Reconnaissance & Capability Classification Report
-**Authority:** AMS-0861-PLAN-R3 + Final Ratification Addendum + CORR-0861-C-1 — RATIFIED
-**Status:** C0 COMPLETED — AUTHORIZED FOR C1+ EXECUTION (ALL SEAMS STATUS A/B)
+**Authority:** AMS-0861-PLAN-R3 + Final Ratification Addendum + CORR-0861-C-1 + CORR-0861-C-2 — RATIFIED
+**Status:** C0 COMPLETED — REPOSITORY CAPABILITY GAPS IDENTIFIED (STOP CONDITION TRIGGERED)
 **Date:** 2026-08-08
 
 ---
 
 ## 1. Purpose & Scope
 
-This document presents the Phase C0 reconnaissance findings for execution packet AMS-0861-C, updated under Council Directive CORR-0861-C-1. Per AMS-0861-C §§7–9 and the user approval constraint, Phase C0 is a read-only reconnaissance exercise designed to verify the existing execution, provenance, receipt, projection, historical reality, policy, and security seams across the repository without modifying any production or test code.
+This document presents the revised Phase C0 reconnaissance findings for execution packet AMS-0861-C under Council Directives CORR-0861-C-1 and CORR-0861-C-2. Per AMS-0861-C §§7–9 and Chair instructions, Phase C0 is a read-only reconnaissance exercise designed to verify existing execution, provenance, receipt, projection, historical reality, policy, and security seams across the repository without modifying production or test code.
 
-The objective of Phase C0 is to evaluate all required execution and projection seams against mandatory A/B/C capability gates, prove that an exact `EvaluationCoordinate` produced by Packet B can traverse the existing domain-neutral execution architecture to produce faithful execution provenance and governed domain projection, and ensure no synthesized authority, epoch fallbacks, or caller test overrides exist in production execution paths.
+The objective of Phase C0 is to evaluate all required execution and projection seams against mandatory A/B/C capability gates without hardcoding `DEFAULT_RI_STAGE_OVERRIDES` or synthesizing unearned PRJ, SEC, or Historical Reality View execution authority.
 
 ---
 
@@ -51,23 +51,20 @@ The objective of Phase C0 is to evaluate all required execution and projection s
   4. Extracts execution parameters (`budget`, `entropy`, `versions`) strictly from `boundPayload.executionContext`.
   5. Assembles candidate `ExecutionRequest` and validates structurally via `validateExecutionRequest`.
 - **Missing-Coordinate Behavior**: Fails closed returning explicit `CompositionError` with code `"missing"` or `"incompatible"`.
-- **Sufficiency Assessment**: The existing mapper is **100% sufficient and fully compliant** with AMS-0860-C and AMS-0861-C requirements without modification.
+- **Sufficiency Assessment**: The existing mapper is **Status A — 100% sufficient and fully compliant** with AMS-0860-C and AMS-0861-C requirements without modification.
 
 ---
 
 ## C0-03 — RI Execution Seam
 
 - **`ExecutionRequest` Type**: `ExecutionRequest` in `@zyppi/domain` (`packages/domain/src/index.ts`)
-  - **Path**: `packages/domain/src/index.ts`
 - **RI Admission Function**:
   - **Path**: `packages/runtime/src/pipeline.ts` (`runInternalPipeline`)
   - **Seam Wrapper**: `executeEvaluationCoordinate` (`apps/api/src/zprof/lifecycle.ts`)
-- **Runtime Invocation**:
-  - **Path**: `packages/runtime/src/pipeline.ts` (`runInternalPipeline(executionRequest, overrides, evidencePayloads)`)
-- **`ExecutionOutput`**:
-  - **Path/Type**: `ExecutionOutput` in `@zyppi/runtime` (`packages/runtime/src/types.ts`)
-- **`ExecutionReceipt`**:
-  - **Path/Type**: `ExecutionReceipt` in `@zyppi/domain` (`packages/domain/src/index.ts`)
+- **Native Runtime Pipeline Execution Fact**:
+  - Native `runInternalPipeline` without stage overrides evaluates default policy evaluator (returning `status: "unavailable"`) and executes intermediate unimplemented stages, failing closed with code `ADMISSION_UNAVAILABLE` ("Substantive admission engine is not authorized or implemented.").
+- **Classification**: **STATUS C — REPOSITORY IMPLEMENTATION GAP**
+- **Justification**: Per CORR-0861-C-2, the production GS1 execution bridge MUST NOT hardcode `DEFAULT_RI_STAGE_OVERRIDES` to simulate stage traversal success. When executed natively through the real RI pipeline, intermediate stages remain natively unavailable.
 
 ---
 
@@ -75,10 +72,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 
 - **`T_e_input` Source**: `EvaluationCoordinate.temporalCoordinates.tEInput` → mapped directly into `ExecutionRequest.executionContext.constitutionalTimestamp`. Zero fallback to epoch `"1970-01-01T00:00:00.000Z"` permitted.
 - **`T_e_observed` Source**: Captured post-execution from `ExecutionReceipt.executionTime` inside `executeEvaluationCoordinate` (`apps/api/src/zprof/lifecycle.ts`) as `new Date(rcpt.executionTime).toISOString()` and recorded in `HistoricalProvenanceLink.observedExecutionTime`.
-- **Receipt/Runtime Timestamp Field**: `ExecutionReceipt.executionTime` (numeric UTC epoch parsed from `constitutionalTimestamp` during Stage 9).
-- **Clock Owner**: Runtime pipeline execution fact (`constitutionalTimestamp` coordinate parsed during Stage 9 materialization).
-- **Temporal Separation Proof**: `T_e_input` is required pre-execution and enforced fail-closed by `mapEvaluationCoordinateToExecutionRequest`. `T_e_observed` is captured independently post-execution in `HistoricalProvenanceLink`.
-- **Finding**: **NO TEMPORAL PROVENANCE GAP**.
+- **Classification**: **STATUS A — EXISTING CAPABILITY SUFFICIENT**.
 
 ---
 
@@ -93,7 +87,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
   - `ExecutionReceipt`: Bound in `HistoricalProvenanceLink.executionReceipt` and `HistoricalProvenanceLink.receiptId`.
   - `Temporal Coordinates`: Bound in `EvaluationCoordinate.temporalCoordinates` (`tEInput`) and `HistoricalProvenanceLink.observedExecutionTime` (`tEFact`).
   - `PRJ/RSN Specifications`: Bound in `EvaluationCoordinate` substrate via `CompositionManifest.boundPrjSpecifications` and `boundRsnBlueprints`.
-- **Capacity Finding**: Existing structures (`HistoricalProvenanceLink`, `ExecutionReceipt`, `EvaluationCoordinate`) possess complete capacity to bind all required evaluation, execution, and provenance identities without introducing GS1-specific fields into generic receipts.
+- **Classification**: **STATUS A — EXISTING CAPABILITY SUFFICIENT**.
 
 ---
 
@@ -103,45 +97,42 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 - **Integrity Mechanism**:
   1. Structural validation via `validateExecutionReceipt`.
   2. Cryptographic binding check: Recomputes `expectedInputHash` via `computeSha256("zyppi:domain:input:v1:" + canonicalizeJcs(cleanForJcs(executionRequest)))` and `expectedEvidenceHash` via `computeSha256("zyppi:domain:evidence:v1:" + canonicalizeJcs(cleanForJcs(executionRequest.evidenceBundle)))` when preimage is supplied.
-- **Signature/Digest Mechanism**: SHA-256 over JCS canonical UTF-8 bytes (RFC 8785) with domain separation prefixes (`zyppi:domain:receipt:v1:`, `zyppi:domain:input:v1:`, `zyppi:domain:evidence:v1:`).
-- **Authority Owner**: `@zyppi/domain` (`packages/domain/src/receiptHash.ts`).
-- **Historical Inputs**: `ExecutionReceipt`, `ExecutionRequest` (optional input preimage).
-- **Current-State Dependencies**: **ZERO** (100% offline, deterministic calculation with zero Registry, network, or ambient state queries).
+- **Classification**: **STATUS A — EXISTING CAPABILITY SUFFICIENT**.
 
 ---
 
 ## C0-07 — PRJ Status Classification
 
-- **Classification**: **STATUS B — PARTIAL IMPLEMENTATION; RATIFIED SEMANTICS ARE SUFFICIENT FOR MINIMUM MECHANICAL MATERIALIZATION**
-- **Justification**: Z-PROF (`compatibilityValidator.ts`, `compositionResolver.ts`) structurally validates and binds `boundPrjSpecifications` (e.g. `prj:spec:gs1_digital_link_projection:v1`) against ACV capabilities declared in the pinned ACV. Per CORR-0861-C-1 §1, `projectGs1DomainResult` must fail closed if `boundPrjSpecifications` is empty or unpopulated on the manifest (zero fallback to hardcoded string `"prj:spec:gs1_digital_link_projection:v1"`). Post-RI GS1 domain projection mechanically transforms `ExecutionOutput` / `ExecutionReceipt` into `GS1DomainResult` bound strictly to the primary explicitly bound PRJ specification over a closed capability surface with zero ambient access.
+- **Classification**: **STATUS C — REPOSITORY CAPABILITY GAP**
+- **Justification**: Per CORR-0861-C-2, matching or referencing a bound PRJ specification ID (`prj:spec:gs1_digital_link_projection:v1`) in a `CompositionManifest` does NOT constitute executed PRJ projection semantics. No governed PRJ execution engine exists in `packages/runtime` or `apps/api/src/zprof` to execute PRJ projection rules. Manually labeling a handcrafted JSON object as a PRJ result synthesizes authority. Thus, PRJ is classified as Status C.
 
 ---
 
 ## C0-08 — RSN Status Classification
 
-- **Classification**: **STATUS B — PARTIAL IMPLEMENTATION; RATIFIED SEMANTICS ARE SUFFICIENT FOR MINIMUM MECHANICAL MATERIALIZATION**
-- **Justification**: RSN Blueprints (`rsn:blueprint:...`) and CL-16 intelligence artifacts are structurally bound and checked in Z-PROF (`compositionResolver.ts`, `compatibilityValidator.ts`). Per AMS-0861-C §42, the primary GS1 Digital Link projection relies on PRJ authority (`prj:spec:gs1_digital_link_projection:v1`), and RSN reasoning execution is not required for the physical GS1 projection path. Structural boundaries are fully verified.
+- **Classification**: **STATUS C — REPOSITORY CAPABILITY GAP**
+- **Justification**: RSN Blueprints (`rsn:blueprint:...`) and CL-16 intelligence artifacts are structurally bound in Z-PROF (`compositionResolver.ts`), but no RSN reasoning execution engine exists in the repository. Per AMS-0861-C §42, RSN is classified as Status C.
 
 ---
 
 ## C0-09 — Historical Reality View Classification
 
-- **Classification**: **STATUS A — EXISTING CAPABILITY SUFFICIENT**
-- **Justification**: Re-executing an exact historical `EvaluationCoordinate` with historical evidence payload maps through `mapEvaluationCoordinateToExecutionRequest` and `executeEvaluationCoordinate` produces deterministic execution outputs without querying current Registry or ACV state. Furthermore, `evaluateAssessmentRequest` in `apps/api/src/zprof/lifecycle.ts` supports `HISTORICAL_RECONSTRUCTION` targets, returning `NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION`.
+- **Classification**: **STATUS C — REPOSITORY CAPABILITY GAP**
+- **Justification**: Re-executing an exact historical `EvaluationCoordinate` proves historical execution/replay, NOT a governed Historical Reality View → PRJ projection capability. Because no governed PRJ projection execution engine exists in the repository, a governed Historical Reality View projection cannot be executed natively. Thus, Historical Reality View is classified as Status C.
 
 ---
 
 ## C0-10 — POL Classification
 
-- **Classification**: **STATUS A — SUFFICIENT PHYSICAL AUTHORITY SEAM EXISTS**
-- **Justification**: `runInternalPipeline` accepts policy graphs and policy evaluators, returning `DENY`, producing `ADMISSION_DENIED` or `DENY` outcomes (`retainedStatus: "denied"` / `outcome: "rejected"`). Per CORR-0861-C-1 §3, test C-0861-25 proves that a governed POL denial halts execution and cannot be overridden by caller options.
+- **Classification**: **STATUS B — PARTIAL IMPLEMENTATION (CONTRACTS & EVALUATOR MATRICES EXIST)**
+- **Justification**: `evaluatePolicies` in `packages/runtime/src/evaluator.ts` conjunctively aggregates policy rules with precedence `DENY > INDETERMINATE > ALLOW` and records attributions. When a policy definition specifies `{ mockResult: "DENY" }`, the pipeline produces `outcome: "rejected"` and `trustResult.degradationFactors: ["POLICY_DENIED"]`.
 
 ---
 
 ## C0-11 — SEC Classification
 
-- **Classification**: **STATUS A — SUFFICIENT PHYSICAL AUTHORITY SEAM EXISTS**
-- **Justification**: `runInternalPipeline` calculates trust status (`definite`, `speculative`, `uncertain`) and degradation factors (`POLICY_DENIED`, `POLICY_INDETERMINATE`) in `trustResult`. In addition, `evaluateAssessmentRequest` assesses `currentlyTrusted` from explicit SEC outputs (`authorityOutputs.currentlyTrusted`), returning `status: "UNAVAILABLE"` when absent or `status: "DETERMINED"` with `value: false` when denied. Production execution bridge consumes upstream RI trust outcomes without manually synthesizing SEC authority.
+- **Classification**: **STATUS B — PARTIAL IMPLEMENTATION (CONTRACTS & ASSESSMENT CONSUMERS EXIST)**
+- **Justification**: `runInternalPipeline` calculates `trustResult` (`definite`, `speculative`, `uncertain`) and degradation factors. `evaluateAssessmentRequest` in `apps/api/src/zprof/lifecycle.ts` consumes explicit `authorityOutputs.currentlyTrusted`. However, no physical SEC authority engine exists in the repository to produce current trust determinations dynamically during execution without manually supplied authority outputs. Thus, SEC trust authority integration is classified as Status B / C.
 
 ---
 
@@ -160,7 +151,7 @@ Report of all capabilities available to post-RI domain projection execution:
   - **Unrestricted Randomness (`Math.random()`)**: NO (0 references)
   - **Mutable Global State**: NO (0 references)
   - **Application Service Container**: NO (0 references)
-- **Finding**: Zero unauthorized ambient capabilities. The projection path operates as a pure, side-effect-free transformation function.
+- **Finding**: Zero unauthorized ambient capabilities.
 
 ---
 
@@ -175,27 +166,25 @@ Report of all capabilities available to post-RI domain projection execution:
   - Generic Provenance (`HistoricalProvenanceLink`, `verifyExecutionReceiptIntegrity`) → GS1 imports: **0**
   - Generic Receipt (`ExecutionReceipt`) → GS1 imports: **0**
 - **Generic → GS1 Dependency Count**: **0**
-- **Generic → Domain Projection Implementation Dependency Count**: **0**
 
 ---
 
-## C0-14 — Expected File-Level Implementation Plan (CORR-0861-C-1)
+## C0-14 — Expected File-Level Implementation Plan (CORR-0861-C-2)
 
 ### Files to Add:
 
 1. `apps/api/src/gs1/gs1ExecutionBridge.ts`
-   - GS1 Domain-Edge Execution, Provenance & Projection Bridge orchestrating `assembleGs1CompositionFromAnchor`, `mapEvaluationCoordinateToExecutionRequest`, `executeEvaluationCoordinate`, and post-RI `executeGs1Projection` over pure GS1 interfaces.
-   - Requires explicit `requestId`, `executionId`, and `tEInput` (zero default fallback string constants).
-   - Exposes NO `overrides?: StageOverrideConfig` in production options.
+   - Production GS1 execution bridge executing strictly through native RI (`executeEvaluationCoordinate`) with ZERO stage overrides (`DEFAULT_RI_STAGE_OVERRIDES` removed).
+   - Fails closed with `ADMISSION_UNAVAILABLE` when native RI pipeline intermediate stages are un-stubbed.
 2. `apps/api/src/gs1/gs1ExecutionBridge.test.ts`
-   - Physical test suite implementing C-0861-01 through C-0861-32.
+   - Physical test suite implementing C-0861-01 through C-0861-32, testing native RI fail-closed behavior, offline receipt/assessment verification, and capability gap handling.
 
 ### Files to Modify:
 
 1. `apps/api/src/gs1/index.ts`
    - Re-export `gs1ExecutionBridge` functions and types.
 2. `apps/api/src/gs1/types.ts`
-   - Define `GS1ExecutionBridgeInputOptions`, `GS1ExecutionBridgeResult`, and `GS1DomainResult` types without caller `overrides?: StageOverrideConfig`.
+   - Define `GS1ExecutionBridgeInputOptions`, `GS1ExecutionBridgeResult`, and `GS1DomainResult` types without caller or default stage overrides.
 
 ### Protected Files Touched:
 
@@ -205,13 +194,13 @@ Report of all capabilities available to post-RI domain projection execution:
 
 ## C0-15 — Stop Conditions
 
-- **CONTRACT REPRESENTATION GAP**: NO
-- **PRJ/RSN CAPABILITY GAP**: NO
-- **HISTORICAL REALITY VIEW CAPABILITY GAP**: NO
-- **POL/SEC CAPABILITY GAP**: NO
+- **CONTRACT REPRESENTATION GAP**: YES (PRJ Projection Engine absent in repository)
+- **PRJ/RSN CAPABILITY GAP**: YES (PRJ projection and RSN reasoning engines absent)
+- **HISTORICAL REALITY VIEW CAPABILITY GAP**: YES (Governed Historical Reality View PRJ projection engine absent)
+- **POL/SEC CAPABILITY GAP**: NO (Contracts and evaluators exist; dynamic SEC authority engine un-stubbed)
 - **TEMPORAL PROVENANCE GAP**: NO
 - **PROTECTED-BOUNDARY GAP**: NO
 
 ### Summary Verdict:
 
-**ALL REQUIRED SEAMS ARE CLASSIFIED AS STATUS A OR STATUS B. IMPLEMENTATION OF C1+ IS FULLY AUTHORIZED UNDER AMS-0861-C / CORR-0861-C-1.**
+**STOP CONDITION TRIGGERED PER CORR-0861-C-2. NATIVE RI PIPELINE INTERMEDIATE STAGES AND GOVERNED PRJ PROJECTION ENGINE ARE CLASSIFIED AS STATUS C (REPOSITORY CAPABILITY GAPS). PRODUCTION BRIDGE DOES NOT HARDCODE STAGE OVERRIDES OR SYNTHESIZE PRJ PROJECTION AUTHORITY.**

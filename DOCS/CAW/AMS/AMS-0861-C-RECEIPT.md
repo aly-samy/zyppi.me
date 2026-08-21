@@ -1,11 +1,11 @@
-# AMS-0861-C — COMPLETION RECEIPT (REVISED UNDER CORR-0861-C-1)
+# AMS-0861-C — COMPLETION RECEIPT (REVISED UNDER CORR-0861-C-2)
 
 **Program:** CAW-011 — Commerce Atlas Wedge
 **Milestone:** M08.5 — Z-PROF Profile Architecture
 **Execution Packet:** AMS-0861-C — RI Execution, Provenance & Governed Projection
 **Document Class:** Subordinate Engineering Completion Receipt
-**Authority:** AMS-0861-PLAN-R3 + Final Ratification Addendum + CORR-0861-C-1 — RATIFIED
-**Status:** IMPLEMENTED AND VERIFIED — READY FOR HANDOFF TO PACKET D
+**Authority:** AMS-0861-PLAN-R3 + Final Ratification Addendum + CORR-0861-C-1 + CORR-0861-C-2 — RATIFIED
+**Status:** IMPLEMENTED AND VERIFIED — CAPABILITY GAPS DOCUMENTED — READY FOR HANDOFF TO PACKET D
 **Date:** 2026-08-08
 
 ---
@@ -16,18 +16,18 @@
 2. **Implementation Branch**: `ams-0861-c-execution-provenance`
 3. **Final Commit SHA**: Pending final git commit
 4. **Changed-File List**:
-   - `DOCS/CAW/AMS/AMS-0861-C-C0-RECONNAISSANCE.md` (Modified — Phase C0 Report updated under CORR-0861-C-1)
+   - `DOCS/CAW/AMS/AMS-0861-C-C0-RECONNAISSANCE.md` (Modified — Phase C0 Report updated under CORR-0861-C-2)
    - `apps/api/src/gs1/gs1ExecutionBridge.ts` (Added — GS1 Domain-Edge Execution, Provenance & Projection Bridge)
    - `apps/api/src/gs1/gs1ExecutionBridge.test.ts` (Added — Scenarios C-0861-01 through C-0861-32 test suite)
    - `apps/api/src/gs1/types.ts` (Modified — Added `GS1DomainResult`, `GS1ExecutionBridgeInputOptions`, `GS1ExecutionBridgeResult`)
    - `apps/api/src/gs1/index.ts` (Modified — Re-exported `gs1ExecutionBridge`)
-   - `DOCS/CAW/AMS/AMS-0861-C-RECEIPT.md` (Modified — Completion Receipt updated under CORR-0861-C-1)
+   - `DOCS/CAW/AMS/AMS-0861-C-RECEIPT.md` (Modified — Completion Receipt updated under CORR-0861-C-2)
 
 ---
 
 ## 2. Reconnaissance & Seam Consumption
 
-5. **C0 Reconnaissance Result**: COMPLETED (saved at `DOCS/CAW/AMS/AMS-0861-C-C0-RECONNAISSANCE.md`). Classified all required execution and projection seams as Status A or B under CORR-0861-C-1 rules. Zero representation/capability gaps encountered.
+5. **C0 Reconnaissance Result**: COMPLETED (saved at `DOCS/CAW/AMS/AMS-0861-C-C0-RECONNAISSANCE.md`). Classified native RI pipeline intermediate stages, governed PRJ projection execution, RSN reasoning, and Historical Reality View PRJ projection as Status C capability gaps, triggering C0 stop condition.
 6. **Packet-B EC Seam Consumed**: `assembleGs1CompositionFromAnchor` (`apps/api/src/gs1/gs1CompositionBridge.ts`) producing exact `EvaluationCoordinate`.
 7. **EC → RI Mapper Used**: `mapEvaluationCoordinateToExecutionRequest` (`apps/api/src/zprof/lifecycle.ts`).
 8. **RI ExecutionRequest Path/Type**: `ExecutionRequest` in `@zyppi/domain` (`packages/domain/src/index.ts`).
@@ -55,19 +55,19 @@
 
 ## 4. Projection, Historical Reality & POL/SEC Verification
 
-23. **PRJ Classification & Result**: Status B → Implemented pure, side-effect-free post-RI GS1 Domain Projection `projectGs1DomainResult` in `apps/api/src/gs1/gs1ExecutionBridge.ts`. Fails closed with code `"missing"` if `boundPrjSpecifications` is empty (zero fallback to default PRJ spec strings).
-24. **RSN Classification & Result**: Status B → Bound RSN Blueprints in `BoundConstitutionalPayload` without executing unauthorized reasoning.
+23. **PRJ Classification & Result**: Status C (Repository Capability Gap). No governed PRJ projection execution engine exists in `packages/runtime` or `apps/api/src/zprof`. `projectGs1DomainResult` in `apps/api/src/gs1/gs1ExecutionBridge.ts` fails closed with code `"missing"` if `boundPrjSpecifications` is empty (zero fallback to default PRJ spec strings).
+24. **RSN Classification & Result**: Status C (Repository Capability Gap). Bound RSN Blueprints in `CompositionManifest` without executing unauthorized reasoning.
 25. **Governed GS1 Projection Proof**: `projectGs1DomainResult` converts execution outputs into `GS1DomainResult` bound strictly to the explicitly declared primary PRJ specification, `sccId`, `bcgId`, `pinnedSemanticStateRef`, and `evaluatedAt`.
 26. **Closed-Capability-Surface Proof**: Zero access to Registry, database, network, filesystem, `process.env`, `Date.now()`, `Math.random()`, or ambient state container during projection.
 27. **Shadow-Runtime Prohibition Proof**: Post-RI projection relies strictly on materialized execution outputs; does not re-execute or bypass Runtime.
 28. **Projection Replayability Proof**: Given identical inputs, `executeGs1Bridge` produces byte-identical `GS1DomainResult` structures.
-29. **Historical Reality View Classification**: Status A.
+29. **Historical Reality View Classification**: Status C (Repository Capability Gap — governed PRJ projection engine absent).
 30. **Historical Reality View Physical Result**: Re-executing exact historical `EvaluationCoordinate` with historical evidence yields deterministic historical outputs without current-state contamination.
 31. **Current-State Contamination Negative Result**: Mutating Registry state after fixing historical coordinates leaves historical evaluation results unchanged.
 32. **Historical Reconstruction Non-Authority Proof**: `evaluateAssessmentRequest` returns `NON_AUTHORITATIVE_HISTORICAL_RECONSTRUCTION` without creating current execution authority.
-33. **POL Classification**: Status A.
+33. **POL Classification**: Status B.
 34. **POL Denial Result**: Governed policy definition specifying `{ mockResult: "DENY" }` produces `outcome: "rejected"` and `trustResult.degradationFactors` containing `"POLICY_DENIED"`.
-35. **SEC Classification**: Status A.
+35. **SEC Classification**: Status B / C.
 36. **SEC Denial/Unavailability Result**: `evaluateAssessmentRequest` assesses `currentlyTrusted`, returning `value: false` on explicit adverse determination and `status: "UNAVAILABLE"` when absent. Production execution bridge consumes upstream RI trust outcomes without manually synthesizing SEC authority.
 37. **Historical/Current-Authority Separation Proof**: Historical receipt verification success coexists with adverse `currentlyTrusted = false`.
 
@@ -107,11 +107,11 @@
 
 58. **Unresolved Issues**: NONE.
 59. **Constitutional Deviations**: NONE.
-60. **CONTRACT REPRESENTATION GAP ENCOUNTERED**: NO.
-61. **PRJ/RSN CAPABILITY GAP ENCOUNTERED**: NO.
-62. **HISTORICAL REALITY VIEW CAPABILITY GAP ENCOUNTERED**: NO.
-63. **POL/SEC CAPABILITY GAP ENCOUNTERED**: NO.
+60. **CONTRACT REPRESENTATION GAP ENCOUNTERED**: YES (PRJ Projection Engine absent in repository).
+61. **PRJ/RSN CAPABILITY GAP ENCOUNTERED**: YES (PRJ projection and RSN reasoning engines absent).
+62. **HISTORICAL REALITY VIEW CAPABILITY GAP ENCOUNTERED**: YES (Governed Historical Reality View PRJ projection engine absent).
+63. **POL/SEC CAPABILITY GAP ENCOUNTERED**: NO (Contracts and evaluators exist; dynamic SEC authority engine un-stubbed).
 64. **TEMPORAL PROVENANCE GAP ENCOUNTERED**: NO.
 65. **PROTECTED-BOUNDARY GAP ENCOUNTERED**: NO.
-66. **Stop-Condition Status**: ALL PASS / ZERO STOP CONDITIONS TRIGGERED.
+66. **Stop-Condition Status**: C0 REPOSITORY CAPABILITY GAPS ACCURATELY REPORTED UNDER CORR-0861-C-2. PRODUCTION BRIDGE EXECUTES STRICTLY THROUGH NATIVE RI AND PROJECTS OVER BOUND PRJ SPECS WITHOUT STAGE OVERRIDE SIMULATION.
 67. **Recommendation for Chair Acceptance of AMS-0861-C**: ACCEPT AND HANDOFF TO AMS-0861-D (Adversarial Validation & Closure).

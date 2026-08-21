@@ -146,17 +146,14 @@ const defaultResolvedPolicyGraph: ResolvedPolicyGraph = {
 
 const defaultVersions = Object.freeze(["1.0.0"]);
 
-const testOverrides = Object.freeze({
+const testRiOverrides = Object.freeze({
   Admission: Object.freeze({ ok: true as const }),
   "Bundle Discovery": Object.freeze({ ok: true as const }),
   "Bundle Verification": Object.freeze({ ok: true as const }),
   "Dependency Resolution": Object.freeze({ ok: true as const }),
   "Compatibility Validation": Object.freeze({ ok: true as const }),
   "ACV Activation": Object.freeze({ ok: true as const }),
-  "Resolution Graph Construction": Object.freeze({ ok: true as const }),
-  "Active Execution": Object.freeze({ ok: true as const }),
   "Receipt Generation": Object.freeze({ ok: true as const }),
-  outcome: "verified" as const,
 });
 
 function createDefaultBridgeInput(
@@ -165,7 +162,6 @@ function createDefaultBridgeInput(
 ) {
   return {
     anchorSuccess,
-    overrides: testOverrides,
     dtcFixture: GS1_DOMAIN_TEMPLATE_CARD,
     epistemicRequirementsFixtures: [GS1_GTIN_EPISTEMIC_REQUIREMENT],
     manifestAuthor: "identity:test:manifest_author",
@@ -285,7 +281,7 @@ function createDefaultBridgeInput(
   };
 }
 
-describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite", () => {
+describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite (CORR-0861-C-2)", () => {
   async function getLawfulAnchor() {
     const knownMap = new Map<string, RetrievedRegistryState>([
       [validK1, mockRegistryState],
@@ -333,40 +329,73 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-02 — SCC Identity Preservation
   it("C-0861-02: should preserve exact sccId during RI execution and bind it into provenance without recomputation", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
-    if (!execRes.ok) {
-      console.log("EXEC RES FAILURE:", JSON.stringify(execRes, null, 2));
-    }
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:02",
+      executionId: "exec:test:02",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.provenanceLink.sccId).toBe(execRes.assembly.sccId);
+    if (execRes.ok && execRes.provenanceLink) {
+      expect(execRes.provenanceLink.sccId).toBe(assemblyRes.sccId);
     }
   });
 
   // C-0861-03 — BCG Identity Preservation
   it("C-0861-03: should preserve exact bcgId during RI execution and bind it into provenance without recomputation", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:03",
+      executionId: "exec:test:03",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.provenanceLink.bcgId).toBe(execRes.assembly.bcgId);
+    if (execRes.ok && execRes.provenanceLink) {
+      expect(execRes.provenanceLink.bcgId).toBe(assemblyRes.bcgId);
     }
   });
 
   // C-0861-04 — ACV State Reference Preservation
   it("C-0861-04: should preserve pinnedSemanticStateRef from EC into provenance link with zero caller substitution", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:04",
+      executionId: "exec:test:04",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    if (execRes.ok && execRes.provenanceLink) {
       expect(execRes.provenanceLink.coordinate.pinnedSemanticStateRef).toEqual(
-        execRes.assembly.evaluationCoordinate.pinnedSemanticStateRef,
+        assemblyRes.evaluationCoordinate.pinnedSemanticStateRef,
       );
     }
   });
@@ -374,11 +403,23 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-05 — Evidence Integrity Preservation
   it("C-0861-05: should preserve evidence integrity coordinates and evidenceHash across execution", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:05",
+      executionId: "exec:test:05",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    if (execRes.ok && execRes.provenanceLink) {
       expect(execRes.provenanceLink.evidenceHash).toMatch(
         /^sha256:[a-f0-9]{64}$/,
       );
@@ -391,13 +432,23 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-06 — Explicit T_e_input
   it("C-0861-06: should pass exact supplied tEInput into ExecutionRequest.executionContext.constitutionalTimestamp", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
-    expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    const mapRes = mapEvaluationCoordinateToExecutionRequest({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:06",
+      executionId: "exec:test:06",
+    });
+
+    expect(mapRes.ok).toBe(true);
+    if (mapRes.ok) {
       expect(
-        execRes.executionRequest.executionContext.constitutionalTimestamp,
+        mapRes.executionRequest.executionContext.constitutionalTimestamp,
       ).toBe("2026-01-01T00:00:00Z");
     }
   });
@@ -419,31 +470,38 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-08 — T_e_observed Separation
   it("C-0861-08: should record post-execution T_e_observed as historical fact separate from pre-execution T_e_input", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:08",
+      executionId: "exec:test:08",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
     if (execRes.ok) {
-      expect(execRes.provenanceLink.observedExecutionTime).toBeDefined();
-      expect(typeof execRes.provenanceLink.observedExecutionTime).toBe(
-        "string",
-      );
+      expect(execRes.observedExecutionTime).toBeDefined();
+      expect(typeof execRes.observedExecutionTime).toBe("string");
     }
   });
 
-  // C-0861-09 — RI Neutrality
-  it("C-0861-09: should execute GS1-derived EC through generic RI without GS1 branching in generic code", async () => {
+  // C-0861-09 — RI Neutrality (Native Pipeline Execution without Overrides)
+  it("C-0861-09: should execute GS1-derived EC through generic RI failing closed with ADMISSION_UNAVAILABLE without GS1 branching in generic code", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
     const execRes = await executeGs1Bridge(input);
-    expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.pipelineResult.ok).toBe(true);
-      if (execRes.pipelineResult.ok) {
-        expect(execRes.pipelineResult.trace).toContain("Admission");
-        expect(execRes.pipelineResult.trace).toContain("Receipt Generation");
-      }
+    expect(execRes.ok).toBe(false);
+    if (!execRes.ok) {
+      expect(execRes.stage).toBe("EXECUTION");
+      expect(execRes.error.code).toBe("ADMISSION_UNAVAILABLE");
     }
   });
 
@@ -454,7 +512,7 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
 
     const repoLookupCountBefore = repo.lookupCount;
     const execRes = await executeGs1Bridge(input);
-    expect(execRes.ok).toBe(true);
+    expect(execRes.ok).toBe(false);
 
     // Assembly takes 1 lookup, zero lookups performed inside execution
     expect(repo.lookupCount).toBe(repoLookupCountBefore + 1);
@@ -463,11 +521,23 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-11 — ExecutionReceipt Neutrality
   it("C-0861-11: should verify generic ExecutionReceipt contains zero GS1-specific fields", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:11",
+      executionId: "exec:test:11",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    if (execRes.ok && execRes.provenanceLink) {
       const rcpt = execRes.provenanceLink.executionReceipt;
       expect(rcpt).not.toHaveProperty("gtin");
       expect(rcpt).not.toHaveProperty("gln");
@@ -480,11 +550,23 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-12 — EC / Receipt Provenance
   it("C-0861-12: should bind EvaluationCoordinate to ExecutionReceipt via HistoricalProvenanceLink", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:12",
+      executionId: "exec:test:12",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    if (execRes.ok && execRes.provenanceLink) {
       const link = execRes.provenanceLink;
       expect(link.receiptId).toBe(link.executionReceipt.receiptId);
       expect(link.sccId).toBe(link.coordinate.sccId);
@@ -495,11 +577,23 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-13 — Receipt Immutability
   it("C-0861-13: should preserve historical ExecutionReceipt immutability under Object.freeze", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:13",
+      executionId: "exec:test:13",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    if (execRes.ok && execRes.provenanceLink) {
       const rcpt = execRes.provenanceLink.executionReceipt;
       expect(Object.isFrozen(rcpt)).toBe(true);
       expect(() => {
@@ -512,11 +606,23 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-14 — Receipt Verification Separation
   it("C-0861-14: should prove receipt verification does not imply current trust or admissibility", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:14",
+      executionId: "exec:test:14",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
+    if (execRes.ok && execRes.provenanceLink) {
       const verifyRes = verifyExecutionReceiptIntegrity(
         execRes.provenanceLink.executionReceipt,
         execRes.executionRequest,
@@ -537,26 +643,54 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-15 — Governed PRJ Projection
   it("C-0861-15: should produce governed GS1DomainResult post-RI through projectGs1DomainResult", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:15",
+      executionId: "exec:test:15",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.domainResult).toBeDefined();
-      expect(execRes.domainResult?.domain).toBe("GS1");
-      expect(execRes.domainResult?.projectionSpecification).toBe(
-        "prj:spec:gs1_digital_link_projection:v1",
-      );
-      expect(execRes.domainResult?.canonicalIdentifier).toBe(validK1);
+    if (
+      execRes.ok &&
+      execRes.provenanceLink &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const projRes = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      expect(projRes.ok).toBe(true);
+      if (projRes.ok) {
+        expect(projRes.result.domain).toBe("GS1");
+        expect(projRes.result.projectionSpecification).toBe(
+          "prj:spec:gs1_digital_link_projection:v1",
+        );
+        expect(projRes.result.canonicalIdentifier).toBe(validK1);
+      }
     }
   });
 
   // C-0861-16 — PRJ Specification Sensitivity
-  it("C-0861-16: should reflect bound PRJ specification in projection result when explicitly altered", async () => {
+  it("C-0861-16: should reflect bound PRJ specification in projection result when explicitly altered and fail closed when boundPrjSpecifications is empty", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
     const input = createDefaultBridgeInput(anchorSuccess, repo);
 
-    // Add secondary capability and PRJ spec participant
     const altCapability: CapabilityRecord = {
       capabilityId: "prj:spec:gs1_digital_link_projection:v2",
       subjectId: "arm:profile:trade_item:v1",
@@ -614,72 +748,201 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
       },
     };
 
-    const execRes = await executeGs1Bridge(altInput);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(altInput);
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
+
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:16",
+      executionId: "exec:test:16",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.domainResult?.projectionSpecification).toBe(
-        "prj:spec:gs1_digital_link_projection:v2",
-      );
+    if (
+      execRes.ok &&
+      execRes.provenanceLink &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const projRes = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      expect(projRes.ok).toBe(true);
+      if (projRes.ok) {
+        expect(projRes.result.projectionSpecification).toBe(
+          "prj:spec:gs1_digital_link_projection:v2",
+        );
+      }
+
+      // Negative check: Empty boundPrjSpecifications fails closed with missing code (CORR-0861-C-1 §1)
+      const emptyPrjManifest = {
+        ...assemblyRes.manifest,
+        boundPrjSpecifications: [],
+      };
+      const badProjRes = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: emptyPrjManifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+      expect(badProjRes.ok).toBe(false);
+      if (!badProjRes.ok) {
+        expect(badProjRes.error.code).toBe("missing");
+      }
     }
   });
 
   // C-0861-17 — Closed Projection Capability Surface
   it("C-0861-17: should verify post-RI projection operates over a closed capability surface with zero ambient dependencies", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:17",
+      executionId: "exec:test:17",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (execRes.ok && execRes.domainResult) {
-      const proj = execRes.domainResult;
-      expect(proj).not.toHaveProperty("db");
-      expect(proj).not.toHaveProperty("fetch");
-      expect(proj).not.toHaveProperty("env");
+    if (
+      execRes.ok &&
+      execRes.provenanceLink &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const projRes = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      expect(projRes.ok).toBe(true);
+      if (projRes.ok) {
+        const proj = projRes.result;
+        expect(proj).not.toHaveProperty("db");
+        expect(proj).not.toHaveProperty("fetch");
+        expect(proj).not.toHaveProperty("env");
+      }
     }
   });
 
   // C-0861-18 — Projection Replayability
   it("C-0861-18: should produce byte-identical GS1DomainResult given identical inputs", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input1 = createDefaultBridgeInput(anchorSuccess, repo);
-    const input2 = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const res1 = await executeGs1Bridge(input1);
-    const res2 = await executeGs1Bridge(input2);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:18",
+      executionId: "exec:test:18",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
 
-    expect(res1.ok).toBe(true);
-    expect(res2.ok).toBe(true);
-    if (res1.ok && res2.ok) {
-      expect(res1.domainResult?.sccId).toBe(res2.domainResult?.sccId);
-      expect(res1.domainResult?.bcgId).toBe(res2.domainResult?.bcgId);
-      expect(res1.domainResult?.executionReceipt.deterministicHash).toBe(
-        res2.domainResult?.executionReceipt.deterministicHash,
-      );
+    expect(execRes.ok).toBe(true);
+    if (
+      execRes.ok &&
+      execRes.provenanceLink &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const res1 = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      const res2 = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      expect(res1.ok).toBe(true);
+      expect(res2.ok).toBe(true);
+      if (res1.ok && res2.ok) {
+        expect(res1.result.sccId).toBe(res2.result.sccId);
+        expect(res1.result.bcgId).toBe(res2.result.bcgId);
+        expect(res1.result.executionReceipt.deterministicHash).toBe(
+          res2.result.executionReceipt.deterministicHash,
+        );
+      }
     }
   });
 
   // C-0861-19 — No Shadow Runtime
   it("C-0861-19: should verify post-RI projection does not bypass or re-execute Runtime pipeline", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:19",
+      executionId: "exec:test:19",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
     if (
       execRes.ok &&
+      execRes.provenanceLink &&
       execRes.pipelineResult.ok &&
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
-      // Projection relies on existing materialized executionOutput and does not run pipeline again
       const projRes = projectGs1DomainResult({
-        coordinate: execRes.assembly.evaluationCoordinate,
-        manifest: execRes.assembly.manifest,
-        boundPayload: execRes.assembly.boundPayload,
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
         executionReceipt: execRes.provenanceLink.executionReceipt,
         provenanceLink: execRes.provenanceLink,
         executionOutput: execRes.pipelineResult.outcome.executionOutput,
         canonicalIdentifier: validK1,
       });
+
       expect(projRes.ok).toBe(true);
       if (projRes.ok) {
         expect(projRes.result.outcome).toBe("verified");
@@ -690,38 +953,37 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-20 — Historical Reality View
   it("C-0861-20: should re-execute exact historical EvaluationCoordinate and produce deterministic historical projection", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const res1 = await executeGs1Bridge(input);
-    expect(res1.ok).toBe(true);
-    if (!res1.ok) return;
-
-    // Historical execution using exact historical coordinate and evidence payloads
     const historicalExecRes = await executeEvaluationCoordinate({
-      coordinate: res1.assembly.evaluationCoordinate,
-      boundPayload: res1.assembly.boundPayload,
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
       requestId: "req:historical:01",
       executionId: "exec:historical:01",
       evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
     });
 
     expect(historicalExecRes.ok).toBe(true);
     if (historicalExecRes.ok && historicalExecRes.provenanceLink) {
-      expect(historicalExecRes.provenanceLink.sccId).toBe(res1.assembly.sccId);
-      expect(historicalExecRes.provenanceLink.bcgId).toBe(res1.assembly.bcgId);
+      expect(historicalExecRes.provenanceLink.sccId).toBe(assemblyRes.sccId);
+      expect(historicalExecRes.provenanceLink.bcgId).toBe(assemblyRes.bcgId);
     }
   });
 
   // C-0861-21 — Current-State Contamination Negative Test
   it("C-0861-21: should prove historical execution result is unchanged when current Registry state is mutated after historical coordinates are fixed", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const historicalRes = await executeGs1Bridge(input);
-    expect(historicalRes.ok).toBe(true);
-    if (!historicalRes.ok) return;
-
-    // Mutate mock Registry state for future lookups
     const mutatedRegistryState: RetrievedRegistryState = {
       ...mockRegistryState,
       applicablePolicies: [],
@@ -731,18 +993,18 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
     );
     expect(mutatedRepo.lookupCount).toBe(0);
 
-    // Re-evaluating historical coordinate with fixed historical boundPayload produces identical result
     const reExecRes = await executeEvaluationCoordinate({
-      coordinate: historicalRes.assembly.evaluationCoordinate,
-      boundPayload: historicalRes.assembly.boundPayload,
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
       requestId: "req:historical:reexec",
       executionId: "exec:historical:reexec",
       evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
     });
 
     expect(reExecRes.ok).toBe(true);
     if (reExecRes.ok && reExecRes.provenanceLink) {
-      expect(reExecRes.provenanceLink.sccId).toBe(historicalRes.assembly.sccId);
+      expect(reExecRes.provenanceLink.sccId).toBe(assemblyRes.sccId);
     }
   });
 
@@ -788,7 +1050,6 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
     const assessmentOutcome = evaluateAssessmentRequest({ arc });
     expect(assessmentOutcome.ok).toBe(true);
     if (assessmentOutcome.ok) {
-      // Executable and currentlyTrusted remain UNAVAILABLE without current authority outputs
       expect(assessmentOutcome.assessment.executable.status).toBe(
         "UNAVAILABLE",
       );
@@ -821,25 +1082,46 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
     );
     expect(anchorRes.ok).toBe(true);
 
-    const input = {
+    const assemblyRes = await assembleGs1CompositionFromAnchor({
       ...createDefaultBridgeInput(
         anchorRes as GS1AnchorBridgeSuccess,
         denyingRepo,
       ),
       policyContext: { policies: [denyingPolicy] },
-    };
+    });
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:24",
+      executionId: "exec:test:24",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
 
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.domainResult.outcome).toBe("rejected");
-      expect(
-        execRes.pipelineResult.ok &&
-          execRes.pipelineResult.outcome.kind === "materialized" &&
-          execRes.pipelineResult.outcome.executionOutput.trustResult
-            .degradationFactors,
-      ).toContain("POLICY_DENIED");
+    if (
+      execRes.ok &&
+      execRes.provenanceLink &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const projRes = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      expect(projRes.ok).toBe(true);
+      if (projRes.ok) {
+        expect(projRes.result.outcome).toBe("rejected");
+      }
     }
   });
 
@@ -866,26 +1148,49 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
     );
     expect(anchorRes.ok).toBe(true);
 
-    const input = {
+    const assemblyRes = await assembleGs1CompositionFromAnchor({
       ...createDefaultBridgeInput(
         anchorRes as GS1AnchorBridgeSuccess,
         denyingRepo,
       ),
       policyContext: { policies: [denyingPolicy] },
+    });
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
+
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
       requestId: "req:caller:optimistic_attempt",
       executionId: "exec:caller:optimistic_attempt",
-      budget: 999999,
-    };
-
-    const execRes = await executeGs1Bridge(input);
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
 
     expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      // Governed POL denial is preserved as "rejected" outcome despite caller parameters
-      expect(execRes.domainResult.outcome).toBe("rejected");
-      expect(execRes.executionRequest.requestId).toBe(
-        "req:caller:optimistic_attempt",
-      );
+    if (
+      execRes.ok &&
+      execRes.provenanceLink &&
+      execRes.pipelineResult.ok &&
+      execRes.pipelineResult.outcome.kind === "materialized"
+    ) {
+      const projRes = projectGs1DomainResult({
+        coordinate: assemblyRes.evaluationCoordinate,
+        manifest: assemblyRes.manifest,
+        boundPayload: assemblyRes.boundPayload,
+        executionReceipt: execRes.provenanceLink.executionReceipt,
+        provenanceLink: execRes.provenanceLink,
+        executionOutput: execRes.pipelineResult.outcome.executionOutput,
+        canonicalIdentifier: validK1,
+      });
+
+      expect(projRes.ok).toBe(true);
+      if (projRes.ok) {
+        expect(projRes.result.outcome).toBe("rejected");
+        expect(execRes.executionRequest.requestId).toBe(
+          "req:caller:optimistic_attempt",
+        );
+      }
     }
   });
 
@@ -950,13 +1255,29 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-28 — Historical Truth / Current Trust Separation
   it("C-0861-28: should prove a verified historical receipt can coexist with adverse current trust", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (!assemblyRes.ok) return;
 
-    const execRes = await executeGs1Bridge(input);
+    const execRes = await executeEvaluationCoordinate({
+      coordinate: assemblyRes.evaluationCoordinate,
+      boundPayload: assemblyRes.boundPayload,
+      requestId: "req:test:28",
+      executionId: "exec:test:28",
+      evidencePayloads: mockEvidencePayloads,
+      overrides: testRiOverrides,
+    });
+
     expect(execRes.ok).toBe(true);
-    if (!execRes.ok) return;
+    if (!execRes.ok || !execRes.provenanceLink) return;
 
-    const receipt = execRes.provenanceLink.executionReceipt;
+    const provenanceLink = execRes.provenanceLink;
+    expect(provenanceLink).toBeDefined();
+    if (!provenanceLink) return;
+
+    const receipt = provenanceLink.executionReceipt;
     const request = execRes.executionRequest;
 
     const verifyRes = verifyExecutionReceiptIntegrity(receipt, request);
@@ -991,12 +1312,10 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
 
     expect(assessmentRes.ok).toBe(true);
     if (assessmentRes.ok) {
-      // Historical receipt is verified reproducible
       expect(assessmentRes.assessment.reproducible.status).toBe("DETERMINED");
       if (assessmentRes.assessment.reproducible.status === "DETERMINED") {
         expect(assessmentRes.assessment.reproducible.value).toBe(true);
       }
-      // Current trust is explicitly adverse
       expect(assessmentRes.assessment.currentlyTrusted.status).toBe(
         "DETERMINED",
       );
@@ -1009,12 +1328,12 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   // C-0861-29 — No Ambient Version Upgrade
   it("C-0861-29: should maintain explicit Artifact@v1 version binding when v2 exists in registry", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
-
-    const execRes = await executeGs1Bridge(input);
-    expect(execRes.ok).toBe(true);
-    if (execRes.ok) {
-      expect(execRes.assembly.manifest.dtcReference.version).toBe("1.0.0");
+    const assemblyRes = await assembleGs1CompositionFromAnchor(
+      createDefaultBridgeInput(anchorSuccess, repo),
+    );
+    expect(assemblyRes.ok).toBe(true);
+    if (assemblyRes.ok) {
+      expect(assemblyRes.manifest.dtcReference.version).toBe("1.0.0");
     }
   });
 
