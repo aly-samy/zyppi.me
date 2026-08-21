@@ -56,37 +56,74 @@ function sortCollection<T>(
 /**
  * Projects a valid ActiveConstitutionalView into its normalized V1 state projection.
  *
- * Rules:
+ * Rules per CORR-ACV-STATE-REF-01:
  * - Uses strict allowlist: identity, relationships, standings, authorities, capabilities, applicablePolicies.
  * - Explicitly excludes evidenceReferences.
+ * - Requires explicit presence of all required projection fields on the input ACV (NO silent ?? [] repair).
  * - Deterministically normalizes set-like top-level collections using stable coordinate sorting.
  * - Preserves original ACV immutability (does not mutate supplied ACV).
  */
 export function projectActiveConstitutionalViewState(
   acv: ActiveConstitutionalView,
 ): AcvStateProjectionV1 {
+  if (!acv || typeof acv !== "object") {
+    throw new TypeError("ActiveConstitutionalView must be a non-null object.");
+  }
+
+  if (!acv.identity) {
+    throw new TypeError("ActiveConstitutionalView identity field is required.");
+  }
+
+  if (!Array.isArray(acv.relationships)) {
+    throw new TypeError(
+      "ActiveConstitutionalView relationships must be an array.",
+    );
+  }
+
+  if (!Array.isArray(acv.standings)) {
+    throw new TypeError("ActiveConstitutionalView standings must be an array.");
+  }
+
+  if (!Array.isArray(acv.authorities)) {
+    throw new TypeError(
+      "ActiveConstitutionalView authorities must be an array.",
+    );
+  }
+
+  if (!Array.isArray(acv.capabilities)) {
+    throw new TypeError(
+      "ActiveConstitutionalView capabilities must be an array.",
+    );
+  }
+
+  if (!Array.isArray(acv.applicablePolicies)) {
+    throw new TypeError(
+      "ActiveConstitutionalView applicablePolicies must be an array.",
+    );
+  }
+
   const relationships = sortCollection(
-    acv.relationships ?? [],
+    acv.relationships,
     (r: ReferentRecord) => r.referentId,
   );
 
   const standings = sortCollection(
-    acv.standings ?? [],
+    acv.standings,
     (s: StandingRecord) => s.standingId,
   );
 
   const authorities = sortCollection(
-    acv.authorities ?? [],
+    acv.authorities,
     (a: AuthorityRecord) => a.authorityId,
   );
 
   const capabilities = sortCollection(
-    acv.capabilities ?? [],
+    acv.capabilities,
     (c: CapabilityRecord) => c.capabilityId,
   );
 
   const applicablePolicies = sortCollection(
-    acv.applicablePolicies ?? [],
+    acv.applicablePolicies,
     (p: PolicyRecord) => p.policyId,
     (p: PolicyRecord) => p.version,
   );

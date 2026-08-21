@@ -321,4 +321,79 @@ describe("ACV State Reference Derivation (§15 Mandate Tests ACV-REF-T01..T16)",
     const d2 = deriveActiveConstitutionalViewStateDigest(acvWithFutureField);
     expect(d1).toBe(d2);
   });
+
+  describe("CORR-ACV-STATE-REF-01 Negative Malformed-ACV Tests (No Silent Repair)", () => {
+    it("should throw TypeError when ACV is null or non-object", () => {
+      expect(() =>
+        projectActiveConstitutionalViewState(
+          null as unknown as ActiveConstitutionalView,
+        ),
+      ).toThrow(TypeError);
+      expect(() =>
+        deriveActiveConstitutionalViewStateDigest(
+          null as unknown as ActiveConstitutionalView,
+        ),
+      ).toThrow(TypeError);
+    });
+
+    it("should throw TypeError when identity field is missing", () => {
+      const malformedACV = {
+        ...mockACV,
+        identity: undefined,
+      } as unknown as ActiveConstitutionalView;
+      expect(() => projectActiveConstitutionalViewState(malformedACV)).toThrow(
+        "ActiveConstitutionalView identity field is required.",
+      );
+    });
+
+    it("should throw TypeError when relationships collection is missing or not an array", () => {
+      const malformedACV = {
+        ...mockACV,
+        relationships: undefined,
+      } as unknown as ActiveConstitutionalView;
+      expect(() => projectActiveConstitutionalViewState(malformedACV)).toThrow(
+        "ActiveConstitutionalView relationships must be an array.",
+      );
+    });
+
+    it("should throw TypeError when standings collection is missing or not an array", () => {
+      const malformedACV = {
+        ...mockACV,
+        standings: undefined,
+      } as unknown as ActiveConstitutionalView;
+      expect(() => projectActiveConstitutionalViewState(malformedACV)).toThrow(
+        "ActiveConstitutionalView standings must be an array.",
+      );
+    });
+
+    it("should throw TypeError when authorities collection is missing or not an array", () => {
+      const malformedACV = {
+        ...mockACV,
+        authorities: undefined,
+      } as unknown as ActiveConstitutionalView;
+      expect(() => projectActiveConstitutionalViewState(malformedACV)).toThrow(
+        "ActiveConstitutionalView authorities must be an array.",
+      );
+    });
+
+    it("should throw TypeError when capabilities collection is missing or not an array", () => {
+      const malformedACV = {
+        ...mockACV,
+        capabilities: undefined,
+      } as unknown as ActiveConstitutionalView;
+      expect(() => projectActiveConstitutionalViewState(malformedACV)).toThrow(
+        "ActiveConstitutionalView capabilities must be an array.",
+      );
+    });
+
+    it("should throw TypeError when applicablePolicies collection is missing or not an array", () => {
+      const malformedACV = {
+        ...mockACV,
+        applicablePolicies: undefined,
+      } as unknown as ActiveConstitutionalView;
+      expect(() => projectActiveConstitutionalViewState(malformedACV)).toThrow(
+        "ActiveConstitutionalView applicablePolicies must be an array.",
+      );
+    });
+  });
 });

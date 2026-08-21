@@ -31,7 +31,7 @@ export type GS1CompositionBridgeAssemblyResult =
       readonly sccId: string;
       readonly bcgId: string;
       readonly bcg: import("../zprof/bcg.js").BoundConfigurationGraph;
-      readonly evaluationCoordinate?: EvaluationCoordinate;
+      readonly evaluationCoordinate: EvaluationCoordinate;
     }
   | {
       readonly ok: false;
@@ -40,7 +40,7 @@ export type GS1CompositionBridgeAssemblyResult =
     };
 
 /**
- * GS1 Domain-Edge Assembly Bridge (AMS-0861-B / ACV-STATE-REF-GATE-01).
+ * GS1 Domain-Edge Assembly Bridge (AMS-0861-B / ACV-STATE-REF-GATE-01 / CORR-ACV-STATE-REF-01).
  *
  * Consumes the lawful constitutional anchor produced by Packet A (createGs1AnchorFromCarrier / GS1AnchorBridgeSuccess)
  * and adapts it into generic Z-PROF composition resolution.
@@ -49,11 +49,13 @@ export type GS1CompositionBridgeAssemblyResult =
  * LAW-B-11: Strictly stops before RI Execution (does NOT invoke runInternalPipeline or produce ExecutionReceipt).
  * LAW-B-09: Positioned strictly in the GS1 domain edge (apps/api/src/gs1/). Generic Z-PROF contains zero imports of this module.
  *
- * ACV-STATE-REF-GATE-01 Closure:
+ * CORR-ACV-STATE-REF-01 Readiness Rules:
  * 1. Derives exact deterministic ACV State Reference digest from boundPayload.resolvedActiveConstitutionalView using @zyppi/domain.
  * 2. Maps digest into PinnedStateReference { ref: digest, digest: digest } with zero caller override / substitution.
- * 3. Materializes evaluationCoordinate when evaluation-affecting execution timestamp (tEInput) is supplied.
- * 4. Mechanical Temporal Enforcement:
+ * 3. Requires explicit, non-empty tEInput (evaluation-affecting execution time coordinate) for successful Packet-B pre-RI assembly.
+ *    Missing or blank tEInput fails closed with error code "missing" (B-0861-32 rule restored).
+ * 4. Requires governed policyContext (no synthetic { policies: [] } fallback). Missing policyContext fails closed with "missing".
+ * 5. Mechanical Temporal Enforcement:
  *    - If any bound EpistemicRequirementContract has temporalConstraints.validTimeRequired === true,
  *      tValid is mandatory; missing tValid fails closed with error code "missing".
  */
@@ -74,7 +76,38 @@ export async function assembleGs1CompositionFromAnchor(
     };
   }
 
-  // 1. Mechanical Temporal Requirement Verification from bound EpistemicRequirementContracts
+  // 1. Require explicit tEInput coordinate for Packet-B assembly
+  if (!options.tEInput || options.tEInput.trim().length === 0) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "Required evaluation execution time coordinate (tEInput) is missing or empty",
+      },
+      epistemicStatus: "UNAVAILABLE",
+    };
+  }
+
+  // 2. Require explicit governed policyContext
+  if (
+    !options.policyContext ||
+    typeof options.policyContext !== "object" ||
+    !Array.isArray(options.policyContext.policies)
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message: "Required governed policyContext is missing or malformed",
+      },
+      epistemicStatus: "UNAVAILABLE",
+    };
+  }
+
+  // 3. Mechanical Temporal Requirement Verification from bound EpistemicRequirementContracts
   const requiresTValid = (options.epistemicRequirementsFixtures || []).some(
     (req) => req.temporalConstraints?.validTimeRequired === true,
   );
@@ -155,38 +188,31 @@ export async function assembleGs1CompositionFromAnchor(
     digest: acvDigest,
   });
 
-  // Materialize evaluationCoordinate if evaluation-affecting execution time coordinate (tEInput) is present
-  let evaluationCoordinate: EvaluationCoordinate | undefined = undefined;
+  const evidenceIntegrityCoordinates = (
+    boundPayload.resolvedEvidenceBundle?.evidenceRecords ?? []
+  ).map((record) => ({
+    evidenceRef: record.evidenceId,
+    digest: record.hash,
+  }));
 
-  if (options.tEInput && options.tEInput.trim().length > 0) {
-    const evidenceIntegrityCoordinates = (
-      boundPayload.resolvedEvidenceBundle?.evidenceRecords ?? []
-    ).map((record) => ({
-      evidenceRef: record.evidenceId,
-      digest: record.hash,
-    }));
+  const ecBuildRes = buildEvaluationCoordinate({
+    sccId,
+    bcgId,
+    pinnedSemanticStateRef,
+    boundContext: options.policyContext,
+    evidenceIntegrityCoordinates,
+    temporalCoordinates: {
+      tValid: options.tValid,
+      tObservation: options.tObservation,
+      tEInput: options.tEInput,
+    },
+  });
 
-    const ecBuildRes = buildEvaluationCoordinate({
-      sccId,
-      bcgId,
-      pinnedSemanticStateRef,
-      boundContext: options.policyContext ?? { policies: [] },
-      evidenceIntegrityCoordinates,
-      temporalCoordinates: {
-        tValid: options.tValid,
-        tObservation: options.tObservation,
-        tEInput: options.tEInput,
-      },
-    });
-
-    if (!ecBuildRes.ok) {
-      return {
-        ok: false,
-        error: ecBuildRes.error,
-      };
-    }
-
-    evaluationCoordinate = ecBuildRes.coordinate;
+  if (!ecBuildRes.ok) {
+    return {
+      ok: false,
+      error: ecBuildRes.error,
+    };
   }
 
   return Object.freeze({
@@ -196,6 +222,6 @@ export async function assembleGs1CompositionFromAnchor(
     sccId,
     bcgId,
     bcg,
-    evaluationCoordinate,
+    evaluationCoordinate: ecBuildRes.coordinate,
   });
 }

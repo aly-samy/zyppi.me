@@ -922,19 +922,43 @@ describe("AMS-0861-B GS1 Epistemic Composition & Application Assembly Test Suite
     }
   });
 
-  // ACV-STATE-REF-GATE-01: Absence of tEInput leaves evaluationCoordinate absent without error
-  it("ACV-STATE-REF-GATE-01: should leave evaluationCoordinate absent when tEInput is missing while returning successful composition", async () => {
+  // B-0861-32 / CORR-ACV-STATE-REF-01: Explicit tEInput requirement for Packet-B pre-RI assembly
+  it("B-0861-32: should fail closed with code 'missing' when evaluation execution timestamp (tEInput) is missing or empty", async () => {
     const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = {
+
+    const missingTEInput = {
       ...createDefaultBridgeInput(anchorSuccess, repo),
       tEInput: undefined,
     };
 
-    const result = await assembleGs1CompositionFromAnchor(input);
+    const result = await assembleGs1CompositionFromAnchor(missingTEInput);
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.evaluationCoordinate).toBeUndefined();
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("missing");
+      expect(result.error.message).toContain("tEInput");
+    }
+  });
+
+  // CORR-ACV-STATE-REF-01: Explicit governed policyContext requirement
+  it("CORR-ACV-STATE-REF-01: should fail closed with code 'missing' when governed policyContext is missing or malformed", async () => {
+    const { anchorSuccess, repo } = await getLawfulAnchor();
+
+    const missingPolicyContext = {
+      ...createDefaultBridgeInput(anchorSuccess, repo),
+      policyContext: undefined,
+    };
+
+    const result = await assembleGs1CompositionFromAnchor(
+      missingPolicyContext as unknown as Parameters<
+        typeof assembleGs1CompositionFromAnchor
+      >[0],
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("missing");
+      expect(result.error.message).toContain("policyContext");
     }
   });
 });
