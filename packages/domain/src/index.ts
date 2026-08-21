@@ -571,6 +571,12 @@ export {
   generateReceiptHashes,
 } from "./receiptHash.js";
 
+export type { AcvStateProjectionV1 } from "./acvState.js";
+export {
+  projectActiveConstitutionalViewState,
+  deriveActiveConstitutionalViewStateDigest,
+} from "./acvState.js";
+
 export type {
   BundleVerificationReport,
   EvidenceRecordVerificationResult,
