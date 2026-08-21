@@ -1,10 +1,10 @@
-# AMS-0861-C — C0 RECONNAISSANCE REPORT
+# AMS-0861-C — C0 RECONNAISSANCE REPORT (REVISED UNDER CORR-0861-C-1)
 
 **Program:** CAW-011 — Commerce Atlas Wedge
 **Milestone:** M08.5 — Z-PROF Profile Architecture
 **Execution Packet:** AMS-0861-C — RI Execution, Provenance & Governed Projection
 **Document Class:** Phase C0 Reconnaissance & Capability Classification Report
-**Authority:** AMS-0861-PLAN-R3 + Final Ratification Addendum — RATIFIED
+**Authority:** AMS-0861-PLAN-R3 + Final Ratification Addendum + CORR-0861-C-1 — RATIFIED
 **Status:** C0 COMPLETED — AUTHORIZED FOR C1+ EXECUTION (ALL SEAMS STATUS A/B)
 **Date:** 2026-08-08
 
@@ -12,9 +12,9 @@
 
 ## 1. Purpose & Scope
 
-This document presents the Phase C0 reconnaissance findings for execution packet AMS-0861-C. Per AMS-0861-C §§7–9 and the user approval constraint, Phase C0 is a read-only reconnaissance exercise designed to verify the existing execution, provenance, receipt, projection, historical reality, policy, and security seams across the repository without modifying any production or test code.
+This document presents the Phase C0 reconnaissance findings for execution packet AMS-0861-C, updated under Council Directive CORR-0861-C-1. Per AMS-0861-C §§7–9 and the user approval constraint, Phase C0 is a read-only reconnaissance exercise designed to verify the existing execution, provenance, receipt, projection, historical reality, policy, and security seams across the repository without modifying any production or test code.
 
-The objective of Phase C0 is to evaluate all required execution and projection seams against mandatory A/B/C capability gates, prove that an exact `EvaluationCoordinate` produced by Packet B can traverse the existing domain-neutral execution architecture to produce faithful execution provenance and governed domain projection, and determine whether any blocking representation or capability gaps exist.
+The objective of Phase C0 is to evaluate all required execution and projection seams against mandatory A/B/C capability gates, prove that an exact `EvaluationCoordinate` produced by Packet B can traverse the existing domain-neutral execution architecture to produce faithful execution provenance and governed domain projection, and ensure no synthesized authority, epoch fallbacks, or caller test overrides exist in production execution paths.
 
 ---
 
@@ -34,7 +34,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 - **`EvidenceIntegrityCoordinates`**:
   - **Source**: `EvaluationCoordinate.evidenceIntegrityCoordinates` (extracted from `resolvedEvidenceBundle.evidenceRecords` as `{ evidenceRef, digest }` pairs).
 - **`TemporalCoordinates`**:
-  - **Source**: `EvaluationCoordinate.temporalCoordinates` (`tValid`, `tObservation`, `tEInput`).
+  - **Source**: `EvaluationCoordinate.temporalCoordinates` (`tValid`, `tObservation`, `tEInput`). Missing `tEInput` fails closed immediately with zero epoch fallback.
 
 ---
 
@@ -46,7 +46,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 - **Output**: `{ readonly ok: true; readonly executionRequest: ExecutionRequest } | { readonly ok: false; readonly error: CompositionError }`
 - **Validation Behavior**:
   1. Executes `validateEvaluationCoordinatePayload` over input coordinate.
-  2. Enforces explicit `tEInput` presence (fails closed with code `"missing"` if absent or empty; zero system-clock fallback).
+  2. Enforces explicit `tEInput` presence (fails closed with code `"missing"` if absent or empty; zero system-clock/epoch fallback).
   3. Enforces structural `PolicyContext` in `boundContext` (fails closed with code `"incompatible"` if malformed; zero ACV synthesis).
   4. Extracts execution parameters (`budget`, `entropy`, `versions`) strictly from `boundPayload.executionContext`.
   5. Assembles candidate `ExecutionRequest` and validates structurally via `validateExecutionRequest`.
@@ -73,7 +73,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 
 ## C0-04 — Temporal Provenance
 
-- **`T_e_input` Source**: `EvaluationCoordinate.temporalCoordinates.tEInput` → mapped directly into `ExecutionRequest.executionContext.constitutionalTimestamp`.
+- **`T_e_input` Source**: `EvaluationCoordinate.temporalCoordinates.tEInput` → mapped directly into `ExecutionRequest.executionContext.constitutionalTimestamp`. Zero fallback to epoch `"1970-01-01T00:00:00.000Z"` permitted.
 - **`T_e_observed` Source**: Captured post-execution from `ExecutionReceipt.executionTime` inside `executeEvaluationCoordinate` (`apps/api/src/zprof/lifecycle.ts`) as `new Date(rcpt.executionTime).toISOString()` and recorded in `HistoricalProvenanceLink.observedExecutionTime`.
 - **Receipt/Runtime Timestamp Field**: `ExecutionReceipt.executionTime` (numeric UTC epoch parsed from `constitutionalTimestamp` during Stage 9).
 - **Clock Owner**: Runtime pipeline execution fact (`constitutionalTimestamp` coordinate parsed during Stage 9 materialization).
@@ -92,7 +92,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
   - `ExecutionRequest` & `ExecutionOutput`: Bound via `ExecutionReceipt.inputHash` and `ExecutionReceipt.outputHash`.
   - `ExecutionReceipt`: Bound in `HistoricalProvenanceLink.executionReceipt` and `HistoricalProvenanceLink.receiptId`.
   - `Temporal Coordinates`: Bound in `EvaluationCoordinate.temporalCoordinates` (`tEInput`) and `HistoricalProvenanceLink.observedExecutionTime` (`tEFact`).
-  - `PRJ/RSN Specifications`: Bound in `EvaluationCoordinate` substrate via `BoundConstitutionalPayload.boundPrjSpecifications` and `boundRsnBlueprints`.
+  - `PRJ/RSN Specifications`: Bound in `EvaluationCoordinate` substrate via `CompositionManifest.boundPrjSpecifications` and `boundRsnBlueprints`.
 - **Capacity Finding**: Existing structures (`HistoricalProvenanceLink`, `ExecutionReceipt`, `EvaluationCoordinate`) possess complete capacity to bind all required evaluation, execution, and provenance identities without introducing GS1-specific fields into generic receipts.
 
 ---
@@ -113,7 +113,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 ## C0-07 — PRJ Status Classification
 
 - **Classification**: **STATUS B — PARTIAL IMPLEMENTATION; RATIFIED SEMANTICS ARE SUFFICIENT FOR MINIMUM MECHANICAL MATERIALIZATION**
-- **Justification**: Z-PROF (`compatibilityValidator.ts`, `compositionResolver.ts`) structurally validates and binds `boundPrjSpecifications` (e.g. `prj:spec:gs1_digital_link_projection:v1`) against ACV capabilities declared in the pinned ACV. In Phase C, a pure, closed GS1 domain projection function (`executeGs1Projection` / `projectGs1DomainResult` inside `apps/api/src/gs1/`) will consume `ExecutionOutput`, `ExecutionReceipt`, `EvaluationCoordinate`, and `BoundConstitutionalPayload` to produce a `GS1DomainResult` over a closed capability surface with zero ambient access.
+- **Justification**: Z-PROF (`compatibilityValidator.ts`, `compositionResolver.ts`) structurally validates and binds `boundPrjSpecifications` (e.g. `prj:spec:gs1_digital_link_projection:v1`) against ACV capabilities declared in the pinned ACV. Per CORR-0861-C-1 §1, `projectGs1DomainResult` must fail closed if `boundPrjSpecifications` is empty or unpopulated on the manifest (zero fallback to hardcoded string `"prj:spec:gs1_digital_link_projection:v1"`). Post-RI GS1 domain projection mechanically transforms `ExecutionOutput` / `ExecutionReceipt` into `GS1DomainResult` bound strictly to the primary explicitly bound PRJ specification over a closed capability surface with zero ambient access.
 
 ---
 
@@ -134,14 +134,14 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 ## C0-10 — POL Classification
 
 - **Classification**: **STATUS A — SUFFICIENT PHYSICAL AUTHORITY SEAM EXISTS**
-- **Justification**: `runInternalPipeline` accepts policy graphs and custom `policyEvaluator` functions returning `DENY`, producing `ADMISSION_DENIED` or `DENY` outcomes (`retainedStatus: "denied"` / `outcome: "rejected"`). In addition, `evaluateAssessmentRequest` assesses `currentlyAdmissible` from explicit POL outputs (`authorityOutputs.currentlyAdmissible`), returning `status: "UNAVAILABLE"` when absent or `status: "DETERMINED"` with `value: false` when denied.
+- **Justification**: `runInternalPipeline` accepts policy graphs and policy evaluators, returning `DENY`, producing `ADMISSION_DENIED` or `DENY` outcomes (`retainedStatus: "denied"` / `outcome: "rejected"`). Per CORR-0861-C-1 §3, test C-0861-25 proves that a governed POL denial halts execution and cannot be overridden by caller options.
 
 ---
 
 ## C0-11 — SEC Classification
 
 - **Classification**: **STATUS A — SUFFICIENT PHYSICAL AUTHORITY SEAM EXISTS**
-- **Justification**: `runInternalPipeline` calculates trust status (`definite`, `speculative`, `uncertain`) and degradation factors (`POLICY_DENIED`, `POLICY_INDETERMINATE`) in `trustResult`. In addition, `evaluateAssessmentRequest` assesses `currentlyTrusted` from explicit SEC outputs (`authorityOutputs.currentlyTrusted`), returning `status: "UNAVAILABLE"` when absent or `status: "DETERMINED"` with `value: false` when denied.
+- **Justification**: `runInternalPipeline` calculates trust status (`definite`, `speculative`, `uncertain`) and degradation factors (`POLICY_DENIED`, `POLICY_INDETERMINATE`) in `trustResult`. In addition, `evaluateAssessmentRequest` assesses `currentlyTrusted` from explicit SEC outputs (`authorityOutputs.currentlyTrusted`), returning `status: "UNAVAILABLE"` when absent or `status: "DETERMINED"` with `value: false` when denied. Production execution bridge consumes upstream RI trust outcomes without manually synthesizing SEC authority.
 
 ---
 
@@ -149,7 +149,7 @@ The objective of Phase C0 is to evaluate all required execution and projection s
 
 Report of all capabilities available to post-RI domain projection execution:
 
-- **Available Inputs**: Explicit, immutable parameters (`ExecutionOutput`, `ExecutionReceipt`, `EvaluationCoordinate`, `BoundConstitutionalPayload`).
+- **Available Inputs**: Explicit, immutable parameters (`ExecutionOutput`, `ExecutionReceipt`, `EvaluationCoordinate`, `CompositionManifest`, `BoundConstitutionalPayload`).
 - **Access Audit**:
   - **Registry Client**: NO (0 references)
   - **Database Client**: NO (0 references)
@@ -179,12 +179,14 @@ Report of all capabilities available to post-RI domain projection execution:
 
 ---
 
-## C0-14 — Expected File-Level Implementation Plan
+## C0-14 — Expected File-Level Implementation Plan (CORR-0861-C-1)
 
 ### Files to Add:
 
 1. `apps/api/src/gs1/gs1ExecutionBridge.ts`
    - GS1 Domain-Edge Execution, Provenance & Projection Bridge orchestrating `assembleGs1CompositionFromAnchor`, `mapEvaluationCoordinateToExecutionRequest`, `executeEvaluationCoordinate`, and post-RI `executeGs1Projection` over pure GS1 interfaces.
+   - Requires explicit `requestId`, `executionId`, and `tEInput` (zero default fallback string constants).
+   - Exposes NO `overrides?: StageOverrideConfig` in production options.
 2. `apps/api/src/gs1/gs1ExecutionBridge.test.ts`
    - Physical test suite implementing C-0861-01 through C-0861-32.
 
@@ -193,7 +195,7 @@ Report of all capabilities available to post-RI domain projection execution:
 1. `apps/api/src/gs1/index.ts`
    - Re-export `gs1ExecutionBridge` functions and types.
 2. `apps/api/src/gs1/types.ts`
-   - Define `GS1ExecutionBridgeInputOptions`, `GS1ExecutionBridgeResult`, and `GS1DomainResult` types.
+   - Define `GS1ExecutionBridgeInputOptions`, `GS1ExecutionBridgeResult`, and `GS1DomainResult` types without caller `overrides?: StageOverrideConfig`.
 
 ### Protected Files Touched:
 
@@ -212,4 +214,4 @@ Report of all capabilities available to post-RI domain projection execution:
 
 ### Summary Verdict:
 
-**ALL REQUIRED SEAMS ARE CLASSIFIED AS STATUS A OR STATUS B. IMPLEMENTATION OF C1+ IS FULLY AUTHORIZED UNDER AMS-0861-C.**
+**ALL REQUIRED SEAMS ARE CLASSIFIED AS STATUS A OR STATUS B. IMPLEMENTATION OF C1+ IS FULLY AUTHORIZED UNDER AMS-0861-C / CORR-0861-C-1.**

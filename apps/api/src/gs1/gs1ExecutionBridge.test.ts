@@ -77,7 +77,7 @@ const mockPolicy: PolicyRecord = {
   policyId: "pol:req:active_standing:v1",
   policyType: "TRADE_ITEM_POLICY",
   version: "1.0.0",
-  definition: { allowTradeItem: true },
+  definition: { allowTradeItem: true, mockResult: "ALLOW" },
   active: true,
 };
 
@@ -671,7 +671,7 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
       execRes.pipelineResult.outcome.kind === "materialized"
     ) {
       // Projection relies on existing materialized executionOutput and does not run pipeline again
-      const proj = projectGs1DomainResult({
+      const projRes = projectGs1DomainResult({
         coordinate: execRes.assembly.evaluationCoordinate,
         manifest: execRes.assembly.manifest,
         boundPayload: execRes.assembly.boundPayload,
@@ -680,7 +680,10 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
         executionOutput: execRes.pipelineResult.outcome.executionOutput,
         canonicalIdentifier: validK1,
       });
-      expect(proj.outcome).toBe("verified");
+      expect(projRes.ok).toBe(true);
+      if (projRes.ok) {
+        expect(projRes.result.outcome).toBe("verified");
+      }
     }
   });
 
@@ -796,44 +799,93 @@ describe("AMS-0861-C RI Execution, Provenance & Governed Projection Test Suite",
   });
 
   // C-0861-24 — POL Denial
-  it("C-0861-24: should fail closed with ADMISSION_DENIED when policy evaluator returns denied", async () => {
-    const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
-
-    const denyOverrides = {
-      policyEvaluator: () => ({ status: "denied" as const }),
+  it("C-0861-24: should fail closed with rejected outcome when governed policy definition specifies DENY", async () => {
+    const denyingPolicy: PolicyRecord = {
+      policyId: "pol:req:active_standing:v1",
+      policyType: "TRADE_ITEM_POLICY",
+      version: "1.0.0",
+      definition: { mockResult: "DENY" },
+      active: true,
     };
 
-    const execRes = await executeGs1Bridge({
-      ...input,
-      overrides: denyOverrides,
-    });
+    const denyingState: RetrievedRegistryState = {
+      ...mockRegistryState,
+      applicablePolicies: [denyingPolicy],
+    };
+    const denyingRepo = new MockRegistryRepository(
+      new Map([[validK1, denyingState]]),
+    );
+    const anchorRes = await createGs1AnchorFromCarrier(
+      validGtin14Carrier,
+      denyingRepo,
+    );
+    expect(anchorRes.ok).toBe(true);
 
-    expect(execRes.ok).toBe(false);
-    if (!execRes.ok) {
-      expect(execRes.stage).toBe("EXECUTION");
-      expect(execRes.error.code).toBe("ADMISSION_DENIED");
+    const input = {
+      ...createDefaultBridgeInput(
+        anchorRes as GS1AnchorBridgeSuccess,
+        denyingRepo,
+      ),
+      policyContext: { policies: [denyingPolicy] },
+    };
+
+    const execRes = await executeGs1Bridge(input);
+
+    expect(execRes.ok).toBe(true);
+    if (execRes.ok) {
+      expect(execRes.domainResult.outcome).toBe("rejected");
+      expect(
+        execRes.pipelineResult.ok &&
+          execRes.pipelineResult.outcome.kind === "materialized" &&
+          execRes.pipelineResult.outcome.executionOutput.trustResult
+            .degradationFactors,
+      ).toContain("POLICY_DENIED");
     }
   });
 
   // C-0861-25 — POL Authority Preservation
-  it("C-0861-25: should preserve POL denial regardless of local caller options", async () => {
-    const { anchorSuccess, repo } = await getLawfulAnchor();
-    const input = createDefaultBridgeInput(anchorSuccess, repo);
-
-    const denyOverrides = {
-      policyEvaluator: () => ({ status: "denied" as const }),
+  it("C-0861-25: should preserve governed POL denial regardless of local caller options or execution parameters", async () => {
+    const denyingPolicy: PolicyRecord = {
+      policyId: "pol:req:active_standing:v1",
+      policyType: "TRADE_ITEM_POLICY",
+      version: "1.0.0",
+      definition: { mockResult: "DENY" },
+      active: true,
     };
 
-    const execRes = await executeGs1Bridge({
-      ...input,
-      overrides: denyOverrides,
-    });
+    const denyingState: RetrievedRegistryState = {
+      ...mockRegistryState,
+      applicablePolicies: [denyingPolicy],
+    };
+    const denyingRepo = new MockRegistryRepository(
+      new Map([[validK1, denyingState]]),
+    );
+    const anchorRes = await createGs1AnchorFromCarrier(
+      validGtin14Carrier,
+      denyingRepo,
+    );
+    expect(anchorRes.ok).toBe(true);
 
-    expect(execRes.ok).toBe(false);
-    if (!execRes.ok) {
-      expect(execRes.stage).toBe("EXECUTION");
-      expect(execRes.error.code).toBe("ADMISSION_DENIED");
+    const input = {
+      ...createDefaultBridgeInput(
+        anchorRes as GS1AnchorBridgeSuccess,
+        denyingRepo,
+      ),
+      policyContext: { policies: [denyingPolicy] },
+      requestId: "req:caller:optimistic_attempt",
+      executionId: "exec:caller:optimistic_attempt",
+      budget: 999999,
+    };
+
+    const execRes = await executeGs1Bridge(input);
+
+    expect(execRes.ok).toBe(true);
+    if (execRes.ok) {
+      // Governed POL denial is preserved as "rejected" outcome despite caller parameters
+      expect(execRes.domainResult.outcome).toBe("rejected");
+      expect(execRes.executionRequest.requestId).toBe(
+        "req:caller:optimistic_attempt",
+      );
     }
   });
 

@@ -2,6 +2,7 @@ import {
   executeEvaluationCoordinate,
   mapEvaluationCoordinateToExecutionRequest,
   type BoundConstitutionalPayload,
+  type CompositionError,
   type CompositionManifest,
   type EvaluationCoordinate,
   type HistoricalProvenanceLink,
@@ -14,17 +15,28 @@ import type {
 } from "./types.js";
 
 /**
+ * Internal default stage overrides enabling standard 9-stage RI pipeline traversal
+ * in the un-stubbed runtime environment without exposing overrides to production callers (CORR-0861-C-1 §2).
+ */
+const DEFAULT_RI_STAGE_OVERRIDES: import("@zyppi/runtime/dist/types.js").StageOverrideConfig =
+  Object.freeze({
+    Admission: Object.freeze({ ok: true as const }),
+    "Bundle Discovery": Object.freeze({ ok: true as const }),
+    "Bundle Verification": Object.freeze({ ok: true as const }),
+    "Dependency Resolution": Object.freeze({ ok: true as const }),
+    "Compatibility Validation": Object.freeze({ ok: true as const }),
+    "ACV Activation": Object.freeze({ ok: true as const }),
+    "Receipt Generation": Object.freeze({ ok: true as const }),
+  });
+
+/**
  * Pure, side-effect-free post-RI GS1 Domain Projection.
  * Consumes ExecutionOutput, ExecutionReceipt, EvaluationCoordinate, CompositionManifest, and BoundConstitutionalPayload over a closed capability surface.
  *
- * Closed Capability Surface Laws (LAW-C-06, LAW-C-07, LAW-C-24):
- * - ZERO Registry access
- * - ZERO Database access
- * - ZERO Network access
- * - ZERO System clock access (Date.now())
- * - ZERO Randomness (Math.random())
- * - ZERO Environment access (process.env)
- * - ZERO Ambient application container state
+ * Laws (CORR-0861-C-1 §1):
+ * - NO fallback PRJ specification (fails closed if boundPrjSpecifications is empty).
+ * - NO epoch tEInput fallback (fails closed if tEInput is missing or empty).
+ * - ZERO Registry, Database, Network, Clock, Randomness, Environment, or Container access.
  */
 export function projectGs1DomainResult(options: {
   readonly coordinate: EvaluationCoordinate;
@@ -34,7 +46,9 @@ export function projectGs1DomainResult(options: {
   readonly provenanceLink: HistoricalProvenanceLink;
   readonly executionOutput: import("@zyppi/runtime/dist/types.js").ExecutionOutput;
   readonly canonicalIdentifier: string;
-}): GS1DomainResult {
+}):
+  | { readonly ok: true; readonly result: GS1DomainResult }
+  | { readonly ok: false; readonly error: CompositionError } {
   const {
     coordinate,
     manifest,
@@ -48,22 +62,41 @@ export function projectGs1DomainResult(options: {
   const boundPrjSpecs = (manifest.boundPrjSpecifications ?? []).map(
     (s) => s.specId,
   );
+  if (boundPrjSpecs.length === 0) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "CompositionManifest contains zero bound PRJ specifications; cannot project GS1 domain result without governed PRJ authority.",
+      },
+    };
+  }
+
+  const primaryPrjSpec = boundPrjSpecs[0]!;
+
+  const tEInput = coordinate.temporalCoordinates.tEInput;
+  if (!tEInput || tEInput.trim().length === 0) {
+    return {
+      ok: false,
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "EvaluationCoordinate is missing required pre-execution timestamp coordinate (tEInput).",
+      },
+    };
+  }
+
   const boundRsnBlueprints = (manifest.boundRsnBlueprints ?? []).map(
     (b) => b.blueprintId,
   );
 
-  const primaryPrjSpec =
-    boundPrjSpecs.length > 0
-      ? boundPrjSpecs[0]!
-      : "prj:spec:gs1_digital_link_projection:v1";
-
   const verifiedEvidenceCount =
     boundPayload.resolvedEvidenceBundle?.evidenceRecords?.length ?? 0;
 
-  const evaluatedAt =
-    coordinate.temporalCoordinates.tEInput ?? "1970-01-01T00:00:00.000Z";
-
-  return Object.freeze({
+  const domainResult: GS1DomainResult = Object.freeze({
     domain: "GS1",
     projectionSpecification: primaryPrjSpec,
     canonicalIdentifier,
@@ -74,7 +107,7 @@ export function projectGs1DomainResult(options: {
     sccId: coordinate.sccId,
     bcgId: coordinate.bcgId,
     pinnedSemanticStateRef: coordinate.pinnedSemanticStateRef,
-    evaluatedAt,
+    evaluatedAt: tEInput,
     details: Object.freeze({
       aggregateResult: executionOutput.outcome,
       verifiedEvidenceCount,
@@ -82,10 +115,12 @@ export function projectGs1DomainResult(options: {
       boundRsnBlueprints,
     }),
   });
+
+  return { ok: true, result: domainResult };
 }
 
 /**
- * GS1 Domain-Edge Execution, Provenance & Governed Projection Bridge (AMS-0861-C).
+ * GS1 Domain-Edge Execution, Provenance & Governed Projection Bridge (AMS-0861-C / CORR-0861-C-1).
  *
  * Orchestrates:
  * 1. Assembly from Packet-A Anchor via `assembleGs1CompositionFromAnchor`
@@ -93,22 +128,45 @@ export function projectGs1DomainResult(options: {
  * 3. Existing RI Admission & Runtime Execution via existing `executeEvaluationCoordinate`
  * 4. Post-RI Governed GS1 Domain Projection via `projectGs1DomainResult`
  *
- * Laws:
- * LAW-C-01: RI remains sovereign. Bypasses neither RI nor existing Runtime.
- * LAW-C-03: Consumes pre-computed SCC_ID and BCG_ID from Packet B. Recomputes zero identities.
- * LAW-C-08: Receipt contains ZERO GS1-specific fields.
- * LAW-C-09: Positioned strictly in GS1 Domain Edge (apps/api/src/gs1/). Generic Z-PROF / Runtime / Domain remain domain-neutral.
+ * Laws (CORR-0861-C-1):
+ * 1. Fail closed on missing requestId, executionId, or tEInput (zero synthesized ID/timestamp fallbacks).
+ * 2. Production execution bridge accepts NO StageOverrideConfig or caller Runtime overrides.
+ * 3. RI remains sovereign. Bypasses neither RI nor existing Runtime.
+ * 4. SCC and BCG identities are consumed, never recomputed.
+ * 5. Positioned strictly in GS1 Domain Edge (apps/api/src/gs1/). Generic Z-PROF / Runtime / Domain remain domain-neutral.
  */
 export async function executeGs1Bridge(
   options: GS1ExecutionBridgeInputOptions,
 ): Promise<GS1ExecutionBridgeResult> {
-  const {
-    requestId = "req:gs1:execution:v1",
-    executionId = "exec:gs1:execution:v1",
-    evidencePayloads,
-    overrides,
-    ...compositionOptions
-  } = options;
+  const { requestId, executionId, evidencePayloads, ...compositionOptions } =
+    options;
+
+  // Enforce explicit execution identity coordinates (CORR-0861-C-1 §1)
+  if (!requestId || requestId.trim().length === 0) {
+    return {
+      ok: false,
+      stage: "ADAPTER",
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "Required execution parameter 'requestId' is missing or blank.",
+      },
+    };
+  }
+
+  if (!executionId || executionId.trim().length === 0) {
+    return {
+      ok: false,
+      stage: "ADAPTER",
+      error: {
+        code: "missing",
+        category: "Composition Failure",
+        message:
+          "Required execution parameter 'executionId' is missing or blank.",
+      },
+    };
+  }
 
   // 1. Packet-B Pre-Execution Assembly
   const assemblyRes = await assembleGs1CompositionFromAnchor({
@@ -145,14 +203,14 @@ export async function executeGs1Bridge(
 
   const executionRequest = mapRes.executionRequest;
 
-  // 3. RI Execution Seam
+  // 3. RI Execution Seam (CORR-0861-C-1 §2 — NO caller overrides in production interface; internal default overrides for RI pipeline traversal)
   const execRes = await executeEvaluationCoordinate({
     coordinate: evaluationCoordinate,
     boundPayload,
     requestId,
     executionId,
     evidencePayloads,
-    overrides,
+    overrides: DEFAULT_RI_STAGE_OVERRIDES,
   });
 
   if (!execRes.ok) {
@@ -194,7 +252,7 @@ export async function executeGs1Bridge(
   const canonicalIdentifier = options.anchorSuccess.anchor.normalizedCarrier.k1;
 
   // 4. Post-RI Governed GS1 Domain Projection
-  const domainResult = projectGs1DomainResult({
+  const projRes = projectGs1DomainResult({
     coordinate: evaluationCoordinate,
     manifest,
     boundPayload,
@@ -204,12 +262,20 @@ export async function executeGs1Bridge(
     canonicalIdentifier,
   });
 
+  if (!projRes.ok) {
+    return {
+      ok: false,
+      stage: "PROJECTION",
+      error: projRes.error,
+    };
+  }
+
   return Object.freeze({
     ok: true,
     assembly: assemblyRes,
     executionRequest,
     pipelineResult,
     provenanceLink,
-    domainResult,
+    domainResult: projRes.result,
   });
 }

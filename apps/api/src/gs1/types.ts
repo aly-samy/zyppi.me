@@ -82,14 +82,13 @@ export interface GS1DomainResult {
   };
 }
 
-export interface GS1ExecutionBridgeInputOptions extends Omit<
-  GS1CompositionBridgeInputOptions,
-  "requestId" | "executionId"
-> {
-  readonly requestId?: string;
-  readonly executionId?: string;
+/**
+ * Production GS1 Execution Bridge Options (CORR-0861-C-1).
+ * Requires explicit requestId, executionId, and tEInput.
+ * Exposes NO StageOverrideConfig / arbitrary Runtime overrides to caller.
+ */
+export interface GS1ExecutionBridgeInputOptions extends GS1CompositionBridgeInputOptions {
   readonly evidencePayloads?: ReadonlyMap<string, unknown>;
-  readonly overrides?: import("@zyppi/runtime/dist/types.js").StageOverrideConfig;
 }
 
 export type GS1ExecutionBridgeResult =
@@ -99,7 +98,7 @@ export type GS1ExecutionBridgeResult =
       readonly executionRequest: ExecutionRequest;
       readonly pipelineResult: PipelineResult;
       readonly provenanceLink: HistoricalProvenanceLink;
-      readonly domainResult?: GS1DomainResult;
+      readonly domainResult: GS1DomainResult;
       readonly assessmentResult?: AssessmentResult;
     }
   | {
