@@ -180,8 +180,10 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
     if (result.ok) {
       expect(result.pipelineResult.ok).toBe(false);
       if (!result.pipelineResult.ok) {
-        expect(result.pipelineResult.error.stage).toBe("Admission");
-        expect(result.pipelineResult.error.code).toBe("ADMISSION_UNAVAILABLE");
+        expect(result.pipelineResult.error.stage).toBe("Bundle Discovery");
+        expect(result.pipelineResult.error.code).toBe(
+          "BUNDLE_DISCOVERY_UNAVAILABLE",
+        );
       }
     }
   });

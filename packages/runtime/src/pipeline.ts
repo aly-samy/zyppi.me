@@ -4,7 +4,7 @@ import {
   validateExecutionReceipt,
   generateReceiptHashes,
 } from "@zyppi/domain";
-import type { ExecutionContext, PolicyContext, Outcome } from "@zyppi/domain";
+import type { ExecutionContext, Outcome } from "@zyppi/domain";
 import type {
   LifecycleStage,
   PipelineResult,
@@ -21,25 +21,14 @@ import {
   type PolicyDecision,
 } from "./evaluator.js";
 
-/**
- * Pure-deterministic unexported default policy evaluator.
- */
-function defaultPolicyEvaluator(
-  _policyContext: PolicyContext,
-  _executionContext: ExecutionContext,
-): { status: "authorized" | "denied" | "unavailable" } {
-  void _policyContext;
-  void _executionContext;
-  return { status: "unavailable" };
-}
-
 export function runInternalPipeline(
   input: unknown,
   overrides?: StageOverrideConfig,
   evidencePayloads?: ReadonlyMap<string, unknown>,
 ): PipelineResult {
   const trace: LifecycleStage[] = [];
-  let retainedStatus: "authorized" | "denied" | "unavailable" = "unavailable";
+  let retainedStatus: "authorized" | "denied" | "unavailable" =
+    "unavailable" as "authorized" | "denied" | "unavailable";
 
   // Helper function to handle a stage traversal for post-Admission stages
   function executePostAdmissionStage(
@@ -106,68 +95,19 @@ export function runInternalPipeline(
   const context = executionRequest.executionContext;
   const policyContext = executionRequest.policyContext;
 
-  // Policy evaluation
-  const evaluate = overrides?.policyEvaluator ?? defaultPolicyEvaluator;
-  const evaluationResult = evaluate(policyContext, context);
-  retainedStatus = evaluationResult.status;
-
-  // Process Admission stage outcome under evaluation results, overrides or default closed behavior
-  let admissionSucceeded = false;
-  let admissionError: PipelineError | undefined;
-
-  if (evaluationResult.status === "denied") {
-    // A denied evaluator always halts and cannot be bypassed.
-    admissionError = {
-      stage: "Admission",
-      code: "ADMISSION_DENIED",
-      message: "Policy evaluation denied admission.",
-    };
-  } else if (evaluationResult.status === "authorized") {
-    // Authorized status allows Admission to complete unless overridden to fail.
-    if (overrides && overrides["Admission"]) {
-      const stageOverride = overrides["Admission"];
-      if (stageOverride.ok) {
-        admissionSucceeded = true;
-      } else {
-        admissionError = {
+  if (overrides && overrides["Admission"]) {
+    const stageOverride = overrides["Admission"];
+    if (!stageOverride.ok) {
+      return {
+        ok: false,
+        error: {
           stage: "Admission",
           code: stageOverride.code,
           message: stageOverride.message,
-        };
-      }
-    } else {
-      admissionSucceeded = true;
-    }
-  } else {
-    // status === "unavailable"
-    // Under unconfigured/default evaluator behavior, check if stage overrides force success or failure.
-    if (overrides && overrides["Admission"]) {
-      const stageOverride = overrides["Admission"];
-      if (stageOverride.ok) {
-        admissionSucceeded = true;
-      } else {
-        admissionError = {
-          stage: "Admission",
-          code: stageOverride.code,
-          message: stageOverride.message,
-        };
-      }
-    } else {
-      admissionError = {
-        stage: "Admission",
-        code: "ADMISSION_UNAVAILABLE",
-        message:
-          "Substantive admission engine is not authorized or implemented.",
+        },
+        trace,
       };
     }
-  }
-
-  if (!admissionSucceeded && admissionError) {
-    return {
-      ok: false,
-      error: admissionError,
-      trace,
-    };
   }
 
   type StageAction = (

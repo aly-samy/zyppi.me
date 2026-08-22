@@ -126,12 +126,12 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
     // Expected: Successful native 9-stage execution.
     // Finding: Stage 2 (Bundle Discovery), Stage 4 (Dependency Resolution), and Stage 5 (Compatibility Validation)
     // are unimplemented natively and return _UNAVAILABLE.
-    // Proof of blockage: Running with zero overrides fails at Stage 1 with ADMISSION_UNAVAILABLE.
+    // Proof of blockage: Running with zero overrides passes Stage 1 and fails at Stage 2 with BUNDLE_DISCOVERY_UNAVAILABLE.
     const result = runInternalPipeline(validRequestInput);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
+      expect(result.error.stage).toBe("Bundle Discovery");
+      expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
     }
   });
 
@@ -188,7 +188,7 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
   it("REPLAY-005 — Budget Exhaustion [BLOCKED]", () => {
     // Expected: Native G-0813 active execution budget exhaustion in Stage 8.
     // Finding: Unimplemented intermediate stages prevent reaching Stage 8 natively to evaluate budget consumption.
-    // Proof of blockage: Running natively with 0 budget fails at Stage 1 with ADMISSION_UNAVAILABLE instead of reaching Stage 8.
+    // Proof of blockage: Running natively with 0 budget passes Stage 1 and fails at Stage 2 with BUNDLE_DISCOVERY_UNAVAILABLE instead of reaching Stage 8.
     const zeroBudgetRequest: ExecutionRequest = {
       ...validRequestInput,
       executionContext: {
@@ -199,8 +199,8 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
     const result = runInternalPipeline(zeroBudgetRequest);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
+      expect(result.error.stage).toBe("Bundle Discovery");
+      expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
     }
   });
 

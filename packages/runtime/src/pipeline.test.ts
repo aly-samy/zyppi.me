@@ -15,7 +15,6 @@ import type {
   EvidenceRecord,
   PolicyRecord,
   ExecutionContext,
-  PolicyContext,
 } from "@zyppi/domain";
 
 const url = (import.meta as unknown as { url: string }).url;
@@ -207,14 +206,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
   });
 
   // 10.4: Default production/unimplemented behavior
-  it("fails closed at Admission stage under default production configuration", () => {
+  it("passes Stage 1 natively and fails at Stage 2 (Bundle Discovery) under default production configuration", () => {
     const result = runInternalPipeline(validRequestInput);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
+      expect(result.error.stage).toBe("Bundle Discovery");
+      expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
     }
-    expect(result.trace).toEqual(["Admission"]);
+    expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
   });
 
   // 10.5: Determinism
@@ -493,232 +492,9 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     expect(requestWithCustomBudget.executionContext.budget).toBe(testBudget);
   });
 
-  // AMS-0404: Deterministic Authorization
-  it("proves deterministic authorization when evaluator returns authorized", () => {
-    let receivedPolicyContext: PolicyContext | null = null;
-    let receivedExecutionContext: ExecutionContext | null = null;
-
-    const overrides: StageOverrideConfig = {
-      policyEvaluator: (policyContext, executionContext) => {
-        receivedPolicyContext = policyContext;
-        receivedExecutionContext = executionContext;
-        return { status: "authorized" };
-      },
-      "Bundle Discovery": { ok: true },
-      "Bundle Verification": { ok: true },
-      "Dependency Resolution": { ok: true },
-      "Compatibility Validation": { ok: true },
-      "ACV Activation": { ok: true },
-      "Resolution Graph Construction": { ok: true },
-      "Active Execution": { ok: true },
-      "Receipt Generation": { ok: true },
-    };
-
-    const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
-    const result = runInternalPipeline(inputCopy, overrides);
-
-    expect(result.ok).toBe(true);
-    expect(result.trace).toEqual([
-      "Admission",
-      "Bundle Discovery",
-      "Bundle Verification",
-      "Dependency Resolution",
-      "Compatibility Validation",
-      "ACV Activation",
-      "Resolution Graph Construction",
-      "Active Execution",
-      "Receipt Generation",
-    ]);
-
-    expect(receivedPolicyContext).toEqual(validRequestInput.policyContext);
-    expect(receivedExecutionContext).toEqual(
-      validRequestInput.executionContext,
-    );
-  });
-
-  // AMS-0404: Deterministic Denial
-  it("proves deterministic denial when evaluator returns denied, preventing all downstream stages", () => {
-    const overrides: StageOverrideConfig = {
-      policyEvaluator: () => {
-        return { status: "denied" };
-      },
-      "Bundle Discovery": { ok: true },
-    };
-
-    const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
-    const result = runInternalPipeline(inputCopy, overrides);
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_DENIED");
-      expect(result.error.message).toBe("Policy evaluation denied admission.");
-    }
-    // Downstream stages must not execute or be in trace
-    expect(result.trace).toEqual(["Admission"]);
-  });
-
-  // AMS-0404: Evaluation Cannot Be Silently Bypassed
-  it("proves evaluation cannot be silently bypassed even when Admission is overridden to true", () => {
-    const overrides: StageOverrideConfig = {
-      policyEvaluator: () => {
-        return { status: "denied" };
-      },
-      Admission: { ok: true }, // attempting bypass
-      "Bundle Discovery": { ok: true },
-    };
-
-    const result = runInternalPipeline(validRequestInput, overrides);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_DENIED");
-    }
-    expect(result.trace).toEqual(["Admission"]);
-  });
-
-  // AMS-0404: Repeated Execution
-  it("proves structurally identical results on repeated execution without dependency on hidden state", () => {
-    const overrides: StageOverrideConfig = {
-      policyEvaluator: () => {
-        return { status: "denied" };
-      },
-    };
-
-    const result1 = runInternalPipeline(validRequestInput, overrides);
-    const result2 = runInternalPipeline(validRequestInput, overrides);
-
-    expect(result1).toEqual(result2);
-  });
-
-  // AMS-0404: Input Immutability
-  it("proves evaluator and pipeline do not mutate inputs", () => {
-    const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
-    const frozenInput = deepFreeze(inputCopy);
-
-    const overrides: StageOverrideConfig = {
-      policyEvaluator: (policyContext, executionContext) => {
-        // Assert input shape can be read but not mutated
-        expect(policyContext).toEqual(validRequestInput.policyContext);
-        expect(executionContext).toEqual(validRequestInput.executionContext);
-        return { status: "authorized" };
-      },
-      "Bundle Discovery": { ok: true },
-      "Bundle Verification": { ok: true },
-      "Dependency Resolution": { ok: true },
-      "Compatibility Validation": { ok: true },
-      "ACV Activation": { ok: true },
-      "Resolution Graph Construction": { ok: true },
-      "Active Execution": { ok: true },
-      "Receipt Generation": { ok: true },
-    };
-
-    const result = runInternalPipeline(frozenInput, overrides);
-    expect(result.ok).toBe(true);
-    expect(frozenInput).toEqual(validRequestInput);
-  });
-
-  // AMS-0404: Fail-Closed Evaluator Unavailability
-  it("proves evaluator unavailability fails closed with ADMISSION_UNAVAILABLE when no stage-override is present", () => {
-    const overrides: StageOverrideConfig = {
-      policyEvaluator: () => {
-        return { status: "unavailable" };
-      },
-    };
-
-    const result = runInternalPipeline(validRequestInput, overrides);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
-      expect(result.error.message).toBe(
-        "Substantive admission engine is not authorized or implemented.",
-      );
-    }
-    expect(result.trace).toEqual(["Admission"]);
-  });
-
-  // AMS-0404: Default Evaluator behavior is unavailable
-  it("proves default/production evaluator fails closed as unavailable", () => {
-    // When no overrides or evaluator is provided
-    const result = runInternalPipeline(validRequestInput);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.stage).toBe("Admission");
-      expect(result.error.code).toBe("ADMISSION_UNAVAILABLE");
-    }
-  });
-
-  // AMS-0405: Evaluator-Result Retention & Decision-Summary Mapping
-  it("retains evaluator result and deterministically maps decisionSummary across authorized, denied, and unavailable", () => {
-    // Case A: authorized
-    const overridesAuthorized: StageOverrideConfig = {
-      policyEvaluator: () => ({ status: "authorized" }),
-      "Bundle Discovery": { ok: true },
-      "Bundle Verification": { ok: true },
-      "Dependency Resolution": { ok: true },
-      "Compatibility Validation": { ok: true },
-      "ACV Activation": { ok: true },
-      "Resolution Graph Construction": { ok: true },
-      "Active Execution": { ok: true },
-      "Receipt Generation": { ok: true },
-    };
-    const resAuth = runInternalPipeline(validRequestInput, overridesAuthorized);
-    expect(resAuth.ok).toBe(true);
-    if (resAuth.ok && resAuth.outcome.kind === "materialized") {
-      const parsed = JSON.parse(
-        resAuth.outcome.executionOutput.executionReceipt.decisionSummary,
-      );
-      expect(parsed.aggregateResult).toBe("authorized");
-    } else {
-      expect.fail("Expected outcome to be materialized");
-    }
-
-    // Case B: denied (halts at Admission)
-    const overridesDenied: StageOverrideConfig = {
-      policyEvaluator: () => ({ status: "denied" }),
-      Admission: { ok: true },
-      "Bundle Discovery": { ok: true },
-    };
-    const resDenied = runInternalPipeline(validRequestInput, overridesDenied);
-    expect(resDenied.ok).toBe(false);
-    if (!resDenied.ok) {
-      expect(resDenied.error.stage).toBe("Admission");
-      expect(resDenied.error.code).toBe("ADMISSION_DENIED");
-    }
-
-    // Case C: unavailable (using Admission override to proceed)
-    const overridesUnavailable: StageOverrideConfig = {
-      policyEvaluator: () => ({ status: "unavailable" }),
-      Admission: { ok: true },
-      "Bundle Discovery": { ok: true },
-      "Bundle Verification": { ok: true },
-      "Dependency Resolution": { ok: true },
-      "Compatibility Validation": { ok: true },
-      "ACV Activation": { ok: true },
-      "Resolution Graph Construction": { ok: true },
-      "Active Execution": { ok: true },
-      "Receipt Generation": { ok: true },
-    };
-    const resUnavail = runInternalPipeline(
-      validRequestInput,
-      overridesUnavailable,
-    );
-    expect(resUnavail.ok).toBe(true);
-    if (resUnavail.ok && resUnavail.outcome.kind === "materialized") {
-      const parsed = JSON.parse(
-        resUnavail.outcome.executionOutput.executionReceipt.decisionSummary,
-      );
-      expect(parsed.aggregateResult).toBe("unavailable");
-    } else {
-      expect.fail("Expected outcome to be materialized");
-    }
-  });
-
   // AMS-0405: Reaches Stage 9 and successfully materializes the ExecutionOutput
   it("reaches Receipt Generation and successfully materializes the ExecutionOutput", () => {
     const overrides: StageOverrideConfig = {
-      policyEvaluator: () => ({ status: "authorized" }),
       "Bundle Discovery": { ok: true },
       "Bundle Verification": { ok: true },
       "Dependency Resolution": { ok: true },
@@ -734,8 +510,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     if (result.ok && result.outcome.kind === "materialized") {
       expect(result.trace).toContain("Receipt Generation");
       const output = result.outcome.executionOutput;
-      expect(output.outcome).toBe("verified");
-      expect(output.trustResult.trustStatus).toBe("definite");
+      expect(output.outcome).toBe("unverified");
+      expect(output.trustResult.trustStatus).toBe("uncertain");
       expect(output.executionReceipt).toBeDefined();
       expect(output.executionReceipt.executionId).toBe("exec-456");
       expect(output.policyDecisions).toBeDefined();
@@ -747,7 +523,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
   // AMS-0405: Receipt-Stage constructs and returns a fully completed and validated ExecutionReceipt
   it("proves the pipeline outcome constructs and returns a fully completed and validated ExecutionReceipt", () => {
     const overrides: StageOverrideConfig = {
-      policyEvaluator: () => ({ status: "authorized" }),
       "Bundle Discovery": { ok: true },
       "Bundle Verification": { ok: true },
       "Dependency Resolution": { ok: true },
@@ -775,10 +550,10 @@ describe("Runtime Pipeline Scaffold Tests", () => {
   });
 
   describe("Deterministic replay proof — AMS-0406", () => {
-    // DR-01: authorized × 3 independent runs
-    it("DR-01: authorized x 3 -> structurally identical successful PipelineResults", () => {
+    it("DR-01: authorized execution x 3 -> structurally identical successful PipelineResults", () => {
       const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "authorized" }),
+        outcome: "verified",
+        trustResult: { trustStatus: "definite", degradationFactors: [] },
         "Bundle Discovery": { ok: true },
         "Bundle Verification": { ok: true },
         "Dependency Resolution": { ok: true },
@@ -789,7 +564,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         "Receipt Generation": { ok: true },
       };
 
-      // Three independent runs with identical inputs and overrides
       const input1 = JSON.parse(JSON.stringify(validRequestInput));
       const input2 = JSON.parse(JSON.stringify(validRequestInput));
       const input3 = JSON.parse(JSON.stringify(validRequestInput));
@@ -798,7 +572,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const res2 = runInternalPipeline(input2, overrides);
       const res3 = runInternalPipeline(input3, overrides);
 
-      // Value-level structural equality checks
       expect(res1.ok).toBe(true);
       expect(res2.ok).toBe(true);
       expect(res3.ok).toBe(true);
@@ -819,113 +592,11 @@ describe("Runtime Pipeline Scaffold Tests", () => {
           "Active Execution",
           "Receipt Generation",
         ]);
-        const parsed = JSON.parse(
-          res1.outcome.executionOutput.executionReceipt.decisionSummary,
-        );
-        expect(parsed.aggregateResult).toBe("authorized");
       } else {
         expect.fail("Outcome should be materialized with 9-stage completion");
       }
     });
 
-    // DR-02: denied × 3 independent runs
-    it("DR-02: denied x 3 -> structurally identical Admission failure results", () => {
-      const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "denied" }),
-      };
-
-      const input1 = JSON.parse(JSON.stringify(validRequestInput));
-      const input2 = JSON.parse(JSON.stringify(validRequestInput));
-      const input3 = JSON.parse(JSON.stringify(validRequestInput));
-
-      const res1 = runInternalPipeline(input1, overrides);
-      const res2 = runInternalPipeline(input2, overrides);
-      const res3 = runInternalPipeline(input3, overrides);
-
-      expect(res1.ok).toBe(false);
-      expect(res2.ok).toBe(false);
-      expect(res3.ok).toBe(false);
-
-      expect(res1).toEqual(res2);
-      expect(res1).toEqual(res3);
-
-      if (!res1.ok) {
-        expect(res1.error.stage).toBe("Admission");
-        expect(res1.error.code).toBe("ADMISSION_DENIED");
-        expect(res1.trace).toEqual(["Admission"]);
-      }
-    });
-
-    // DR-03A: default unavailable × 3 independent runs (fails closed by default)
-    it("DR-03A: default unavailable x 3 -> structurally identical Admission failure results", () => {
-      const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "unavailable" }),
-      };
-
-      const input1 = JSON.parse(JSON.stringify(validRequestInput));
-      const input2 = JSON.parse(JSON.stringify(validRequestInput));
-      const input3 = JSON.parse(JSON.stringify(validRequestInput));
-
-      const res1 = runInternalPipeline(input1, overrides);
-      const res2 = runInternalPipeline(input2, overrides);
-      const res3 = runInternalPipeline(input3, overrides);
-
-      expect(res1.ok).toBe(false);
-      expect(res2.ok).toBe(false);
-      expect(res3.ok).toBe(false);
-
-      expect(res1).toEqual(res2);
-      expect(res1).toEqual(res3);
-
-      if (!res1.ok) {
-        expect(res1.error.stage).toBe("Admission");
-        expect(res1.error.code).toBe("ADMISSION_UNAVAILABLE");
-        expect(res1.trace).toEqual(["Admission"]);
-      }
-    });
-
-    // DR-03B: override-enabled unavailable × 3 independent runs
-    it("DR-03B: override-enabled unavailable x 3 -> structurally identical successful materialized outcomes", () => {
-      const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "unavailable" }),
-        Admission: { ok: true },
-        "Bundle Discovery": { ok: true },
-        "Bundle Verification": { ok: true },
-        "Dependency Resolution": { ok: true },
-        "Compatibility Validation": { ok: true },
-        "ACV Activation": { ok: true },
-        "Resolution Graph Construction": { ok: true },
-        "Active Execution": { ok: true },
-        "Receipt Generation": { ok: true },
-      };
-
-      const input1 = JSON.parse(JSON.stringify(validRequestInput));
-      const input2 = JSON.parse(JSON.stringify(validRequestInput));
-      const input3 = JSON.parse(JSON.stringify(validRequestInput));
-
-      const res1 = runInternalPipeline(input1, overrides);
-      const res2 = runInternalPipeline(input2, overrides);
-      const res3 = runInternalPipeline(input3, overrides);
-
-      expect(res1.ok).toBe(true);
-      expect(res2.ok).toBe(true);
-      expect(res3.ok).toBe(true);
-
-      expect(res1).toEqual(res2);
-      expect(res1).toEqual(res3);
-
-      if (res1.ok && res1.outcome.kind === "materialized") {
-        expect(res1.stage).toBe("Receipt Generation");
-        const parsed = JSON.parse(
-          res1.outcome.executionOutput.executionReceipt.decisionSummary,
-        );
-        expect(parsed.aggregateResult).toBe("unavailable");
-      } else {
-        expect.fail("Outcome should be successful and materialized");
-      }
-    });
-
-    // DR-04: Exact ten-field membership and canonical order
     it("DR-04: Exact ten-field membership and canonical order", () => {
       const expectedFields = [
         "receiptId",
@@ -941,7 +612,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       ];
 
       const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "authorized" }),
         "Bundle Discovery": { ok: true },
         "Bundle Verification": { ok: true },
         "Dependency Resolution": { ok: true },
@@ -966,10 +636,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       }
     });
 
-    // DR-05: A → B → A cross-invocation isolation
     it("DR-05: A -> B -> A cross-invocation isolation", () => {
       const overridesA: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "authorized" }),
         "Bundle Discovery": { ok: true },
         "Bundle Verification": { ok: true },
         "Dependency Resolution": { ok: true },
@@ -981,10 +649,13 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       };
 
       const overridesB: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "denied" }),
+        "Bundle Discovery": {
+          ok: false,
+          code: "DISCOVERY_ERR",
+          message: "Failure B",
+        },
       };
 
-      // Distinct logical request objects
       const requestA1 = JSON.parse(JSON.stringify(validRequestInput));
       const requestB = {
         ...JSON.parse(JSON.stringify(validRequestInput)),
@@ -992,29 +663,23 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       };
       const requestA2 = JSON.parse(JSON.stringify(validRequestInput));
 
-      // 1. Run A1
       const resA1 = runInternalPipeline(requestA1, overridesA);
       expect(resA1.ok).toBe(true);
 
-      // 2. Run B (intervening execution with distinct input and/or state)
       const resB = runInternalPipeline(requestB, overridesB);
       expect(resB.ok).toBe(false);
 
-      // 3. Run A2
       const resA2 = runInternalPipeline(requestA2, overridesA);
       expect(resA2.ok).toBe(true);
 
-      // Verify A1 and A2 are exactly identical (no state leakage from intervening run B)
       expect(resA1).toEqual(resA2);
     });
 
-    // DR-06: Explicit input immutability under repeated execution
     it("DR-06: Explicit input immutability under repeated execution", () => {
       const inputCopy = JSON.parse(JSON.stringify(validRequestInput));
       const frozenInput = deepFreeze(inputCopy);
 
       const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "authorized" }),
         "Bundle Discovery": { ok: true },
         "Bundle Verification": { ok: true },
         "Dependency Resolution": { ok: true },
@@ -1025,7 +690,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         "Receipt Generation": { ok: true },
       };
 
-      // Running the pipeline three consecutive times on the frozen object must not throw mutation exceptions
       const res1 = runInternalPipeline(frozenInput, overrides);
       const res2 = runInternalPipeline(frozenInput, overrides);
       const res3 = runInternalPipeline(frozenInput, overrides);
@@ -1034,14 +698,11 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(res2.ok).toBe(true);
       expect(res3.ok).toBe(true);
 
-      // Ensure input structure remains absolutely unchanged
       expect(frozenInput).toEqual(validRequestInput);
     });
 
-    // DR-07: Behavioral confirmation of ExecutionReceipt fields being returned
     it("DR-07: Behavioral confirmation of ExecutionReceipt fields being returned", () => {
       const overrides: StageOverrideConfig = {
-        policyEvaluator: () => ({ status: "authorized" }),
         "Bundle Discovery": { ok: true },
         "Bundle Verification": { ok: true },
         "Dependency Resolution": { ok: true },
@@ -1069,7 +730,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
   describe("AMS-0803 Explicit Full Verification Tests", () => {
     const defaultOverrides: StageOverrideConfig = {
-      policyEvaluator: () => ({ status: "authorized" }),
       "Bundle Discovery": { ok: true },
       "Bundle Verification": { ok: true },
       "Dependency Resolution": { ok: true },
@@ -1085,15 +745,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         ...validRequestInput,
         executionContext: {
           ...validRequestInput.executionContext,
-          budget: 0, // 0 budget fails closed deterministically
+          budget: 0,
         },
       };
 
       const res = runInternalPipeline(lowBudgetInput, {
         ...defaultOverrides,
-        "Active Execution": undefined, // don't override step 8 to let real budget engine run
+        "Active Execution": undefined,
       });
-      // Budget exhaustion during evaluation terminates evaluation and fails closed as INDETERMINATE
       expect(res.ok).toBe(true);
       if (res.ok && res.outcome.kind === "materialized") {
         expect(res.outcome.executionOutput.outcome).toBe("unverified");
@@ -1138,7 +797,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         expect(receipt.evidenceHash.startsWith("sha256:")).toBe(true);
         expect(receipt.deterministicHash.startsWith("sha256:")).toBe(true);
 
-        // Ensure distinct hashes across domains to prove domain separation
         expect(receipt.inputHash).not.toBe(receipt.outputHash);
         expect(receipt.inputHash).not.toBe(receipt.evidenceHash);
         expect(receipt.deterministicHash).not.toBe(receipt.inputHash);
@@ -1155,6 +813,214 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         );
         expect(receipt.executionTime).toBe(expectedTime);
       }
+    });
+  });
+
+  describe("CCP-RI-01A — Mandatory Test Suite (RI01A-T01 to RI01A-T10)", () => {
+    it("RI01A-T01: Native Valid Admission", () => {
+      const result = runInternalPipeline(validRequestInput);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Discovery");
+        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+    });
+
+    it("RI01A-T02: Structural Invalidity", () => {
+      const invalidInput = { ...validRequestInput, requestId: "" };
+      const result = runInternalPipeline(invalidInput);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Admission");
+        expect(result.error.code).toBe("INVALID_EXECUTION_REQUEST");
+      }
+      expect(result.trace).toEqual(["Admission"]);
+    });
+
+    it("RI01A-T03: No Stage-1 POL Evaluation", () => {
+      // Behaviorally: Valid request passes Stage 1 regardless of policy definitions
+      const requestWithDenyPolicy: ExecutionRequest = {
+        ...validRequestInput,
+        policyContext: {
+          policies: [
+            {
+              policyId: "deny-policy",
+              policyType: "caw:simple",
+              version: "1.0.0",
+              definition: { rule: "always-deny" },
+              active: true,
+            },
+          ],
+        },
+      };
+      const result = runInternalPipeline(requestWithDenyPolicy);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Discovery");
+        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+
+      // Statically: verify pipeline.ts source code has no defaultPolicyEvaluator or policy status checks in Stage 1
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+      expect(source).not.toContain("defaultPolicyEvaluator");
+      expect(source).not.toContain("ADMISSION_DENIED");
+      expect(source).not.toContain("ADMISSION_UNAVAILABLE");
+    });
+
+    it("RI01A-T04: Stage-8 Sovereignty", () => {
+      // Statically verify evaluatePolicies is called only within Stage 8 Active Execution
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+      const activeExecIndex = source.indexOf("Active Execution");
+      const evalPoliciesIndex = source.indexOf("evaluatePolicies(");
+
+      expect(activeExecIndex).not.toBe(-1);
+      expect(evalPoliciesIndex).not.toBe(-1);
+      expect(evalPoliciesIndex).toBeGreaterThan(activeExecIndex);
+    });
+
+    it("RI01A-T05: No ADMISSION_DENIED Policy Mapping", () => {
+      const overrides: StageOverrideConfig = {
+        "Bundle Discovery": { ok: true },
+        "Bundle Verification": { ok: true },
+        "Dependency Resolution": { ok: true },
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+        "Resolution Graph Construction": { ok: true },
+        // Active Execution runs natively with policy evaluation
+        "Receipt Generation": { ok: true },
+      };
+      const requestWithDenyPolicy: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          applicablePolicies: [
+            {
+              policyId: "deny-policy",
+              policyType: "caw:simple",
+              version: "1.0.0",
+              definition: { mockResult: "DENY" },
+              active: true,
+            },
+          ],
+        },
+        policyContext: {
+          policies: [
+            {
+              policyId: "deny-policy",
+              policyType: "caw:simple",
+              version: "1.0.0",
+              definition: { mockResult: "DENY" },
+              active: true,
+            },
+          ],
+        },
+      };
+
+      const result = runInternalPipeline(requestWithDenyPolicy, overrides);
+      expect(result.ok).toBe(true);
+      if (result.ok && result.outcome.kind === "materialized") {
+        expect(result.outcome.executionOutput.outcome).toBe("rejected");
+        expect(
+          result.outcome.executionOutput.trustResult.degradationFactors,
+        ).toContain("POLICY_DENIED");
+      }
+    });
+
+    it("RI01A-T06: No ADMISSION_UNAVAILABLE Default Blocker", () => {
+      const result = runInternalPipeline(validRequestInput);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).not.toBe("ADMISSION_UNAVAILABLE");
+        expect(result.error.stage).toBe("Bundle Discovery");
+        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+      }
+    });
+
+    it("RI01A-T07: Domain Neutrality", () => {
+      const syntheticNonGs1Request: ExecutionRequest = {
+        ...validRequestInput,
+        identity: {
+          ...validIdentity,
+          identityId: "synthetic-uuid-001",
+          identityType: "synthetic_asset",
+          canonicalReference: "urn:uuid:12345678-1234-1234-1234-123456789abc",
+        },
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          identity: {
+            ...validIdentity,
+            identityId: "synthetic-uuid-001",
+            identityType: "synthetic_asset",
+            canonicalReference: "urn:uuid:12345678-1234-1234-1234-123456789abc",
+          },
+        },
+      };
+
+      const result = runInternalPipeline(syntheticNonGs1Request);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Discovery");
+        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+    });
+
+    it("RI01A-T08: No Hidden I/O", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+      expect(source).not.toContain('import fs from "fs"');
+      expect(source).not.toContain('import http from "http"');
+      expect(source).not.toContain('import net from "net"');
+      expect(source).not.toContain("process.env");
+
+      // Verify execution with modified process.env produces identical result
+      const origEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "test-mutation-env";
+      try {
+        const res = runInternalPipeline(validRequestInput);
+        expect(res.ok).toBe(false);
+        if (!res.ok) {
+          expect(res.error.stage).toBe("Bundle Discovery");
+          expect(res.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+        }
+      } finally {
+        process.env.NODE_ENV = origEnv;
+      }
+    });
+
+    it("RI01A-T09: Deterministic Replay", () => {
+      const req1 = JSON.parse(JSON.stringify(validRequestInput));
+      const req2 = JSON.parse(JSON.stringify(validRequestInput));
+
+      const res1 = runInternalPipeline(req1);
+      const res2 = runInternalPipeline(req2);
+
+      expect(res1).toEqual(res2);
+      expect(res1.ok).toBe(false);
+      if (!res1.ok) {
+        expect(res1.error.stage).toBe("Bundle Discovery");
+        expect(res1.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+      }
+      expect(res1.trace).toEqual(["Admission", "Bundle Discovery"]);
+    });
+
+    it("RI01A-T10: Input Non-Mutation", () => {
+      const reqCopy = JSON.parse(JSON.stringify(validRequestInput));
+      const frozenInput = deepFreeze(reqCopy);
+
+      const result = runInternalPipeline(frozenInput);
+      expect(result.ok).toBe(false);
+      expect(frozenInput).toEqual(validRequestInput);
     });
   });
 });
