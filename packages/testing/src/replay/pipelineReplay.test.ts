@@ -60,7 +60,7 @@ const validEvidence: EvidenceRecord = {
   evidenceId: "evidence-001",
   identityId: "id-123",
   evidenceType: "caw:receipt",
-  hash: "hash123",
+  hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
   storageRef: "r2://key-123",
   retrievedAt: "2026-07-28T12:00:00Z",
 };
@@ -124,14 +124,14 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
 
   it("REPLAY-001 — Baseline [BLOCKED]", () => {
     // Expected: Successful native 9-stage execution.
-    // Finding: Stage 3 (Bundle Verification), Stage 4 (Dependency Resolution), and Stage 5 (Compatibility Validation)
+    // Finding: Stage 4 (Dependency Resolution) and Stage 5 (Compatibility Validation)
     // are unimplemented natively and return _UNAVAILABLE.
-    // Proof of blockage: Running with zero overrides passes Stage 1 and Stage 2 natively and fails at Stage 3 with BUNDLE_VERIFICATION_UNAVAILABLE.
+    // Proof of blockage: Running natively with zero evidencePayloads passes Stage 1 and Stage 2 natively and fails at Stage 3 with PAYLOAD_MISSING.
     const result = runInternalPipeline(validRequestInput);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.stage).toBe("Bundle Verification");
-      expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+      expect(result.error.code).toBe("PAYLOAD_MISSING");
     }
   });
 
@@ -188,7 +188,7 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
   it("REPLAY-005 — Budget Exhaustion [BLOCKED]", () => {
     // Expected: Native G-0813 active execution budget exhaustion in Stage 8.
     // Finding: Unimplemented intermediate stages prevent reaching Stage 8 natively to evaluate budget consumption.
-    // Proof of blockage: Running natively with 0 budget passes Stage 1 and Stage 2 natively and fails at Stage 3 with BUNDLE_VERIFICATION_UNAVAILABLE instead of reaching Stage 8.
+    // Proof of blockage: Running natively with 0 budget passes Stage 1 and Stage 2 natively and fails at Stage 3 with PAYLOAD_MISSING instead of reaching Stage 8.
     const zeroBudgetRequest: ExecutionRequest = {
       ...validRequestInput,
       executionContext: {
@@ -200,7 +200,7 @@ describe("AMS-0805 — Pipeline Replay Tests", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.stage).toBe("Bundle Verification");
-      expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+      expect(result.error.code).toBe("PAYLOAD_MISSING");
     }
   });
 
