@@ -5,16 +5,18 @@ import { fileURLToPath } from "url";
 import * as runtimeIndex from "./index.js";
 import { runInternalPipeline } from "./pipeline.js";
 import type { StageOverrideConfig } from "./types.js";
-import type {
-  ExecutionRequest,
-  IdentityRecord,
-  ReferentRecord,
-  StandingRecord,
-  AuthorityRecord,
-  CapabilityRecord,
-  EvidenceRecord,
-  PolicyRecord,
-  ExecutionContext,
+import crypto from "crypto";
+import {
+  canonicalizeJcs,
+  type ExecutionRequest,
+  type IdentityRecord,
+  type ReferentRecord,
+  type StandingRecord,
+  type AuthorityRecord,
+  type CapabilityRecord,
+  type EvidenceRecord,
+  type PolicyRecord,
+  type ExecutionContext,
 } from "@zyppi/domain";
 
 const url = (import.meta as unknown as { url: string }).url;
@@ -81,11 +83,16 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     validTo: "2026-07-28T12:00:00Z",
   };
 
+  const validEvidencePayload = { hello: "world" };
+  // SHA-256 of JCS canonicalized `{"hello":"world"}`
+  const validEvidenceHash =
+    "sha256:93a23971a914e5eacbf0a8d25154cda309c3c1c72fbb9914d47c60f3cb681588";
+
   const validEvidence: EvidenceRecord = {
     evidenceId: "evidence-001",
     identityId: "id-123",
     evidenceType: "caw:receipt",
-    hash: "hash123",
+    hash: validEvidenceHash,
     storageRef: "r2://key-123",
     retrievedAt: "2026-07-28T12:00:00Z",
   };
@@ -205,13 +212,13 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
   });
 
-  // 10.4: Default production native behavior (passes Stage 1 and Stage 2 natively, failing at Stage 3)
-  it("passes Stage 1 and Stage 2 natively and fails at Stage 3 (Bundle Verification) under default production configuration", () => {
+  // 10.4: Default production native behavior (passes Stage 1 and Stage 2 natively, failing at Stage 3 with PAYLOAD_MISSING when payloads are omitted)
+  it("passes Stage 1 and Stage 2 natively and fails at Stage 3 (Bundle Verification) with PAYLOAD_MISSING under default production configuration", () => {
     const result = runInternalPipeline(validRequestInput);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.stage).toBe("Bundle Verification");
-      expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+      expect(result.error.code).toBe("PAYLOAD_MISSING");
     }
     expect(result.trace).toEqual([
       "Admission",
@@ -280,7 +287,6 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
     // Verify that post-Admission stages pass context as the third argument to executePostAdmissionStage
     const stages = [
-      "Bundle Verification",
       "Dependency Resolution",
       "Compatibility Validation",
       "Receipt Generation",
@@ -831,7 +837,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.stage).toBe("Bundle Verification");
-        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(result.error.code).toBe("PAYLOAD_MISSING");
       }
       expect(result.trace).toEqual([
         "Admission",
@@ -871,7 +877,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.stage).toBe("Bundle Verification");
-        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(result.error.code).toBe("PAYLOAD_MISSING");
       }
       expect(result.trace).toEqual([
         "Admission",
@@ -957,7 +963,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       if (!result.ok) {
         expect(result.error.code).not.toBe("ADMISSION_UNAVAILABLE");
         expect(result.error.stage).toBe("Bundle Verification");
-        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(result.error.code).toBe("PAYLOAD_MISSING");
       }
     });
 
@@ -985,7 +991,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.stage).toBe("Bundle Verification");
-        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(result.error.code).toBe("PAYLOAD_MISSING");
       }
       expect(result.trace).toEqual([
         "Admission",
@@ -1012,7 +1018,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         expect(res.ok).toBe(false);
         if (!res.ok) {
           expect(res.error.stage).toBe("Bundle Verification");
-          expect(res.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+          expect(res.error.code).toBe("PAYLOAD_MISSING");
         }
       } finally {
         process.env.NODE_ENV = origEnv;
@@ -1030,7 +1036,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(res1.ok).toBe(false);
       if (!res1.ok) {
         expect(res1.error.stage).toBe("Bundle Verification");
-        expect(res1.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(res1.error.code).toBe("PAYLOAD_MISSING");
       }
       expect(res1.trace).toEqual([
         "Admission",
@@ -1146,11 +1152,13 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(req);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.stage).toBe("Dependency Resolution");
+        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
         expect(result.trace).toEqual([
           "Admission",
           "Bundle Discovery",
           "Bundle Verification",
+          "Dependency Resolution",
         ]);
       }
     });
@@ -1415,7 +1423,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.stage).toBe("Bundle Verification");
-        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(result.error.code).toBe("PAYLOAD_MISSING");
         expect(result.trace).toEqual([
           "Admission",
           "Bundle Discovery",
@@ -1451,6 +1459,357 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         expect(result.error.message).toContain(
           "Duplicate evidence reference detected",
         );
+      }
+    });
+  });
+
+  describe("CCP-RI-03A — Mandatory Test Suite (RI03A-T01 to RI03A-T12)", () => {
+    it("RI03A-T01 — Valid Evidence Verification", () => {
+      const payloads = new Map<string, unknown>([
+        [validEvidence.evidenceId, validEvidencePayload],
+      ]);
+      const result = runInternalPipeline(
+        validRequestInput,
+        undefined,
+        payloads,
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Dependency Resolution");
+        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+      ]);
+    });
+
+    it("RI03A-T02 — Empty Bundle, No Payloads", () => {
+      const emptyBundleReq: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [],
+        },
+      };
+      const result = runInternalPipeline(emptyBundleReq, undefined, undefined);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Dependency Resolution");
+        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+      ]);
+    });
+
+    it("RI03A-T03 — Missing Payload", () => {
+      const result = runInternalPipeline(
+        validRequestInput,
+        undefined,
+        new Map(),
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("PAYLOAD_MISSING");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+      ]);
+    });
+
+    it("RI03A-T04 — Hash Mismatch", () => {
+      const corruptPayloads = new Map<string, unknown>([
+        [validEvidence.evidenceId, { hello: "corrupted_world" }],
+      ]);
+      const result = runInternalPipeline(
+        validRequestInput,
+        undefined,
+        corruptPayloads,
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("HASH_MISMATCH");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+      ]);
+    });
+
+    it("RI03A-T05 — Bundle Size Limit", () => {
+      const largePayload = { data: "x".repeat(11 * 1024 * 1024) };
+      // Compute hash for large payload to bypass HASH_MISMATCH and trigger BUNDLE_LIMIT_EXCEEDED
+      const hashHex = crypto
+        .createHash("sha256")
+        .update(canonicalizeJcs(largePayload), "utf8")
+        .digest("hex");
+
+      const largeEvidence: EvidenceRecord = {
+        evidenceId: "large-ev-001",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: `sha256:${hashHex}`,
+        storageRef: "r2://key-large",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const largeReq: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [largeEvidence],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [largeEvidence],
+        },
+      };
+
+      const payloads = new Map<string, unknown>([
+        ["large-ev-001", largePayload],
+      ]);
+
+      const result = runInternalPipeline(largeReq, undefined, payloads);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("BUNDLE_LIMIT_EXCEEDED");
+      }
+    });
+
+    it("RI03A-T06 — Unsupported Hash Algorithm", () => {
+      const unsupportedEvidence: EvidenceRecord = {
+        evidenceId: "ev-unsupported",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "sha512:abcdef123456",
+        storageRef: "r2://key-unsupported",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [unsupportedEvidence],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [unsupportedEvidence],
+        },
+      };
+
+      const payloads = new Map<string, unknown>([
+        ["ev-unsupported", { data: true }],
+      ]);
+
+      const result = runInternalPipeline(req, undefined, payloads);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("UNSUPPORTED_HASH_ALGORITHM");
+      }
+    });
+
+    it("RI03A-T07 — Invalid Hash Format", () => {
+      const invalidFormatEvidence: EvidenceRecord = {
+        evidenceId: "ev-bad-format",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "invalid-hash-no-colon",
+        storageRef: "r2://key-bad-format",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [invalidFormatEvidence],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [invalidFormatEvidence],
+        },
+      };
+
+      const payloads = new Map<string, unknown>([
+        ["ev-bad-format", { data: true }],
+      ]);
+
+      const result = runInternalPipeline(req, undefined, payloads);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("INVALID_HASH_FORMAT");
+      }
+    });
+
+    it("RI03A-T08 — Deterministic Multi-Failure Selection", () => {
+      // Create two failing EvidenceRecords with distinct evidenceIds & different failure conditions:
+      // "ev-A": Missing payload -> PAYLOAD_MISSING
+      // "ev-B": Corrupted payload -> HASH_MISMATCH
+      const evA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: validEvidenceHash,
+        storageRef: "r2://key-A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+      const evB: EvidenceRecord = {
+        evidenceId: "ev-B",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: validEvidenceHash,
+        storageRef: "r2://key-B",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      // Only supply payload for ev-B (which is corrupt for validEvidenceHash)
+      const payloads = new Map<string, unknown>([
+        ["ev-B", { wrongPayload: true }],
+      ]);
+
+      // Permutation 1: [evA, evB]
+      const req1: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evA, evB],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evA, evB],
+        },
+      };
+
+      // Permutation 2: [evB, evA]
+      const req2: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evB, evA],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evB, evA],
+        },
+      };
+
+      const res1 = runInternalPipeline(req1, undefined, payloads);
+      const res2 = runInternalPipeline(req2, undefined, payloads);
+
+      // Both permutations must return the exact same Stage-3 PipelineError!
+      expect(res1).toEqual(res2);
+      expect(res1.ok).toBe(false);
+      if (!res1.ok) {
+        expect(res1.error.stage).toBe("Bundle Verification");
+        // Ordinal comparison selects "ev-A" first -> PAYLOAD_MISSING
+        expect(res1.error.code).toBe("PAYLOAD_MISSING");
+      }
+    });
+
+    it("RI03A-T09 — Input Non-Mutation", () => {
+      const payloads = new Map<string, unknown>([
+        [validEvidence.evidenceId, validEvidencePayload],
+      ]);
+      const reqCopy = JSON.parse(JSON.stringify(validRequestInput));
+      const frozenInput = deepFreeze(reqCopy);
+      const frozenPayloads = deepFreeze(payloads);
+
+      const result = runInternalPipeline(
+        frozenInput,
+        undefined,
+        frozenPayloads,
+      );
+      expect(result.ok).toBe(false);
+      expect(frozenInput).toEqual(validRequestInput);
+    });
+
+    it("RI03A-T10 — No I/O / Domain Leakage", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      // Audit forbidden symbols in production pipeline
+      expect(source).not.toContain("RegistryRepository");
+      expect(source).not.toContain("EvidencePayloadProvider");
+      expect(source).not.toContain("ObjectStorage");
+      expect(source).not.toContain("fetch(");
+      expect(source).not.toContain("axios");
+      expect(source).not.toContain("http");
+      expect(source).not.toContain("https");
+      expect(source).not.toContain("process.env");
+      expect(source).not.toContain("Date.now");
+      expect(source).not.toContain("new Date(");
+      expect(source).not.toContain("Math.random");
+      expect(source).not.toContain("crypto.randomUUID");
+      expect(source).not.toContain("CompositionManifest");
+      expect(source).not.toContain("EvaluationCoordinate");
+      expect(source).not.toContain("SCC");
+      expect(source).not.toContain("BCG");
+      expect(source).not.toContain("GS1");
+      expect(source).not.toContain("GTIN");
+      expect(source).not.toContain("DigitalLink");
+      expect(source).not.toContain("currentlyTrusted");
+    });
+
+    it("RI03A-T11 — Runtime Reverification After Application Preflight", () => {
+      // Prove Stage 3 executes verifyEvidenceBundle natively regardless of upstream preflight
+      const payloads = new Map<string, unknown>([
+        [validEvidence.evidenceId, validEvidencePayload],
+      ]);
+      const result = runInternalPipeline(
+        validRequestInput,
+        undefined,
+        payloads,
+      );
+      // Stage 3 succeeds natively, progressing to Stage 4
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+      ]);
+    });
+
+    it("RI03A-T12 — Native Progression", () => {
+      const payloads = new Map<string, unknown>([
+        [validEvidence.evidenceId, validEvidencePayload],
+      ]);
+      const result = runInternalPipeline(
+        validRequestInput,
+        undefined,
+        payloads,
+      );
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Dependency Resolution");
+        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+        expect(result.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+          "Dependency Resolution",
+        ]);
       }
     });
   });

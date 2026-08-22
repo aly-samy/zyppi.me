@@ -119,30 +119,6 @@ export function runInternalPipeline(
     if (stageName === "Receipt Generation") {
       return () => ({ ok: true });
     }
-    if (stageName === "Bundle Verification" && evidencePayloads) {
-      return () => {
-        const report = verifyEvidenceBundle(
-          executionRequest.evidenceBundle,
-          evidencePayloads,
-        );
-        if (!report.isValid) {
-          if (report.errorCode === "BUNDLE_LIMIT_EXCEEDED") {
-            return {
-              ok: false,
-              code: "BUNDLE_LIMIT_EXCEEDED",
-              message: "Evidence bundle exceeds the canonical size limit.",
-            };
-          }
-          const failedRecord = report.records.find((r) => !r.valid);
-          return {
-            ok: false,
-            code: failedRecord?.errorCode ?? "BUNDLE_VERIFICATION_FAILED",
-            message: `Runtime evidence verification failed: ${failedRecord?.errorCode || "invalid bundle"}`,
-          };
-        }
-        return { ok: true };
-      };
-    }
     return () => ({
       ok: false,
       code: `${stageName.toUpperCase().replace(/\s+/g, "_")}_UNAVAILABLE`,
@@ -187,7 +163,49 @@ export function runInternalPipeline(
   // 3. Bundle Verification
   const verificationRes = executePostAdmissionStage(
     "Bundle Verification",
-    makeUnimplementedAction("Bundle Verification"),
+    () => {
+      const payloads = evidencePayloads ?? new Map<string, unknown>();
+      const report = verifyEvidenceBundle(
+        executionRequest.evidenceBundle,
+        payloads,
+      );
+
+      if (report.isValid) {
+        return { ok: true };
+      }
+
+      if (report.errorCode === "BUNDLE_LIMIT_EXCEEDED") {
+        return {
+          ok: false,
+          code: "BUNDLE_LIMIT_EXCEEDED",
+          message: "Evidence bundle exceeds the canonical size limit.",
+        };
+      }
+
+      const failedRecords = report.records.filter((r) => !r.valid);
+      if (failedRecords.length > 0) {
+        const sorted = [...failedRecords].sort((a, b) =>
+          a.evidenceId < b.evidenceId
+            ? -1
+            : a.evidenceId > b.evidenceId
+              ? 1
+              : 0,
+        );
+        const selected = sorted[0];
+        const code = selected.errorCode ?? "BUNDLE_VERIFICATION_FAILED";
+        return {
+          ok: false,
+          code,
+          message: `Runtime evidence verification failed: ${code}`,
+        };
+      }
+
+      return {
+        ok: false,
+        code: "BUNDLE_VERIFICATION_FAILED",
+        message: "Runtime evidence verification failed.",
+      };
+    },
     context,
   );
   if (!verificationRes.ok) {
