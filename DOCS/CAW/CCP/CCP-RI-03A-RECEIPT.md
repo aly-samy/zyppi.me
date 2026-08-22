@@ -23,7 +23,10 @@ CCP-RI-03A — Native Bundle Verification Integration Closure
 
 ## 3. Final Commit SHA
 
-`ef9fd1f9d112762c8bff2e22af7ef07000f892cd`
+`0ad0a4c865d084518a28981e9f51d48fdb744168`
+
+- **Implementation Commit SHA:**
+  `0ad0a4c865d084518a28981e9f51d48fdb744168`
 
 ## 4. Files Modified
 
@@ -258,3 +261,14 @@ None. Implementation completed strictly within authorized mandate boundaries.
 `CCP-RI-03A` is FULLY IMPLEMENTED and VERIFIED.
 Runtime Stage 3 is natively closed.
 The next native capability boundary is `Stage 4 — Dependency Resolution` (`DEPENDENCY_RESOLUTION_UNAVAILABLE`).
+
+# Closure disposition
+
+CCP-RI-03
+→ CLOSED
+
+CCP-RI-03A
+→ IMPLEMENTED / VERIFIED / MERGE
+
+RI Stage 3 — Bundle Verification
+→ NATIVE / CLOSED
