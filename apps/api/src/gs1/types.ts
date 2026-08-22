@@ -5,11 +5,28 @@ import type {
   GS1ParseError,
   GS1ValidationError,
   GS1NormalizationError,
+  ExecutionReceipt,
+  ExecutionRequest,
 } from "@zyppi/domain";
 import type {
   ResolvedGs1DigitalLink,
   GS1ResolutionError,
 } from "@zyppi/contracts";
+import type {
+  PipelineResult,
+  PipelineError,
+} from "@zyppi/runtime/dist/types.js";
+import type {
+  AssessmentResult,
+  CompositionError,
+  EpistemicStatus,
+  HistoricalProvenanceLink,
+  PinnedStateReference,
+} from "../zprof/types.js";
+import type {
+  GS1CompositionBridgeAssemblyResult,
+  GS1CompositionBridgeInputOptions,
+} from "./gs1CompositionBridge.js";
 
 export type GS1BridgeErrorCode =
   | "PARSE_FAILED"
@@ -44,3 +61,49 @@ export interface GS1AnchorBridgeSuccess {
 
 export type GS1AnchorBridgeResult =
   GS1AnchorBridgeSuccess | GS1AnchorBridgeFailure;
+
+export interface GS1DomainResult {
+  readonly domain: "GS1";
+  readonly projectionSpecification: string;
+  readonly canonicalIdentifier: string;
+  readonly anchorCarrier: string;
+  readonly outcome: string;
+  readonly executionReceipt: ExecutionReceipt;
+  readonly provenanceLink: HistoricalProvenanceLink;
+  readonly sccId: string;
+  readonly bcgId: string;
+  readonly pinnedSemanticStateRef: PinnedStateReference;
+  readonly evaluatedAt: string;
+  readonly details: {
+    readonly aggregateResult: string;
+    readonly verifiedEvidenceCount: number;
+    readonly boundPrjSpecifications: readonly string[];
+    readonly boundRsnBlueprints: readonly string[];
+  };
+}
+
+/**
+ * Production GS1 Execution Bridge Options (CORR-0861-C-1).
+ * Requires explicit requestId, executionId, and tEInput.
+ * Exposes NO StageOverrideConfig / arbitrary Runtime overrides to caller.
+ */
+export interface GS1ExecutionBridgeInputOptions extends GS1CompositionBridgeInputOptions {
+  readonly evidencePayloads?: ReadonlyMap<string, unknown>;
+}
+
+export type GS1ExecutionBridgeResult =
+  | {
+      readonly ok: true;
+      readonly assembly: GS1CompositionBridgeAssemblyResult & { ok: true };
+      readonly executionRequest: ExecutionRequest;
+      readonly pipelineResult: PipelineResult;
+      readonly provenanceLink: HistoricalProvenanceLink;
+      readonly domainResult: GS1DomainResult;
+      readonly assessmentResult?: AssessmentResult;
+    }
+  | {
+      readonly ok: false;
+      readonly stage: "ASSEMBLY" | "ADAPTER" | "EXECUTION" | "PROJECTION";
+      readonly error: CompositionError | PipelineError;
+      readonly epistemicStatus?: EpistemicStatus;
+    };
