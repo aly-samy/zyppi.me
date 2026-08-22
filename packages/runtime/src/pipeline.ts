@@ -153,7 +153,31 @@ export function runInternalPipeline(
   // 2. Bundle Discovery
   const discoveryRes = executePostAdmissionStage(
     "Bundle Discovery",
-    makeUnimplementedAction("Bundle Discovery"),
+    () => {
+      const required =
+        executionRequest.activeConstitutionalView.evidenceReferences;
+      const supplied = executionRequest.evidenceBundle.evidenceRecords;
+
+      const suppliedSet = new Set(supplied.map((rec) => rec.evidenceId));
+      const missingIds: string[] = [];
+
+      for (const reqRec of required) {
+        if (!suppliedSet.has(reqRec.evidenceId)) {
+          missingIds.push(reqRec.evidenceId);
+        }
+      }
+
+      if (missingIds.length > 0) {
+        missingIds.sort();
+        return {
+          ok: false,
+          code: "BUNDLE_DISCOVERY_MISSING_REQUIRED_MATERIAL",
+          message: `Missing required evidence material: ${missingIds.join(", ")}`,
+        };
+      }
+
+      return { ok: true };
+    },
     context,
   );
   if (!discoveryRes.ok) {
