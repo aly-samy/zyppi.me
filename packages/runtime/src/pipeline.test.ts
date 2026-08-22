@@ -205,15 +205,19 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
   });
 
-  // 10.4: Default production/unimplemented behavior
-  it("passes Stage 1 natively and fails at Stage 2 (Bundle Discovery) under default production configuration", () => {
+  // 10.4: Default production native behavior (passes Stage 1 and Stage 2 natively, failing at Stage 3)
+  it("passes Stage 1 and Stage 2 natively and fails at Stage 3 (Bundle Verification) under default production configuration", () => {
     const result = runInternalPipeline(validRequestInput);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.stage).toBe("Bundle Discovery");
-      expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+      expect(result.error.stage).toBe("Bundle Verification");
+      expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
     }
-    expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+    expect(result.trace).toEqual([
+      "Admission",
+      "Bundle Discovery",
+      "Bundle Verification",
+    ]);
   });
 
   // 10.5: Determinism
@@ -274,9 +278,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     );
     expect(source).toContain("return () =>");
 
-    // Verify that all post-Admission stages (2 to 9) pass context as the third argument to executePostAdmissionStage
+    // Verify that post-Admission stages pass context as the third argument to executePostAdmissionStage
     const stages = [
-      "Bundle Discovery",
       "Bundle Verification",
       "Dependency Resolution",
       "Compatibility Validation",
@@ -299,6 +302,12 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
       expect(hasMatch).toBe(true);
     }
+
+    // Verify Bundle Discovery specifically (implemented in CCP-RI-02A)
+    const discoveryCleaned = source.replace(/\s+/g, " ");
+    expect(discoveryCleaned).toContain(
+      'executePostAdmissionStage( "Bundle Discovery", () => {',
+    );
 
     // Verify ACV Activation specifically (which is implemented in AMS-0801)
     const acvCleaned = source.replace(/\s+/g, " ");
@@ -821,10 +830,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(validRequestInput);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Bundle Discovery");
-        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
       }
-      expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+      ]);
     });
 
     it("RI01A-T02: Structural Invalidity", () => {
@@ -857,10 +870,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(requestWithDenyPolicy);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Bundle Discovery");
-        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
       }
-      expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+      ]);
 
       // Statically: verify pipeline.ts source code has no defaultPolicyEvaluator or policy status checks in Stage 1
       const source = fs.readFileSync(
@@ -939,8 +956,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).not.toBe("ADMISSION_UNAVAILABLE");
-        expect(result.error.stage).toBe("Bundle Discovery");
-        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
       }
     });
 
@@ -967,10 +984,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(syntheticNonGs1Request);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Bundle Discovery");
-        expect(result.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
       }
-      expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+      ]);
     });
 
     it("RI01A-T08: No Hidden I/O", () => {
@@ -990,8 +1011,8 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         const res = runInternalPipeline(validRequestInput);
         expect(res.ok).toBe(false);
         if (!res.ok) {
-          expect(res.error.stage).toBe("Bundle Discovery");
-          expect(res.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+          expect(res.error.stage).toBe("Bundle Verification");
+          expect(res.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
         }
       } finally {
         process.env.NODE_ENV = origEnv;
@@ -1008,10 +1029,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       expect(res1).toEqual(res2);
       expect(res1.ok).toBe(false);
       if (!res1.ok) {
-        expect(res1.error.stage).toBe("Bundle Discovery");
-        expect(res1.error.code).toBe("BUNDLE_DISCOVERY_UNAVAILABLE");
+        expect(res1.error.stage).toBe("Bundle Verification");
+        expect(res1.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
       }
-      expect(res1.trace).toEqual(["Admission", "Bundle Discovery"]);
+      expect(res1.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+      ]);
     });
 
     it("RI01A-T10: Input Non-Mutation", () => {
@@ -1021,6 +1046,412 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(frozenInput);
       expect(result.ok).toBe(false);
       expect(frozenInput).toEqual(validRequestInput);
+    });
+  });
+
+  describe("CCP-RI-02A — Mandatory Test Suite (RI02A-T01 to RI02A-T13)", () => {
+    it("RI02A-T01: Required Evidence Complete", () => {
+      const evidenceA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashA",
+        storageRef: "r2://A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+      const evidenceB: EvidenceRecord = {
+        evidenceId: "ev-B",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashB",
+        storageRef: "r2://B",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceA, evidenceB],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceA, evidenceB],
+        },
+      };
+
+      const result = runInternalPipeline(req);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.trace).toContain("Bundle Discovery");
+        expect(result.error.stage).toBe("Bundle Verification");
+      }
+    });
+
+    it("RI02A-T02: Required Evidence Missing", () => {
+      const evidenceA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashA",
+        storageRef: "r2://A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+      const evidenceB: EvidenceRecord = {
+        evidenceId: "ev-B",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashB",
+        storageRef: "r2://B",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceA, evidenceB],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceA],
+        },
+      };
+
+      const result = runInternalPipeline(req);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Discovery");
+        expect(result.error.code).toBe(
+          "BUNDLE_DISCOVERY_MISSING_REQUIRED_MATERIAL",
+        );
+        expect(result.error.message).toContain("ev-B");
+        expect(result.trace).toEqual(["Admission", "Bundle Discovery"]);
+      }
+    });
+
+    it("RI02A-T03: Empty Required Set", () => {
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [],
+        },
+      };
+
+      const result = runInternalPipeline(req);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+        ]);
+      }
+    });
+
+    it("RI02A-T04: Superset Evidence", () => {
+      const evidenceA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashA",
+        storageRef: "r2://A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+      const evidenceB: EvidenceRecord = {
+        evidenceId: "ev-B",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashB",
+        storageRef: "r2://B",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceA],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceA, evidenceB],
+        },
+      };
+
+      const result = runInternalPipeline(req);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+        ]);
+      }
+    });
+
+    it("RI02A-T05: No Cryptographic Verification", () => {
+      const evidenceA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        storageRef: "r2://A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceA],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceA],
+        },
+      };
+
+      // Provide corrupt evidencePayload where payload hash does not match evidenceA.hash
+      const evidencePayloads = new Map<string, unknown>([
+        ["ev-A", { corruptedData: true }],
+      ]);
+
+      const result = runInternalPipeline(req, undefined, evidencePayloads);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+        ]);
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("HASH_MISMATCH");
+      }
+    });
+
+    it("RI02A-T06: Domain Neutrality", () => {
+      const syntheticReq: ExecutionRequest = {
+        ...validRequestInput,
+        identity: {
+          identityId: "synth-id-1",
+          identityType: "synthetic_kind",
+          canonicalReference: "urn:synthetic:ref:1",
+          referentId: null,
+          status: "active",
+          createdAt: "2026-07-28T12:00:00Z",
+          updatedAt: "2026-07-28T12:00:00Z",
+        },
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          identity: {
+            identityId: "synth-id-1",
+            identityType: "synthetic_kind",
+            canonicalReference: "urn:synthetic:ref:1",
+            referentId: null,
+            status: "active",
+            createdAt: "2026-07-28T12:00:00Z",
+            updatedAt: "2026-07-28T12:00:00Z",
+          },
+        },
+      };
+
+      const result = runInternalPipeline(syntheticReq);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+        ]);
+      }
+    });
+
+    it("RI02A-T07: No I/O", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      expect(source).not.toContain("RegistryRepository");
+      expect(source).not.toContain("fetch(");
+      expect(source).not.toContain("axios");
+      expect(source).not.toContain("ObjectStorage");
+      expect(source).not.toContain("process.env");
+      expect(source).not.toContain("Date.now");
+      expect(source).not.toContain("new Date(");
+      expect(source).not.toContain("Math.random");
+      expect(source).not.toContain("crypto.randomUUID");
+    });
+
+    it("RI02A-T08: No Z-PROF Dependency", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      expect(source).not.toContain("zprof");
+      expect(source).not.toContain("CompositionManifest");
+      expect(source).not.toContain("EvaluationCoordinate");
+      expect(source).not.toContain("SCC");
+      expect(source).not.toContain("BCG");
+      expect(source).not.toContain("DomainTemplateCard");
+      expect(source).not.toContain("EpistemicRequirement");
+      expect(source).not.toContain("DigitalLink");
+      expect(source).not.toContain("DPP");
+    });
+
+    it("RI02A-T09: Deterministic Permutation", () => {
+      const evidenceA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashA",
+        storageRef: "r2://A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+      const evidenceB: EvidenceRecord = {
+        evidenceId: "ev-B",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashB",
+        storageRef: "r2://B",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const reqOrder1: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceA, evidenceB],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceB, evidenceA],
+        },
+      };
+
+      const reqOrder2: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceB, evidenceA],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceA, evidenceB],
+        },
+      };
+
+      const res1 = runInternalPipeline(reqOrder1);
+      const res2 = runInternalPipeline(reqOrder2);
+
+      expect(res1).toEqual(res2);
+    });
+
+    it("RI02A-T10: Input Non-Mutation", () => {
+      const evidenceA: EvidenceRecord = {
+        evidenceId: "ev-A",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashA",
+        storageRef: "r2://A",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const req: ExecutionRequest = {
+        ...validRequestInput,
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          evidenceReferences: [evidenceA],
+        },
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [evidenceA],
+        },
+      };
+
+      const frozenReq = deepFreeze(JSON.parse(JSON.stringify(req)));
+      const res = runInternalPipeline(frozenReq);
+
+      expect(res.ok).toBe(false);
+      expect(frozenReq).toEqual(req);
+    });
+
+    it("RI02A-T11: No New Bundle Primitive", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      const prohibitedPrimitives = [
+        "Bundle",
+        "RuntimeBundle",
+        "ConstitutionalBundle",
+        "CandidateBundle",
+        "DiscoveredBundle",
+        "DiscoveryBundle",
+        "RequiredMaterialBundle",
+      ];
+
+      for (const prim of prohibitedPrimitives) {
+        expect(source).not.toContain(`type ${prim}`);
+        expect(source).not.toContain(`interface ${prim}`);
+        expect(source).not.toContain(`class ${prim}`);
+      }
+    });
+
+    it("RI02A-T12: Native Progression", () => {
+      const result = runInternalPipeline(validRequestInput);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Bundle Verification");
+        expect(result.error.code).toBe("BUNDLE_VERIFICATION_UNAVAILABLE");
+        expect(result.trace).toEqual([
+          "Admission",
+          "Bundle Discovery",
+          "Bundle Verification",
+        ]);
+      }
+    });
+
+    it("RI02A-T13: Duplicate Evidence Identifier Governance", () => {
+      const duplicateEvidence: EvidenceRecord = {
+        evidenceId: "ev-DUP",
+        identityId: "id-123",
+        evidenceType: "caw:receipt",
+        hash: "hashDUP",
+        storageRef: "r2://DUP",
+        retrievedAt: "2026-07-28T12:00:00Z",
+      };
+
+      const reqWithDuplicateBundle = {
+        ...validRequestInput,
+        evidenceBundle: {
+          schemaVersion: "1.0",
+          evidenceRecords: [duplicateEvidence, duplicateEvidence],
+        },
+      };
+
+      const result = runInternalPipeline(reqWithDuplicateBundle);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Admission");
+        expect(result.error.code).toBe("INVALID_EXECUTION_REQUEST");
+        expect(result.error.message).toContain(
+          "Duplicate evidence reference detected",
+        );
+      }
     });
   });
 });
