@@ -1,10 +1,4 @@
-import type {
-  PolicyContext,
-  ExecutionContext,
-  Outcome,
-  EvidenceRecord,
-  ExecutionReceipt,
-} from "@zyppi/domain";
+import type { Outcome, EvidenceRecord, ExecutionReceipt } from "@zyppi/domain";
 import type { PolicyDecision } from "./evaluator.js";
 
 /**
@@ -94,18 +88,6 @@ export type PipelineResult =
  * Configuration options to control deterministic stage behavior during testing.
  */
 export interface StageOverrideConfig {
-  /**
-   * Internal Runtime evaluator seam.
-   *
-   * This exists only to deterministically control the evaluator in Runtime tests.
-   * It is not a production evaluator-registration mechanism and does not alter
-   * the production evaluator signature.
-   */
-  readonly policyEvaluator?: (
-    policyContext: PolicyContext,
-    executionContext: ExecutionContext,
-  ) => { readonly status: "authorized" | "denied" | "unavailable" };
-
   /**
    * Overrides the generated Outcome.
    */
