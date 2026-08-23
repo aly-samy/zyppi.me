@@ -2,20 +2,20 @@
 
 **Capability Closure Program — RI Native Execution Closure**
 
-| Field                        | Value                                           |
-| :--------------------------- | :---------------------------------------------- |
-| **Mandate**                  | `CCP-RI-04A`                                    |
-| **Program**                  | `CCP-0861 — Capability Closure Program`         |
-| **Track**                    | RI Native Execution Closure                     |
-| **Target Capability**        | `RI Stage 4 — Dependency Resolution`            |
-| **Classification**           | COMPLETION RECEIPT                              |
-| **Status**                   | VERIFIED — CLOSED                               |
-| **Implementation Authority** | LIMITED — THIS PACKET ONLY                      |
-| **Primary Repository**       | `aly-samy/zyppi.me`                             |
-| **Branch**                   | `jules-13536428299943560367-1d9baf32`           |
-| **Commit SHA**               | `40dabef6265c0dc1c245e24831dcf6e95ce7345f`      |
-| **Execution Agent**          | Jules / Authorized Repository Engineering Agent |
-| **Issuing Authority**        | Chair, Zyppi Constitutional Council             |
+| Field                         | Value                                           |
+| :---------------------------- | :---------------------------------------------- |
+| **Mandate**                   | `CCP-RI-04A`                                    |
+| **Program**                   | `CCP-0861 — Capability Closure Program`         |
+| **Track**                     | RI Native Execution Closure                     |
+| **Target Capability**         | `RI Stage 4 — Dependency Resolution`            |
+| **Classification**            | COMPLETION RECEIPT                              |
+| **Status**                    | VERIFIED — CLOSED                               |
+| **Implementation Authority**  | LIMITED — THIS PACKET ONLY                      |
+| **Primary Repository**        | `aly-samy/zyppi.me`                             |
+| **Branch**                    | `jules-13536428299943560367-1d9baf32`           |
+| **Implementation Commit SHA** | `8403cf930cd72ba1b2ca211c2f2d91550befb25f`      |
+| **Execution Agent**           | Jules / Authorized Repository Engineering Agent |
+| **Issuing Authority**         | Chair, Zyppi Constitutional Council             |
 
 ---
 
