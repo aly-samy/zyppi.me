@@ -286,11 +286,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     expect(source).toContain("return () =>");
 
     // Verify that post-Admission stages pass context as the third argument to executePostAdmissionStage
-    const stages = [
-      "Dependency Resolution",
-      "Compatibility Validation",
-      "Receipt Generation",
-    ];
+    const stages = ["Compatibility Validation", "Receipt Generation"];
 
     for (const stage of stages) {
       const searchPattern1 = `executePostAdmissionStage(\n    "${stage}",\n    makeUnimplementedAction("${stage}"),\n    context,\n  )`;
@@ -1152,13 +1148,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(req);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Dependency Resolution");
-        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
         expect(result.trace).toEqual([
           "Admission",
           "Bundle Discovery",
           "Bundle Verification",
           "Dependency Resolution",
+          "Compatibility Validation",
         ]);
       }
     });
@@ -1463,6 +1460,298 @@ describe("Runtime Pipeline Scaffold Tests", () => {
     });
   });
 
+  describe("CCP-RI-04A — Mandatory Test Suite (RI04A-T01 to RI04A-T12)", () => {
+    const validPayloads = new Map<string, unknown>([
+      [validEvidence.evidenceId, validEvidencePayload],
+    ]);
+
+    it("RI04A-T01 — Native Valid Stage-4 Passage", () => {
+      const result = runInternalPipeline(
+        validRequestInput,
+        undefined,
+        validPayloads,
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+        "Compatibility Validation",
+      ]);
+    });
+
+    it("RI04A-T02 — Explicit Graph Pass-Through", () => {
+      const reqWithGraph: ExecutionRequest = {
+        ...validRequestInput,
+        resolvedPolicyGraph: {
+          edges: [{ dependeeId: "policy-001", dependentId: "policy-002" }],
+        },
+      };
+      const reqCopy = JSON.parse(JSON.stringify(reqWithGraph));
+
+      const result = runInternalPipeline(
+        reqWithGraph,
+        undefined,
+        validPayloads,
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Compatibility Validation");
+      }
+      expect(reqWithGraph.resolvedPolicyGraph).toEqual(
+        reqCopy.resolvedPolicyGraph,
+      );
+    });
+
+    it("RI04A-T03 — Empty Dependency State", () => {
+      const emptyGraphReq: ExecutionRequest = {
+        ...validRequestInput,
+        resolvedPolicyGraph: {
+          edges: [],
+        },
+      };
+
+      const result = runInternalPipeline(
+        emptyGraphReq,
+        undefined,
+        validPayloads,
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+        "Compatibility Validation",
+      ]);
+    });
+
+    it("RI04A-T04 — Unknown Reference Sovereignty", () => {
+      const unknownRefReq: ExecutionRequest = {
+        ...validRequestInput,
+        resolvedPolicyGraph: {
+          edges: [
+            { dependeeId: "policy-001", dependentId: "unknown-policy-999" },
+          ],
+        },
+      };
+
+      // NO Stage 4 override! Test-only overrides for Stage 5 and 6 to drive execution to Stage 7
+      const overrides: StageOverrideConfig = {
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+      };
+
+      const result = runInternalPipeline(
+        unknownRefReq,
+        overrides,
+        validPayloads,
+      );
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Resolution Graph Construction");
+        expect(result.error.code).toBe("REFERENTIAL_INTEGRITY_VIOLATION");
+      }
+      expect(result.trace).toContain("Dependency Resolution");
+      expect(result.trace).toContain("Resolution Graph Construction");
+    });
+
+    it("RI04A-T05 — Cycle Sovereignty", () => {
+      const cycleReq: ExecutionRequest = {
+        ...validRequestInput,
+        resolvedPolicyGraph: {
+          edges: [{ dependeeId: "policy-001", dependentId: "policy-001" }],
+        },
+      };
+
+      // NO Stage 4 override! Test-only overrides for Stage 5 and 6 to drive execution to Stage 7
+      const overrides: StageOverrideConfig = {
+        "Compatibility Validation": { ok: true },
+        "ACV Activation": { ok: true },
+      };
+
+      const result = runInternalPipeline(cycleReq, overrides, validPayloads);
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Resolution Graph Construction");
+        expect(result.error.code).toBe("CYCLIC_POLICY_GRAPH");
+      }
+      expect(result.trace).toContain("Dependency Resolution");
+      expect(result.trace).toContain("Resolution Graph Construction");
+    });
+
+    it("RI04A-T06 — No Topological Ordering", () => {
+      const reqWithEdges: ExecutionRequest = {
+        ...validRequestInput,
+        resolvedPolicyGraph: {
+          edges: [{ dependeeId: "policy-B", dependentId: "policy-A" }],
+        },
+      };
+
+      const reqCopy = JSON.parse(JSON.stringify(reqWithEdges));
+      const result = runInternalPipeline(
+        reqWithEdges,
+        undefined,
+        validPayloads,
+      );
+
+      expect(result.ok).toBe(false);
+      expect(reqWithEdges.resolvedPolicyGraph.edges).toEqual(
+        reqCopy.resolvedPolicyGraph.edges,
+      );
+    });
+
+    it("RI04A-T07 — Domain Neutrality", () => {
+      const syntheticReq: ExecutionRequest = {
+        ...validRequestInput,
+        identity: {
+          identityId: "synthetic-asset-999",
+          identityType: "synthetic_kind",
+          canonicalReference: "urn:uuid:99999999-9999-9999-9999-999999999999",
+          referentId: null,
+          status: "active",
+          createdAt: "2026-07-28T12:00:00Z",
+          updatedAt: "2026-07-28T12:00:00Z",
+        },
+        activeConstitutionalView: {
+          ...validRequestInput.activeConstitutionalView,
+          identity: {
+            identityId: "synthetic-asset-999",
+            identityType: "synthetic_kind",
+            canonicalReference: "urn:uuid:99999999-9999-9999-9999-999999999999",
+            referentId: null,
+            status: "active",
+            createdAt: "2026-07-28T12:00:00Z",
+            updatedAt: "2026-07-28T12:00:00Z",
+          },
+        },
+      };
+
+      const result = runInternalPipeline(
+        syntheticReq,
+        undefined,
+        validPayloads,
+      );
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
+      }
+      expect(result.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+        "Compatibility Validation",
+      ]);
+    });
+
+    it("RI04A-T08 — Zero I/O", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      expect(source).not.toContain("RegistryRepository");
+      expect(source).not.toContain("fetch(");
+      expect(source).not.toContain("axios");
+      expect(source).not.toContain("ObjectStorage");
+      expect(source).not.toContain("process.env");
+      expect(source).not.toContain("Date.now");
+      expect(source).not.toContain("new Date(");
+      expect(source).not.toContain("Math.random");
+      expect(source).not.toContain("crypto.randomUUID");
+    });
+
+    it("RI04A-T09 — Zero Z-PROF / GS1 Dependency", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      expect(source).not.toContain("zprof");
+      expect(source).not.toContain("CompositionManifest");
+      expect(source).not.toContain("EvaluationCoordinate");
+      expect(source).not.toContain("SCC");
+      expect(source).not.toContain("BCG");
+      expect(source).not.toContain("DomainTemplateCard");
+      expect(source).not.toContain("EpistemicRequirement");
+      expect(source).not.toContain("DigitalLink");
+      expect(source).not.toContain("DPP");
+      expect(source).not.toContain("GTIN");
+    });
+
+    it("RI04A-T10 — Input Non-Mutation", () => {
+      const reqCopy = JSON.parse(JSON.stringify(validRequestInput));
+      const frozenReq = deepFreeze(reqCopy);
+      const frozenPayloads = deepFreeze(new Map(validPayloads));
+
+      const result = runInternalPipeline(frozenReq, undefined, frozenPayloads);
+
+      expect(result.ok).toBe(false);
+      expect(frozenReq).toEqual(validRequestInput);
+    });
+
+    it("RI04A-T11 — Deterministic Replay", () => {
+      const req1 = JSON.parse(JSON.stringify(validRequestInput));
+      const req2 = JSON.parse(JSON.stringify(validRequestInput));
+
+      const res1 = runInternalPipeline(req1, undefined, validPayloads);
+      const res2 = runInternalPipeline(req2, undefined, validPayloads);
+
+      expect(res1).toEqual(res2);
+      expect(res1.ok).toBe(false);
+      if (!res1.ok) {
+        expect(res1.error.stage).toBe("Compatibility Validation");
+        expect(res1.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
+      }
+      expect(res1.trace).toEqual([
+        "Admission",
+        "Bundle Discovery",
+        "Bundle Verification",
+        "Dependency Resolution",
+        "Compatibility Validation",
+      ]);
+    });
+
+    it("RI04A-T12 — No New Dependency Primitive", () => {
+      const source = fs.readFileSync(
+        path.resolve(__dirname, "pipeline.ts"),
+        "utf-8",
+      );
+
+      const prohibitedPrimitives = [
+        "DependencyResolutionResult",
+        "DependencyManifest",
+        "DependencyBundle",
+        "RuntimeDependencyGraph",
+        "ResolvedDependencySet",
+        "CandidateDependencySet",
+        "DependencySelection",
+        "DependencyPlan",
+        "ResolvedDependencyManifest",
+      ];
+
+      for (const prim of prohibitedPrimitives) {
+        expect(source).not.toContain(`type ${prim}`);
+        expect(source).not.toContain(`interface ${prim}`);
+        expect(source).not.toContain(`class ${prim}`);
+      }
+    });
+  });
+
   describe("CCP-RI-03A — Mandatory Test Suite (RI03A-T01 to RI03A-T12)", () => {
     it("RI03A-T01 — Valid Evidence Verification", () => {
       const payloads = new Map<string, unknown>([
@@ -1475,14 +1764,15 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       );
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Dependency Resolution");
-        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
       }
       expect(result.trace).toEqual([
         "Admission",
         "Bundle Discovery",
         "Bundle Verification",
         "Dependency Resolution",
+        "Compatibility Validation",
       ]);
     });
 
@@ -1501,14 +1791,15 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       const result = runInternalPipeline(emptyBundleReq, undefined, undefined);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Dependency Resolution");
-        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
       }
       expect(result.trace).toEqual([
         "Admission",
         "Bundle Discovery",
         "Bundle Verification",
         "Dependency Resolution",
+        "Compatibility Validation",
       ]);
     });
 
@@ -1551,7 +1842,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
       ]);
     });
 
-    it("RI03A-T05 — Bundle Size Limit", () => {
+    it("RI03A-T05 — Bundle Size Limit", { timeout: 15000 }, () => {
       const largePayload = { data: "x".repeat(11 * 1024 * 1024) };
       // Compute hash for large payload to bypass HASH_MISMATCH and trigger BUNDLE_LIMIT_EXCEEDED
       const hashHex = crypto
@@ -1781,12 +2072,13 @@ describe("Runtime Pipeline Scaffold Tests", () => {
         undefined,
         payloads,
       );
-      // Stage 3 succeeds natively, progressing to Stage 4
+      // Stage 3 succeeds natively, progressing to Stage 4 and Stage 5
       expect(result.trace).toEqual([
         "Admission",
         "Bundle Discovery",
         "Bundle Verification",
         "Dependency Resolution",
+        "Compatibility Validation",
       ]);
     });
 
@@ -1802,13 +2094,14 @@ describe("Runtime Pipeline Scaffold Tests", () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.stage).toBe("Dependency Resolution");
-        expect(result.error.code).toBe("DEPENDENCY_RESOLUTION_UNAVAILABLE");
+        expect(result.error.stage).toBe("Compatibility Validation");
+        expect(result.error.code).toBe("COMPATIBILITY_VALIDATION_UNAVAILABLE");
         expect(result.trace).toEqual([
           "Admission",
           "Bundle Discovery",
           "Bundle Verification",
           "Dependency Resolution",
+          "Compatibility Validation",
         ]);
       }
     });

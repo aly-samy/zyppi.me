@@ -215,7 +215,7 @@ export function runInternalPipeline(
   // 4. Dependency Resolution
   const dependencyRes = executePostAdmissionStage(
     "Dependency Resolution",
-    makeUnimplementedAction("Dependency Resolution"),
+    () => ({ ok: true }),
     context,
   );
   if (!dependencyRes.ok) {

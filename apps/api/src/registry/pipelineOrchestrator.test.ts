@@ -180,9 +180,11 @@ describe("Pipeline Orchestrator Integration Tests — AMS-0801", () => {
     if (result.ok) {
       expect(result.pipelineResult.ok).toBe(false);
       if (!result.pipelineResult.ok) {
-        expect(result.pipelineResult.error.stage).toBe("Dependency Resolution");
+        expect(result.pipelineResult.error.stage).toBe(
+          "Compatibility Validation",
+        );
         expect(result.pipelineResult.error.code).toBe(
-          "DEPENDENCY_RESOLUTION_UNAVAILABLE",
+          "COMPATIBILITY_VALIDATION_UNAVAILABLE",
         );
       }
     }
