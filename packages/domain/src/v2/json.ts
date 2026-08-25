@@ -8,13 +8,15 @@ export type JsonValueV2 =
 /**
  * Validates whether a value is a strict, valid JSON value per V2 rules:
  * - null, boolean, finite number, string
- * - Array of valid JsonValueV2
+ * - Array of valid JsonValueV2 (no extra non-numeric own properties)
  * - Plain object with valid JsonValueV2 values
  *
  * Rejects:
  * - undefined, NaN, Infinity, -Infinity, BigInt, Date, Map, Set, Buffer,
  *   typed arrays, RegExp, functions, symbols, class instances, cyclic objects,
- *   objects with non-Object prototype, getters.
+ *   objects with non-Object prototype, getters/accessors.
+ *
+ * Safely handles Proxy or getter exceptions by catching reflection errors.
  */
 export function isStrictJsonValueV2(val: unknown): boolean {
   const seen = new Set<unknown>();
@@ -34,7 +36,6 @@ export function isStrictJsonValueV2(val: unknown): boolean {
       return false;
     }
 
-    // It's an object/array - check for cycle
     if (seen.has(v)) {
       return false;
     }
@@ -42,12 +43,19 @@ export function isStrictJsonValueV2(val: unknown): boolean {
 
     try {
       if (Array.isArray(v)) {
-        for (let i = 0; i < v.length; i++) {
-          // Check if index property has a getter or is invalid
-          const desc = Object.getOwnPropertyDescriptor(v, i);
-          if (desc && (desc.get || desc.set)) {
+        const ownKeys = Reflect.ownKeys(v);
+        for (const k of ownKeys) {
+          if (k === "length") continue;
+          if (typeof k !== "string" || !/^\d+$/.test(k)) {
             return false;
           }
+          const desc = Object.getOwnPropertyDescriptor(v, k);
+          if (!desc || desc.get || desc.set) {
+            return false;
+          }
+        }
+
+        for (let i = 0; i < v.length; i++) {
           if (!validate(v[i])) {
             return false;
           }
@@ -55,7 +63,6 @@ export function isStrictJsonValueV2(val: unknown): boolean {
         return true;
       }
 
-      // Rejects special instances like Date, RegExp, Map, Set, Buffer, ArrayBuffer, TypedArrays, etc.
       const proto = Object.getPrototypeOf(v as object);
       if (proto !== Object.prototype && proto !== null) {
         return false;
@@ -76,10 +83,16 @@ export function isStrictJsonValueV2(val: unknown): boolean {
       }
 
       return true;
+    } catch {
+      return false;
     } finally {
       seen.delete(v);
     }
   }
 
-  return validate(val);
+  try {
+    return validate(val);
+  } catch {
+    return false;
+  }
 }

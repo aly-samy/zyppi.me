@@ -55,8 +55,12 @@ function isPlainObject(val: unknown): val is Record<string, unknown> {
   if (val === null || typeof val !== "object" || Array.isArray(val)) {
     return false;
   }
-  const proto = Object.getPrototypeOf(val);
-  return proto === Object.prototype || proto === null;
+  try {
+    const proto = Object.getPrototypeOf(val);
+    return proto === Object.prototype || proto === null;
+  } catch {
+    return false;
+  }
 }
 
 function checkAllowedKeys(
@@ -64,17 +68,25 @@ function checkAllowedKeys(
   allowedKeys: string[],
   path: string,
 ): ExecutionRequestV2ValidationError | null {
-  const keys = Object.keys(obj);
-  for (const k of keys) {
-    if (!allowedKeys.includes(k)) {
-      return {
-        code: "UNKNOWN_FIELD",
-        path: path ? `${path}.${k}` : k,
-        message: `Unknown field '${k}'`,
-      };
+  try {
+    const keys = Object.keys(obj);
+    for (const k of keys) {
+      if (!allowedKeys.includes(k)) {
+        return {
+          code: "UNKNOWN_FIELD",
+          path: path ? `${path}.${k}` : k,
+          message: `Unknown field '${k}'`,
+        };
+      }
     }
+    return null;
+  } catch {
+    return {
+      code: "INVALID_TYPE",
+      path,
+      message: `${path} failed property key inspection`,
+    };
   }
-  return null;
 }
 
 function validateRef<F extends ConstitutionalRefFamilyV2>(
@@ -178,6 +190,53 @@ function validateRef<F extends ConstitutionalRefFamilyV2>(
         message: "provenanceRef must be a non-empty string if provided",
       };
     }
+  }
+
+  return null;
+}
+
+// C06: PolicyRefV2 requires exact version, stateRef, and provenanceRef
+function validatePolicyRef(
+  input: unknown,
+  path: string,
+): ExecutionRequestV2ValidationError | null {
+  const errBase = validateRef(input, path, "POLICY");
+  if (errBase) return errBase;
+
+  const ref = input as Record<string, unknown>;
+
+  if (typeof ref.version !== "string" || ref.version.trim() === "") {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.version`,
+      message: `PolicyRef at ${path} requires an explicit exact version`,
+    };
+  }
+  if (isFloatingVersion(ref.version)) {
+    return {
+      code: "INVALID_VALUE",
+      path: `${path}.version`,
+      message: `Floating or non-exact policy version '${ref.version}' is rejected`,
+    };
+  }
+
+  if (typeof ref.stateRef !== "string" || ref.stateRef.trim() === "") {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.stateRef`,
+      message: `PolicyRef at ${path} requires an explicit stateRef`,
+    };
+  }
+
+  if (
+    typeof ref.provenanceRef !== "string" ||
+    ref.provenanceRef.trim() === ""
+  ) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.provenanceRef`,
+      message: `PolicyRef at ${path} requires an explicit provenanceRef`,
+    };
   }
 
   return null;
@@ -459,6 +518,7 @@ function validateParticipation(
   return null;
 }
 
+// C01: Candidate state & exact candidate state instance mandatory
 function validateIntent(
   input: unknown,
   path: string,
@@ -527,97 +587,121 @@ function validateIntent(
   );
   if (errTarget) return errTarget;
 
-  if (raw.candidateStateBinding !== undefined) {
-    const csbPath = `${path}.candidateStateBinding`;
-    if (!isPlainObject(raw.candidateStateBinding)) {
+  // C01: Candidate State Binding is MANDATORY
+  if (
+    !("candidateStateBinding" in raw) ||
+    raw.candidateStateBinding === undefined
+  ) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.candidateStateBinding`,
+      message: `${path}.candidateStateBinding is mandatory in V2 Intent`,
+    };
+  }
+
+  const csbPath = `${path}.candidateStateBinding`;
+  if (!isPlainObject(raw.candidateStateBinding)) {
+    return {
+      code: "INVALID_TYPE",
+      path: csbPath,
+      message: `${csbPath} must be a plain object`,
+    };
+  }
+
+  const errCsbKey = checkAllowedKeys(
+    raw.candidateStateBinding,
+    ["stateTargetRef", "stateSemanticRef", "exactStateInstance"],
+    csbPath,
+  );
+  if (errCsbKey) return errCsbKey;
+
+  const csb = raw.candidateStateBinding as Record<string, unknown>;
+
+  const errStRef = validateRef(
+    csb.stateTargetRef,
+    `${csbPath}.stateTargetRef`,
+    "TARGET",
+  );
+  if (errStRef) return errStRef;
+
+  const errSsRef = validateRef(
+    csb.stateSemanticRef,
+    `${csbPath}.stateSemanticRef`,
+    "STATE_SEMANTIC",
+  );
+  if (errSsRef) return errSsRef;
+
+  // C01: exactStateInstance is MANDATORY in CandidateStateBinding
+  if (!("exactStateInstance" in csb) || csb.exactStateInstance === undefined) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${csbPath}.exactStateInstance`,
+      message: `${csbPath}.exactStateInstance is mandatory`,
+    };
+  }
+
+  const esiPath = `${csbPath}.exactStateInstance`;
+  if (!isPlainObject(csb.exactStateInstance)) {
+    return {
+      code: "INVALID_TYPE",
+      path: esiPath,
+      message: `${esiPath} must be a plain object`,
+    };
+  }
+
+  const esi = csb.exactStateInstance as Record<string, unknown>;
+  if (esi.kind === "GOVERNED_ARTIFACT_REF") {
+    const errEsiKey = checkAllowedKeys(
+      esi,
+      ["kind", "stateInstanceRef"],
+      esiPath,
+    );
+    if (errEsiKey) return errEsiKey;
+
+    const errSir = validateRef(
+      esi.stateInstanceRef,
+      `${esiPath}.stateInstanceRef`,
+      "STATE_INSTANCE",
+    );
+    if (errSir) return errSir;
+  } else if (esi.kind === "OWNER_TYPED_INLINE") {
+    const errEsiKey = checkAllowedKeys(
+      esi,
+      ["kind", "ownerRef", "schemaRef", "material"],
+      esiPath,
+    );
+    if (errEsiKey) return errEsiKey;
+
+    const errOwnRef = validateRef(esi.ownerRef, `${esiPath}.ownerRef`, "OWNER");
+    if (errOwnRef) return errOwnRef;
+
+    const errSchRef = validateRef(
+      esi.schemaRef,
+      `${esiPath}.schemaRef`,
+      "STATE_ARTIFACT",
+    );
+    if (errSchRef) return errSchRef;
+
+    if (esi.material === undefined || !isStrictJsonValueV2(esi.material)) {
       return {
-        code: "INVALID_TYPE",
-        path: csbPath,
-        message: `${csbPath} must be a plain object`,
+        code: "INVALID_RUNTIME_VALUE",
+        path: `${esiPath}.material`,
+        message: `${esiPath}.material must be a strict JSON value`,
       };
     }
-    const errCsbKey = checkAllowedKeys(
-      raw.candidateStateBinding,
-      [
-        "stateTargetRef",
-        "stateSemanticRef",
-        "exactStateInstance",
-        "ownerTypedMaterial",
-      ],
-      csbPath,
-    );
-    if (errCsbKey) return errCsbKey;
-
-    const csb = raw.candidateStateBinding as Record<string, unknown>;
-
-    const errStRef = validateRef(
-      csb.stateTargetRef,
-      `${csbPath}.stateTargetRef`,
-      "TARGET",
-    );
-    if (errStRef) return errStRef;
-
-    const errSsRef = validateRef(
-      csb.stateSemanticRef,
-      `${csbPath}.stateSemanticRef`,
-      "STATE_SEMANTIC",
-    );
-    if (errSsRef) return errSsRef;
-
-    if (csb.exactStateInstance !== undefined) {
-      const errEsi = validateRef(
-        csb.exactStateInstance,
-        `${csbPath}.exactStateInstance`,
-        "STATE_INSTANCE",
-      );
-      if (errEsi) return errEsi;
-    }
-
-    if (csb.ownerTypedMaterial !== undefined) {
-      const otmPath = `${csbPath}.ownerTypedMaterial`;
-      if (!isPlainObject(csb.ownerTypedMaterial)) {
-        return {
-          code: "INVALID_TYPE",
-          path: otmPath,
-          message: `${otmPath} must be a plain object`,
-        };
-      }
-      const errOtmKey = checkAllowedKeys(
-        csb.ownerTypedMaterial,
-        ["ownerRef", "schemaRef", "material"],
-        otmPath,
-      );
-      if (errOtmKey) return errOtmKey;
-
-      const otm = csb.ownerTypedMaterial as Record<string, unknown>;
-
-      const errOwnRef = validateRef(
-        otm.ownerRef,
-        `${otmPath}.ownerRef`,
-        "OWNER",
-      );
-      if (errOwnRef) return errOwnRef;
-
-      const errSchRef = validateRef(
-        otm.schemaRef,
-        `${otmPath}.schemaRef`,
-        "STATE_ARTIFACT",
-      );
-      if (errSchRef) return errSchRef;
-
-      if (otm.material === undefined || !isStrictJsonValueV2(otm.material)) {
-        return {
-          code: "INVALID_RUNTIME_VALUE",
-          path: `${otmPath}.material`,
-          message: `${otmPath}.material must be a strict JSON value`,
-        };
-      }
-    }
+  } else {
+    return {
+      code: "INVALID_VALUE",
+      path: `${esiPath}.kind`,
+      message:
+        "exactStateInstance.kind must be GOVERNED_ARTIFACT_REF or OWNER_TYPED_INLINE",
+    };
   }
 
   return null;
 }
 
+// C02: Intent/Action compatibility binding must have mandatory authority cross-reference
 function validateRequestedAction(
   input: unknown,
   path: string,
@@ -651,7 +735,7 @@ function validateRequestedAction(
   );
   if (errActRef) return errActRef;
 
-  // intentActionCompatibilityBinding
+  // C02: intentActionCompatibilityBinding
   const compatPath = `${path}.intentActionCompatibilityBinding`;
   if (!isPlainObject(raw.intentActionCompatibilityBinding)) {
     return {
@@ -660,35 +744,51 @@ function validateRequestedAction(
       message: `${compatPath} must be a plain object`,
     };
   }
-  const errCompatKey = checkAllowedKeys(
-    raw.intentActionCompatibilityBinding,
-    ["compatibilityKind", "contractRef"],
-    compatPath,
-  );
-  if (errCompatKey) return errCompatKey;
 
   const compat = raw.intentActionCompatibilityBinding as Record<
     string,
     unknown
   >;
-  if (
-    compat.compatibilityKind !== "GOVERNED_SEMANTIC_CONTRACT" &&
-    compat.compatibilityKind !== "OWNER_DETERMINATION"
-  ) {
-    return {
-      code: "INVALID_VALUE",
-      path: `${compatPath}.compatibilityKind`,
-      message:
-        "compatibilityKind must be GOVERNED_SEMANTIC_CONTRACT or OWNER_DETERMINATION",
-    };
-  }
-  if (compat.contractRef !== undefined) {
+  if (compat.kind === "GOVERNED_SEMANTIC_CONTRACT") {
+    const errCompatKey = checkAllowedKeys(
+      compat,
+      ["kind", "exactCompatibilityContractRef"],
+      compatPath,
+    );
+    if (errCompatKey) return errCompatKey;
+
     const errCR = validateRef(
-      compat.contractRef,
-      `${compatPath}.contractRef`,
+      compat.exactCompatibilityContractRef,
+      `${compatPath}.exactCompatibilityContractRef`,
       "COMPATIBILITY_CONTRACT",
     );
     if (errCR) return errCR;
+  } else if (compat.kind === "OWNER_DETERMINATION") {
+    const errCompatKey = checkAllowedKeys(
+      compat,
+      ["kind", "ownerDeterminationBindingRef"],
+      compatPath,
+    );
+    if (errCompatKey) return errCompatKey;
+
+    if (
+      typeof compat.ownerDeterminationBindingRef !== "string" ||
+      compat.ownerDeterminationBindingRef.trim() === ""
+    ) {
+      return {
+        code: "INVALID_VALUE",
+        path: `${compatPath}.ownerDeterminationBindingRef`,
+        message:
+          "ownerDeterminationBindingRef must be a non-empty string in OWNER_DETERMINATION compatibility",
+      };
+    }
+  } else {
+    return {
+      code: "INVALID_VALUE",
+      path: `${compatPath}.kind`,
+      message:
+        "intentActionCompatibilityBinding.kind must be GOVERNED_SEMANTIC_CONTRACT or OWNER_DETERMINATION",
+    };
   }
 
   // actionPerformerBindings [1..N]
@@ -979,6 +1079,7 @@ function validateRequestedAction(
   return null;
 }
 
+// C05: Exact state references required for all state bindings
 function validateConstitutionalState(
   input: unknown,
   path: string,
@@ -1021,13 +1122,12 @@ function validateConstitutionalState(
   }
 
   const viewKeys = new Set<string>();
-  const validKinds = [
+  const normalKinds = [
     "IDENTITY_STATE",
     "STANDING_STATE",
     "AUTHORITY_STATE",
     "CAPABILITY_STATE",
     "AGENCY_STATE",
-    "RELATIONSHIP_STATE",
   ];
 
   for (let i = 0; i < raw.stateViews.length; i++) {
@@ -1090,23 +1190,6 @@ function validateConstitutionalState(
           message: `${sbPath} must be a plain object`,
         };
       }
-      const errSbKey = checkAllowedKeys(
-        sb,
-        [
-          "stateBindingKey",
-          "kind",
-          "subjectRef",
-          "stateSemanticRef",
-          "exactStateRef",
-          "stateArtifactRef",
-          "relationshipKind",
-          "relationshipRef",
-          "sourceEndpointRef",
-          "targetEndpointRef",
-        ],
-        sbPath,
-      );
-      if (errSbKey) return errSbKey;
 
       if (
         typeof sb.stateBindingKey !== "string" ||
@@ -1128,82 +1211,198 @@ function validateConstitutionalState(
       }
       sbKeys.add(sb.stateBindingKey);
 
-      if (typeof sb.kind !== "string" || !validKinds.includes(sb.kind)) {
+      if (typeof sb.kind !== "string") {
         return {
           code: "INVALID_VALUE",
           path: `${sbPath}.kind`,
-          message: `kind must be one of: ${validKinds.join(", ")}`,
+          message: "kind is required",
         };
       }
 
-      const errSubjRef = validateRef(
-        sb.subjectRef,
-        `${sbPath}.subjectRef`,
-        "SUBJECT",
-      );
-      if (errSubjRef) return errSubjRef;
+      if (normalKinds.includes(sb.kind)) {
+        const errSbKey = checkAllowedKeys(
+          sb,
+          [
+            "stateBindingKey",
+            "kind",
+            "subjectRef",
+            "stateSemanticRef",
+            "exactStateRef",
+            "stateArtifactRef",
+          ],
+          sbPath,
+        );
+        if (errSbKey) return errSbKey;
 
-      const errSsRef = validateRef(
-        sb.stateSemanticRef,
-        `${sbPath}.stateSemanticRef`,
-        "STATE_SEMANTIC",
-      );
-      if (errSsRef) return errSsRef;
+        const errSubjRef = validateRef(
+          sb.subjectRef,
+          `${sbPath}.subjectRef`,
+          "SUBJECT",
+        );
+        if (errSubjRef) return errSubjRef;
 
-      if (sb.exactStateRef !== undefined) {
+        const errSsRef = validateRef(
+          sb.stateSemanticRef,
+          `${sbPath}.stateSemanticRef`,
+          "STATE_SEMANTIC",
+        );
+        if (errSsRef) return errSsRef;
+
+        // C05: exactStateRef is MANDATORY for normal state bindings
+        if (!("exactStateRef" in sb) || sb.exactStateRef === undefined) {
+          return {
+            code: "MISSING_FIELD",
+            path: `${sbPath}.exactStateRef`,
+            message: `${sbPath}.exactStateRef is mandatory for ${sb.kind}`,
+          };
+        }
         const errEsi = validateRef(
           sb.exactStateRef,
           `${sbPath}.exactStateRef`,
           "STATE_INSTANCE",
         );
         if (errEsi) return errEsi;
-      }
 
-      if (sb.stateArtifactRef !== undefined) {
-        const errSa = validateRef(
-          sb.stateArtifactRef,
-          `${sbPath}.stateArtifactRef`,
-          "STATE_ARTIFACT",
-        );
-        if (errSa) return errSa;
-      }
+        if (sb.stateArtifactRef !== undefined) {
+          const errSa = validateRef(
+            sb.stateArtifactRef,
+            `${sbPath}.stateArtifactRef`,
+            "STATE_ARTIFACT",
+          );
+          if (errSa) return errSa;
+        }
+      } else if (sb.kind === "RELATIONSHIP_STATE") {
+        if (sb.relationshipKind === "STRUCTURAL") {
+          const errSbKey = checkAllowedKeys(
+            sb,
+            [
+              "stateBindingKey",
+              "kind",
+              "relationshipKind",
+              "sourceEndpointRef",
+              "relationshipSemanticRef",
+              "targetEndpointRef",
+              "exactTopologyStateRef",
+            ],
+            sbPath,
+          );
+          if (errSbKey) return errSbKey;
 
-      if (sb.relationshipKind !== undefined) {
-        if (
-          sb.relationshipKind !== "STRUCTURAL" &&
-          sb.relationshipKind !== "REIFIED"
-        ) {
+          const errSrcRef = validateRef(
+            sb.sourceEndpointRef,
+            `${sbPath}.sourceEndpointRef`,
+          );
+          if (errSrcRef) return errSrcRef;
+
+          const errRelSemRef = validateRef(
+            sb.relationshipSemanticRef,
+            `${sbPath}.relationshipSemanticRef`,
+            "RELATIONSHIP",
+          );
+          if (errRelSemRef) return errRelSemRef;
+
+          const errTgtRef = validateRef(
+            sb.targetEndpointRef,
+            `${sbPath}.targetEndpointRef`,
+          );
+          if (errTgtRef) return errTgtRef;
+
+          if (
+            !("exactTopologyStateRef" in sb) ||
+            sb.exactTopologyStateRef === undefined
+          ) {
+            return {
+              code: "MISSING_FIELD",
+              path: `${sbPath}.exactTopologyStateRef`,
+              message: `${sbPath}.exactTopologyStateRef is mandatory for STRUCTURAL relationship state`,
+            };
+          }
+
+          const errEtsRef = validateRef(
+            sb.exactTopologyStateRef,
+            `${sbPath}.exactTopologyStateRef`,
+            "STATE_INSTANCE",
+          );
+          if (errEtsRef) return errEtsRef;
+        } else if (sb.relationshipKind === "REIFIED") {
+          const errSbKey = checkAllowedKeys(
+            sb,
+            [
+              "stateBindingKey",
+              "kind",
+              "relationshipKind",
+              "relationshipRef",
+              "exactStateRef",
+              "subjectRef",
+              "stateSemanticRef",
+              "stateArtifactRef",
+            ],
+            sbPath,
+          );
+          if (errSbKey) return errSbKey;
+
+          const errRelRef = validateRef(
+            sb.relationshipRef,
+            `${sbPath}.relationshipRef`,
+            "RELATIONSHIP",
+          );
+          if (errRelRef) return errRelRef;
+
+          if (!("exactStateRef" in sb) || sb.exactStateRef === undefined) {
+            return {
+              code: "MISSING_FIELD",
+              path: `${sbPath}.exactStateRef`,
+              message: `${sbPath}.exactStateRef is mandatory for REIFIED relationship state`,
+            };
+          }
+
+          const errEsi = validateRef(
+            sb.exactStateRef,
+            `${sbPath}.exactStateRef`,
+            "STATE_INSTANCE",
+          );
+          if (errEsi) return errEsi;
+
+          if (sb.subjectRef !== undefined) {
+            const errSubjRef = validateRef(
+              sb.subjectRef,
+              `${sbPath}.subjectRef`,
+              "SUBJECT",
+            );
+            if (errSubjRef) return errSubjRef;
+          }
+
+          if (sb.stateSemanticRef !== undefined) {
+            const errSsRef = validateRef(
+              sb.stateSemanticRef,
+              `${sbPath}.stateSemanticRef`,
+              "STATE_SEMANTIC",
+            );
+            if (errSsRef) return errSsRef;
+          }
+
+          if (sb.stateArtifactRef !== undefined) {
+            const errSa = validateRef(
+              sb.stateArtifactRef,
+              `${sbPath}.stateArtifactRef`,
+              "STATE_ARTIFACT",
+            );
+            if (errSa) return errSa;
+          }
+        } else {
           return {
             code: "INVALID_VALUE",
             path: `${sbPath}.relationshipKind`,
-            message: "relationshipKind must be STRUCTURAL or REIFIED",
+            message:
+              "relationshipKind must be STRUCTURAL or REIFIED for RELATIONSHIP_STATE",
           };
         }
-      }
-
-      if (sb.relationshipRef !== undefined) {
-        const errRelRef = validateRef(
-          sb.relationshipRef,
-          `${sbPath}.relationshipRef`,
-          "RELATIONSHIP",
-        );
-        if (errRelRef) return errRelRef;
-      }
-
-      if (sb.sourceEndpointRef !== undefined) {
-        const errSrcRef = validateRef(
-          sb.sourceEndpointRef,
-          `${sbPath}.sourceEndpointRef`,
-        );
-        if (errSrcRef) return errSrcRef;
-      }
-
-      if (sb.targetEndpointRef !== undefined) {
-        const errTgtRef = validateRef(
-          sb.targetEndpointRef,
-          `${sbPath}.targetEndpointRef`,
-        );
-        if (errTgtRef) return errTgtRef;
+      } else {
+        return {
+          code: "INVALID_VALUE",
+          path: `${sbPath}.kind`,
+          message: `kind must be one of: ${normalKinds.join(", ")}, RELATIONSHIP_STATE`,
+        };
       }
     }
   }
@@ -1243,7 +1442,6 @@ function validateEvidenceState(
   );
   if (errDig) return errDig;
 
-  // Requirement Collections MUST be explicitly present (arrays)
   if (!Array.isArray(raw.evidenceRequirementBindings)) {
     return {
       code: "MISSING_FIELD",
@@ -1520,6 +1718,7 @@ function validateEvidenceState(
   return null;
 }
 
+// C06: Validate policy universe and policy refs
 function validatePolicyUniverse(
   input: unknown,
   path: string,
@@ -1593,11 +1792,7 @@ function validatePolicyUniverse(
     }
     polKeys.add(apm.policyKey);
 
-    const errPolRef = validateRef(
-      apm.policyRef,
-      `${apmPath}.policyRef`,
-      "POLICY",
-    );
+    const errPolRef = validatePolicyRef(apm.policyRef, `${apmPath}.policyRef`);
     if (errPolRef) return errPolRef;
 
     if (apm.material === undefined || !isStrictJsonValueV2(apm.material)) {
@@ -1609,7 +1804,6 @@ function validatePolicyUniverse(
     }
   }
 
-  // dependencyTopology MUST be explicit object
   const topoPath = `${path}.dependencyTopology`;
   if (!isPlainObject(raw.dependencyTopology)) {
     return {
@@ -1651,17 +1845,15 @@ function validatePolicyUniverse(
     );
     if (errEdgeKey) return errEdgeKey;
 
-    const errDeRef = validateRef(
+    const errDeRef = validatePolicyRef(
       edge.dependeePolicyRef,
       `${edgePath}.dependeePolicyRef`,
-      "POLICY",
     );
     if (errDeRef) return errDeRef;
 
-    const errDpRef = validateRef(
+    const errDpRef = validatePolicyRef(
       edge.dependentPolicyRef,
       `${edgePath}.dependentPolicyRef`,
-      "POLICY",
     );
     if (errDpRef) return errDpRef;
   }
@@ -1740,6 +1932,320 @@ function validateEvaluationContextBinding(
   return null;
 }
 
+// C04: Validate closed discriminated question operands
+function validateQuestionOperandBinding(
+  input: unknown,
+  path: string,
+): ExecutionRequestV2ValidationError | null {
+  if (!isPlainObject(input)) {
+    return {
+      code: "INVALID_TYPE",
+      path,
+      message: `${path} must be a plain object`,
+    };
+  }
+
+  const raw = input as Record<string, unknown>;
+
+  if (typeof raw.operandKey !== "string" || raw.operandKey.trim() === "") {
+    return {
+      code: "INVALID_VALUE",
+      path: `${path}.operandKey`,
+      message: "operandKey must be a non-empty string",
+    };
+  }
+
+  const errSlotRef = validateRef(
+    raw.operandSlotSemanticRef,
+    `${path}.operandSlotSemanticRef`,
+    "TARGET_SLOT_SEMANTIC",
+  );
+  if (errSlotRef) return errSlotRef;
+
+  const validKinds = [
+    "PARTICIPATION_BINDING",
+    "ACTION_PERFORMER",
+    "REQUESTED_ACTION",
+    "ACTION_TARGET",
+    "CAPABILITY_CLAIM",
+    "CONSTITUTIONAL_STATE",
+    "EVIDENCE_STATE",
+    "POLICY_UNIVERSE",
+    "EVALUATION_CONTEXT_BINDING",
+    "TEMPORAL_COORDINATE",
+    "OWNER_DETERMINATION",
+  ];
+
+  if (
+    typeof raw.operandKind !== "string" ||
+    !validKinds.includes(raw.operandKind)
+  ) {
+    return {
+      code: "INVALID_VALUE",
+      path: `${path}.operandKind`,
+      message: `operandKind must be one of: ${validKinds.join(", ")}`,
+    };
+  }
+
+  switch (raw.operandKind) {
+    case "PARTICIPATION_BINDING": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "roleBindingRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      if (
+        typeof raw.roleBindingRef !== "string" ||
+        raw.roleBindingRef.trim() === ""
+      ) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.roleBindingRef`,
+          message: "roleBindingRef must be a non-empty string",
+        };
+      }
+      break;
+    }
+    case "ACTION_PERFORMER": {
+      const errKey = checkAllowedKeys(
+        raw,
+        ["operandKey", "operandSlotSemanticRef", "operandKind", "performerRef"],
+        path,
+      );
+      if (errKey) return errKey;
+      if (
+        typeof raw.performerRef !== "string" ||
+        raw.performerRef.trim() === ""
+      ) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.performerRef`,
+          message: "performerRef must be a non-empty string",
+        };
+      }
+      break;
+    }
+    case "REQUESTED_ACTION": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "actionSemanticRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      const errActRef = validateRef(
+        raw.actionSemanticRef,
+        `${path}.actionSemanticRef`,
+        "ACTION_SEMANTIC",
+      );
+      if (errActRef) return errActRef;
+      break;
+    }
+    case "ACTION_TARGET": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "targetSlotSemanticRef",
+          "targetRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      const errTsRef = validateRef(
+        raw.targetSlotSemanticRef,
+        `${path}.targetSlotSemanticRef`,
+        "TARGET_SLOT_SEMANTIC",
+      );
+      if (errTsRef) return errTsRef;
+      const errTRef = validateRef(raw.targetRef, `${path}.targetRef`, "TARGET");
+      if (errTRef) return errTRef;
+      break;
+    }
+    case "CAPABILITY_CLAIM": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "capabilityClaimRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      if (
+        typeof raw.capabilityClaimRef !== "string" ||
+        raw.capabilityClaimRef.trim() === ""
+      ) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.capabilityClaimRef`,
+          message: "capabilityClaimRef must be a non-empty string",
+        };
+      }
+      break;
+    }
+    case "CONSTITUTIONAL_STATE": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "semanticStateRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      const errDig = validateDigest(
+        raw.semanticStateRef,
+        `${path}.semanticStateRef`,
+      );
+      if (errDig) return errDig;
+      break;
+    }
+    case "EVIDENCE_STATE": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "evidenceStateRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      const errDig = validateDigest(
+        raw.evidenceStateRef,
+        `${path}.evidenceStateRef`,
+      );
+      if (errDig) return errDig;
+      break;
+    }
+    case "POLICY_UNIVERSE": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "policyUniverseRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      const errDig = validateDigest(
+        raw.policyUniverseRef,
+        `${path}.policyUniverseRef`,
+      );
+      if (errDig) return errDig;
+      break;
+    }
+    case "EVALUATION_CONTEXT_BINDING": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "bindingCollection",
+          "bindingRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      if (
+        raw.bindingCollection !== "authorizedInputBindings" &&
+        raw.bindingCollection !== "evaluationParameterBindings" &&
+        raw.bindingCollection !== "boundContextBindings"
+      ) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.bindingCollection`,
+          message:
+            "bindingCollection must be authorizedInputBindings, evaluationParameterBindings, or boundContextBindings",
+        };
+      }
+      if (typeof raw.bindingRef !== "string" || raw.bindingRef.trim() === "") {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.bindingRef`,
+          message: "bindingRef must be a non-empty string",
+        };
+      }
+      break;
+    }
+    case "TEMPORAL_COORDINATE": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "temporalCoordinateRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      if (
+        raw.temporalCoordinateRef !== "tValid" &&
+        raw.temporalCoordinateRef !== "tObservation" &&
+        raw.temporalCoordinateRef !== "tEInput" &&
+        raw.temporalCoordinateRef !== "tTrust"
+      ) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.temporalCoordinateRef`,
+          message:
+            "temporalCoordinateRef must be tValid, tObservation, tEInput, or tTrust",
+        };
+      }
+      break;
+    }
+    case "OWNER_DETERMINATION": {
+      const errKey = checkAllowedKeys(
+        raw,
+        [
+          "operandKey",
+          "operandSlotSemanticRef",
+          "operandKind",
+          "ownerDeterminationBindingRef",
+        ],
+        path,
+      );
+      if (errKey) return errKey;
+      if (
+        typeof raw.ownerDeterminationBindingRef !== "string" ||
+        raw.ownerDeterminationBindingRef.trim() === ""
+      ) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.ownerDeterminationBindingRef`,
+          message: "ownerDeterminationBindingRef must be a non-empty string",
+        };
+      }
+      break;
+    }
+  }
+
+  return null;
+}
+
+// C03: Owner Determination provenance and temporal coordinate references
 function validateOwnerDetermination(
   input: unknown,
   path: string,
@@ -1814,86 +2320,25 @@ function validateOwnerDetermination(
     };
   }
 
-  const validOperandKinds = [
-    "PARTICIPATION_BINDING",
-    "ACTION_PERFORMER",
-    "REQUESTED_ACTION",
-    "ACTION_TARGET",
-    "CAPABILITY_CLAIM",
-    "CONSTITUTIONAL_STATE",
-    "EVIDENCE_STATE",
-    "POLICY_UNIVERSE",
-    "EVALUATION_CONTEXT_BINDING",
-    "TEMPORAL_COORDINATE",
-    "OWNER_DETERMINATION",
-  ];
-
   const operandKeys = new Set<string>();
   for (let i = 0; i < qb.questionOperandBindings.length; i++) {
     const opPath = `${qbPath}.questionOperandBindings[${i}]`;
-    const op = qb.questionOperandBindings[i];
-    if (!isPlainObject(op)) {
-      return {
-        code: "INVALID_TYPE",
-        path: opPath,
-        message: `${opPath} must be a plain object`,
-      };
-    }
-    const errOpKey = checkAllowedKeys(
-      op,
-      ["operandKey", "operandKind", "operandRef", "operandValue"],
+    const errOp = validateQuestionOperandBinding(
+      qb.questionOperandBindings[i],
       opPath,
     );
-    if (errOpKey) return errOpKey;
+    if (errOp) return errOp;
 
-    if (typeof op.operandKey !== "string" || op.operandKey.trim() === "") {
-      return {
-        code: "INVALID_VALUE",
-        path: `${opPath}.operandKey`,
-        message: "operandKey must be a non-empty string",
-      };
-    }
-
-    if (operandKeys.has(op.operandKey)) {
+    const key = (qb.questionOperandBindings[i] as Record<string, unknown>)
+      .operandKey as string;
+    if (operandKeys.has(key)) {
       return {
         code: "DUPLICATE_BINDING",
         path: `${opPath}.operandKey`,
-        message: `Duplicate operandKey '${op.operandKey}'`,
+        message: `Duplicate operandKey '${key}'`,
       };
     }
-    operandKeys.add(op.operandKey);
-
-    if (
-      typeof op.operandKind !== "string" ||
-      !validOperandKinds.includes(op.operandKind)
-    ) {
-      return {
-        code: "INVALID_VALUE",
-        path: `${opPath}.operandKind`,
-        message: `operandKind must be one of: ${validOperandKinds.join(", ")}`,
-      };
-    }
-
-    if (op.operandRef !== undefined) {
-      if (typeof op.operandRef !== "string" || op.operandRef.trim() === "") {
-        return {
-          code: "INVALID_VALUE",
-          path: `${opPath}.operandRef`,
-          message: "operandRef must be a non-empty string if provided",
-        };
-      }
-    }
-
-    if (
-      op.operandValue !== undefined &&
-      !isStrictJsonValueV2(op.operandValue)
-    ) {
-      return {
-        code: "INVALID_RUNTIME_VALUE",
-        path: `${opPath}.operandValue`,
-        message: `${opPath}.operandValue must be a strict JSON value`,
-      };
-    }
+    operandKeys.add(key);
   }
 
   const errOwnRef = validateRef(
@@ -1914,41 +2359,71 @@ function validateOwnerDetermination(
     };
   }
 
-  if (raw.exactStateRef !== undefined) {
-    const errEsi = validateRef(
-      raw.exactStateRef,
-      `${path}.exactStateRef`,
-      "STATE_INSTANCE",
-    );
-    if (errEsi) return errEsi;
+  // C03: Mandatory exactStateRef
+  if (!("exactStateRef" in raw) || raw.exactStateRef === undefined) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.exactStateRef`,
+      message: `${path}.exactStateRef is mandatory`,
+    };
+  }
+  const errEsRef = validateRef(raw.exactStateRef, `${path}.exactStateRef`);
+  if (errEsRef) return errEsRef;
+
+  // C03: Mandatory exactRuleRef
+  if (!("exactRuleRef" in raw) || raw.exactRuleRef === undefined) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.exactRuleRef`,
+      message: `${path}.exactRuleRef is mandatory`,
+    };
+  }
+  const errRuleRef = validateRef(
+    raw.exactRuleRef,
+    `${path}.exactRuleRef`,
+    "RULE",
+  );
+  if (errRuleRef) return errRuleRef;
+
+  // C03: Mandatory assessedAtCoordinateRef (TemporalCoordinateRefV2 string)
+  if (
+    !("assessedAtCoordinateRef" in raw) ||
+    raw.assessedAtCoordinateRef === undefined
+  ) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.assessedAtCoordinateRef`,
+      message: `${path}.assessedAtCoordinateRef is mandatory`,
+    };
+  }
+  if (
+    raw.assessedAtCoordinateRef !== "tValid" &&
+    raw.assessedAtCoordinateRef !== "tObservation" &&
+    raw.assessedAtCoordinateRef !== "tEInput" &&
+    raw.assessedAtCoordinateRef !== "tTrust"
+  ) {
+    return {
+      code: "INVALID_VALUE",
+      path: `${path}.assessedAtCoordinateRef`,
+      message:
+        "assessedAtCoordinateRef must be tValid, tObservation, tEInput, or tTrust",
+    };
   }
 
-  if (raw.exactRuleRef !== undefined) {
-    const errRuleRef = validateRef(
-      raw.exactRuleRef,
-      `${path}.exactRuleRef`,
-      "RULE",
-    );
-    if (errRuleRef) return errRuleRef;
+  // C03: Mandatory provenanceRef
+  if (!("provenanceRef" in raw) || raw.provenanceRef === undefined) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.provenanceRef`,
+      message: `${path}.provenanceRef is mandatory`,
+    };
   }
-
-  if (raw.assessedAtCoordinateRef !== undefined) {
-    const errProvRef = validateRef(
-      raw.assessedAtCoordinateRef,
-      `${path}.assessedAtCoordinateRef`,
-      "PROVENANCE",
-    );
-    if (errProvRef) return errProvRef;
-  }
-
-  if (raw.provenanceRef !== undefined) {
-    const errProvRef = validateRef(
-      raw.provenanceRef,
-      `${path}.provenanceRef`,
-      "PROVENANCE",
-    );
-    if (errProvRef) return errProvRef;
-  }
+  const errProvRef = validateRef(
+    raw.provenanceRef,
+    `${path}.provenanceRef`,
+    "PROVENANCE",
+  );
+  if (errProvRef) return errProvRef;
 
   // determinationDependencyDeclaration
   const declPath = `${path}.determinationDependencyDeclaration`;
@@ -2222,12 +2697,25 @@ function validateExecutionContextV2(
 
 /**
  * Validates raw input strictly as an ExecutionRequestV2 structure.
+ * Performs a whole-input strict carrier check before structural traversal (C07).
  * Returns ValidationResult with ok: true and typed value, or ok: false and detailed error.
  * Does not throw exceptions, purely deterministic.
  */
 export function validateExecutionRequestV2(
   input: unknown,
 ): ValidationResult<ExecutionRequestV2, ExecutionRequestV2ValidationError> {
+  // C07: Whole-request strict JSON / runtime safety carrier check
+  if (!isStrictJsonValueV2(input)) {
+    return {
+      ok: false,
+      error: {
+        code: "INVALID_RUNTIME_VALUE",
+        path: "",
+        message: "Input contains invalid JSON or runtime values",
+      },
+    };
+  }
+
   if (!isPlainObject(input)) {
     return {
       ok: false,
@@ -2241,7 +2729,7 @@ export function validateExecutionRequestV2(
 
   const raw = input as Record<string, unknown>;
 
-  // Reject explicit top-level V1 fields immediately with UNKNOWN_FIELD or INVALID_CONTRACT_VERSION
+  // Reject explicit top-level V1 fields immediately
   const forbiddenV1Fields = [
     "inputHash",
     "identity",

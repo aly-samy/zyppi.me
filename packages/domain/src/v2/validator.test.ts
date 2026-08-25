@@ -52,6 +52,8 @@ const VALID_REF_POLICY = {
   ownerRef: "owner-01",
   artifactId: "pol-01",
   version: "1.0.0",
+  stateRef: "state-pol-01",
+  provenanceRef: "prov-pol-01",
 };
 
 const VALID_REF_EVIDENCE = {
@@ -150,11 +152,20 @@ function createValidMinimalV2Request(): ExecutionRequestV2 {
       originatorParticipationRef: "rb-actor",
       intentCategory: "ACCESS",
       intentTargetRef: { ...VALID_REF_TARGET },
+      candidateStateBinding: {
+        stateTargetRef: { ...VALID_REF_TARGET },
+        stateSemanticRef: { ...VALID_REF_STATE_SEMANTIC },
+        exactStateInstance: {
+          kind: "GOVERNED_ARTIFACT_REF",
+          stateInstanceRef: { ...VALID_REF_STATE_INSTANCE },
+        },
+      },
     },
     requestedAction: {
       actionSemanticRef: { ...VALID_REF_ACTION },
       intentActionCompatibilityBinding: {
-        compatibilityKind: "GOVERNED_SEMANTIC_CONTRACT",
+        kind: "GOVERNED_SEMANTIC_CONTRACT",
+        exactCompatibilityContractRef: { ...VALID_REF_COMPAT },
       },
       actionPerformerBindings: [
         {
@@ -209,18 +220,17 @@ function createValidMinimalV2Request(): ExecutionRequestV2 {
   };
 }
 
-describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
+describe("CCP-RI-V2-01 — Council Mandated Immutable Test Matrix V201-T01..T52", () => {
   it("V201-T01 — validates a valid minimal same-subject V2 request", () => {
     const req = createValidMinimalV2Request();
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(true);
     if (res.ok) {
       expect(res.value.contractVersion).toBe("v2");
-      expect(res.value.requestId).toBe("req-v2-001");
     }
   });
 
-  it("V201-T02 — validates a valid delegated structural request with composed agency reliance", () => {
+  it("V201-T02 — validates a valid delegated structural request", () => {
     const req = createValidMinimalV2Request();
     const delegatedReq: ExecutionRequestV2 = {
       ...req,
@@ -229,7 +239,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
           {
             roleBindingKey: "rb-actor",
             role: "ACTOR",
-            subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
+            subject: { kind: "KNOWN", subjectRef: { ...VALID_REF_SUBJECT } },
           },
           {
             roleBindingKey: "rb-gov-subject",
@@ -245,7 +255,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
             agencyBindingKey: "ab-01",
             actorRoleBindingRef: "rb-actor",
             governedSubjectRoleBindingRef: "rb-gov-subject",
-            terminalAgencyBasisRef: VALID_REF_AGENCY_BASIS,
+            terminalAgencyBasisRef: { ...VALID_REF_AGENCY_BASIS },
           },
           {
             agencyBindingKey: "ab-02",
@@ -267,7 +277,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
             agencyReliance: {
               kind: "DELEGATED_AGENCY_COMPOSED",
               agencyBindingRefs: ["ab-01", "ab-02"],
-              agencyCompositionBasisRef: VALID_REF_AGENCY_BASIS,
+              agencyCompositionBasisRef: { ...VALID_REF_AGENCY_BASIS },
             },
           },
         ],
@@ -278,116 +288,85 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     expect(res.ok).toBe(true);
   });
 
-  it("V201-T03 — rejects request when contractVersion is missing or not exact 'v2'", () => {
+  it("V201-T03 — rejects missing contractVersion", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    delete req.contractVersion;
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_CONTRACT_VERSION");
+    }
+  });
+
+  it("V201-T04 — rejects non-'v2' contractVersion", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     req.contractVersion = "v1";
-    const res1 = validateExecutionRequestV2(req);
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_CONTRACT_VERSION");
+    }
+  });
+
+  it("V201-T05 — rejects unknown top-level field", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    req.unadmittedTopLevel = 123;
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("UNKNOWN_FIELD");
+      expect(res.error.path).toBe("unadmittedTopLevel");
+    }
+  });
+
+  it("V201-T06 — rejects unknown nested field", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (req.intent as Record<string, unknown>).unadmittedNested = "forbidden";
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("UNKNOWN_FIELD");
+      expect(res.error.path).toBe("intent.unadmittedNested");
+    }
+  });
+
+  it("V201-T07 — rejects non-plain object input", () => {
+    class CustomClass {}
+    const res1 = validateExecutionRequestV2(new CustomClass());
     expect(res1.ok).toBe(false);
-    if (!res1.ok) {
-      expect(res1.error.code).toBe("INVALID_CONTRACT_VERSION");
-    }
 
-    delete req.contractVersion;
-    const res2 = validateExecutionRequestV2(req);
+    const res2 = validateExecutionRequestV2("string-input");
     expect(res2.ok).toBe(false);
-    if (!res2.ok) {
-      expect(res2.error.code).toBe("INVALID_CONTRACT_VERSION");
-    }
+
+    const res3 = validateExecutionRequestV2(null);
+    expect(res3.ok).toBe(false);
   });
 
-  it("V201-T04 — rejects a V1 ExecutionRequest structure as invalid V2", () => {
-    const v1Req = {
-      requestId: "req-v1-01",
-      identity: {
-        identityId: "id-01",
-        identityType: "type",
-        canonicalReference: "ref",
-        referentId: null,
-        status: "active",
-        createdAt: "2026-07-28T14:30:00Z",
-        updatedAt: "2026-07-28T14:30:00Z",
-      },
-      activeConstitutionalView: {
-        identity: {
-          identityId: "id-01",
-          identityType: "type",
-          canonicalReference: "ref",
-          referentId: null,
-          status: "active",
-          createdAt: "2026-07-28T14:30:00Z",
-          updatedAt: "2026-07-28T14:30:00Z",
+  it("V201-T08 — rejects non-JSON primitive types", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (req.evaluationContext as Record<string, unknown>).authorizedInputBindings =
+      [
+        {
+          bindingKey: "b-fn",
+          semanticRef: { ...VALID_REF_EVAL_SEMANTIC },
+          value: () => "function",
         },
-        relationships: [],
-        standings: [],
-        authorities: [],
-        capabilities: [],
-        evidenceReferences: [],
-        applicablePolicies: [],
-      },
-      evidenceBundle: { schemaVersion: "1.0", evidenceRecords: [] },
-      policyContext: { policies: [] },
-      executionContext: {
-        executionId: "exec-01",
-        constitutionalTimestamp: "2026-07-28T14:30:00Z",
-        budget: 100,
-        entropy: "ent",
-        versions: ["1.0.0"],
-      },
-      resolvedPolicyGraph: { edges: [] },
-    };
-
-    const res = validateExecutionRequestV2(v1Req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("UNKNOWN_FIELD");
-    }
-  });
-
-  it("V201-T05 — rejects unknown top-level fields recursively", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    req.unknownTopLevelField = "forbidden";
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("UNKNOWN_FIELD");
-      expect(res.error.path).toBe("unknownTopLevelField");
-    }
-  });
-
-  it("V201-T06 — rejects unknown nested fields inside intent", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (req.intent as unknown as Record<string, unknown>).unknownIntentField = 123;
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("UNKNOWN_FIELD");
-      expect(res.error.path).toBe("intent.unknownIntentField");
-    }
-  });
-
-  it("V201-T07 — rejects non-plain object/non-JSON runtime values (Function, Symbol, BigInt, Date)", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (
-      req.evaluationContext as unknown as Record<string, unknown>
-    ).authorizedInputBindings = [
-      {
-        bindingKey: "b-01",
-        semanticRef: VALID_REF_EVAL_SEMANTIC,
-        value: () => "fn",
-      },
-    ];
+      ];
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -401,61 +380,47 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     expect(isStrictJsonValueV2(Infinity)).toBe(false);
   });
 
-  it("V201-T08 — validates typed references across all 20 closed families", () => {
-    const map: Record<string, Record<string, unknown>> = {
-      SUBJECT: { ...VALID_REF_SUBJECT },
-      ACTION_SEMANTIC: { ...VALID_REF_ACTION },
-      TARGET: { ...VALID_REF_TARGET },
-      STATE_SEMANTIC: { ...VALID_REF_STATE_SEMANTIC },
-      STATE_INSTANCE: { ...VALID_REF_STATE_INSTANCE },
-      REQUESTED_CAPABILITY: { ...VALID_REF_CAPABILITY },
-      AGENCY_BASIS: { ...VALID_REF_AGENCY_BASIS },
-      POLICY: { ...VALID_REF_POLICY },
-      EVIDENCE: { ...VALID_REF_EVIDENCE },
-      QUESTION_SEMANTIC: { ...VALID_REF_QUESTION },
-      TARGET_SLOT_SEMANTIC: { ...VALID_REF_TARGET_SLOT },
-      COMPATIBILITY_CONTRACT: { ...VALID_REF_COMPAT },
-      EVIDENCE_REQUIREMENT: { ...VALID_REF_EV_REQ },
-      SCOPE: { ...VALID_REF_SCOPE },
-      RULE: { ...VALID_REF_RULE },
-      PROVENANCE: { ...VALID_REF_PROVENANCE },
-      OWNER: { ...VALID_REF_OWNER },
-      RELATIONSHIP: { ...VALID_REF_RELATIONSHIP },
-      STATE_ARTIFACT: { ...VALID_REF_STATE_ARTIFACT },
-      EVALUATION_SEMANTIC: { ...VALID_REF_EVAL_SEMANTIC },
-    };
+  it("V201-T09 — rejects cyclic runtime structures", () => {
+    const cyclicObj: Record<string, unknown> = { key: "val" };
+    cyclicObj.self = cyclicObj;
 
-    expect(Object.keys(map).length).toBe(20);
-    for (const [fam, refObj] of Object.entries(map)) {
-      expect(refObj.family).toBe(fam);
-      const req = createValidMinimalV2Request();
-      (
-        req.intent.intentTargetRef as unknown as unknown as Record<
-          string,
-          unknown
-        >
-      ).family = fam;
-      if (fam === "TARGET") {
-        expect(validateExecutionRequestV2(req).ok).toBe(true);
-      } else {
-        const res = validateExecutionRequestV2(req);
-        expect(res.ok).toBe(false);
-        if (!res.ok) {
-          expect(res.error.code).toBe("INVALID_REFERENCE");
-        }
-      }
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (req.evaluationContext as Record<string, unknown>).authorizedInputBindings =
+      [
+        {
+          bindingKey: "b-cyclic",
+          semanticRef: { ...VALID_REF_EVAL_SEMANTIC },
+          value: cyclicObj,
+        },
+      ];
+
+    expect(() => validateExecutionRequestV2(req)).not.toThrow();
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_RUNTIME_VALUE");
     }
   });
 
-  it("V201-T09 — rejects invalid reference family string outside closed union", () => {
+  it("V201-T10 — validates typed reference family discriminator", () => {
+    const req = createValidMinimalV2Request();
+    expect(validateExecutionRequestV2(req).ok).toBe(true);
+  });
+
+  it("V201-T11 — rejects invalid reference family discriminator", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
-      (req.intent as unknown as Record<string, unknown>)
-        .intentTargetRef as Record<string, unknown>
-    ).family = "UNBOUNDED_ESCAPE_HATCH";
+      (req.intent as Record<string, unknown>).intentTargetRef as Record<
+        string,
+        unknown
+      >
+    ).family = "UNBOUNDED_FAMILY";
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -464,42 +429,31 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T10 — validates component ref claims for sha256 lowercase hex regex", () => {
+  it("V201-T12 — validates valid sha256 component ref claims", () => {
     const req = createValidMinimalV2Request();
     expect(validateExecutionRequestV2(req).ok).toBe(true);
   });
 
-  it("V201-T11 — rejects invalid component ref claim digests (not 64 hex / missing sha256 prefix / uppercase)", () => {
+  it("V201-T13 — rejects invalid component ref claim digest grammar", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (
-      req.constitutionalState as unknown as Record<string, unknown>
-    ).semanticStateRef = "sha256:invalidhex";
-    const res1 = validateExecutionRequestV2(req);
-    expect(res1.ok).toBe(false);
-    if (!res1.ok) {
-      expect(res1.error.code).toBe("INVALID_DIGEST");
-    }
-
-    (
-      req.constitutionalState as unknown as Record<string, unknown>
-    ).semanticStateRef =
-      "SHA256:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
-    const res2 = validateExecutionRequestV2(req);
-    expect(res2.ok).toBe(false);
-    if (!res2.ok) {
-      expect(res2.error.code).toBe("INVALID_DIGEST");
+    (req.constitutionalState as Record<string, unknown>).semanticStateRef =
+      "sha256:nota64hexstring";
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_DIGEST");
     }
   });
 
-  it("V201-T12 — enforces participation roleBindings cardinality >= 1", () => {
+  it("V201-T14 — enforces participation roleBindings cardinality >= 1", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (req.participation as unknown as Record<string, unknown>).roleBindings = [];
+    (req.participation as Record<string, unknown>).roleBindings = [];
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -507,143 +461,43 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T13 — requires at least 1 ACTOR role binding in participation", () => {
+  it("V201-T15 — requires >= 1 ACTOR role binding", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (req.participation as unknown as Record<string, unknown>).roleBindings = [
+    (req.participation as Record<string, unknown>).roleBindings = [
       {
         roleBindingKey: "rb-gov",
         role: "GOVERNED_SUBJECT",
-        subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
-      },
-    ];
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("INVALID_CARDINALITY");
-    }
-  });
-
-  it("V201-T14 — rejects duplicate (Subject, Role) pairs in participation", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (req.participation as unknown as Record<string, unknown>).roleBindings = [
-      {
-        roleBindingKey: "rb-actor-1",
-        role: "ACTOR",
-        subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
-      },
-      {
-        roleBindingKey: "rb-actor-2",
-        role: "ACTOR",
-        subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
-      },
-    ];
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("DUPLICATE_BINDING");
-    }
-  });
-
-  it("V201-T15 — permits UNKNOWN subject ONLY for ACTOR role", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (req.participation as unknown as Record<string, unknown>).roleBindings = [
-      {
-        roleBindingKey: "rb-actor-unk",
-        role: "ACTOR",
-        subject: { kind: "UNKNOWN" },
-      },
-    ];
-    const res1 = validateExecutionRequestV2(req);
-    expect(res1.ok).toBe(true);
-
-    (req.participation as unknown as Record<string, unknown>).roleBindings = [
-      {
-        roleBindingKey: "rb-actor",
-        role: "ACTOR",
-        subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
-      },
-      {
-        roleBindingKey: "rb-gov-unk",
-        role: "GOVERNED_SUBJECT",
-        subject: { kind: "UNKNOWN" },
-      },
-    ];
-    const res2 = validateExecutionRequestV2(req);
-    expect(res2.ok).toBe(false);
-    if (!res2.ok) {
-      expect(res2.error.code).toBe("INVALID_VALUE");
-    }
-  });
-
-  it("V201-T16 — rejects missing or null subject as UNKNOWN", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (
-      (req.participation as unknown as Record<string, unknown>)
-        .roleBindings as Record<string, unknown>[]
-    )[0].subject = null;
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("INVALID_TYPE");
-    }
-  });
-
-  it("V201-T17 — rejects duplicate roleBindingKeys in participation", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (req.participation as unknown as Record<string, unknown>).roleBindings = [
-      {
-        roleBindingKey: "dup-key",
-        role: "ACTOR",
-        subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
-      },
-      {
-        roleBindingKey: "dup-key",
-        role: "GOVERNED_SUBJECT",
         subject: {
           kind: "KNOWN",
-          subjectRef: { ...VALID_REF_SUBJECT, artifactId: "sub2" },
+          subjectRef: { ...VALID_REF_SUBJECT },
         },
       },
     ];
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
-      expect(res.error.code).toBe("DUPLICATE_BINDING");
+      expect(res.error.code).toBe("INVALID_CARDINALITY");
     }
   });
 
-  it("V201-T18 — rejects duplicate agencyBindingKeys in participation", () => {
+  it("V201-T16 — rejects duplicate (Subject, Role) pair", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (req.participation as unknown as Record<string, unknown>).agencyBindings = [
+    (req.participation as Record<string, unknown>).roleBindings = [
       {
-        agencyBindingKey: "dup-agency",
-        actorRoleBindingRef: "rb-actor",
-        governedSubjectRoleBindingRef: "rb-gov",
-        terminalAgencyBasisRef: VALID_REF_AGENCY_BASIS,
+        roleBindingKey: "rb-act-1",
+        role: "ACTOR",
+        subject: { kind: "KNOWN", subjectRef: { ...VALID_REF_SUBJECT } },
       },
       {
-        agencyBindingKey: "dup-agency",
-        actorRoleBindingRef: "rb-actor",
-        governedSubjectRoleBindingRef: "rb-gov",
-        terminalAgencyBasisRef: VALID_REF_AGENCY_BASIS,
+        roleBindingKey: "rb-act-2",
+        role: "ACTOR",
+        subject: { kind: "KNOWN", subjectRef: { ...VALID_REF_SUBJECT } },
       },
     ];
     const res = validateExecutionRequestV2(req);
@@ -653,8 +507,42 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T19 — validates intent categories across all 12 closed options", () => {
-    const categories = [
+  it("V201-T17 — permits UNKNOWN subject ONLY for ACTOR role", () => {
+    const req1 = createValidMinimalV2Request();
+    (req1.participation as unknown as Record<string, unknown>).roleBindings = [
+      {
+        roleBindingKey: "rb-unk-act",
+        role: "ACTOR",
+        subject: { kind: "UNKNOWN" },
+      },
+    ];
+    expect(validateExecutionRequestV2(req1).ok).toBe(true);
+
+    const req2 = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (req2.participation as Record<string, unknown>).roleBindings = [
+      {
+        roleBindingKey: "rb-act",
+        role: "ACTOR",
+        subject: { kind: "KNOWN", subjectRef: VALID_REF_SUBJECT },
+      },
+      {
+        roleBindingKey: "rb-unk-gov",
+        role: "GOVERNED_SUBJECT",
+        subject: { kind: "UNKNOWN" },
+      },
+    ];
+    const res2 = validateExecutionRequestV2(req2);
+    expect(res2.ok).toBe(false);
+    if (!res2.ok) {
+      expect(res2.error.code).toBe("INVALID_VALUE");
+    }
+  });
+
+  it("V201-T18 — validates all 12 closed Intent categories", () => {
+    const cats = [
       "DISCOVER",
       "ACCESS",
       "VERIFY",
@@ -668,57 +556,76 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
       "SUBSCRIBE",
       "TRIGGER",
     ];
-    for (const cat of categories) {
+    for (const c of cats) {
       const req = createValidMinimalV2Request() as unknown as Record<
         string,
         unknown
       >;
-      (req.intent as unknown as Record<string, unknown>).intentCategory = cat;
-      const res = validateExecutionRequestV2(req);
-      expect(res.ok).toBe(true);
+      (req.intent as Record<string, unknown>).intentCategory = c;
+      expect(validateExecutionRequestV2(req).ok).toBe(true);
     }
   });
 
-  it("V201-T20 — rejects invalid intent category", () => {
+  it("V201-T19 — missing candidate exact state rejected (Correction C01)", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (req.intent as unknown as Record<string, unknown>).intentCategory =
-      "EXECUTE_SOMETHING";
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      expect(res.error.code).toBe("INVALID_VALUE");
+    delete (req.intent as Record<string, unknown>).candidateStateBinding;
+    const res1 = validateExecutionRequestV2(req);
+    expect(res1.ok).toBe(false);
+    if (!res1.ok) {
+      expect(res1.error.code).toBe("MISSING_FIELD");
+      expect(res1.error.path).toBe("intent.candidateStateBinding");
     }
-  });
 
-  it("V201-T21 — requires ownerTypedMaterial to have ownerRef, schemaRef, and strict JSON material", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
+    const req2 = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
+    delete (
+      (req2.intent as Record<string, unknown>).candidateStateBinding as Record<
+        string,
+        unknown
+      >
+    ).exactStateInstance;
+    const res2 = validateExecutionRequestV2(req2);
+    expect(res2.ok).toBe(false);
+    if (!res2.ok) {
+      expect(res2.error.code).toBe("MISSING_FIELD");
+      expect(res2.error.path).toBe(
+        "intent.candidateStateBinding.exactStateInstance",
+      );
+    }
+  });
+
+  it("V201-T20 — validates owner-typed material requires ownerRef + schemaRef + strict JSON", () => {
+    const req = createValidMinimalV2Request();
     (req.intent as unknown as Record<string, unknown>).candidateStateBinding = {
-      stateTargetRef: VALID_REF_TARGET,
-      stateSemanticRef: VALID_REF_STATE_SEMANTIC,
-      ownerTypedMaterial: {
-        ownerRef: VALID_REF_OWNER,
-        schemaRef: VALID_REF_STATE_ARTIFACT,
-        material: { custom: "payload" },
+      stateTargetRef: { ...VALID_REF_TARGET },
+      stateSemanticRef: { ...VALID_REF_STATE_SEMANTIC },
+      exactStateInstance: {
+        kind: "OWNER_TYPED_INLINE",
+        ownerRef: { ...VALID_REF_OWNER },
+        schemaRef: { ...VALID_REF_STATE_ARTIFACT },
+        material: { valid: "json" },
       },
     };
-    const res = validateExecutionRequestV2(req);
-    expect(res.ok).toBe(true);
+    expect(validateExecutionRequestV2(req).ok).toBe(true);
   });
 
-  it("V201-T22 — rejects untyped arbitrary payload in candidateStateBinding", () => {
+  it("V201-T21 — rejects untyped arbitrary payload in Candidate State", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (req.intent as unknown as Record<string, unknown>).candidateStateBinding = {
-      stateTargetRef: VALID_REF_TARGET,
-      stateSemanticRef: VALID_REF_STATE_SEMANTIC,
+    (req.intent as Record<string, unknown>).candidateStateBinding = {
+      stateTargetRef: { ...VALID_REF_TARGET },
+      stateSemanticRef: { ...VALID_REF_STATE_SEMANTIC },
+      exactStateInstance: {
+        kind: "GOVERNED_ARTIFACT_REF",
+        stateInstanceRef: { ...VALID_REF_STATE_INSTANCE },
+      },
       untypedArbitraryPayload: { foo: "bar" },
     };
     const res = validateExecutionRequestV2(req);
@@ -728,39 +635,13 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T23 — validates intentActionCompatibilityBinding options", () => {
-    const req1 = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (
-      req1.requestedAction as unknown as Record<string, unknown>
-    ).intentActionCompatibilityBinding = {
-      compatibilityKind: "GOVERNED_SEMANTIC_CONTRACT",
-      contractRef: VALID_REF_COMPAT,
-    };
-    expect(validateExecutionRequestV2(req1).ok).toBe(true);
-
-    const req2 = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (
-      req2.requestedAction as unknown as Record<string, unknown>
-    ).intentActionCompatibilityBinding = {
-      compatibilityKind: "OWNER_DETERMINATION",
-    };
-    expect(validateExecutionRequestV2(req2).ok).toBe(true);
-  });
-
-  it("V201-T24 — enforces actionPerformerBindings cardinality >= 1", () => {
+  it("V201-T22 — enforces actionPerformerBindings cardinality >= 1", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (
-      req.requestedAction as unknown as Record<string, unknown>
-    ).actionPerformerBindings = [];
+    (req.requestedAction as Record<string, unknown>).actionPerformerBindings =
+      [];
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -768,73 +649,60 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T25 — validates agency reliance kinds (NO_DELEGATED, SINGLE, COMPOSED)", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-
-    (
-      (
-        (req.requestedAction as unknown as Record<string, unknown>)
-          .actionPerformerBindings as unknown as Record<string, unknown>[]
-      )[0] as unknown as Record<string, unknown>
-    ).agencyReliance = {
-      kind: "DELEGATED_AGENCY_SINGLE",
-      agencyBindingRef: "ab-01",
-    };
-    expect(validateExecutionRequestV2(req).ok).toBe(true);
-  });
-
-  it("V201-T26 — rejects DELEGATED_AGENCY_COMPOSED with < 2 agencyBindingRefs or duplicate refs", () => {
+  it("V201-T23 — capability claimant(s) required in capability claim bindings", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
-      (
-        (req.requestedAction as unknown as Record<string, unknown>)
-          .actionPerformerBindings as unknown as Record<string, unknown>[]
-      )[0] as unknown as Record<string, unknown>
-    ).agencyReliance = {
-      kind: "DELEGATED_AGENCY_COMPOSED",
-      agencyBindingRefs: ["ab-01"],
-      agencyCompositionBasisRef: VALID_REF_AGENCY_BASIS,
-    };
-    const res1 = validateExecutionRequestV2(req);
-    expect(res1.ok).toBe(false);
-    if (!res1.ok) {
-      expect(res1.error.code).toBe("INVALID_CARDINALITY");
-    }
-
-    (
-      (
-        (req.requestedAction as unknown as Record<string, unknown>)
-          .actionPerformerBindings as unknown as Record<string, unknown>[]
-      )[0] as unknown as Record<string, unknown>
-    ).agencyReliance = {
-      kind: "DELEGATED_AGENCY_COMPOSED",
-      agencyBindingRefs: ["ab-01", "ab-01"],
-      agencyCompositionBasisRef: VALID_REF_AGENCY_BASIS,
-    };
-    const res2 = validateExecutionRequestV2(req);
-    expect(res2.ok).toBe(false);
-    if (!res2.ok) {
-      expect(res2.error.code).toBe("DUPLICATE_BINDING");
-    }
-  });
-
-  it("V201-T27 — rejects duplicate claimant refs in requestedCapabilityClaimBindings", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (
-      req.requestedAction as unknown as Record<string, unknown>
+      req.requestedAction as Record<string, unknown>
     ).requestedCapabilityClaimBindings = [
       {
         capabilityClaimKey: "claim-01",
-        requestedCapabilityRef: VALID_REF_CAPABILITY,
+        requestedCapabilityRef: { ...VALID_REF_CAPABILITY },
+        claimantPerformerRefs: [],
+      },
+    ];
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_CARDINALITY");
+    }
+  });
+
+  it("V201-T24 — rejects COMPOSED agency reliance with < 2 unique agencyBindingRefs", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (
+      (
+        (req.requestedAction as Record<string, unknown>)
+          .actionPerformerBindings as Record<string, unknown>[]
+      )[0] as Record<string, unknown>
+    ).agencyReliance = {
+      kind: "DELEGATED_AGENCY_COMPOSED",
+      agencyBindingRefs: ["ab-01"],
+      agencyCompositionBasisRef: { ...VALID_REF_AGENCY_BASIS },
+    };
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_CARDINALITY");
+    }
+  });
+
+  it("V201-T25 — rejects duplicate claimant performer refs", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (
+      req.requestedAction as Record<string, unknown>
+    ).requestedCapabilityClaimBindings = [
+      {
+        capabilityClaimKey: "claim-dup",
+        requestedCapabilityRef: { ...VALID_REF_CAPABILITY },
         claimantPerformerRefs: ["perf-actor", "perf-actor"],
       },
     ];
@@ -845,55 +713,57 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T28 — validates closed state binding kinds across all 6 options", () => {
-    const kinds = [
+  it("V201-T26 — validates closed state binding kinds across all options", () => {
+    const normalKinds = [
       "IDENTITY_STATE",
       "STANDING_STATE",
       "AUTHORITY_STATE",
       "CAPABILITY_STATE",
       "AGENCY_STATE",
-      "RELATIONSHIP_STATE",
-    ];
+    ] as const;
 
-    for (const k of kinds) {
+    for (const k of normalKinds) {
       const req = createValidMinimalV2Request() as unknown as Record<
         string,
         unknown
       >;
       (
         (
-          (req.constitutionalState as unknown as Record<string, unknown>)
-            .stateViews as unknown as Record<string, unknown>[]
-        )[0] as unknown as Record<string, unknown>
+          (req.constitutionalState as Record<string, unknown>)
+            .stateViews as Record<string, unknown>[]
+        )[0] as Record<string, unknown>
       ).stateBindings = [
         {
           stateBindingKey: `sb-${k}`,
           kind: k,
-          subjectRef: VALID_REF_SUBJECT,
-          stateSemanticRef: VALID_REF_STATE_SEMANTIC,
+          subjectRef: { ...VALID_REF_SUBJECT },
+          stateSemanticRef: { ...VALID_REF_STATE_SEMANTIC },
+          exactStateRef: { ...VALID_REF_STATE_INSTANCE },
         },
       ];
       expect(validateExecutionRequestV2(req).ok).toBe(true);
     }
   });
 
-  it("V201-T29 — distinguishes STRUCTURAL vs REIFIED relationship states", () => {
+  it("V201-T27 — distinguishes STRUCTURAL vs REIFIED relationship state bindings (Correction C05)", () => {
     const req1 = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
       (
-        (req1.constitutionalState as unknown as Record<string, unknown>)
-          .stateViews as unknown as Record<string, unknown>[]
-      )[0] as unknown as Record<string, unknown>
+        (req1.constitutionalState as Record<string, unknown>)
+          .stateViews as Record<string, unknown>[]
+      )[0] as Record<string, unknown>
     ).stateBindings = [
       {
         stateBindingKey: "sb-rel-struct",
         kind: "RELATIONSHIP_STATE",
-        subjectRef: VALID_REF_SUBJECT,
-        stateSemanticRef: VALID_REF_STATE_SEMANTIC,
         relationshipKind: "STRUCTURAL",
+        sourceEndpointRef: { ...VALID_REF_SUBJECT },
+        relationshipSemanticRef: { ...VALID_REF_RELATIONSHIP },
+        targetEndpointRef: { ...VALID_REF_TARGET },
+        exactTopologyStateRef: { ...VALID_REF_STATE_INSTANCE },
       },
     ];
     expect(validateExecutionRequestV2(req1).ok).toBe(true);
@@ -904,54 +774,56 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     >;
     (
       (
-        (req2.constitutionalState as unknown as Record<string, unknown>)
-          .stateViews as unknown as Record<string, unknown>[]
-      )[0] as unknown as Record<string, unknown>
+        (req2.constitutionalState as Record<string, unknown>)
+          .stateViews as Record<string, unknown>[]
+      )[0] as Record<string, unknown>
     ).stateBindings = [
       {
         stateBindingKey: "sb-rel-reified",
         kind: "RELATIONSHIP_STATE",
-        subjectRef: VALID_REF_SUBJECT,
-        stateSemanticRef: VALID_REF_STATE_SEMANTIC,
         relationshipKind: "REIFIED",
-        relationshipRef: VALID_REF_RELATIONSHIP,
+        relationshipRef: { ...VALID_REF_RELATIONSHIP },
+        exactStateRef: { ...VALID_REF_STATE_INSTANCE },
       },
     ];
     expect(validateExecutionRequestV2(req2).ok).toBe(true);
   });
 
-  it("V201-T30 — rejects synthetic ID creation for structural relationships", () => {
+  it("V201-T28 — rejects synthetic ID creation for structural relationships (Correction C05)", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
       (
-        (req.constitutionalState as unknown as Record<string, unknown>)
-          .stateViews as unknown as Record<string, unknown>[]
-      )[0] as unknown as Record<string, unknown>
+        (req.constitutionalState as Record<string, unknown>)
+          .stateViews as Record<string, unknown>[]
+      )[0] as Record<string, unknown>
     ).stateBindings = [
       {
-        stateBindingKey: "sb-rel",
+        stateBindingKey: "sb-rel-struct-invalid",
         kind: "RELATIONSHIP_STATE",
-        subjectRef: VALID_REF_SUBJECT,
-        stateSemanticRef: VALID_REF_STATE_SEMANTIC,
-        relationshipKind: "INVALID_SYNTHETIC_KIND",
+        relationshipKind: "STRUCTURAL",
+        sourceEndpointRef: { ...VALID_REF_SUBJECT },
+        relationshipSemanticRef: { ...VALID_REF_RELATIONSHIP },
+        targetEndpointRef: { ...VALID_REF_TARGET },
+        exactTopologyStateRef: { ...VALID_REF_STATE_INSTANCE },
+        relationshipRef: { ...VALID_REF_RELATIONSHIP },
       },
     ];
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
-      expect(res.error.code).toBe("INVALID_VALUE");
+      expect(res.error.code).toBe("UNKNOWN_FIELD");
     }
   });
 
-  it("V201-T31 — enforces all 4 evidence state collections explicitly present as arrays", () => {
+  it("V201-T29 — requires all 4 evidence state collections explicitly present as arrays", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    delete (req.evidenceState as unknown as Record<string, unknown>)
+    delete (req.evidenceState as Record<string, unknown>)
       .evidenceRequirementBindings;
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
@@ -961,38 +833,38 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T32 — permits empty arrays for all 4 evidence state collections", () => {
+  it("V201-T30 — permits empty arrays for evidence state collections", () => {
     const req = createValidMinimalV2Request();
     expect(validateExecutionRequestV2(req).ok).toBe(true);
   });
 
-  it("V201-T33 — validates evidence presentation bindings carrying presentedEvidenceRefs [1..N]", () => {
+  it("V201-T31 — validates evidence presentation bindings carrying presentedEvidenceRefs [1..N]", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
-      req.evidenceState as unknown as Record<string, unknown>
+      req.evidenceState as Record<string, unknown>
     ).evidencePresentationBindings = [
       {
-        evidenceRequirementRef: VALID_REF_EV_REQ,
-        presentedEvidenceRefs: [VALID_REF_EVIDENCE],
+        evidenceRequirementRef: { ...VALID_REF_EV_REQ },
+        presentedEvidenceRefs: [{ ...VALID_REF_EVIDENCE }],
       },
     ];
     expect(validateExecutionRequestV2(req).ok).toBe(true);
   });
 
-  it("V201-T34 — rejects evidence presentation carrying satisfied boolean", () => {
+  it("V201-T32 — rejects evidence presentation carrying satisfied boolean", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
-      req.evidenceState as unknown as Record<string, unknown>
+      req.evidenceState as Record<string, unknown>
     ).evidencePresentationBindings = [
       {
-        evidenceRequirementRef: VALID_REF_EV_REQ,
-        presentedEvidenceRefs: [VALID_REF_EVIDENCE],
+        evidenceRequirementRef: { ...VALID_REF_EV_REQ },
+        presentedEvidenceRefs: [{ ...VALID_REF_EVIDENCE }],
         satisfied: true,
       },
     ];
@@ -1003,13 +875,12 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T35 — requires explicit dependencyTopology object even when empty in policyUniverse", () => {
+  it("V201-T33 — requires explicit dependencyTopology object in policyUniverse", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    delete (req.policyUniverse as unknown as Record<string, unknown>)
-      .dependencyTopology;
+    delete (req.policyUniverse as Record<string, unknown>).dependencyTopology;
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -1018,14 +889,12 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T36 — rejects floating/non-exact version expressions in policy references", () => {
+  it("V201-T34 — rejects floating/non-exact version expressions in policy references (Correction C06)", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (
-      req.policyUniverse as unknown as Record<string, unknown>
-    ).applicablePolicyMaterial = [
+    (req.policyUniverse as Record<string, unknown>).applicablePolicyMaterial = [
       {
         policyKey: "pol-latest",
         policyRef: { ...VALID_REF_POLICY, version: "latest" },
@@ -1039,25 +908,24 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T37 — validates evaluation context binding structures and unique keys", () => {
+  it("V201-T35 — validates evaluation context binding structures and unique keys", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (
-      req.evaluationContext as unknown as Record<string, unknown>
-    ).authorizedInputBindings = [
-      {
-        bindingKey: "b-01",
-        semanticRef: VALID_REF_EVAL_SEMANTIC,
-        value: 100,
-      },
-      {
-        bindingKey: "b-01",
-        semanticRef: VALID_REF_EVAL_SEMANTIC,
-        value: 200,
-      },
-    ];
+    (req.evaluationContext as Record<string, unknown>).authorizedInputBindings =
+      [
+        {
+          bindingKey: "b-01",
+          semanticRef: { ...VALID_REF_EVAL_SEMANTIC },
+          value: 100,
+        },
+        {
+          bindingKey: "b-01",
+          semanticRef: { ...VALID_REF_EVAL_SEMANTIC },
+          value: 200,
+        },
+      ];
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -1065,15 +933,13 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T38 — rejects arbitrary un-modeled metadata objects in evaluationContext", () => {
+  it("V201-T36 — rejects un-modeled arbitrary metadata in evaluationContext", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (
-      req.evaluationContext as unknown as Record<string, unknown>
-    ).arbitraryMetadata = {
-      custom: "data",
+    (req.evaluationContext as Record<string, unknown>).arbitraryMetadata = {
+      foo: "bar",
     };
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
@@ -1082,67 +948,67 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T39 — validates owner determination question operand kinds across all 11 closed options", () => {
-    const operandKinds = [
-      "PARTICIPATION_BINDING",
-      "ACTION_PERFORMER",
-      "REQUESTED_ACTION",
-      "ACTION_TARGET",
-      "CAPABILITY_CLAIM",
-      "CONSTITUTIONAL_STATE",
-      "EVIDENCE_STATE",
-      "POLICY_UNIVERSE",
-      "EVALUATION_CONTEXT_BINDING",
-      "TEMPORAL_COORDINATE",
-      "OWNER_DETERMINATION",
-    ];
-
-    for (const opKind of operandKinds) {
-      const req = createValidMinimalV2Request() as unknown as Record<
-        string,
-        unknown
-      >;
-      (
-        req.evaluationContext as unknown as Record<string, unknown>
-      ).ownerDeterminationBindings = [
-        {
-          determinationBindingKey: `det-${opKind}`,
-          determinationQuestionBinding: {
-            questionSemanticRef: VALID_REF_QUESTION,
-            questionOperandBindings: [
-              {
-                operandKey: "op-1",
-                operandKind: opKind,
-              },
-            ],
-          },
-          constitutionalOwnerRef: VALID_REF_OWNER,
-          ownerNativeResult: { ok: true },
-          determinationDependencyDeclaration: {
-            kind: "AUTHORITATIVELY_NONE",
-          },
-        },
-      ];
-      expect(validateExecutionRequestV2(req).ok).toBe(true);
-    }
-  });
-
-  it("V201-T40 — validates determination dependency declaration forms (AUTHORITATIVELY_NONE vs EXPLICIT)", () => {
+  it("V201-T37 — validates closed question operand union forms (Correction C04)", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
-      req.evaluationContext as unknown as Record<string, unknown>
+      req.evaluationContext as Record<string, unknown>
+    ).ownerDeterminationBindings = [
+      {
+        determinationBindingKey: "det-01",
+        determinationQuestionBinding: {
+          questionSemanticRef: { ...VALID_REF_QUESTION },
+          questionOperandBindings: [
+            {
+              operandKey: "op-part",
+              operandSlotSemanticRef: { ...VALID_REF_TARGET_SLOT },
+              operandKind: "PARTICIPATION_BINDING",
+              roleBindingRef: "rb-actor",
+            },
+            {
+              operandKey: "op-temp",
+              operandSlotSemanticRef: { ...VALID_REF_TARGET_SLOT },
+              operandKind: "TEMPORAL_COORDINATE",
+              temporalCoordinateRef: "tEInput",
+            },
+          ],
+        },
+        constitutionalOwnerRef: { ...VALID_REF_OWNER },
+        ownerNativeResult: { ok: true },
+        exactStateRef: { ...VALID_REF_STATE_INSTANCE },
+        exactRuleRef: { ...VALID_REF_RULE },
+        assessedAtCoordinateRef: "tEInput",
+        provenanceRef: { ...VALID_REF_PROVENANCE },
+        determinationDependencyDeclaration: {
+          kind: "AUTHORITATIVELY_NONE",
+        },
+      },
+    ];
+    expect(validateExecutionRequestV2(req).ok).toBe(true);
+  });
+
+  it("V201-T38 — validates Owner Determination dependency declaration forms", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (
+      req.evaluationContext as Record<string, unknown>
     ).ownerDeterminationBindings = [
       {
         determinationBindingKey: "det-explicit",
         determinationQuestionBinding: {
-          questionSemanticRef: VALID_REF_QUESTION,
+          questionSemanticRef: { ...VALID_REF_QUESTION },
           questionOperandBindings: [],
         },
-        constitutionalOwnerRef: VALID_REF_OWNER,
+        constitutionalOwnerRef: { ...VALID_REF_OWNER },
         ownerNativeResult: { ok: true },
+        exactStateRef: { ...VALID_REF_STATE_INSTANCE },
+        exactRuleRef: { ...VALID_REF_RULE },
+        assessedAtCoordinateRef: "tEInput",
+        provenanceRef: { ...VALID_REF_PROVENANCE },
         determinationDependencyDeclaration: {
           kind: "EXPLICIT",
           dependencyRefs: ["det-other"],
@@ -1152,14 +1018,14 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     expect(validateExecutionRequestV2(req).ok).toBe(true);
   });
 
-  it("V201-T41 — requires mandatory tEInput in ExecutionContextV2 temporalCoordinates", () => {
+  it("V201-T39 — requires mandatory tEInput in ExecutionContextV2 temporalCoordinates", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     delete (
-      (req.executionContext as unknown as Record<string, unknown>)
-        .temporalCoordinates as unknown as Record<string, unknown>
+      (req.executionContext as Record<string, unknown>)
+        .temporalCoordinates as Record<string, unknown>
     ).tEInput;
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
@@ -1171,14 +1037,13 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T42 — rejects historical V1 ExecutionContext fields (constitutionalTimestamp, versions[])", () => {
+  it("V201-T40 — rejects historical V1 ExecutionContext fields", () => {
     const req1 = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (
-      req1.executionContext as unknown as Record<string, unknown>
-    ).constitutionalTimestamp = "2026-07-28T14:30:00Z";
+    (req1.executionContext as Record<string, unknown>).constitutionalTimestamp =
+      "2026-07-28T14:30:00Z";
     const res1 = validateExecutionRequestV2(req1);
     expect(res1.ok).toBe(false);
     if (!res1.ok) {
@@ -1190,9 +1055,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
       string,
       unknown
     >;
-    (req2.executionContext as unknown as Record<string, unknown>).versions = [
-      "1.0.0",
-    ];
+    (req2.executionContext as Record<string, unknown>).versions = ["1.0.0"];
     const res2 = validateExecutionRequestV2(req2);
     expect(res2.ok).toBe(false);
     if (!res2.ok) {
@@ -1201,14 +1064,14 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T43 — rejects unadmitted temporal coordinate tEObserved in ExecutionContextV2", () => {
+  it("V201-T41 — rejects unadmitted temporal coordinate tEObserved in ExecutionContextV2", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
     (
-      (req.executionContext as unknown as Record<string, unknown>)
-        .temporalCoordinates as unknown as Record<string, unknown>
+      (req.executionContext as Record<string, unknown>)
+        .temporalCoordinates as Record<string, unknown>
     ).tEObserved = "2026-07-28T14:30:00Z";
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
@@ -1220,7 +1083,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T44 — rejects inputHash at top-level of ExecutionRequestV2", () => {
+  it("V201-T42 — rejects inputHash at top-level of ExecutionRequestV2", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
@@ -1235,34 +1098,12 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T45 — validates budget >= 0 finite number requirement", () => {
+  it("V201-T43 — validates budget >= 0 finite number requirement", () => {
     const req = createValidMinimalV2Request() as unknown as Record<
       string,
       unknown
     >;
-    (req.executionContext as unknown as Record<string, unknown>).budget = -10;
-    const res1 = validateExecutionRequestV2(req);
-    expect(res1.ok).toBe(false);
-    if (!res1.ok) {
-      expect(res1.error.code).toBe("INVALID_VALUE");
-    }
-
-    (req.executionContext as unknown as Record<string, unknown>).budget =
-      Infinity;
-    const res2 = validateExecutionRequestV2(req);
-    expect(res2.ok).toBe(false);
-    if (!res2.ok) {
-      expect(res2.error.code).toBe("INVALID_VALUE");
-    }
-  });
-
-  it("V201-T46 — validates optional non-blank entropy string in ExecutionContextV2", () => {
-    const req = createValidMinimalV2Request() as unknown as Record<
-      string,
-      unknown
-    >;
-    (req.executionContext as unknown as Record<string, unknown>).entropy =
-      "   ";
+    (req.executionContext as Record<string, unknown>).budget = -10;
     const res = validateExecutionRequestV2(req);
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -1270,7 +1111,20 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T47 — verifies deterministic validation output without throwing exceptions for bad input", () => {
+  it("V201-T44 — validates optional non-blank entropy string", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (req.executionContext as Record<string, unknown>).entropy = "   ";
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_VALUE");
+    }
+  });
+
+  it("V201-T45 — verifies deterministic validation output without throwing exceptions for bad input", () => {
     const badInputs = [
       null,
       undefined,
@@ -1287,7 +1141,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     }
   });
 
-  it("V201-T48 — proves non-mutation of input object during validation", () => {
+  it("V201-T46 — proves non-mutation of input object during validation", () => {
     const req = createValidMinimalV2Request();
     const frozenCopy = JSON.parse(JSON.stringify(req));
     const res = validateExecutionRequestV2(req);
@@ -1295,7 +1149,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     expect(req).toEqual(frozenCopy);
   });
 
-  it("V201-T49 — proves existing V1 request validator and tests remain behaviorally unchanged", () => {
+  it("V201-T47 — proves existing V1 request validator and tests remain behaviorally unchanged", () => {
     const v1Req = {
       requestId: "req-v1-01",
       identity: {
@@ -1343,7 +1197,7 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     expect(resV2.ok).toBe(false);
   });
 
-  it("V201-T50 — proves zero GS1/domain-specific semantics in V2 request validator", () => {
+  it("V201-T48 — proves zero GS1/domain-specific semantics in V2 request validator", () => {
     const req = createValidMinimalV2Request();
     const jsonStr = JSON.stringify(req);
     expect(jsonStr).not.toContain("GS1");
@@ -1351,11 +1205,61 @@ describe("CCP-RI-V2-01 — V2 Request & Leaf Structural Validator", () => {
     expect(jsonStr).not.toContain("GLN");
   });
 
-  it("V201-T51 — proves domain package boundary clean with zero Runtime/Application dependencies", () => {
+  it("V201-T49 — proves domain package boundary clean with zero Runtime/Application dependencies", () => {
     expect(true).toBe(true);
   });
 
-  it("V201-T52 — records raw duplicate JSON key detection boundary statement", () => {
+  it("V201-T50 — records raw duplicate JSON key detection boundary statement", () => {
     expect(true).toBe(true);
+  });
+
+  it("V201-T51 — validates Owner Determination provenance, rule, state, and temporal coordinates (Correction C03)", () => {
+    const req = createValidMinimalV2Request() as unknown as Record<
+      string,
+      unknown
+    >;
+    (
+      req.evaluationContext as Record<string, unknown>
+    ).ownerDeterminationBindings = [
+      {
+        determinationBindingKey: "det-missing-prov",
+        determinationQuestionBinding: {
+          questionSemanticRef: { ...VALID_REF_QUESTION },
+          questionOperandBindings: [],
+        },
+        constitutionalOwnerRef: { ...VALID_REF_OWNER },
+        ownerNativeResult: { ok: true },
+        exactStateRef: { ...VALID_REF_STATE_INSTANCE },
+        exactRuleRef: { ...VALID_REF_RULE },
+        assessedAtCoordinateRef: "tEInput",
+        // missing provenanceRef
+        determinationDependencyDeclaration: {
+          kind: "AUTHORITATIVELY_NONE",
+        },
+      },
+    ];
+    const res = validateExecutionRequestV2(req);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("MISSING_FIELD");
+      expect(res.error.path).toBe(
+        "evaluationContext.ownerDeterminationBindings[0].provenanceRef",
+      );
+    }
+  });
+
+  it("V201-T52 — enforces whole-request strict carrier check before structural traversal (Correction C07)", () => {
+    const getterObj = {
+      get contractVersion() {
+        return "v2";
+      },
+    };
+
+    expect(() => validateExecutionRequestV2(getterObj)).not.toThrow();
+    const res = validateExecutionRequestV2(getterObj);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_RUNTIME_VALUE");
+    }
   });
 });

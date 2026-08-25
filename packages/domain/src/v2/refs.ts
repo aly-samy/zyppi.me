@@ -39,7 +39,14 @@ export type StateInstanceRefV2 = ConstitutionalRefBaseV2<"STATE_INSTANCE">;
 export type RequestedCapabilityRefV2 =
   ConstitutionalRefBaseV2<"REQUESTED_CAPABILITY">;
 export type AgencyBasisRefV2 = ConstitutionalRefBaseV2<"AGENCY_BASIS">;
-export type PolicyRefV2 = ConstitutionalRefBaseV2<"POLICY">;
+
+// C06: PolicyRefV2 requires exact version, stateRef, and provenanceRef
+export type PolicyRefV2 = ConstitutionalRefBaseV2<"POLICY"> & {
+  readonly version: string;
+  readonly stateRef: string;
+  readonly provenanceRef: string;
+};
+
 export type EvidenceRefV2 = ConstitutionalRefBaseV2<"EVIDENCE">;
 export type QuestionSemanticRefV2 =
   ConstitutionalRefBaseV2<"QUESTION_SEMANTIC">;
