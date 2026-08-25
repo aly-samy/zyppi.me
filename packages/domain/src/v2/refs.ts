@@ -40,7 +40,7 @@ export type RequestedCapabilityRefV2 =
   ConstitutionalRefBaseV2<"REQUESTED_CAPABILITY">;
 export type AgencyBasisRefV2 = ConstitutionalRefBaseV2<"AGENCY_BASIS">;
 
-// C06: PolicyRefV2 requires exact version, stateRef, and provenanceRef
+// C06 / R06: PolicyRefV2 requires exact version, stateRef, and provenanceRef
 export type PolicyRefV2 = ConstitutionalRefBaseV2<"POLICY"> & {
   readonly version: string;
   readonly stateRef: string;

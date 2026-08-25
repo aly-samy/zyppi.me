@@ -8,13 +8,13 @@ export type JsonValueV2 =
 /**
  * Validates whether a value is a strict, valid JSON value per V2 rules:
  * - null, boolean, finite number, string
- * - Array of valid JsonValueV2 (no extra non-numeric own properties)
- * - Plain object with valid JsonValueV2 values
+ * - Array of valid JsonValueV2 (R08: only admitted own keys are 'length' and "0".."length-1", enumerable, no extra keys, no sparse/undefined)
+ * - Plain object with valid JsonValueV2 values (R07: all own keys must be enumerable string keys, no getters/setters)
  *
  * Rejects:
  * - undefined, NaN, Infinity, -Infinity, BigInt, Date, Map, Set, Buffer,
  *   typed arrays, RegExp, functions, symbols, class instances, cyclic objects,
- *   objects with non-Object prototype, getters/accessors.
+ *   objects with non-Object prototype, getters/accessors, non-enumerable hidden properties.
  *
  * Safely handles Proxy or getter exceptions by catching reflection errors.
  */
@@ -44,22 +44,42 @@ export function isStrictJsonValueV2(val: unknown): boolean {
     try {
       if (Array.isArray(v)) {
         const ownKeys = Reflect.ownKeys(v);
-        for (const k of ownKeys) {
-          if (k === "length") continue;
-          if (typeof k !== "string" || !/^\d+$/.test(k)) {
-            return false;
-          }
-          const desc = Object.getOwnPropertyDescriptor(v, k);
-          if (!desc || desc.get || desc.set) {
-            return false;
-          }
+        const len = v.length;
+
+        // R08: Number of own keys must be exactly len + 1 (indices 0..len-1 + "length")
+        if (ownKeys.length !== len + 1) {
+          return false;
         }
 
-        for (let i = 0; i < v.length; i++) {
+        // Verify "length" property
+        const lenDesc = Object.getOwnPropertyDescriptor(v, "length");
+        if (!lenDesc || lenDesc.get || lenDesc.set) {
+          return false;
+        }
+
+        // Verify exact index key ordering and property descriptors
+        for (let i = 0; i < len; i++) {
+          const keyStr = String(i);
+          if (ownKeys[i] !== keyStr) {
+            return false;
+          }
+          const desc = Object.getOwnPropertyDescriptor(v, keyStr);
+          if (!desc || !desc.enumerable || desc.get || desc.set) {
+            return false;
+          }
+          if (!(i in v) || v[i] === undefined) {
+            return false;
+          }
           if (!validate(v[i])) {
             return false;
           }
         }
+
+        // The last key in ownKeys must be "length"
+        if (ownKeys[len] !== "length") {
+          return false;
+        }
+
         return true;
       }
 
@@ -74,7 +94,8 @@ export function isStrictJsonValueV2(val: unknown): boolean {
           return false;
         }
         const desc = Object.getOwnPropertyDescriptor(v as object, k);
-        if (!desc || desc.get || desc.set) {
+        // R07: Enforce desc.enumerable === true
+        if (!desc || !desc.enumerable || desc.get || desc.set) {
           return false;
         }
         if (!validate((v as Record<string, unknown>)[k])) {

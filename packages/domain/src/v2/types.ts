@@ -54,7 +54,7 @@ export interface ParticipationV2 {
   readonly agencyBindings: readonly AgencyBindingV2[];
 }
 
-// Intent Types (C01)
+// Intent Types
 export type IntentCategoryV2 =
   | "DISCOVER"
   | "ACCESS"
@@ -94,7 +94,7 @@ export interface IntentBindingV2 {
   readonly candidateStateBinding: CandidateStateBindingV2;
 }
 
-// Requested Action Types (C02)
+// Requested Action Types
 export type IntentActionCompatibilityBindingV2 =
   | {
       readonly kind: "GOVERNED_SEMANTIC_CONTRACT";
@@ -142,7 +142,7 @@ export interface RequestedActionBindingV2 {
   readonly requestedCapabilityClaimBindings: readonly RequestedCapabilityClaimBindingV2[];
 }
 
-// Bound Constitutional State Types (C05)
+// Bound Constitutional State Types (R04, R05)
 export type NormalStateBindingKindV2 =
   | "IDENTITY_STATE"
   | "STANDING_STATE"
@@ -164,7 +164,7 @@ export type StateBindingV2 =
       readonly kind: "RELATIONSHIP_STATE";
       readonly relationshipKind: "STRUCTURAL";
       readonly sourceEndpointRef: ConstitutionalRefV2;
-      readonly relationshipSemanticRef: RelationshipRefV2;
+      readonly relationshipSemanticRef: StateSemanticRefV2; // R04: STATE_SEMANTIC
       readonly targetEndpointRef: ConstitutionalRefV2;
       readonly exactTopologyStateRef: StateInstanceRefV2;
     }
@@ -174,15 +174,12 @@ export type StateBindingV2 =
       readonly relationshipKind: "REIFIED";
       readonly relationshipRef: RelationshipRefV2;
       readonly exactStateRef: StateInstanceRefV2;
-      readonly subjectRef?: SubjectRefV2;
-      readonly stateSemanticRef?: StateSemanticRefV2;
-      readonly stateArtifactRef?: StateArtifactRefV2;
     };
 
 export interface StateViewV2 {
   readonly viewKey: string;
   readonly viewScope: ScopeRefV2;
-  readonly stateBindings: readonly StateBindingV2[];
+  readonly stateBindings: readonly StateBindingV2[]; // R05: Requires [1..N]
 }
 
 export interface BoundConstitutionalStateV2 {
@@ -226,7 +223,7 @@ export interface BoundEvidenceStateV2 {
   readonly integrityCoordinates: readonly IntegrityCoordinatesV2[];
 }
 
-// Bound Policy Universe Types (C06)
+// Bound Policy Universe Types
 export interface PolicyDependencyEdgeV2 {
   readonly dependeePolicyRef: PolicyRefV2;
   readonly dependentPolicyRef: PolicyRefV2;
@@ -249,7 +246,7 @@ export interface BoundPolicyUniverseV2 {
   readonly applicabilityProvenanceBinding: ProvenanceRefV2;
 }
 
-// Bound Evaluation Context Types (C03, C04)
+// Bound Evaluation Context Types (R01, R02, R03)
 export interface EvaluationContextBindingV2 {
   readonly bindingKey: string;
   readonly semanticRef: EvaluationSemanticRefV2;
@@ -261,75 +258,79 @@ export interface EvaluationContextBindingV2 {
 export type TemporalCoordinateRefV2 =
   "tValid" | "tObservation" | "tEInput" | "tTrust";
 
+// R03: Semantic Evaluation-Context Collection Discriminator
+export type EvaluationContextBindingCollectionV2 =
+  "AUTHORIZED_INPUT" | "EVALUATION_PARAMETER" | "BOUND_CONTEXT";
+
+// R01: operandSlotSemanticRef is EvaluationSemanticRefV2
+// R02: REQUESTED_ACTION carries requestedActionRef: "REQUESTED_ACTION"
+// R03: EVALUATION_CONTEXT_BINDING carries bindingCollection: EvaluationContextBindingCollectionV2
 export type QuestionOperandBindingV2 =
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "PARTICIPATION_BINDING";
       readonly roleBindingRef: string;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "ACTION_PERFORMER";
       readonly performerRef: string;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "REQUESTED_ACTION";
-      readonly actionSemanticRef: ActionSemanticRefV2;
+      readonly requestedActionRef: "REQUESTED_ACTION";
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "ACTION_TARGET";
       readonly targetSlotSemanticRef: TargetSlotSemanticRefV2;
       readonly targetRef: TargetRefV2;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "CAPABILITY_CLAIM";
       readonly capabilityClaimRef: string;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "CONSTITUTIONAL_STATE";
       readonly semanticStateRef: SemanticStateRefV2;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "EVIDENCE_STATE";
       readonly evidenceStateRef: EvidenceStateRefV2;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "POLICY_UNIVERSE";
       readonly policyUniverseRef: PolicyUniverseRefV2;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "EVALUATION_CONTEXT_BINDING";
-      readonly bindingCollection:
-        | "authorizedInputBindings"
-        | "evaluationParameterBindings"
-        | "boundContextBindings";
+      readonly bindingCollection: EvaluationContextBindingCollectionV2;
       readonly bindingRef: string;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "TEMPORAL_COORDINATE";
       readonly temporalCoordinateRef: TemporalCoordinateRefV2;
     }
   | {
       readonly operandKey: string;
-      readonly operandSlotSemanticRef: TargetSlotSemanticRefV2;
+      readonly operandSlotSemanticRef: EvaluationSemanticRefV2;
       readonly operandKind: "OWNER_DETERMINATION";
       readonly ownerDeterminationBindingRef: string;
     };

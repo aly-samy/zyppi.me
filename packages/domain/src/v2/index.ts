@@ -45,6 +45,7 @@ export type {
   CandidateStateBindingV2,
   DeterminationDependencyDeclarationV2,
   DeterminationQuestionBindingV2,
+  EvaluationContextBindingCollectionV2,
   EvaluationContextBindingV2,
   EvidencePresentationBindingV2,
   EvidenceRequirementBindingV2,

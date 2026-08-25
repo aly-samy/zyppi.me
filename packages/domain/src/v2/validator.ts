@@ -8,8 +8,10 @@ import type {
 import type { ExecutionRequestV2 } from "./types.js";
 
 const DIGEST_REGEX = /^sha256:[0-9a-f]{64}$/;
+
+// Strict ISO-8601 instant regex
 const ISO_8601_INSTANT_REGEX =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:?\d{2})$/i;
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|([+-])(\d{2}):?(\d{2})?)$/i;
 
 const ALLOWED_REF_FAMILIES = new Set<ConstitutionalRefFamilyV2>([
   "SUBJECT",
@@ -69,13 +71,21 @@ function checkAllowedKeys(
   path: string,
 ): ExecutionRequestV2ValidationError | null {
   try {
-    const keys = Object.keys(obj);
+    const keys = Reflect.ownKeys(obj);
     for (const k of keys) {
-      if (!allowedKeys.includes(k)) {
+      if (typeof k !== "string" || !allowedKeys.includes(k)) {
         return {
           code: "UNKNOWN_FIELD",
-          path: path ? `${path}.${k}` : k,
-          message: `Unknown field '${k}'`,
+          path: path ? `${path}.${String(k)}` : String(k),
+          message: `Unknown or unadmitted field '${String(k)}'`,
+        };
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, k);
+      if (!desc || !desc.enumerable || desc.get || desc.set) {
+        return {
+          code: "INVALID_RUNTIME_VALUE",
+          path: path ? `${path}.${String(k)}` : String(k),
+          message: `Property '${String(k)}' is non-enumerable or accessor-based`,
         };
       }
     }
@@ -87,6 +97,48 @@ function checkAllowedKeys(
       message: `${path} failed property key inspection`,
     };
   }
+}
+
+// C06 / R06: PolicyRef validation requiring exact version, stateRef, and provenanceRef
+function validatePolicyRefFields(
+  ref: Record<string, unknown>,
+  path: string,
+): ExecutionRequestV2ValidationError | null {
+  if (typeof ref.version !== "string" || ref.version.trim() === "") {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.version`,
+      message: `PolicyRef at ${path} requires an explicit exact version`,
+    };
+  }
+  if (isFloatingVersion(ref.version)) {
+    return {
+      code: "INVALID_VALUE",
+      path: `${path}.version`,
+      message: `Floating or non-exact policy version '${ref.version}' is rejected`,
+    };
+  }
+
+  if (typeof ref.stateRef !== "string" || ref.stateRef.trim() === "") {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.stateRef`,
+      message: `PolicyRef at ${path} requires an explicit stateRef`,
+    };
+  }
+
+  if (
+    typeof ref.provenanceRef !== "string" ||
+    ref.provenanceRef.trim() === ""
+  ) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.provenanceRef`,
+      message: `PolicyRef at ${path} requires an explicit provenanceRef`,
+    };
+  }
+
+  return null;
 }
 
 function validateRef<F extends ConstitutionalRefFamilyV2>(
@@ -152,91 +204,50 @@ function validateRef<F extends ConstitutionalRefFamilyV2>(
     };
   }
 
-  if (ref.version !== undefined) {
-    if (typeof ref.version !== "string" || ref.version.trim() === "") {
-      return {
-        code: "INVALID_REFERENCE",
-        path: `${path}.version`,
-        message: "version must be a non-empty string if provided",
-      };
+  // R06: Any reference with family === "POLICY" must satisfy full PolicyRef exactness
+  if (ref.family === "POLICY") {
+    const errPol = validatePolicyRefFields(ref, path);
+    if (errPol) return errPol;
+  } else {
+    if (ref.version !== undefined) {
+      if (typeof ref.version !== "string" || ref.version.trim() === "") {
+        return {
+          code: "INVALID_REFERENCE",
+          path: `${path}.version`,
+          message: "version must be a non-empty string if provided",
+        };
+      }
+      if (isFloatingVersion(ref.version)) {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.version`,
+          message: `Floating or non-exact version '${ref.version}' is rejected`,
+        };
+      }
     }
-    if (isFloatingVersion(ref.version)) {
-      return {
-        code: "INVALID_VALUE",
-        path: `${path}.version`,
-        message: `Floating or non-exact version '${ref.version}' is rejected`,
-      };
+
+    if (ref.stateRef !== undefined) {
+      if (typeof ref.stateRef !== "string" || ref.stateRef.trim() === "") {
+        return {
+          code: "INVALID_REFERENCE",
+          path: `${path}.stateRef`,
+          message: "stateRef must be a non-empty string if provided",
+        };
+      }
     }
-  }
 
-  if (ref.stateRef !== undefined) {
-    if (typeof ref.stateRef !== "string" || ref.stateRef.trim() === "") {
-      return {
-        code: "INVALID_REFERENCE",
-        path: `${path}.stateRef`,
-        message: "stateRef must be a non-empty string if provided",
-      };
+    if (ref.provenanceRef !== undefined) {
+      if (
+        typeof ref.provenanceRef !== "string" ||
+        ref.provenanceRef.trim() === ""
+      ) {
+        return {
+          code: "INVALID_REFERENCE",
+          path: `${path}.provenanceRef`,
+          message: "provenanceRef must be a non-empty string if provided",
+        };
+      }
     }
-  }
-
-  if (ref.provenanceRef !== undefined) {
-    if (
-      typeof ref.provenanceRef !== "string" ||
-      ref.provenanceRef.trim() === ""
-    ) {
-      return {
-        code: "INVALID_REFERENCE",
-        path: `${path}.provenanceRef`,
-        message: "provenanceRef must be a non-empty string if provided",
-      };
-    }
-  }
-
-  return null;
-}
-
-// C06: PolicyRefV2 requires exact version, stateRef, and provenanceRef
-function validatePolicyRef(
-  input: unknown,
-  path: string,
-): ExecutionRequestV2ValidationError | null {
-  const errBase = validateRef(input, path, "POLICY");
-  if (errBase) return errBase;
-
-  const ref = input as Record<string, unknown>;
-
-  if (typeof ref.version !== "string" || ref.version.trim() === "") {
-    return {
-      code: "MISSING_FIELD",
-      path: `${path}.version`,
-      message: `PolicyRef at ${path} requires an explicit exact version`,
-    };
-  }
-  if (isFloatingVersion(ref.version)) {
-    return {
-      code: "INVALID_VALUE",
-      path: `${path}.version`,
-      message: `Floating or non-exact policy version '${ref.version}' is rejected`,
-    };
-  }
-
-  if (typeof ref.stateRef !== "string" || ref.stateRef.trim() === "") {
-    return {
-      code: "MISSING_FIELD",
-      path: `${path}.stateRef`,
-      message: `PolicyRef at ${path} requires an explicit stateRef`,
-    };
-  }
-
-  if (
-    typeof ref.provenanceRef !== "string" ||
-    ref.provenanceRef.trim() === ""
-  ) {
-    return {
-      code: "MISSING_FIELD",
-      path: `${path}.provenanceRef`,
-      message: `PolicyRef at ${path} requires an explicit provenanceRef`,
-    };
   }
 
   return null;
@@ -256,17 +267,111 @@ function validateDigest(
   return null;
 }
 
+// R09: Strict calendar instant validation rejecting impossible dates like 2026-02-30
 function validateIso8601Timestamp(
   val: unknown,
   path: string,
 ): ExecutionRequestV2ValidationError | null {
-  if (typeof val !== "string" || !ISO_8601_INSTANT_REGEX.test(val)) {
+  if (typeof val !== "string") {
+    return {
+      code: "INVALID_VALUE",
+      path,
+      message: `${path} must be a string timestamp`,
+    };
+  }
+
+  const match = ISO_8601_INSTANT_REGEX.exec(val);
+  if (!match) {
     return {
       code: "INVALID_VALUE",
       path,
       message: `${path} must be a valid ISO-8601 timestamp string`,
     };
   }
+
+  const year = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const day = parseInt(match[3], 10);
+  const hours = parseInt(match[4], 10);
+  const minutes = parseInt(match[5], 10);
+  const seconds = parseInt(match[6], 10);
+
+  if (month < 1 || month > 12) {
+    return {
+      code: "INVALID_VALUE",
+      path,
+      message: `${path} has invalid month '${month}'`,
+    };
+  }
+
+  const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const daysInMonths = [
+    31,
+    isLeapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+
+  const maxDays = daysInMonths[month - 1];
+  if (day < 1 || day > maxDays) {
+    return {
+      code: "INVALID_VALUE",
+      path,
+      message: `${path} has impossible calendar day '${day}' for month ${month}`,
+    };
+  }
+
+  if (hours < 0 || hours > 23) {
+    return {
+      code: "INVALID_VALUE",
+      path,
+      message: `${path} has invalid hours '${hours}'`,
+    };
+  }
+
+  if (minutes < 0 || minutes > 59) {
+    return {
+      code: "INVALID_VALUE",
+      path,
+      message: `${path} has invalid minutes '${minutes}'`,
+    };
+  }
+
+  if (seconds < 0 || seconds > 59) {
+    return {
+      code: "INVALID_VALUE",
+      path,
+      message: `${path} has invalid seconds '${seconds}'`,
+    };
+  }
+
+  if (match[8] && match[8] !== "Z" && match[8] !== "z") {
+    const offHH = match[10] ? parseInt(match[10], 10) : 0;
+    const offMM = match[11] ? parseInt(match[11], 10) : 0;
+    if (offHH < 0 || offHH > 23) {
+      return {
+        code: "INVALID_VALUE",
+        path,
+        message: `${path} has invalid offset hours '${offHH}'`,
+      };
+    }
+    if (offMM < 0 || offMM > 59) {
+      return {
+        code: "INVALID_VALUE",
+        path,
+        message: `${path} has invalid offset minutes '${offMM}'`,
+      };
+    }
+  }
+
   if (isNaN(Date.parse(val))) {
     return {
       code: "INVALID_VALUE",
@@ -274,6 +379,7 @@ function validateIso8601Timestamp(
       message: `${path} represents an invalid date instant`,
     };
   }
+
   return null;
 }
 
@@ -1079,7 +1185,7 @@ function validateRequestedAction(
   return null;
 }
 
-// C05: Exact state references required for all state bindings
+// C05, R04, R05: Exact state references required for all state bindings; R04 Structural STATE_SEMANTIC; R05 StateBindings [1..N]
 function validateConstitutionalState(
   input: unknown,
   path: string,
@@ -1179,6 +1285,15 @@ function validateConstitutionalState(
       };
     }
 
+    // R05: StateBindings [1..N] per State View
+    if (sv.stateBindings.length === 0) {
+      return {
+        code: "INVALID_CARDINALITY",
+        path: `${svPath}.stateBindings`,
+        message: `${svPath}.stateBindings must contain at least 1 state binding`,
+      };
+    }
+
     const sbKeys = new Set<string>();
     for (let j = 0; j < sv.stateBindings.length; j++) {
       const sbPath = `${svPath}.stateBindings[${j}]`;
@@ -1273,6 +1388,7 @@ function validateConstitutionalState(
         }
       } else if (sb.kind === "RELATIONSHIP_STATE") {
         if (sb.relationshipKind === "STRUCTURAL") {
+          // R04: Structural relationship fields
           const errSbKey = checkAllowedKeys(
             sb,
             [
@@ -1294,10 +1410,11 @@ function validateConstitutionalState(
           );
           if (errSrcRef) return errSrcRef;
 
+          // R04: relationshipSemanticRef must be STATE_SEMANTIC
           const errRelSemRef = validateRef(
             sb.relationshipSemanticRef,
             `${sbPath}.relationshipSemanticRef`,
-            "RELATIONSHIP",
+            "STATE_SEMANTIC",
           );
           if (errRelSemRef) return errRelSemRef;
 
@@ -1325,6 +1442,7 @@ function validateConstitutionalState(
           );
           if (errEtsRef) return errEtsRef;
         } else if (sb.relationshipKind === "REIFIED") {
+          // R04: Reified relationship fields closed on exact branch
           const errSbKey = checkAllowedKeys(
             sb,
             [
@@ -1333,9 +1451,6 @@ function validateConstitutionalState(
               "relationshipKind",
               "relationshipRef",
               "exactStateRef",
-              "subjectRef",
-              "stateSemanticRef",
-              "stateArtifactRef",
             ],
             sbPath,
           );
@@ -1362,33 +1477,6 @@ function validateConstitutionalState(
             "STATE_INSTANCE",
           );
           if (errEsi) return errEsi;
-
-          if (sb.subjectRef !== undefined) {
-            const errSubjRef = validateRef(
-              sb.subjectRef,
-              `${sbPath}.subjectRef`,
-              "SUBJECT",
-            );
-            if (errSubjRef) return errSubjRef;
-          }
-
-          if (sb.stateSemanticRef !== undefined) {
-            const errSsRef = validateRef(
-              sb.stateSemanticRef,
-              `${sbPath}.stateSemanticRef`,
-              "STATE_SEMANTIC",
-            );
-            if (errSsRef) return errSsRef;
-          }
-
-          if (sb.stateArtifactRef !== undefined) {
-            const errSa = validateRef(
-              sb.stateArtifactRef,
-              `${sbPath}.stateArtifactRef`,
-              "STATE_ARTIFACT",
-            );
-            if (errSa) return errSa;
-          }
         } else {
           return {
             code: "INVALID_VALUE",
@@ -1709,7 +1797,7 @@ function validateEvidenceState(
     if (typeof ic.algorithm !== "string" || ic.algorithm.trim() === "") {
       return {
         code: "INVALID_VALUE",
-        path: `${icPath}.algorithm`,
+        path: `${path}.algorithm`,
         message: "algorithm must be a non-empty string",
       };
     }
@@ -1718,7 +1806,7 @@ function validateEvidenceState(
   return null;
 }
 
-// C06: Validate policy universe and policy refs
+// C06 / R06: Validate policy universe and policy refs
 function validatePolicyUniverse(
   input: unknown,
   path: string,
@@ -1792,7 +1880,11 @@ function validatePolicyUniverse(
     }
     polKeys.add(apm.policyKey);
 
-    const errPolRef = validatePolicyRef(apm.policyRef, `${apmPath}.policyRef`);
+    const errPolRef = validateRef(
+      apm.policyRef,
+      `${apmPath}.policyRef`,
+      "POLICY",
+    );
     if (errPolRef) return errPolRef;
 
     if (apm.material === undefined || !isStrictJsonValueV2(apm.material)) {
@@ -1845,17 +1937,30 @@ function validatePolicyUniverse(
     );
     if (errEdgeKey) return errEdgeKey;
 
-    const errDeRef = validatePolicyRef(
+    const errDeRef = validateRef(
       edge.dependeePolicyRef,
       `${edgePath}.dependeePolicyRef`,
+      "POLICY",
     );
     if (errDeRef) return errDeRef;
 
-    const errDpRef = validatePolicyRef(
+    const errDpRef = validateRef(
       edge.dependentPolicyRef,
       `${edgePath}.dependentPolicyRef`,
+      "POLICY",
     );
     if (errDpRef) return errDpRef;
+  }
+
+  if (
+    !("applicabilityProvenanceBinding" in raw) ||
+    raw.applicabilityProvenanceBinding === undefined
+  ) {
+    return {
+      code: "MISSING_FIELD",
+      path: `${path}.applicabilityProvenanceBinding`,
+      message: `${path}.applicabilityProvenanceBinding is mandatory`,
+    };
   }
 
   const errProvRef = validateRef(
@@ -1932,7 +2037,9 @@ function validateEvaluationContextBinding(
   return null;
 }
 
-// C04: Validate closed discriminated question operands
+// R01: operandSlotSemanticRef must be EVALUATION_SEMANTIC
+// R02: REQUESTED_ACTION carries requestedActionRef: "REQUESTED_ACTION"
+// R03: EVALUATION_CONTEXT_BINDING carries bindingCollection: AUTHORIZED_INPUT | EVALUATION_PARAMETER | BOUND_CONTEXT
 function validateQuestionOperandBinding(
   input: unknown,
   path: string,
@@ -1955,10 +2062,11 @@ function validateQuestionOperandBinding(
     };
   }
 
+  // R01: operandSlotSemanticRef MUST have family EVALUATION_SEMANTIC
   const errSlotRef = validateRef(
     raw.operandSlotSemanticRef,
     `${path}.operandSlotSemanticRef`,
-    "TARGET_SLOT_SEMANTIC",
+    "EVALUATION_SEMANTIC",
   );
   if (errSlotRef) return errSlotRef;
 
@@ -2032,23 +2140,25 @@ function validateQuestionOperandBinding(
       break;
     }
     case "REQUESTED_ACTION": {
+      // R02: Must carry requestedActionRef: "REQUESTED_ACTION"
       const errKey = checkAllowedKeys(
         raw,
         [
           "operandKey",
           "operandSlotSemanticRef",
           "operandKind",
-          "actionSemanticRef",
+          "requestedActionRef",
         ],
         path,
       );
       if (errKey) return errKey;
-      const errActRef = validateRef(
-        raw.actionSemanticRef,
-        `${path}.actionSemanticRef`,
-        "ACTION_SEMANTIC",
-      );
-      if (errActRef) return errActRef;
+      if (raw.requestedActionRef !== "REQUESTED_ACTION") {
+        return {
+          code: "INVALID_VALUE",
+          path: `${path}.requestedActionRef`,
+          message: "requestedActionRef must be exactly 'REQUESTED_ACTION'",
+        };
+      }
       break;
     }
     case "ACTION_TARGET": {
@@ -2156,6 +2266,7 @@ function validateQuestionOperandBinding(
       break;
     }
     case "EVALUATION_CONTEXT_BINDING": {
+      // R03: bindingCollection must be AUTHORIZED_INPUT, EVALUATION_PARAMETER, or BOUND_CONTEXT
       const errKey = checkAllowedKeys(
         raw,
         [
@@ -2169,15 +2280,15 @@ function validateQuestionOperandBinding(
       );
       if (errKey) return errKey;
       if (
-        raw.bindingCollection !== "authorizedInputBindings" &&
-        raw.bindingCollection !== "evaluationParameterBindings" &&
-        raw.bindingCollection !== "boundContextBindings"
+        raw.bindingCollection !== "AUTHORIZED_INPUT" &&
+        raw.bindingCollection !== "EVALUATION_PARAMETER" &&
+        raw.bindingCollection !== "BOUND_CONTEXT"
       ) {
         return {
           code: "INVALID_VALUE",
           path: `${path}.bindingCollection`,
           message:
-            "bindingCollection must be authorizedInputBindings, evaluationParameterBindings, or boundContextBindings",
+            "bindingCollection must be AUTHORIZED_INPUT, EVALUATION_PARAMETER, or BOUND_CONTEXT",
         };
       }
       if (typeof raw.bindingRef !== "string" || raw.bindingRef.trim() === "") {
@@ -2697,14 +2808,14 @@ function validateExecutionContextV2(
 
 /**
  * Validates raw input strictly as an ExecutionRequestV2 structure.
- * Performs a whole-input strict carrier check before structural traversal (C07).
+ * Performs a whole-input strict carrier check before structural traversal (C07, R07, R08).
  * Returns ValidationResult with ok: true and typed value, or ok: false and detailed error.
  * Does not throw exceptions, purely deterministic.
  */
 export function validateExecutionRequestV2(
   input: unknown,
 ): ValidationResult<ExecutionRequestV2, ExecutionRequestV2ValidationError> {
-  // C07: Whole-request strict JSON / runtime safety carrier check
+  // C07 / R07 / R08: Whole-request strict JSON / runtime safety carrier check
   if (!isStrictJsonValueV2(input)) {
     return {
       ok: false,
