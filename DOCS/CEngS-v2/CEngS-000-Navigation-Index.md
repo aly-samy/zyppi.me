@@ -41,19 +41,36 @@ IMPLEMENTATION GUIDES (product-specific — outside CEngS, load per feature area
 
 ## Task → Document Table
 
-| Task                                        | Load (in addition to Core)             |
-| ------------------------------------------- | -------------------------------------- |
-| Any general coding task                     | Core only                              |
-| Profile / Domain Architecture (M08.5)       | Core + CAW-005, M08.5-PREP, M08.5-PLAN |
-| Writing or modifying tests                  | CEngS-101                              |
-| Opening a Pull Request                      | CEngS-102, CL-001                      |
-| Cutting a build or release                  | CEngS-102, CL-002                      |
-| Optimization / profiling work               | CEngS-103                              |
-| Adding logs, metrics, traces, alerts        | CEngS-104                              |
-| Writing docs / READMEs / API references     | CEngS-105                              |
-| Implementing a specific product area        | Core + relevant IG-xxx                 |
-| Reviewing someone else's (or AI's) PR       | CEngS-102, CL-001                      |
-| Deciding whether to migrate a package to Go | CEngS-103 §Migration Triggers          |
+| Task                                        | Load (in addition to Core)                                                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Any general coding task                     | Core only                                                                                                                                      |
+| Profile / Domain Architecture (M08.5)       | Core + CAW-005, M08.5-PREP, M08.5-PLAN                                                                                                         |
+| ZII / ZQE implementation                    | ZII-001 + relevant ACTIVE ZII authority + active ZQE specification + exact implementation mandate + only task-relevant Operational Standard(s) |
+| Writing or modifying tests                  | CEngS-101                                                                                                                                      |
+| Opening a Pull Request                      | CEngS-102, CL-001                                                                                                                              |
+| Cutting a build or release                  | CEngS-102, CL-002                                                                                                                              |
+| Optimization / profiling work               | CEngS-103                                                                                                                                      |
+| Adding logs, metrics, traces, alerts        | CEngS-104                                                                                                                                      |
+| Writing docs / READMEs / API references     | CEngS-105                                                                                                                                      |
+| Implementing a specific product area        | Core + relevant IG-xxx                                                                                                                         |
+| Reviewing someone else's (or AI's) PR       | CEngS-102, CL-001                                                                                                                              |
+| Deciding whether to migrate a package to Go | CEngS-103 §Migration Triggers                                                                                                                  |
+
+### ZII / ZQE Context Boundary
+
+For a ZII or ZQE implementation task:
+
+- load `ZII-001`;
+- load only the relevant `ACTIVE` ZII family authority required by the task;
+- load the active ZQE specification governing the implementation;
+- load the exact implementation mandate;
+- load only the Operational Standard(s) actually required by the task.
+
+Do not load CAW, GS1, Z-PROF, or other domain authority merely because a QR payload contains a GS1 Digital Link, GTIN-shaped value, URL, or other domain-shaped data.
+
+Load CAW or another domain authority only when the implementation task itself crosses into that governed domain behavior.
+
+If the required ZII authority, ZQE specification, or implementation mandate is absent, inactive, ambiguous, or conflicting, stop rather than infer the missing authority.
 
 ## Governing Principle
 
