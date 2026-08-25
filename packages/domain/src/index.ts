@@ -565,6 +565,8 @@ export function serializeIdentityRecord(record: IdentityRecord): string {
   return JSON.stringify(ordered);
 }
 
+export * from "./v2/index.js";
+
 export {
   cleanForJcs,
   computeSha256,
