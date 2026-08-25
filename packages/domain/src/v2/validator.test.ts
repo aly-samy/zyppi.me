@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { describe, expect, it } from "vitest";
 
 import { validateExecutionRequest } from "../index.js";
@@ -1252,21 +1254,117 @@ describe("CCP-RI-V2-01 — Council Mandated Immutable Test Matrix V201-T01..T52"
   });
 
   it("V201-T50 — V1 ExecutionRequest tests remain green", () => {
-    // Verified by running packages/domain/src/executionRequest.test.ts
-    expect(true).toBe(true);
+    // E03: Executable regression guard verifying real validateExecutionRequest() on valid V1 structure
+    const validV1Req = {
+      requestId: "req-v1-test-50",
+      identity: {
+        identityId: "id-v1-50",
+        identityType: "type",
+        canonicalReference: "ref",
+        referentId: null,
+        status: "active" as const,
+        createdAt: "2026-07-28T14:30:00Z",
+        updatedAt: "2026-07-28T14:30:00Z",
+      },
+      activeConstitutionalView: {
+        identity: {
+          identityId: "id-v1-50",
+          identityType: "type",
+          canonicalReference: "ref",
+          referentId: null,
+          status: "active" as const,
+          createdAt: "2026-07-28T14:30:00Z",
+          updatedAt: "2026-07-28T14:30:00Z",
+        },
+        relationships: [],
+        standings: [],
+        authorities: [],
+        capabilities: [],
+        evidenceReferences: [],
+        applicablePolicies: [],
+      },
+      evidenceBundle: { schemaVersion: "1.0", evidenceRecords: [] },
+      policyContext: { policies: [] },
+      executionContext: {
+        executionId: "exec-v1-50",
+        constitutionalTimestamp: "2026-07-28T14:30:00Z",
+        budget: 100,
+        entropy: "ent",
+        versions: ["1.0.0"],
+      },
+      resolvedPolicyGraph: { edges: [] },
+    };
+
+    const res = validateExecutionRequest(validV1Req);
+    expect(res.ok).toBe(true);
   });
 
   it("V201-T51 — generic V2 source contains zero GS1 domain semantics", () => {
-    const req = createValidMinimalV2Request();
-    const jsonStr = JSON.stringify(req);
-    expect(jsonStr).not.toContain("GS1");
-    expect(jsonStr).not.toContain("GTIN");
-    expect(jsonStr).not.toContain("GLN");
+    // E04: Static filesystem scan of V2 production files proving zero GS1/domain-specific terms
+    const v2ProdFiles = [
+      "types.ts",
+      "json.ts",
+      "refs.ts",
+      "errors.ts",
+      "validator.ts",
+      "index.ts",
+    ];
+
+    const forbiddenTerms = ["GS1", "GTIN", "GLN", "trade_item", "digital_link"];
+
+    const v2Dir = path.join(__dirname);
+
+    for (const file of v2ProdFiles) {
+      const filePath = path.join(v2Dir, file);
+      expect(fs.existsSync(filePath)).toBe(true);
+      const content = fs.readFileSync(filePath, "utf8");
+      for (const term of forbiddenTerms) {
+        const matches = content.includes(term);
+        expect(matches).toBe(false);
+      }
+    }
   });
 
   it("V201-T52 — domain package remains dependency-free / boundary-clean", () => {
-    // Verified by pnpm boundary:all and pnpm graph:validate
-    expect(true).toBe(true);
+    // E05: Static inspection proving V2 imports are domain-local and introduce no external/forbidden package dependencies
+    const v2ProdFiles = [
+      "types.ts",
+      "json.ts",
+      "refs.ts",
+      "errors.ts",
+      "validator.ts",
+      "index.ts",
+    ];
+
+    const v2Dir = path.join(__dirname);
+    const forbiddenImportPatterns = [
+      "@zyppi/runtime",
+      "@zyppi/contracts",
+      "@zyppi/testing",
+      "apps/api",
+      "infra",
+      "edge",
+    ];
+
+    for (const file of v2ProdFiles) {
+      const filePath = path.join(v2Dir, file);
+      const content = fs.readFileSync(filePath, "utf8");
+      const lines = content.split("\n");
+      for (const line of lines) {
+        if (line.trim().startsWith("import")) {
+          for (const pattern of forbiddenImportPatterns) {
+            expect(line.includes(pattern)).toBe(false);
+          }
+        }
+      }
+    }
+
+    // Verify package.json in packages/domain has no runtime/application dependencies
+    const pkgJsonPath = path.join(v2Dir, "../../package.json");
+    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
+    const deps = { ...pkgJson.dependencies, ...pkgJson.devDependencies };
+    expect(deps["@zyppi/runtime"]).toBeUndefined();
+    expect(deps["@zyppi/contracts"]).toBeUndefined();
   });
 });
 

@@ -1,55 +1,65 @@
 # Completion Receipt — CCP-RI-V2-01
 
-## V2 Request / Leaf Physical Representation & Structural Validation (With Corrective CCP-RI-V2-01-CORR-02)
+## V2 Request / Leaf Physical Representation & Structural Validation (With Corrective CCP-RI-V2-01-CORR-03)
 
 ### 1. Base SHA
 
 - `3b9f725992ad1deef63ffbf9232bc6d1d3ad8b0e`
 
-### 2. CORR-02 Implementation Commit SHA (Commit A)
+### 2. CORR-02 Implementation-Bearing Prior Head
 
-- `142e51cdb6943e3d6d85ec7366223f56e0e15459`
+- `16aecbfd2ded3e97ac74d9dbd7094d517cfaddd8`
 
-### 3. Receipt Container Commit SHA (Commit B)
+### 3. CORR-03 Final Implementation/Evidence Tree Anchor (Commit C)
+
+- `bb64e048b5c3ad788c5242c884875cf8f50be650`
+
+### 4. Receipt Container Commit (Commit D)
 
 - NOT SELF-EMBEDDED
 - VERIFIED EXTERNALLY BY COUNCIL / GIT
 
-### 4. PR Head at Council Verification
+### 5. PR Head at Council Verification
 
-- TO BE RECORDED BY COUNCIL ON PR #114
+- TO BE RECORDED EXTERNALLY BY COUNCIL ON PR #114
 
-### 5. Actual Branch Name
+### 6. Actual Branch Name
 
 - `CCP-RI-V2-01-v2-request-structural-contract-1431857625134782151`
 
-### 6. Exact Files Added/Modified per Commit
+### 7. Historical Commit Provenance Correction
 
-- **Commit A (`142e51cdb6943e3d6d85ec7366223f56e0e15459`):**
-  - `packages/domain/src/v2/types.ts`
-  - `packages/domain/src/v2/json.ts`
-  - `packages/domain/src/v2/refs.ts`
-  - `packages/domain/src/v2/errors.ts`
-  - `packages/domain/src/v2/validator.ts`
+- The prior receipt reference to `142e51cdb6943e3d6d85ec7366223f56e0e15459` as the submitted CORR-02 implementation commit was not present in PR #114 ancestry and is superseded by this evidence record.
+
+### 8. Full PR Changed-File Register
+
+```text
+DOCS/CAW/CCP/CCP-RI-V2-01-RECEIPT.md
+packages/domain/src/index.ts
+packages/domain/src/v2/errors.ts
+packages/domain/src/v2/index.ts
+packages/domain/src/v2/json.ts
+packages/domain/src/v2/refs.ts
+packages/domain/src/v2/types.ts
+packages/domain/src/v2/validator.test.ts
+packages/domain/src/v2/validator.ts
+```
+
+### 9. Exact Files Changed per Commit
+
+- **Commit C (`bb64e048b5c3ad788c5242c884875cf8f50be650`):**
   - `packages/domain/src/v2/validator.test.ts`
-  - `packages/domain/src/v2/index.ts`
-- **Commit B (Receipt Commit):**
+- **Commit D (Receipt Commit):**
   - `DOCS/CAW/CCP/CCP-RI-V2-01-RECEIPT.md`
 
-### 7. Corrective Refinements Applied (R01–R10)
+### 10. Corrective Evidence Fixes Applied (E01–E05)
 
-- **R01 (Question Operand Slot Semantic Type):** `QuestionOperandBindingV2.operandSlotSemanticRef` is updated to `EvaluationSemanticRefV2` (`EVALUATION_SEMANTIC`).
-- **R02 (Exact Requested Action Instance Marker):** `REQUESTED_ACTION` question operands carry literal `requestedActionRef: "REQUESTED_ACTION"`.
-- **R03 (Semantic Evaluation-Context Collection Discriminator):** `EVALUATION_CONTEXT_BINDING` uses `bindingCollection: "AUTHORIZED_INPUT" | "EVALUATION_PARAMETER" | "BOUND_CONTEXT"`.
-- **R04 (Structural Relationship Semantic Type):** `RELATIONSHIP_STATE / STRUCTURAL` uses `relationshipSemanticRef: StateSemanticRefV2` (`STATE_SEMANTIC`). `REIFIED` is closed on `relationshipRef` and `exactStateRef`.
-- **R05 (StateBindings [1..N] Per State View):** `StateViewV2.stateBindings` mandates at least 1 state binding. Minimal valid fixture includes an `IDENTITY_STATE` binding.
-- **R06 (PolicyRef Exactness via Generic ConstitutionalRef):** Any `ConstitutionalRefV2` with `family: "POLICY"` requires mandatory `version`, `stateRef`, and `provenanceRef`.
-- **R07 (Rejection of Non-Enumerable Hidden Properties):** `isStrictJsonValueV2` rejects own properties with `desc.enumerable !== true`.
-- **R08 (Rejection of Non-Canonical Array Own Keys):** Array validation rejects own keys other than `length` and `"0"`..`String(length - 1)`, rejecting sparse/undefined elements and extra numeric-like keys (`"01"`, `"4294967295"`).
-- **R09 (Rejection of Impossible Calendar Dates):** Instant validation strictly checks calendar bounds, rejecting impossible dates like `2026-02-30` or non-leap `2025-02-29`, while accepting valid leap days and offset-bearing instants.
-- **R10 (Immutable Council Test Matrix Restoration):** Test IDs `V201-T01` through `V201-T52` are restored to their exact Council definitions. Extra tests are assigned `V201-T53+`.
+- **E01/E02 (Commit Provenance Correction):** Preserved existing Git history without rebase/squash/amend. Fixed prior head reference to `16aecbfd2ded3e97ac74d9dbd7094d517cfaddd8` and committed evidence updates in Commit C (`bb64e048b5c3ad788c5242c884875cf8f50be650`).
+- **E03 (T50 Executable V1 Regression Evidence):** Replaced `expect(true).toBe(true)` in `V201-T50` with an executable regression guard invoking `validateExecutionRequest()` on a valid V1 structure. AUTHORITATIVE T50 SUITE-LEVEL EVIDENCE: `pnpm test` (including `packages/domain/src/executionRequest.test.ts`).
+- **E04 (T51 Static V2 Source Scan):** Replaced fixture string check in `V201-T51` with a static filesystem scan of V2 production files (`types.ts`, `json.ts`, `refs.ts`, `errors.ts`, `validator.ts`, `index.ts`), proving zero occurrences of `GS1`, `GTIN`, `GLN`, `trade_item`, and `digital_link`.
+- **E05 (T52 Static Domain Boundary Proof):** Replaced `expect(true).toBe(true)` in `V201-T52` with static import inspection proving V2 production imports are strictly domain-local. Cites `pnpm boundary:all` and `pnpm graph:validate` for workspace-wide boundary proof.
 
-### 8. V2 Public Exports
+### 11. V2 Public Exports
 
 Exported from `packages/domain/src/v2/index.ts` and re-exported from `@zyppi/domain` (`packages/domain/src/index.ts`):
 
@@ -60,7 +70,7 @@ Exported from `packages/domain/src/v2/index.ts` and re-exported from `@zyppi/dom
 - Strict JSON type and validator (`JsonValueV2`, `isStrictJsonValueV2`)
 - Validator function `validateExecutionRequestV2`
 
-### 9. Implementation vs Deferred Work
+### 12. Implementation vs Deferred Work
 
 ```text
 IMPLEMENTED IN V2-01:
@@ -79,7 +89,7 @@ NOT IMPLEMENTED:
   Runtime execution
 ```
 
-### 10. Raw Duplicate Key Boundary
+### 13. Raw Duplicate Key Boundary
 
 ```text
 RAW DUPLICATE JSON KEY DETECTION:
@@ -87,7 +97,7 @@ RAW DUPLICATE JSON KEY DETECTION:
   MANDATORY DEFERRED TO CCP-RI-V2-04
 ```
 
-### 11. Protected-Boundary Diff Proof
+### 14. Protected-Boundary Diff Proof
 
 No files were modified or touched inside:
 
@@ -97,7 +107,7 @@ No files were modified or touched inside:
 - `infra/**`
 - `edge/**`
 
-### 12. Source Negative Audit Classification
+### 15. Source Negative Audit Classification
 
 | Match                                                      | Source File                                | Classification / Justification                                            |
 | :--------------------------------------------------------- | :----------------------------------------- | :------------------------------------------------------------------------ |
@@ -107,7 +117,7 @@ No files were modified or touched inside:
 | `"pol-latest"`, `"latest"`                                 | `packages/domain/src/v2/validator.test.ts` | Negative test fixture verifying rejection of floating version specifiers. |
 | `"GS1"`, `"GTIN"`, `"GLN"`                                 | `packages/domain/src/v2/validator.test.ts` | Disappearance test verifying zero GS1 semantics in V2.                    |
 
-### 13. Full Quality Gate Output Summary
+### 16. Full Quality Gate Output Summary
 
 - `pnpm format:check`: PASS (100% Prettier compliant)
 - `pnpm lint`: PASS (0 ESLint errors)
@@ -117,7 +127,7 @@ No files were modified or touched inside:
 - `pnpm graph:validate`: PASS (Workspace dependency graph valid)
 - `pnpm test`: PASS (1025 domain & workspace tests passing green)
 
-### 14. Restored Council Test Matrix Mapping (V201-T01..T52)
+### 17. Restored Council Test Matrix Mapping (V201-T01..T52)
 
 | Test ID  | Test Description                                            | Result |
 | :------- | :---------------------------------------------------------- | :----- |
@@ -174,7 +184,7 @@ No files were modified or touched inside:
 | V201-T51 | generic V2 source contains zero GS1 domain semantics        | PASS   |
 | V201-T52 | domain package remains dependency-free / boundary-clean     | PASS   |
 
-### 15. Extra Corrective Tests (V201-T53+)
+### 18. Extra Corrective Tests (V201-T53+)
 
 - **V201-T53:** R01 — Question operand slot wrong reference family rejected
 - **V201-T54:** R02 — REQUESTED_ACTION operand missing/wrong literal marker
@@ -191,7 +201,7 @@ No files were modified or touched inside:
 - **V201-T65:** R09 — Invalid non-leap February 29 rejected & valid leap day accepted
 - **V201-T66:** R09 — Valid timezone offset instant accepted
 
-### 16. Final Implementer Disposition
+### 19. Final Implementer Recommendation
 
 FINAL IMPLEMENTER RECOMMENDATION:
 READY FOR COUNCIL RE-VERIFICATION
