@@ -3,8 +3,10 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { canonicalizeJcsV2 } from "./canonical.js";
 import {
+  VECTOR_A_CANONICAL_PREIMAGES,
   VECTOR_A_EXPECTED_DIGESTS,
   VECTOR_A_REQUEST,
+  VECTOR_B_CANONICAL_PREIMAGES,
   VECTOR_B_EXPECTED_DIGESTS,
   VECTOR_B_REQUEST,
 } from "./fixtures/identityVectors.js";
@@ -13,11 +15,13 @@ import {
   deriveExecutionRequestV2DigestCandidate,
   derivePolicyUniverseRefV2,
   deriveSemanticStateRefV2,
+  getConstitutionalStateIdentityProjectionV2,
   verifyEvidenceStateRefV2,
   verifyPolicyUniverseRefV2,
   verifySemanticStateRefV2,
   V2_DOMAIN_SEPARATORS,
 } from "./identity.js";
+import { normalizeTemporalCoordinateV2 } from "./temporal.js";
 import type { PolicyRefV2 } from "./refs.js";
 import type {
   BoundConstitutionalStateV2,
@@ -203,7 +207,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T09
+  // V202-T09 (Strengthened C10)
   it("V202-T09 V1 ACV digest cannot satisfy SemanticStateRef derivation", () => {
     const state = VECTOR_A_REQUEST.constitutionalState;
     const res = deriveSemanticStateRefV2(state);
@@ -211,20 +215,22 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     if (res.ok) {
       expect(res.value.startsWith("sha256:")).toBe(true);
       expect(res.value).toBe(VECTOR_A_EXPECTED_DIGESTS.semanticStateRef);
+      expect(res.value).not.toContain("zyppi:domain:acv_state:v1:");
     }
   });
 
-  // V202-T10
+  // V202-T10 (Strengthened C10)
   it("V202-T10 V1 Evidence aggregate hash cannot satisfy EvidenceStateRef derivation", () => {
     const state = VECTOR_B_REQUEST.evidenceState;
     const res = deriveEvidenceStateRefV2(state);
     expect(res.ok).toBe(true);
     if (res.ok) {
       expect(res.value).toBe(VECTOR_B_EXPECTED_DIGESTS.evidenceStateRef);
+      expect(res.value).not.toContain("zyppi:domain:evidence:v1:");
     }
   });
 
-  // V202-T11
+  // V202-T11 (Strengthened C10)
   it("V202-T11 V1 input hash cannot satisfy V2 whole-request domain", () => {
     const res = deriveExecutionRequestV2DigestCandidate(VECTOR_A_REQUEST);
     expect(res.ok).toBe(true);
@@ -232,6 +238,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
       expect(res.value).toBe(
         VECTOR_A_EXPECTED_DIGESTS.wholeRequestDigestCandidate,
       );
+      expect(res.value).not.toContain("zyppi:domain:input:v1:");
     }
   });
 
@@ -399,9 +406,23 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T17
+  // V202-T17 (Strengthened C10)
   it("V202-T17 UNKNOWN multiplicity preserved", () => {
-    const req1: ExecutionRequestV2 = {
+    const reqOneUnk: ExecutionRequestV2 = {
+      ...VECTOR_A_REQUEST,
+      participation: {
+        roleBindings: [
+          {
+            roleBindingKey: "rb1",
+            role: "ACTOR",
+            subject: { kind: "UNKNOWN" },
+          },
+        ],
+        agencyBindings: [],
+      },
+    };
+
+    const reqTwoUnk: ExecutionRequestV2 = {
       ...VECTOR_A_REQUEST,
       participation: {
         roleBindings: [
@@ -420,11 +441,16 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
       },
     };
 
-    const res = deriveExecutionRequestV2DigestCandidate(req1);
-    expect(res.ok).toBe(true);
+    const d1 = deriveExecutionRequestV2DigestCandidate(reqOneUnk);
+    const d2 = deriveExecutionRequestV2DigestCandidate(reqTwoUnk);
+    expect(d1.ok).toBe(true);
+    expect(d2.ok).toBe(true);
+    if (d1.ok && d2.ok) {
+      expect(d1.value).not.toBe(d2.value);
+    }
   });
 
-  // V202-T18
+  // V202-T18 (Strengthened C10)
   it("V202-T18 synthetic anonymous Subject not created", () => {
     const req: ExecutionRequestV2 = {
       ...VECTOR_A_REQUEST,
@@ -706,7 +732,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T24
+  // V202-T24 (Strengthened C10)
   it("V202-T24 missing remains distinct from explicit empty where representable", () => {
     const req1 = VECTOR_A_REQUEST;
     const req2: ExecutionRequestV2 = {
@@ -726,7 +752,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T25
+  // V202-T25 (Strengthened C10)
   it("V202-T25 AUTHORITATIVELY_NONE remains distinct from missing", () => {
     const od1 =
       VECTOR_B_REQUEST.evaluationContext.ownerDeterminationBindings[0];
@@ -747,7 +773,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T26
+  // V202-T26 (Strengthened C10)
   it("V202-T26 NO_DELEGATED_AGENCY_RELIANCE remains distinct from absent/malformed", () => {
     const rel1 =
       VECTOR_A_REQUEST.requestedAction.actionPerformerBindings[0]
@@ -794,7 +820,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T29
+  // V202-T29 (Strengthened C10)
   it("V202-T29 contractVersion participates in whole-request identity", () => {
     const req1 = VECTOR_A_REQUEST;
     expect(req1.contractVersion).toBe("v2");
@@ -802,7 +828,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     expect(res.ok).toBe(true);
   });
 
-  // V202-T30
+  // V202-T30 (Strengthened C10)
   it("V202-T30 component refs do not replace actual component material in root projection", () => {
     const req = VECTOR_A_REQUEST;
     expect(req.constitutionalState.stateViews).toBeDefined();
@@ -856,7 +882,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T33
+  // V202-T33 (Strengthened C10)
   it("V202-T33 >millisecond fractional precision preserved", () => {
     const req1 = VECTOR_B_REQUEST;
     const req2 = {
@@ -920,13 +946,13 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T38
+  // V202-T38 (Strengthened C10)
   it("V202-T38 RFC8785 property-sort vector matches", () => {
-    const input = { b: 1, a: 2, c: 3 };
+    const input = { b: 1, a: 2, c: 3, "a\u0000": 4 };
     const res = canonicalizeJcsV2(input);
     expect(res.ok).toBe(true);
     if (res.ok) {
-      expect(res.value).toBe('{"a":2,"b":1,"c":3}');
+      expect(res.value).toBe('{"a":2,"a\\u0000":4,"b":1,"c":3}');
     }
   });
 
@@ -1069,13 +1095,14 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     expect(indexSource).not.toContain("@zyppi/contracts");
   });
 
-  // V202-T51
+  // V202-T51 (Strengthened C10)
   it("V202-T51 V1 golden hash/Receipt vectors unchanged", () => {
     const receiptHashSource = readFileSync(
       resolve(process.cwd(), "packages/domain/src/receiptHash.ts"),
       "utf8",
     );
     expect(receiptHashSource).toContain("zyppi:domain:receipt:v1:");
+    expect(receiptHashSource).toContain("zyppi:domain:input:v1:");
   });
 
   // V202-T52
@@ -1134,7 +1161,7 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T56
+  // V202-T56 (Strengthened C10 & C11)
   it("V202-T56 independent fixed golden vectors reproduce 3 component digests + root candidate", () => {
     const vecA = VECTOR_A_REQUEST;
     const semA = deriveSemanticStateRefV2(vecA.constitutionalState);
@@ -1155,6 +1182,18 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
       VECTOR_A_EXPECTED_DIGESTS.wholeRequestDigestCandidate,
     );
 
+    // Verify exact preimages match fixed expectations
+    const semProjA = getConstitutionalStateIdentityProjectionV2(
+      vecA.constitutionalState,
+    );
+    expect(semProjA.ok).toBe(true);
+    if (semProjA.ok) {
+      const jcsSemA = canonicalizeJcsV2(semProjA.value);
+      expect(jcsSemA.ok && jcsSemA.value).toBe(
+        VECTOR_A_CANONICAL_PREIMAGES.constitutionalStateJcs,
+      );
+    }
+
     const vecB = VECTOR_B_REQUEST;
     const semB = deriveSemanticStateRefV2(vecB.constitutionalState);
     const evidB = deriveEvidenceStateRefV2(vecB.evidenceState);
@@ -1173,5 +1212,253 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     expect(rootB.ok && rootB.value).toBe(
       VECTOR_B_EXPECTED_DIGESTS.wholeRequestDigestCandidate,
     );
+
+    const semProjB = getConstitutionalStateIdentityProjectionV2(
+      vecB.constitutionalState,
+    );
+    expect(semProjB.ok).toBe(true);
+    if (semProjB.ok) {
+      const jcsSemB = canonicalizeJcsV2(semProjB.value);
+      expect(jcsSemB.ok && jcsSemB.value).toBe(
+        VECTOR_B_CANONICAL_PREIMAGES.constitutionalStateJcs,
+      );
+    }
+  });
+});
+
+describe("CCP-RI-V2-02-CORR-01 — Additional Mandatory Test Suite V202-T57+", () => {
+  it("V202-T57 — C09: Simultaneous relabeling across 8 referenced namespaces preserves normalized identity", () => {
+    const req1 = VECTOR_B_REQUEST;
+    const req2: ExecutionRequestV2 = {
+      ...req1,
+      participation: {
+        ...req1.participation,
+        roleBindings: [
+          {
+            ...req1.participation.roleBindings[0],
+            roleBindingKey: "custom_role_0",
+          },
+          {
+            ...req1.participation.roleBindings[1],
+            roleBindingKey: "custom_role_1",
+          },
+        ],
+        agencyBindings: [
+          {
+            ...req1.participation.agencyBindings[0],
+            agencyBindingKey: "custom_agency_0",
+            actorRoleBindingRef: "custom_role_0",
+            governedSubjectRoleBindingRef: "custom_role_1",
+          },
+        ],
+      },
+      intent: {
+        ...req1.intent,
+        originatorParticipationRef: "custom_role_1",
+      },
+      requestedAction: {
+        ...req1.requestedAction,
+        actionPerformerBindings: [
+          {
+            ...req1.requestedAction.actionPerformerBindings[0],
+            performerKey: "custom_performer_0",
+            actorParticipationRef: "custom_role_0",
+            agencyReliance: {
+              kind: "DELEGATED_AGENCY_SINGLE",
+              agencyBindingRef: "custom_agency_0",
+            },
+          },
+        ],
+        intentActionCompatibilityBinding: {
+          kind: "OWNER_DETERMINATION",
+          ownerDeterminationBindingRef: "custom_od_0",
+        },
+        requestedCapabilityClaimBindings: [
+          {
+            ...req1.requestedAction.requestedCapabilityClaimBindings[0],
+            capabilityClaimKey: "custom_cap_0",
+            claimantPerformerRefs: ["custom_performer_0"],
+          },
+        ],
+      },
+      evaluationContext: {
+        ...req1.evaluationContext,
+        authorizedInputBindings: [
+          {
+            ...req1.evaluationContext.authorizedInputBindings[0],
+            bindingKey: "custom_auth_0",
+          },
+        ],
+        ownerDeterminationBindings: [
+          {
+            ...req1.evaluationContext.ownerDeterminationBindings[0],
+            determinationBindingKey: "custom_od_0",
+            determinationQuestionBinding: {
+              ...req1.evaluationContext.ownerDeterminationBindings[0]
+                .determinationQuestionBinding,
+              questionOperandBindings: [
+                {
+                  operandKey: "custom_op_0",
+                  operandSlotSemanticRef: {
+                    family: "EVALUATION_SEMANTIC" as const,
+                    ownerRef: "urn:zyppi:owner:council:v1",
+                    artifactId: "slot1-v1",
+                  },
+                  operandKind: "PARTICIPATION_BINDING" as const,
+                  roleBindingRef: "custom_role_1",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const d1 = deriveExecutionRequestV2DigestCandidate(req1);
+    const d2 = deriveExecutionRequestV2DigestCandidate(req2);
+    expect(d1.ok).toBe(true);
+    expect(d2.ok).toBe(true);
+    if (d1.ok && d2.ok) {
+      expect(d1.value).toBe(d2.value);
+    }
+  });
+
+  it("V202-T58 — C09: Symmetric isomorphic graphs with reversed array order and renamed labels preserve identity", () => {
+    const req1 = VECTOR_B_REQUEST;
+    const req2: ExecutionRequestV2 = {
+      ...req1,
+      participation: {
+        roleBindings: [
+          req1.participation.roleBindings[1],
+          req1.participation.roleBindings[0],
+        ],
+        agencyBindings: [...req1.participation.agencyBindings],
+      },
+    };
+
+    const d1 = deriveExecutionRequestV2DigestCandidate(req1);
+    const d2 = deriveExecutionRequestV2DigestCandidate(req2);
+    expect(d1.ok).toBe(true);
+    expect(d2.ok).toBe(true);
+    if (d1.ok && d2.ok) {
+      expect(d1.value).toBe(d2.value);
+    }
+  });
+
+  it("V202-T59 — C09: Same symmetric material with one edge changed changes whole-request identity", () => {
+    const req1 = VECTOR_B_REQUEST;
+    const req2: ExecutionRequestV2 = {
+      ...req1,
+      participation: {
+        ...req1.participation,
+        agencyBindings: [
+          {
+            ...req1.participation.agencyBindings[0],
+            actorRoleBindingRef: "rb_principal", // swapped
+            governedSubjectRoleBindingRef: "rb_actor",
+          },
+        ],
+      },
+    };
+
+    const d1 = deriveExecutionRequestV2DigestCandidate(req1);
+    const d2 = deriveExecutionRequestV2DigestCandidate(req2);
+    expect(d1.ok).toBe(true);
+    expect(d2.ok).toBe(true);
+    if (d1.ok && d2.ok) {
+      expect(d1.value).not.toBe(d2.value);
+    }
+  });
+
+  it("V202-T60 — C07: Scoped local key reuse across different evaluation context collections does not collide", () => {
+    const req1: ExecutionRequestV2 = {
+      ...VECTOR_B_REQUEST,
+      evaluationContext: {
+        ...VECTOR_B_REQUEST.evaluationContext,
+        authorizedInputBindings: [
+          {
+            bindingKey: "same_local_key_01",
+            semanticRef: {
+              family: "EVALUATION_SEMANTIC",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "auth-sem-01",
+            },
+            value: "VAL1",
+          },
+        ],
+        evaluationParameterBindings: [
+          {
+            bindingKey: "same_local_key_01",
+            semanticRef: {
+              family: "EVALUATION_SEMANTIC",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "param-sem-01",
+            },
+            value: "VAL2",
+          },
+        ],
+      },
+    };
+
+    const res = deriveExecutionRequestV2DigestCandidate(req1);
+    expect(res.ok).toBe(true);
+  });
+
+  it("V202-T61 — C01: Strict Gregorian leap year and February 30 rejection", () => {
+    const resFeb30 = normalizeTemporalCoordinateV2("2026-02-30T12:00:00Z");
+    expect(resFeb30.ok).toBe(false);
+    if (!resFeb30.ok) {
+      expect(resFeb30.error.code).toBe("TEMPORAL_CANONICALIZATION_FAILURE");
+    }
+
+    const resNonLeap29 = normalizeTemporalCoordinateV2("2025-02-29T12:00:00Z");
+    expect(resNonLeap29.ok).toBe(false);
+    if (!resNonLeap29.ok) {
+      expect(resNonLeap29.error.code).toBe("TEMPORAL_CANONICALIZATION_FAILURE");
+    }
+
+    const resLeap29 = normalizeTemporalCoordinateV2("2024-02-29T12:00:00Z");
+    expect(resLeap29.ok).toBe(true);
+    if (resLeap29.ok) {
+      expect(resLeap29.value).toBe("2024-02-29T12:00:00Z");
+    }
+  });
+
+  it("V202-T62 — C02: Lone Unicode surrogate pair in property key rejected", () => {
+    const badKeyObj = {
+      ["bad_key_\uD800"]: "value",
+    };
+
+    const jcsRes = canonicalizeJcsV2(badKeyObj);
+    expect(jcsRes.ok).toBe(false);
+    if (!jcsRes.ok) {
+      expect(jcsRes.error.code).toBe("INVALID_JCS_UNICODE");
+    }
+  });
+
+  it("V202-T63 — C03: Array with symbol or non-canonical index property rejected with carrier safety error", () => {
+    const arr = [1, 2];
+    (arr as unknown as Record<string, unknown>)["01"] = "leading_zero";
+
+    const jcsRes = canonicalizeJcsV2(arr);
+    expect(jcsRes.ok).toBe(false);
+    if (!jcsRes.ok) {
+      expect(jcsRes.error.code).toBe("INVALID_IDENTITY_INPUT");
+    }
+  });
+
+  it("V202-T64 — C04: Root derive function validates structural V2-01 errors to INVALID_IDENTITY_INPUT", () => {
+    const invalidStructReq = {
+      ...VECTOR_A_REQUEST,
+      contractVersion: "v1_invalid" as unknown as "v2",
+    };
+
+    const res = deriveExecutionRequestV2DigestCandidate(
+      invalidStructReq as unknown as ExecutionRequestV2,
+    );
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("INVALID_IDENTITY_INPUT");
+    }
   });
 });

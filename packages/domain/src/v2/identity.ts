@@ -10,6 +10,7 @@ import {
   canonicalizeGraphAndCollectionsV2,
   canonicalizePolicyUniverseComponentV2,
 } from "./graphCanonicalization.js";
+import { validateExecutionRequestV2 } from "./validator.js";
 import { canonicalizeTemporalCoordinatesV2 } from "./temporal.js";
 import type {
   BoundConstitutionalStateV2,
@@ -214,6 +215,16 @@ export function verifyPolicyUniverseRefV2(
 export function deriveExecutionRequestV2DigestCandidate(
   req: ExecutionRequestV2,
 ): V2IdentityResult<string> {
+  // 0. C04: Enforce V2-01 structural validation at root identity boundary
+  const structVal = validateExecutionRequestV2(req);
+  if (!structVal.ok) {
+    return makeIdentityFailure(
+      "INVALID_IDENTITY_INPUT",
+      `Structural V2-01 validation failed: ${structVal.error.message}`,
+      structVal.error.path,
+    );
+  }
+
   // 1. Verify component digests
   const semCheck = verifySemanticStateRefV2(req.constitutionalState);
   if (!semCheck.ok) return semCheck;

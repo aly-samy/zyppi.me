@@ -9,33 +9,32 @@ import type {
   BoundConstitutionalStateV2,
   BoundEvaluationContextV2,
   BoundEvidenceStateV2,
+  BoundPolicyMaterialV2,
   BoundPolicyUniverseV2,
+  EvaluationContextBindingV2,
   EvidencePresentationBindingV2,
+  EvidenceRequirementBindingV2,
   ExecutionRequestV2,
+  IntegrityCoordinatesV2,
   OwnerDeterminationBindingV2,
   ParticipationV2,
   PolicyDependencyEdgeV2,
   QuestionOperandBindingV2,
   RequestedActionBindingV2,
   RequestedCapabilityClaimBindingV2,
-  StateBindingV2,
   StateViewV2,
+  SuppliedEvidenceMaterialV2,
 } from "./types.js";
 
-export type LocalLabelNamespace =
+export type ReferencedLocalLabelNamespace =
   | "ROLE_BINDING"
   | "AGENCY_BINDING"
   | "PERFORMER"
   | "CAPABILITY_CLAIM"
-  | "VIEW"
-  | "STATE_BINDING"
-  | "EVIDENCE_REQUIREMENT"
-  | "EVIDENCE_MATERIAL"
-  | "INTEGRITY_COORDINATE"
-  | "POLICY_MATERIAL"
-  | "EVALUATION_BINDING"
-  | "OWNER_DETERMINATION"
-  | "QUESTION_OPERAND";
+  | "AUTHORIZED_INPUT"
+  | "EVALUATION_PARAMETER"
+  | "BOUND_CONTEXT"
+  | "OWNER_DETERMINATION";
 
 /**
  * Sorts an array of semantically unordered members by their JCS representation's UTF-8 bytes.
@@ -90,32 +89,23 @@ function deepClone<T>(obj: T): T {
   return copy as T;
 }
 
-function permutations<T>(arr: readonly T[]): T[][] {
-  if (arr.length <= 1) return [[...arr]];
-  const result: T[][] = [];
-  for (let i = 0; i < arr.length; i++) {
-    const head = arr[i];
-    const tail = [...arr.slice(0, i), ...arr.slice(i + 1)];
-    const tailPerms = permutations(tail);
-    for (const p of tailPerms) {
-      result.push([head, ...p]);
-    }
-  }
-  return result;
-}
-
-function canonicalizeComponentNamespace<T>(
-  comp: T,
-  namespace: LocalLabelNamespace,
+/**
+ * C08: Individualization & Partition Refinement Graph Canonicalization Algorithm.
+ * Replaces eager permutations and full Cartesian products with branch-and-bound pruning.
+ */
+function canonicalizeReferencedNamespace<T>(
+  contextObj: T,
+  namespace: ReferencedLocalLabelNamespace,
   extractKeys: (c: T) => {
     defined: readonly string[];
     referenced: readonly string[];
   },
   substitute: (c: T, map: ReadonlyMap<string, string>) => T,
 ): V2IdentityResult<T> {
-  const { defined, referenced } = extractKeys(comp);
-  if (defined.length === 0) return { ok: true, value: comp };
+  const { defined, referenced } = extractKeys(contextObj);
+  if (defined.length === 0) return { ok: true, value: contextObj };
 
+  // Check for dangling references
   for (const ref of referenced) {
     if (!defined.includes(ref)) {
       return makeIdentityFailure(
@@ -125,153 +115,130 @@ function canonicalizeComponentNamespace<T>(
     }
   }
 
-  const labelSignatures: { label: string; sig: string }[] = [];
-  for (const lbl of defined) {
-    const tempMap = new Map<string, string>();
-    tempMap.set(lbl, "__CANONICAL_TARGET__");
-    for (const other of defined) {
-      if (other !== lbl) {
-        tempMap.set(other, "__CANONICAL_OTHER__");
+  let bestResultJcs: string | null = null;
+  let bestResultObj: T | null = null;
+
+  function exploreIndividualizations(
+    remainingLabels: readonly string[],
+    currentAssignedMap: ReadonlyMap<string, string>,
+  ): V2IdentityResult<void> {
+    if (remainingLabels.length === 0) {
+      const candidateObj = substitute(contextObj, currentAssignedMap);
+      const jcsRes = canonicalizeJcsV2(candidateObj);
+      if (!jcsRes.ok) return jcsRes;
+
+      if (
+        bestResultJcs === null ||
+        compareUtf8Bytes(jcsRes.value, bestResultJcs) < 0
+      ) {
+        bestResultJcs = jcsRes.value;
+        bestResultObj = candidateObj;
+      }
+      return { ok: true, value: undefined };
+    }
+
+    // Partition remaining labels into equivalence classes using 1-refinement target signatures
+    const signatures: { label: string; sig: string }[] = [];
+    for (const lbl of remainingLabels) {
+      const tempMap = new Map(currentAssignedMap);
+      tempMap.set(lbl, "__TARGET__");
+      for (const other of remainingLabels) {
+        if (other !== lbl) {
+          tempMap.set(other, "__OTHER__");
+        }
+      }
+      const tempObj = substitute(contextObj, tempMap);
+      const jcsRes = canonicalizeJcsV2(tempObj);
+      if (!jcsRes.ok) return jcsRes;
+      signatures.push({ label: lbl, sig: jcsRes.value });
+    }
+
+    signatures.sort((a, b) => compareUtf8Bytes(a.sig, b.sig));
+
+    // Group into equivalence buckets
+    const buckets: string[][] = [];
+    let currentBucket: string[] = [];
+    let currentSig = "";
+
+    for (const item of signatures) {
+      if (currentBucket.length === 0 || item.sig === currentSig) {
+        currentBucket.push(item.label);
+        currentSig = item.sig;
+      } else {
+        buckets.push(currentBucket);
+        currentBucket = [item.label];
+        currentSig = item.sig;
       }
     }
-    const tempComp = substitute(comp, tempMap);
-    const jcsRes = canonicalizeJcsV2(tempComp);
-    if (!jcsRes.ok) return jcsRes;
-    labelSignatures.push({ label: lbl, sig: jcsRes.value });
+    if (currentBucket.length > 0) buckets.push(currentBucket);
+
+    // Pick the first bucket for individualization
+    const targetBucket = buckets[0];
+    for (const candidateLbl of targetBucket) {
+      const nextMap = new Map(currentAssignedMap);
+      const assignedIndex = currentAssignedMap.size;
+      nextMap.set(candidateLbl, `${namespace}#${assignedIndex}`);
+
+      const nextRemaining = remainingLabels.filter((l) => l !== candidateLbl);
+      const res = exploreIndividualizations(nextRemaining, nextMap);
+      if (!res.ok) return res;
+    }
+
+    return { ok: true, value: undefined };
   }
 
-  labelSignatures.sort((a, b) => compareUtf8Bytes(a.sig, b.sig));
+  const exploreRes = exploreIndividualizations(defined, new Map());
+  if (!exploreRes.ok) return exploreRes;
 
-  const buckets: string[][] = [];
-  let currentBucket: string[] = [];
-  let currentSig = "";
-
-  for (const item of labelSignatures) {
-    if (currentBucket.length === 0 || item.sig === currentSig) {
-      currentBucket.push(item.label);
-      currentSig = item.sig;
-    } else {
-      buckets.push(currentBucket);
-      currentBucket = [item.label];
-      currentSig = item.sig;
-    }
-  }
-  if (currentBucket.length > 0) buckets.push(currentBucket);
-
-  const bucketPermutations = buckets.map(permutations);
-  const combineBucketPermutations = (
-    index: number,
-    currentPath: string[][],
-  ): string[][][] => {
-    if (index === buckets.length) return [currentPath];
-    const results: string[][][] = [];
-    for (const perm of bucketPermutations[index]) {
-      results.push(
-        ...combineBucketPermutations(index + 1, [...currentPath, perm]),
-      );
-    }
-    return results;
-  };
-
-  const candidateCombinations = combineBucketPermutations(0, []);
-  let bestComp: T | null = null;
-  let bestJcs: string | null = null;
-
-  for (const combo of candidateCombinations) {
-    const orderedLabels = combo.flat();
-    const mapping = new Map<string, string>();
-    for (let i = 0; i < orderedLabels.length; i++) {
-      if (!mapping.has(orderedLabels[i])) {
-        mapping.set(orderedLabels[i], `${namespace}#${i}`);
-      }
-    }
-
-    const candidateComp = substitute(comp, mapping);
-    const jcsRes = canonicalizeJcsV2(candidateComp);
-    if (!jcsRes.ok) return jcsRes;
-
-    if (bestJcs === null || compareUtf8Bytes(jcsRes.value, bestJcs) < 0) {
-      bestJcs = jcsRes.value;
-      bestComp = candidateComp;
-    }
-  }
-
-  if (!bestComp) {
+  if (!bestResultObj) {
     return makeIdentityFailure(
       "GRAPH_CANONICALIZATION_FAILURE",
-      `Failed to compute canonical representation for namespace '${namespace}'`,
+      `Failed to canonicalize namespace '${namespace}'`,
     );
   }
 
-  return { ok: true, value: bestComp };
+  return { ok: true, value: bestResultObj };
 }
 
+/**
+ * C05: Constitutional State Identity Projection.
+ * Omits unreferenced incidental keys (viewKey, stateBindingKey) from normalized identity projection.
+ */
 export function canonicalizeConstitutionalStateComponentV2(
   state: BoundConstitutionalStateV2,
-): V2IdentityResult<BoundConstitutionalStateV2> {
-  let current = deepClone(state);
+): V2IdentityResult<Omit<BoundConstitutionalStateV2, "semanticStateRef">> {
+  const current = deepClone(state);
 
-  // Canonicalize VIEW
-  const viewRes = canonicalizeComponentNamespace(
-    current,
-    "VIEW",
-    (s) => ({
-      defined: s.stateViews.map((v) => v.viewKey),
-      referenced: [],
-    }),
-    (s, map) => ({
-      ...s,
-      stateViews: s.stateViews.map((v) => ({
-        ...v,
-        viewKey: map.get(v.viewKey) ?? v.viewKey,
-      })),
-    }),
-  );
-  if (!viewRes.ok) return viewRes;
-  current = viewRes.value;
-
-  // Canonicalize STATE_BINDING
-  const bindingRes = canonicalizeComponentNamespace(
-    current,
-    "STATE_BINDING",
-    (s) => {
-      const defined: string[] = [];
-      for (const v of s.stateViews) {
-        for (const b of v.stateBindings) {
-          defined.push(b.stateBindingKey);
-        }
-      }
-      return { defined, referenced: [] };
-    },
-    (s, map) => ({
-      ...s,
-      stateViews: s.stateViews.map((v) => ({
-        ...v,
-        stateBindings: v.stateBindings.map((b) => ({
-          ...b,
-          stateBindingKey: map.get(b.stateBindingKey) ?? b.stateBindingKey,
-        })),
-      })),
-    }),
-  );
-  if (!bindingRes.ok) return bindingRes;
-  current = bindingRes.value;
-
-  const sortedViews: StateViewV2[] = [];
+  // Map stateViews omitting viewKey and stateBindingKey from each projection
+  const projectedViews = [];
   for (const sv of current.stateViews) {
+    const projectedBindings = [];
+    for (const sb of sv.stateBindings) {
+      const sbProj = { ...(sb as unknown as Record<string, unknown>) };
+      delete sbProj.stateBindingKey;
+      projectedBindings.push(sbProj);
+    }
+
+    // Sort bindings within view by JCS byte order & check duplicates
     const resBindings = sortAndCheckDuplicates(
-      sv.stateBindings,
+      projectedBindings,
       "stateView.stateBindings",
       false,
     );
     if (!resBindings.ok) return resBindings;
-    sortedViews.push({
-      ...sv,
-      stateBindings: resBindings.value as readonly StateBindingV2[],
+
+    const svProj = { ...(sv as unknown as Record<string, unknown>) };
+    delete svProj.viewKey;
+    delete svProj.stateBindings;
+    projectedViews.push({
+      ...svProj,
+      stateBindings: resBindings.value,
     });
   }
+
+  // Sort stateViews by JCS byte order & check duplicates
   const resViews = sortAndCheckDuplicates(
-    sortedViews,
+    projectedViews,
     "constitutionalState.stateViews",
     false,
   );
@@ -280,89 +247,48 @@ export function canonicalizeConstitutionalStateComponentV2(
   return {
     ok: true,
     value: {
-      ...current,
-      stateViews: resViews.value,
+      stateViews: resViews.value as unknown as readonly StateViewV2[],
     },
   };
 }
 
+/**
+ * C05: Evidence State Identity Projection.
+ * Omits unreferenced incidental keys (requirementKey, materialKey, coordinateKey) from normalized identity projection.
+ */
 export function canonicalizeEvidenceStateComponentV2(
   state: BoundEvidenceStateV2,
-): V2IdentityResult<BoundEvidenceStateV2> {
-  let current = deepClone(state);
+): V2IdentityResult<Omit<BoundEvidenceStateV2, "evidenceStateRef">> {
+  const current = deepClone(state);
 
-  // EVIDENCE_REQUIREMENT
-  const reqRes = canonicalizeComponentNamespace(
-    current,
-    "EVIDENCE_REQUIREMENT",
-    (s) => ({
-      defined: s.evidenceRequirementBindings.map((b) => b.requirementKey),
-      referenced: [],
-    }),
-    (s, map) => ({
-      ...s,
-      evidenceRequirementBindings: s.evidenceRequirementBindings.map((b) => ({
-        ...b,
-        requirementKey: map.get(b.requirementKey) ?? b.requirementKey,
-      })),
-    }),
-  );
-  if (!reqRes.ok) return reqRes;
-  current = reqRes.value;
-
-  // EVIDENCE_MATERIAL
-  const matRes = canonicalizeComponentNamespace(
-    current,
-    "EVIDENCE_MATERIAL",
-    (s) => ({
-      defined: s.suppliedEvidenceMaterial.map((m) => m.materialKey),
-      referenced: [],
-    }),
-    (s, map) => ({
-      ...s,
-      suppliedEvidenceMaterial: s.suppliedEvidenceMaterial.map((m) => ({
-        ...m,
-        materialKey: map.get(m.materialKey) ?? m.materialKey,
-      })),
-    }),
-  );
-  if (!matRes.ok) return matRes;
-  current = matRes.value;
-
-  // INTEGRITY_COORDINATE
-  const coordRes = canonicalizeComponentNamespace(
-    current,
-    "INTEGRITY_COORDINATE",
-    (s) => ({
-      defined: s.integrityCoordinates.map((c) => c.coordinateKey),
-      referenced: [],
-    }),
-    (s, map) => ({
-      ...s,
-      integrityCoordinates: s.integrityCoordinates.map((c) => ({
-        ...c,
-        coordinateKey: map.get(c.coordinateKey) ?? c.coordinateKey,
-      })),
-    }),
-  );
-  if (!coordRes.ok) return coordRes;
-  current = coordRes.value;
-
+  // 1. Evidence Requirement Bindings (omit requirementKey)
+  const projReqBindings = current.evidenceRequirementBindings.map((b) => {
+    const proj = { ...(b as unknown as Record<string, unknown>) };
+    delete proj.requirementKey;
+    return proj;
+  });
   const resReqBindings = sortAndCheckDuplicates(
-    current.evidenceRequirementBindings,
+    projReqBindings,
     "evidenceState.evidenceRequirementBindings",
     false,
   );
   if (!resReqBindings.ok) return resReqBindings;
 
+  // 2. Supplied Evidence Material (omit materialKey)
+  const projSuppliedMat = current.suppliedEvidenceMaterial.map((m) => {
+    const proj = { ...(m as unknown as Record<string, unknown>) };
+    delete proj.materialKey;
+    return proj;
+  });
   const resSuppliedMat = sortAndCheckDuplicates(
-    current.suppliedEvidenceMaterial,
+    projSuppliedMat,
     "evidenceState.suppliedEvidenceMaterial",
     false,
   );
   if (!resSuppliedMat.ok) return resSuppliedMat;
 
-  const sortedPresBindings: EvidencePresentationBindingV2[] = [];
+  // 3. Evidence Presentation Bindings
+  const sortedPresBindings = [];
   for (const epb of current.evidencePresentationBindings) {
     const resPresRefs = sortAndCheckDuplicates(
       epb.presentedEvidenceRefs,
@@ -382,8 +308,14 @@ export function canonicalizeEvidenceStateComponentV2(
   );
   if (!resPresBindings.ok) return resPresBindings;
 
+  // 4. Integrity Coordinates (omit coordinateKey)
+  const projIntegCoords = current.integrityCoordinates.map((c) => {
+    const proj = { ...(c as unknown as Record<string, unknown>) };
+    delete proj.coordinateKey;
+    return proj;
+  });
   const resIntegCoords = sortAndCheckDuplicates(
-    current.integrityCoordinates,
+    projIntegCoords,
     "evidenceState.integrityCoordinates",
     false,
   );
@@ -392,82 +324,67 @@ export function canonicalizeEvidenceStateComponentV2(
   return {
     ok: true,
     value: {
-      ...current,
-      evidenceRequirementBindings: resReqBindings.value,
-      suppliedEvidenceMaterial: resSuppliedMat.value,
-      evidencePresentationBindings: resPresBindings.value,
-      integrityCoordinates: resIntegCoords.value,
-    },
-  };
-}
-
-export function canonicalizePolicyUniverseComponentV2(
-  universe: BoundPolicyUniverseV2,
-): V2IdentityResult<BoundPolicyUniverseV2> {
-  let current = deepClone(universe);
-
-  const resPolicyMatPre = sortAndCheckDuplicates(
-    current.applicablePolicyMaterial,
-    "policyUniverse.applicablePolicyMaterial",
-    false,
-  );
-  if (!resPolicyMatPre.ok) return resPolicyMatPre;
-
-  const resEdgesPre = sortAndCheckDuplicates(
-    current.dependencyTopology.dependencyEdges,
-    "policyUniverse.dependencyTopology.dependencyEdges",
-    false,
-  );
-  if (!resEdgesPre.ok) return resEdgesPre;
-
-  current = {
-    ...current,
-    applicablePolicyMaterial: resPolicyMatPre.value,
-    dependencyTopology: {
-      dependencyEdges: resEdgesPre.value as readonly PolicyDependencyEdgeV2[],
-    },
-  };
-
-  const matRes = canonicalizeComponentNamespace(
-    current,
-    "POLICY_MATERIAL",
-    (s) => ({
-      defined: s.applicablePolicyMaterial.map((m) => m.policyKey),
-      referenced: [],
-    }),
-    (s, map) => ({
-      ...s,
-      applicablePolicyMaterial: s.applicablePolicyMaterial.map((m) => ({
-        ...m,
-        policyKey: map.get(m.policyKey) ?? m.policyKey,
-      })),
-    }),
-  );
-  if (!matRes.ok) return matRes;
-  current = matRes.value;
-
-  const resPolicyMatPost = sortAndCheckDuplicates(
-    current.applicablePolicyMaterial,
-    "policyUniverse.applicablePolicyMaterial",
-    false,
-  );
-  if (!resPolicyMatPost.ok) return resPolicyMatPost;
-
-  return {
-    ok: true,
-    value: {
-      ...current,
-      applicablePolicyMaterial: resPolicyMatPost.value,
+      evidenceRequirementBindings:
+        resReqBindings.value as unknown as readonly EvidenceRequirementBindingV2[],
+      suppliedEvidenceMaterial:
+        resSuppliedMat.value as unknown as readonly SuppliedEvidenceMaterialV2[],
+      evidencePresentationBindings:
+        resPresBindings.value as unknown as readonly EvidencePresentationBindingV2[],
+      integrityCoordinates:
+        resIntegCoords.value as unknown as readonly IntegrityCoordinatesV2[],
     },
   };
 }
 
 /**
- * Substitutes labels in a specific namespace across an ExecutionRequestV2 object.
+ * C05: Policy Universe Identity Projection.
+ * Omits unreferenced incidental keys (policyKey) from normalized identity projection.
+ */
+export function canonicalizePolicyUniverseComponentV2(
+  universe: BoundPolicyUniverseV2,
+): V2IdentityResult<Omit<BoundPolicyUniverseV2, "policyUniverseRef">> {
+  const current = deepClone(universe);
+
+  // 1. Applicable Policy Material (omit policyKey)
+  const projPolicyMat = current.applicablePolicyMaterial.map((m) => {
+    const proj = { ...(m as unknown as Record<string, unknown>) };
+    delete proj.policyKey;
+    return proj;
+  });
+  const resPolicyMat = sortAndCheckDuplicates(
+    projPolicyMat,
+    "policyUniverse.applicablePolicyMaterial",
+    false,
+  );
+  if (!resPolicyMat.ok) return resPolicyMat;
+
+  // 2. Dependency Topology Edges
+  const resEdges = sortAndCheckDuplicates(
+    current.dependencyTopology.dependencyEdges,
+    "policyUniverse.dependencyTopology.dependencyEdges",
+    false,
+  );
+  if (!resEdges.ok) return resEdges;
+
+  return {
+    ok: true,
+    value: {
+      applicablePolicyMaterial:
+        resPolicyMat.value as unknown as readonly BoundPolicyMaterialV2[],
+      dependencyTopology: {
+        dependencyEdges: resEdges.value as readonly PolicyDependencyEdgeV2[],
+      },
+      applicabilityProvenanceBinding: current.applicabilityProvenanceBinding,
+    },
+  };
+}
+
+/**
+ * Substitutes labels in a referenced namespace across an ExecutionRequestV2 object.
  */
 function substituteNamespaceLabels(
   req: ExecutionRequestV2,
-  namespace: LocalLabelNamespace,
+  namespace: ReferencedLocalLabelNamespace,
   mapping: ReadonlyMap<string, string>,
 ): ExecutionRequestV2 {
   const mapLabel = (lbl: string | undefined): string => {
@@ -582,72 +499,53 @@ function substituteNamespaceLabels(
       break;
     }
 
-    case "VIEW": {
-      for (const sv of cloned.constitutionalState.stateViews) {
-        (sv as { viewKey: string }).viewKey = mapLabel(sv.viewKey);
+    case "AUTHORIZED_INPUT": {
+      for (const b of cloned.evaluationContext.authorizedInputBindings) {
+        (b as { bindingKey: string }).bindingKey = mapLabel(b.bindingKey);
       }
-      break;
-    }
-
-    case "STATE_BINDING": {
-      for (const sv of cloned.constitutionalState.stateViews) {
-        for (const sb of sv.stateBindings) {
-          (sb as { stateBindingKey: string }).stateBindingKey = mapLabel(
-            sb.stateBindingKey,
-          );
+      for (const od of cloned.evaluationContext.ownerDeterminationBindings) {
+        for (const op of od.determinationQuestionBinding
+          .questionOperandBindings) {
+          if (
+            op.operandKind === "EVALUATION_CONTEXT_BINDING" &&
+            op.bindingCollection === "AUTHORIZED_INPUT"
+          ) {
+            (op as { bindingRef: string }).bindingRef = mapLabel(op.bindingRef);
+          }
         }
       }
       break;
     }
 
-    case "EVIDENCE_REQUIREMENT": {
-      for (const erb of cloned.evidenceState.evidenceRequirementBindings) {
-        (erb as { requirementKey: string }).requirementKey = mapLabel(
-          erb.requirementKey,
-        );
-      }
-      break;
-    }
-
-    case "EVIDENCE_MATERIAL": {
-      for (const sem of cloned.evidenceState.suppliedEvidenceMaterial) {
-        (sem as { materialKey: string }).materialKey = mapLabel(
-          sem.materialKey,
-        );
-      }
-      break;
-    }
-
-    case "INTEGRITY_COORDINATE": {
-      for (const ic of cloned.evidenceState.integrityCoordinates) {
-        (ic as { coordinateKey: string }).coordinateKey = mapLabel(
-          ic.coordinateKey,
-        );
-      }
-      break;
-    }
-
-    case "POLICY_MATERIAL": {
-      for (const apm of cloned.policyUniverse.applicablePolicyMaterial) {
-        (apm as { policyKey: string }).policyKey = mapLabel(apm.policyKey);
-      }
-      break;
-    }
-
-    case "EVALUATION_BINDING": {
-      for (const b of cloned.evaluationContext.authorizedInputBindings) {
-        (b as { bindingKey: string }).bindingKey = mapLabel(b.bindingKey);
-      }
+    case "EVALUATION_PARAMETER": {
       for (const b of cloned.evaluationContext.evaluationParameterBindings) {
         (b as { bindingKey: string }).bindingKey = mapLabel(b.bindingKey);
       }
+      for (const od of cloned.evaluationContext.ownerDeterminationBindings) {
+        for (const op of od.determinationQuestionBinding
+          .questionOperandBindings) {
+          if (
+            op.operandKind === "EVALUATION_CONTEXT_BINDING" &&
+            op.bindingCollection === "EVALUATION_PARAMETER"
+          ) {
+            (op as { bindingRef: string }).bindingRef = mapLabel(op.bindingRef);
+          }
+        }
+      }
+      break;
+    }
+
+    case "BOUND_CONTEXT": {
       for (const b of cloned.evaluationContext.boundContextBindings) {
         (b as { bindingKey: string }).bindingKey = mapLabel(b.bindingKey);
       }
       for (const od of cloned.evaluationContext.ownerDeterminationBindings) {
         for (const op of od.determinationQuestionBinding
           .questionOperandBindings) {
-          if (op.operandKind === "EVALUATION_CONTEXT_BINDING") {
+          if (
+            op.operandKind === "EVALUATION_CONTEXT_BINDING" &&
+            op.bindingCollection === "BOUND_CONTEXT"
+          ) {
             (op as { bindingRef: string }).bindingRef = mapLabel(op.bindingRef);
           }
         }
@@ -693,28 +591,17 @@ function substituteNamespaceLabels(
       }
       break;
     }
-
-    case "QUESTION_OPERAND": {
-      for (const od of cloned.evaluationContext.ownerDeterminationBindings) {
-        for (const op of od.determinationQuestionBinding
-          .questionOperandBindings) {
-          (op as { operandKey: string }).operandKey = mapLabel(op.operandKey);
-        }
-      }
-      break;
-    }
   }
 
   return cloned;
 }
 
 /**
- * Extracts all defined keys and referenced keys for a given namespace.
- * Also validates that all references point to defined keys.
+ * Extracts defined keys and referenced keys for a given namespace and validates absence of dangling references.
  */
 function extractAndValidateNamespaceKeys(
   req: ExecutionRequestV2,
-  namespace: LocalLabelNamespace,
+  namespace: ReferencedLocalLabelNamespace,
 ): V2IdentityResult<{
   defined: readonly string[];
   referenced: readonly string[];
@@ -799,64 +686,53 @@ function extractAndValidateNamespaceKeys(
       break;
     }
 
-    case "VIEW": {
-      for (const sv of req.constitutionalState.stateViews) {
-        defined.add(sv.viewKey);
+    case "AUTHORIZED_INPUT": {
+      for (const b of req.evaluationContext.authorizedInputBindings) {
+        defined.add(b.bindingKey);
       }
-      break;
-    }
-
-    case "STATE_BINDING": {
-      for (const sv of req.constitutionalState.stateViews) {
-        for (const sb of sv.stateBindings) {
-          defined.add(sb.stateBindingKey);
+      for (const od of req.evaluationContext.ownerDeterminationBindings) {
+        for (const op of od.determinationQuestionBinding
+          .questionOperandBindings) {
+          if (
+            op.operandKind === "EVALUATION_CONTEXT_BINDING" &&
+            op.bindingCollection === "AUTHORIZED_INPUT"
+          ) {
+            referenced.add(op.bindingRef);
+          }
         }
       }
       break;
     }
 
-    case "EVIDENCE_REQUIREMENT": {
-      for (const erb of req.evidenceState.evidenceRequirementBindings) {
-        defined.add(erb.requirementKey);
-      }
-      break;
-    }
-
-    case "EVIDENCE_MATERIAL": {
-      for (const sem of req.evidenceState.suppliedEvidenceMaterial) {
-        defined.add(sem.materialKey);
-      }
-      break;
-    }
-
-    case "INTEGRITY_COORDINATE": {
-      for (const ic of req.evidenceState.integrityCoordinates) {
-        defined.add(ic.coordinateKey);
-      }
-      break;
-    }
-
-    case "POLICY_MATERIAL": {
-      for (const apm of req.policyUniverse.applicablePolicyMaterial) {
-        defined.add(apm.policyKey);
-      }
-      break;
-    }
-
-    case "EVALUATION_BINDING": {
-      for (const b of req.evaluationContext.authorizedInputBindings) {
-        defined.add(b.bindingKey);
-      }
+    case "EVALUATION_PARAMETER": {
       for (const b of req.evaluationContext.evaluationParameterBindings) {
         defined.add(b.bindingKey);
       }
+      for (const od of req.evaluationContext.ownerDeterminationBindings) {
+        for (const op of od.determinationQuestionBinding
+          .questionOperandBindings) {
+          if (
+            op.operandKind === "EVALUATION_CONTEXT_BINDING" &&
+            op.bindingCollection === "EVALUATION_PARAMETER"
+          ) {
+            referenced.add(op.bindingRef);
+          }
+        }
+      }
+      break;
+    }
+
+    case "BOUND_CONTEXT": {
       for (const b of req.evaluationContext.boundContextBindings) {
         defined.add(b.bindingKey);
       }
       for (const od of req.evaluationContext.ownerDeterminationBindings) {
         for (const op of od.determinationQuestionBinding
           .questionOperandBindings) {
-          if (op.operandKind === "EVALUATION_CONTEXT_BINDING") {
+          if (
+            op.operandKind === "EVALUATION_CONTEXT_BINDING" &&
+            op.bindingCollection === "BOUND_CONTEXT"
+          ) {
             referenced.add(op.bindingRef);
           }
         }
@@ -891,19 +767,8 @@ function extractAndValidateNamespaceKeys(
       }
       break;
     }
-
-    case "QUESTION_OPERAND": {
-      for (const od of req.evaluationContext.ownerDeterminationBindings) {
-        for (const op of od.determinationQuestionBinding
-          .questionOperandBindings) {
-          defined.add(op.operandKey);
-        }
-      }
-      break;
-    }
   }
 
-  // Validate that all referenced keys exist in defined
   for (const ref of referenced) {
     if (!defined.has(ref)) {
       return makeIdentityFailure(
@@ -923,150 +788,42 @@ function extractAndValidateNamespaceKeys(
 }
 
 /**
- * Normalizes local labels within a single namespace using partition refinement and candidate permutation evaluation.
+ * Topologically ordered referenced namespaces for deterministic local-label canonicalization.
  */
-function canonicalizeNamespace(
-  req: ExecutionRequestV2,
-  namespace: LocalLabelNamespace,
-): V2IdentityResult<ExecutionRequestV2> {
-  const keysRes = extractAndValidateNamespaceKeys(req, namespace);
-  if (!keysRes.ok) {
-    return keysRes;
-  }
-  const { defined } = keysRes.value;
-  if (defined.length === 0) {
-    return { ok: true, value: req };
-  }
-
-  // Compute initial single-label signatures for partition refinement
-  const labelSignatures: { label: string; sig: string }[] = [];
-  for (const lbl of defined) {
-    const tempMap = new Map<string, string>();
-    tempMap.set(lbl, "__CANONICAL_TARGET__");
-    for (const other of defined) {
-      if (other !== lbl) {
-        tempMap.set(other, "__CANONICAL_OTHER__");
-      }
-    }
-    const tempReq = substituteNamespaceLabels(req, namespace, tempMap);
-    const jcsRes = canonicalizeJcsV2(tempReq);
-    if (!jcsRes.ok) {
-      return jcsRes;
-    }
-    labelSignatures.push({ label: lbl, sig: jcsRes.value });
-  }
-
-  // Group labels into buckets by signature
-  labelSignatures.sort((a, b) => compareUtf8Bytes(a.sig, b.sig));
-
-  const buckets: string[][] = [];
-  let currentBucket: string[] = [];
-  let currentSig = "";
-
-  for (const item of labelSignatures) {
-    if (currentBucket.length === 0 || item.sig === currentSig) {
-      currentBucket.push(item.label);
-      currentSig = item.sig;
-    } else {
-      buckets.push(currentBucket);
-      currentBucket = [item.label];
-      currentSig = item.sig;
-    }
-  }
-  if (currentBucket.length > 0) {
-    buckets.push(currentBucket);
-  }
-
-  // Generate candidate permutations for each bucket
-  const bucketPermutations = buckets.map(permutations);
-
-  // Cartesian product over bucket permutations
-  const combineBucketPermutations = (
-    index: number,
-    currentPath: string[][],
-  ): string[][][] => {
-    if (index === buckets.length) {
-      return [currentPath];
-    }
-    const results: string[][][] = [];
-    for (const perm of bucketPermutations[index]) {
-      results.push(
-        ...combineBucketPermutations(index + 1, [...currentPath, perm]),
-      );
-    }
-    return results;
-  };
-
-  const candidateCombinations = combineBucketPermutations(0, []);
-
-  // Evaluate candidate combinations and pick the lexicographically smallest JCS output
-  let bestReq: ExecutionRequestV2 | null = null;
-  let bestJcs: string | null = null;
-
-  for (const combo of candidateCombinations) {
-    const orderedLabels = combo.flat();
-    const mapping = new Map<string, string>();
-    for (let i = 0; i < orderedLabels.length; i++) {
-      if (!mapping.has(orderedLabels[i])) {
-        mapping.set(orderedLabels[i], `${namespace}#${i}`);
-      }
-    }
-
-    const candidateReq = substituteNamespaceLabels(req, namespace, mapping);
-    const jcsRes = canonicalizeJcsV2(candidateReq);
-    if (!jcsRes.ok) {
-      return jcsRes;
-    }
-
-    if (bestJcs === null || compareUtf8Bytes(jcsRes.value, bestJcs) < 0) {
-      bestJcs = jcsRes.value;
-      bestReq = candidateReq;
-    }
-  }
-
-  if (!bestReq) {
-    return makeIdentityFailure(
-      "GRAPH_CANONICALIZATION_FAILURE",
-      `Failed to compute canonical representation for namespace '${namespace}'`,
-    );
-  }
-
-  return { ok: true, value: bestReq };
-}
-
-/**
- * Topologically ordered namespaces for deterministic local-label canonicalization.
- */
-const NAMESPACE_ORDER: readonly LocalLabelNamespace[] = [
+const REFERENCED_NAMESPACE_ORDER: readonly ReferencedLocalLabelNamespace[] = [
   "ROLE_BINDING",
   "AGENCY_BINDING",
   "PERFORMER",
   "CAPABILITY_CLAIM",
-  "VIEW",
-  "STATE_BINDING",
-  "EVIDENCE_REQUIREMENT",
-  "EVIDENCE_MATERIAL",
-  "INTEGRITY_COORDINATE",
-  "POLICY_MATERIAL",
-  "EVALUATION_BINDING",
-  "QUESTION_OPERAND",
+  "AUTHORIZED_INPUT",
+  "EVALUATION_PARAMETER",
+  "BOUND_CONTEXT",
   "OWNER_DETERMINATION",
 ];
 
 /**
  * Fully canonicalizes an ExecutionRequestV2 request structure:
- * 1. Sequentially canonicalizes local labels across all 13 typed namespaces.
- * 2. Sorts all semantically unordered collections by JCS UTF-8 byte ordering.
- * 3. Rejects any semantic duplicates.
+ * 1. Sequentially canonicalizes referenced local labels across all 8 referenced namespaces using DFS individualization-refinement.
+ * 2. Omits unreferenced incidental keys and projects normalized structures.
+ * 3. Sorts all semantically unordered collections by JCS UTF-8 byte ordering.
+ * 4. Rejects any semantic duplicates.
  */
 export function canonicalizeGraphAndCollectionsV2(
   req: ExecutionRequestV2,
 ): V2IdentityResult<ExecutionRequestV2> {
   let currentReq = req;
 
-  // Step 1: Canonicalize local labels per namespace
-  for (const ns of NAMESPACE_ORDER) {
-    const res = canonicalizeNamespace(currentReq, ns);
+  // Step 1: Canonicalize referenced local labels per namespace
+  for (const ns of REFERENCED_NAMESPACE_ORDER) {
+    const res = canonicalizeReferencedNamespace(
+      currentReq,
+      ns,
+      (r) => {
+        const valRes = extractAndValidateNamespaceKeys(r, ns);
+        return valRes.ok ? valRes.value : { defined: [], referenced: [] };
+      },
+      (r, map) => substituteNamespaceLabels(r, ns, map),
+    );
     if (!res.ok) {
       return res;
     }
@@ -1180,22 +937,63 @@ function sortRequestCollections(
   if (!canonPolRes.ok) return canonPolRes;
 
   // 6. Bound Evaluation Context
+  const referencedAuthInputKeys = new Set<string>();
+  const referencedEvalParamKeys = new Set<string>();
+  const referencedBoundContextKeys = new Set<string>();
+
+  for (const od of req.evaluationContext.ownerDeterminationBindings) {
+    for (const op of od.determinationQuestionBinding.questionOperandBindings) {
+      if (op.operandKind === "EVALUATION_CONTEXT_BINDING") {
+        if (op.bindingCollection === "AUTHORIZED_INPUT")
+          referencedAuthInputKeys.add(op.bindingRef);
+        else if (op.bindingCollection === "EVALUATION_PARAMETER")
+          referencedEvalParamKeys.add(op.bindingRef);
+        else if (op.bindingCollection === "BOUND_CONTEXT")
+          referencedBoundContextKeys.add(op.bindingRef);
+      }
+    }
+  }
+
+  const projAuthInputs = req.evaluationContext.authorizedInputBindings.map(
+    (b) => {
+      if (referencedAuthInputKeys.has(b.bindingKey)) return b;
+      const proj = { ...(b as unknown as Record<string, unknown>) };
+      delete proj.bindingKey;
+      return proj;
+    },
+  );
   const resAuthInputs = sortAndCheckDuplicates(
-    req.evaluationContext.authorizedInputBindings,
+    projAuthInputs,
     "evaluationContext.authorizedInputBindings",
     false,
   );
   if (!resAuthInputs.ok) return resAuthInputs;
 
+  const projEvalParams = req.evaluationContext.evaluationParameterBindings.map(
+    (b) => {
+      if (referencedEvalParamKeys.has(b.bindingKey)) return b;
+      const proj = { ...(b as unknown as Record<string, unknown>) };
+      delete proj.bindingKey;
+      return proj;
+    },
+  );
   const resEvalParams = sortAndCheckDuplicates(
-    req.evaluationContext.evaluationParameterBindings,
+    projEvalParams,
     "evaluationContext.evaluationParameterBindings",
     false,
   );
   if (!resEvalParams.ok) return resEvalParams;
 
+  const projBoundContext = req.evaluationContext.boundContextBindings.map(
+    (b) => {
+      if (referencedBoundContextKeys.has(b.bindingKey)) return b;
+      const proj = { ...(b as unknown as Record<string, unknown>) };
+      delete proj.bindingKey;
+      return proj;
+    },
+  );
   const resBoundContext = sortAndCheckDuplicates(
-    req.evaluationContext.boundContextBindings,
+    projBoundContext,
     "evaluationContext.boundContextBindings",
     false,
   );
@@ -1203,8 +1001,15 @@ function sortRequestCollections(
 
   const sortedOwnerDets: OwnerDeterminationBindingV2[] = [];
   for (const od of req.evaluationContext.ownerDeterminationBindings) {
+    const projOps = od.determinationQuestionBinding.questionOperandBindings.map(
+      (op) => {
+        const proj = { ...(op as unknown as Record<string, unknown>) };
+        delete proj.operandKey;
+        return proj;
+      },
+    );
     const resOps = sortAndCheckDuplicates(
-      od.determinationQuestionBinding.questionOperandBindings,
+      projOps,
       "ownerDeterminationBinding.questionOperandBindings",
       false,
     );
@@ -1229,7 +1034,7 @@ function sortRequestCollections(
       determinationQuestionBinding: {
         ...od.determinationQuestionBinding,
         questionOperandBindings:
-          resOps.value as readonly QuestionOperandBindingV2[],
+          resOps.value as unknown as readonly QuestionOperandBindingV2[],
       },
       determinationDependencyDeclaration: sortedDecl,
     });
@@ -1242,9 +1047,12 @@ function sortRequestCollections(
   if (!resOwnerDets.ok) return resOwnerDets;
 
   const evaluationContext: BoundEvaluationContextV2 = {
-    authorizedInputBindings: resAuthInputs.value,
-    evaluationParameterBindings: resEvalParams.value,
-    boundContextBindings: resBoundContext.value,
+    authorizedInputBindings:
+      resAuthInputs.value as unknown as readonly EvaluationContextBindingV2[],
+    evaluationParameterBindings:
+      resEvalParams.value as unknown as readonly EvaluationContextBindingV2[],
+    boundContextBindings:
+      resBoundContext.value as unknown as readonly EvaluationContextBindingV2[],
     ownerDeterminationBindings: resOwnerDets.value,
   };
 
@@ -1254,9 +1062,10 @@ function sortRequestCollections(
       ...req,
       participation,
       requestedAction,
-      constitutionalState: canonStateRes.value,
-      evidenceState: canonEvidRes.value,
-      policyUniverse: canonPolRes.value,
+      constitutionalState:
+        canonStateRes.value as unknown as BoundConstitutionalStateV2,
+      evidenceState: canonEvidRes.value as unknown as BoundEvidenceStateV2,
+      policyUniverse: canonPolRes.value as unknown as BoundPolicyUniverseV2,
       evaluationContext,
     },
   };

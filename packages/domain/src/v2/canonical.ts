@@ -52,7 +52,7 @@ export function validateJcsUnicodeString(
       if (i + 1 >= str.length) {
         return makeIdentityError(
           "INVALID_JCS_UNICODE",
-          `Lone high surrogate at end of string`,
+          `Lone high surrogate at end of string in '${str}'`,
           path,
         );
       }
@@ -60,7 +60,7 @@ export function validateJcsUnicodeString(
       if (nextCode < 0xdc00 || nextCode > 0xdfff) {
         return makeIdentityError(
           "INVALID_JCS_UNICODE",
-          `Lone high surrogate not followed by low surrogate at index ${i}`,
+          `Lone high surrogate not followed by low surrogate at index ${i} in '${str}'`,
           path,
         );
       }
@@ -68,7 +68,7 @@ export function validateJcsUnicodeString(
     } else if (code >= 0xdc00 && code <= 0xdfff) {
       return makeIdentityError(
         "INVALID_JCS_UNICODE",
-        `Lone low surrogate at index ${i}`,
+        `Lone low surrogate at index ${i} in '${str}'`,
         path,
       );
     }
@@ -77,77 +77,186 @@ export function validateJcsUnicodeString(
 }
 
 /**
- * Validates strict JSON value compliance for V2 JCS.
+ * Validates strict JSON value compliance and carrier safety for V2 JCS.
  */
 function validateValueForV2Jcs(
   val: unknown,
   activePath = new Set<unknown>(),
   path = "",
 ): V2IdentityError | null {
-  if (val === undefined) {
-    return makeIdentityError(
-      "INVALID_IDENTITY_INPUT",
-      "undefined value encountered (undefined is not valid JCS)",
-      path,
-    );
-  }
-  if (val === null || typeof val === "boolean") {
-    return null;
-  }
-  if (typeof val === "string") {
-    return validateJcsUnicodeString(val, path);
-  }
-  if (typeof val === "number") {
-    if (!Number.isFinite(val)) {
+  try {
+    if (val === undefined) {
       return makeIdentityError(
         "INVALID_IDENTITY_INPUT",
-        `Non-finite number encountered: ${val}`,
+        "undefined value encountered (undefined is not valid JCS)",
         path,
       );
     }
-    return null;
-  }
-  if (typeof val === "object") {
-    if (
-      val instanceof Date ||
-      (val.constructor && val.constructor.name === "Date")
-    ) {
-      return makeIdentityError(
-        "INVALID_IDENTITY_INPUT",
-        "Date object is prohibited in V2 JCS",
-        path,
-      );
+    if (val === null || typeof val === "boolean") {
+      return null;
     }
-    if (val instanceof Map || val instanceof Set || val instanceof RegExp) {
-      return makeIdentityError(
-        "INVALID_IDENTITY_INPUT",
-        "Prohibited object type encountered (Map/Set/RegExp)",
-        path,
-      );
+    if (typeof val === "string") {
+      return validateJcsUnicodeString(val, path);
     }
-    if (ArrayBuffer.isView(val) || val instanceof ArrayBuffer) {
-      return makeIdentityError(
-        "INVALID_IDENTITY_INPUT",
-        "Buffers and typed arrays are prohibited in V2 JCS",
-        path,
-      );
+    if (typeof val === "number") {
+      if (!Number.isFinite(val)) {
+        return makeIdentityError(
+          "INVALID_IDENTITY_INPUT",
+          `Non-finite number encountered: ${val}`,
+          path,
+        );
+      }
+      return null;
     }
+    if (typeof val === "object") {
+      if (
+        val instanceof Date ||
+        (val.constructor && val.constructor.name === "Date")
+      ) {
+        return makeIdentityError(
+          "INVALID_IDENTITY_INPUT",
+          "Date object is prohibited in V2 JCS",
+          path,
+        );
+      }
+      if (val instanceof Map || val instanceof Set || val instanceof RegExp) {
+        return makeIdentityError(
+          "INVALID_IDENTITY_INPUT",
+          "Prohibited object type encountered (Map/Set/RegExp)",
+          path,
+        );
+      }
+      if (ArrayBuffer.isView(val) || val instanceof ArrayBuffer) {
+        return makeIdentityError(
+          "INVALID_IDENTITY_INPUT",
+          "Buffers and typed arrays are prohibited in V2 JCS",
+          path,
+        );
+      }
 
-    if (activePath.has(val)) {
-      return makeIdentityError(
-        "INVALID_IDENTITY_INPUT",
-        "Cyclic reference detected",
-        path,
-      );
-    }
+      if (activePath.has(val)) {
+        return makeIdentityError(
+          "INVALID_IDENTITY_INPUT",
+          "Cyclic reference detected",
+          path,
+        );
+      }
 
-    if (Array.isArray(val)) {
+      if (Array.isArray(val)) {
+        activePath.add(val);
+
+        // Carrier safety check for arrays
+        const ownKeys = Reflect.ownKeys(val);
+        for (const k of ownKeys) {
+          if (typeof k === "symbol") {
+            activePath.delete(val);
+            return makeIdentityError(
+              "INVALID_IDENTITY_INPUT",
+              "Symbol properties on arrays are prohibited",
+              path,
+            );
+          }
+          if (k === "length") continue;
+
+          // Must be a valid canonical array index 0..length-1
+          if (!/^(0|[1-9][0-9]*)$/.test(k)) {
+            activePath.delete(val);
+            return makeIdentityError(
+              "INVALID_IDENTITY_INPUT",
+              `Array contains invalid non-canonical index property '${k}'`,
+              path,
+            );
+          }
+          const idx = parseInt(k, 10);
+          if (idx < 0 || idx >= val.length) {
+            activePath.delete(val);
+            return makeIdentityError(
+              "INVALID_IDENTITY_INPUT",
+              `Array index '${k}' is out of bounds [0..${val.length - 1}]`,
+              path,
+            );
+          }
+        }
+
+        // Validate elements & sparse array detection
+        for (let i = 0; i < val.length; i++) {
+          if (!Object.prototype.hasOwnProperty.call(val, i)) {
+            activePath.delete(val);
+            return makeIdentityError(
+              "INVALID_IDENTITY_INPUT",
+              `Sparse array element at index [${i}] is prohibited`,
+              path ? `${path}[${i}]` : `[${i}]`,
+            );
+          }
+          const err = validateValueForV2Jcs(
+            val[i],
+            activePath,
+            path ? `${path}[${i}]` : `[${i}]`,
+          );
+          if (err) {
+            activePath.delete(val);
+            return err;
+          }
+        }
+        activePath.delete(val);
+        return null;
+      }
+
+      // Plain prototype check for ordinary objects
+      const proto = Object.getPrototypeOf(val);
+      if (proto !== Object.prototype && proto !== null) {
+        return makeIdentityError(
+          "INVALID_IDENTITY_INPUT",
+          "Value must be a plain object",
+          path,
+        );
+      }
+
       activePath.add(val);
-      for (let i = 0; i < val.length; i++) {
+      const keys = Reflect.ownKeys(val);
+      for (const key of keys) {
+        if (typeof key !== "string") {
+          activePath.delete(val);
+          return makeIdentityError(
+            "INVALID_IDENTITY_INPUT",
+            "Object keys must be strings",
+            path,
+          );
+        }
+
+        // C02: Apply Unicode surrogate validation to every object property key
+        const keyUnicodeErr = validateJcsUnicodeString(
+          key,
+          path ? `${path}.${key}` : key,
+        );
+        if (keyUnicodeErr) {
+          activePath.delete(val);
+          return keyUnicodeErr;
+        }
+
+        const desc = Object.getOwnPropertyDescriptor(val, key);
+        if (!desc || !desc.enumerable) {
+          activePath.delete(val);
+          return makeIdentityError(
+            "INVALID_IDENTITY_INPUT",
+            `Object key '${key}' must be enumerable`,
+            path,
+          );
+        }
+        if (desc.get || desc.set) {
+          activePath.delete(val);
+          return makeIdentityError(
+            "INVALID_IDENTITY_INPUT",
+            `Getters and setters are prohibited on key '${key}'`,
+            path,
+          );
+        }
+
+        const childPath = path ? `${path}.${key}` : key;
         const err = validateValueForV2Jcs(
-          val[i],
+          (val as Record<string, unknown>)[key],
           activePath,
-          path ? `${path}[${i}]` : `[${i}]`,
+          childPath,
         );
         if (err) {
           activePath.delete(val);
@@ -158,55 +267,18 @@ function validateValueForV2Jcs(
       return null;
     }
 
-    const proto = Object.getPrototypeOf(val);
-    if (proto !== Object.prototype && proto !== null) {
-      return makeIdentityError(
-        "INVALID_IDENTITY_INPUT",
-        "Value must be a plain object",
-        path,
-      );
-    }
-
-    activePath.add(val);
-    const keys = Reflect.ownKeys(val);
-    for (const key of keys) {
-      if (typeof key !== "string") {
-        activePath.delete(val);
-        return makeIdentityError(
-          "INVALID_IDENTITY_INPUT",
-          "Object keys must be strings",
-          path,
-        );
-      }
-      const desc = Object.getOwnPropertyDescriptor(val, key);
-      if (!desc || !desc.enumerable) {
-        activePath.delete(val);
-        return makeIdentityError(
-          "INVALID_IDENTITY_INPUT",
-          "Object keys must be enumerable",
-          path,
-        );
-      }
-      const childPath = path ? `${path}.${key}` : key;
-      const err = validateValueForV2Jcs(
-        (val as Record<string, unknown>)[key],
-        activePath,
-        childPath,
-      );
-      if (err) {
-        activePath.delete(val);
-        return err;
-      }
-    }
-    activePath.delete(val);
-    return null;
+    return makeIdentityError(
+      "INVALID_IDENTITY_INPUT",
+      `Unsupported runtime value type: ${typeof val}`,
+      path,
+    );
+  } catch (e) {
+    return makeIdentityError(
+      "INVALID_IDENTITY_INPUT",
+      e instanceof Error ? e.message : String(e),
+      path,
+    );
   }
-
-  return makeIdentityError(
-    "INVALID_IDENTITY_INPUT",
-    `Unsupported runtime value type: ${typeof val}`,
-    path,
-  );
 }
 
 function escapeStringJcs(str: string): string {
