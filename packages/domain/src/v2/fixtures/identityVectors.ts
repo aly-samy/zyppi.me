@@ -198,7 +198,7 @@ export const VECTOR_A_EXPECTED_DIGESTS = {
   policyUniverseRef:
     "sha256:3e72c74c72b3cfd918eb167e12c8e5d2cad8644b808634e50293fc94bb3e9777",
   wholeRequestDigestCandidate:
-    "sha256:b39742b7584165de92d82de8cdd2f5e1a15b8d6472596657d2ee5394acc92abb",
+    "sha256:0ca6861d1d3732b4fa67ce841a039cb73d09393ac932d14e546c4d3345ae0a98",
 } as const;
 
 export const VECTOR_B_CANONICAL_PREIMAGES = {
@@ -573,5 +573,5 @@ export const VECTOR_B_EXPECTED_DIGESTS = {
   policyUniverseRef:
     "sha256:f3451cdd547b91e1245462add36c82eecc47ed41f64bc7f993ba892b6ca8e7a3",
   wholeRequestDigestCandidate:
-    "sha256:3f885a21e0231199823bcc78561f88b6f9c7f821f2869627adc98550f45e7c1b",
+    "sha256:e3894c50a34edd6ecb4548b5bf575597054fa694bf2d9f84cddb2f4236246cf5",
 } as const;

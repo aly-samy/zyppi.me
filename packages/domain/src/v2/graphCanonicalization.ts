@@ -207,6 +207,13 @@ function canonicalizeReferencedNamespace<T>(
 export function canonicalizeConstitutionalStateComponentV2(
   state: BoundConstitutionalStateV2,
 ): V2IdentityResult<Omit<BoundConstitutionalStateV2, "semanticStateRef">> {
+  if (!state || typeof state !== "object" || !Array.isArray(state.stateViews)) {
+    return makeIdentityFailure(
+      "INVALID_IDENTITY_INPUT",
+      "BoundConstitutionalStateV2 must be an object with stateViews array",
+      "constitutionalState",
+    );
+  }
   const current = deepClone(state);
 
   // Map stateViews omitting viewKey and stateBindingKey from each projection
@@ -259,6 +266,20 @@ export function canonicalizeConstitutionalStateComponentV2(
 export function canonicalizeEvidenceStateComponentV2(
   state: BoundEvidenceStateV2,
 ): V2IdentityResult<Omit<BoundEvidenceStateV2, "evidenceStateRef">> {
+  if (
+    !state ||
+    typeof state !== "object" ||
+    !Array.isArray(state.evidenceRequirementBindings) ||
+    !Array.isArray(state.suppliedEvidenceMaterial) ||
+    !Array.isArray(state.evidencePresentationBindings) ||
+    !Array.isArray(state.integrityCoordinates)
+  ) {
+    return makeIdentityFailure(
+      "INVALID_IDENTITY_INPUT",
+      "BoundEvidenceStateV2 must be an object with requirement, material, presentation, and coordinate arrays",
+      "evidenceState",
+    );
+  }
   const current = deepClone(state);
 
   // 1. Evidence Requirement Bindings (omit requirementKey)
@@ -343,6 +364,19 @@ export function canonicalizeEvidenceStateComponentV2(
 export function canonicalizePolicyUniverseComponentV2(
   universe: BoundPolicyUniverseV2,
 ): V2IdentityResult<Omit<BoundPolicyUniverseV2, "policyUniverseRef">> {
+  if (
+    !universe ||
+    typeof universe !== "object" ||
+    !Array.isArray(universe.applicablePolicyMaterial) ||
+    !universe.dependencyTopology ||
+    !Array.isArray(universe.dependencyTopology.dependencyEdges)
+  ) {
+    return makeIdentityFailure(
+      "INVALID_IDENTITY_INPUT",
+      "BoundPolicyUniverseV2 must be an object with applicablePolicyMaterial and dependencyTopology.dependencyEdges",
+      "policyUniverse",
+    );
+  }
   const current = deepClone(universe);
 
   // 1. Applicable Policy Material (omit policyKey)
@@ -1062,10 +1096,18 @@ function sortRequestCollections(
       ...req,
       participation,
       requestedAction,
-      constitutionalState:
-        canonStateRes.value as unknown as BoundConstitutionalStateV2,
-      evidenceState: canonEvidRes.value as unknown as BoundEvidenceStateV2,
-      policyUniverse: canonPolRes.value as unknown as BoundPolicyUniverseV2,
+      constitutionalState: {
+        ...canonStateRes.value,
+        semanticStateRef: req.constitutionalState.semanticStateRef,
+      } as unknown as BoundConstitutionalStateV2,
+      evidenceState: {
+        ...canonEvidRes.value,
+        evidenceStateRef: req.evidenceState.evidenceStateRef,
+      } as unknown as BoundEvidenceStateV2,
+      policyUniverse: {
+        ...canonPolRes.value,
+        policyUniverseRef: req.policyUniverse.policyUniverseRef,
+      } as unknown as BoundPolicyUniverseV2,
       evaluationContext,
     },
   };

@@ -178,13 +178,31 @@ function validateValueForV2Jcs(
           }
         }
 
-        // Validate elements & sparse array detection
+        // Validate elements & sparse array detection + R03 descriptor check
         for (let i = 0; i < val.length; i++) {
-          if (!Object.prototype.hasOwnProperty.call(val, i)) {
+          const keyStr = String(i);
+          if (!Object.prototype.hasOwnProperty.call(val, keyStr)) {
             activePath.delete(val);
             return makeIdentityError(
               "INVALID_IDENTITY_INPUT",
               `Sparse array element at index [${i}] is prohibited`,
+              path ? `${path}[${i}]` : `[${i}]`,
+            );
+          }
+          const desc = Object.getOwnPropertyDescriptor(val, keyStr);
+          if (!desc || !desc.enumerable) {
+            activePath.delete(val);
+            return makeIdentityError(
+              "INVALID_IDENTITY_INPUT",
+              `Array element at index [${i}] must be enumerable`,
+              path ? `${path}[${i}]` : `[${i}]`,
+            );
+          }
+          if (desc.get || desc.set) {
+            activePath.delete(val);
+            return makeIdentityError(
+              "INVALID_IDENTITY_INPUT",
+              `Getters and setters are prohibited on array index '${keyStr}'`,
               path ? `${path}[${i}]` : `[${i}]`,
             );
           }

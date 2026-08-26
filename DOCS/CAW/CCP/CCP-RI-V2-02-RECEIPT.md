@@ -27,8 +27,8 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 ## 2. Commit Anchor & Repository Metadata
 
 1. **Repository Base SHA:** `17406f6034631d7f2cd988c5e0ec8e95d09a5121` (`main`)
-2. **Implementation/Evidence Tree Anchor (Commit C SHA):** `83123742a280d6ded9a8da5a215fb710c0e3affa`
-3. **Receipt Container (Commit D / PR Head SHA):** Materialized in Commit D. Supercedes prior implementer-reported SHAs not present in PR ancestry.
+2. **Implementation/Evidence Tree Anchor (Commit E SHA):** `a425333797fa46f696e461082daba484bed60172`
+3. **Receipt Container (Commit F / PR Head SHA):** Materialized in Commit F. Supercedes prior implementer-reported SHAs not present in PR ancestry.
 4. **Target Branch:** `CCP-RI-V2-02-v2-canonicalization-identity`
 
 ---
@@ -109,7 +109,7 @@ python3 -c "import hashlib; print('sha256:' + hashlib.sha256(('domain_sep' + 'jc
 - **`semanticStateRef`:** `sha256:946a1d1d35385c868648e1967ca70ea87ea1f254b517deb46a2ea6d5f6e7708d`
 - **`evidenceStateRef`:** `sha256:93f27b9a5bf46d85dd8e98710398e85db24eb8efc0e43827ebf6c900f73e2dde`
 - **`policyUniverseRef`:** `sha256:3e72c74c72b3cfd918eb167e12c8e5d2cad8644b808634e50293fc94bb3e9777`
-- **`wholeRequestDigestCandidate`:** `sha256:b39742b7584165de92d82de8cdd2f5e1a15b8d6472596657d2ee5394acc92abb`
+- **`wholeRequestDigestCandidate`:** `sha256:0ca6861d1d3732b4fa67ce841a039cb73d09393ac932d14e546c4d3345ae0a98`
 
 ### 6.2 Vector B (Delegated / Graph-Rich)
 
@@ -118,7 +118,7 @@ python3 -c "import hashlib; print('sha256:' + hashlib.sha256(('domain_sep' + 'jc
 - **`semanticStateRef`:** `sha256:3436d1769040a9e5f586eb8e3a8617465cec90341d5a1e528587764b50163831`
 - **`evidenceStateRef`:** `sha256:1b87097c8fed038164079c10193ec53d1ff554f856c67b831e11606272b8bc79`
 - **`policyUniverseRef`:** `sha256:f3451cdd547b91e1245462add36c82eecc47ed41f64bc7f993ba892b6ca8e7a3`
-- **`wholeRequestDigestCandidate`:** `sha256:3f885a21e0231199823bcc78561f88b6f9c7f821f2869627adc98550f45e7c1b`
+- **`wholeRequestDigestCandidate`:** `sha256:e3894c50a34edd6ecb4548b5bf575597054fa694bf2d9f84cddb2f4236246cf5`
 
 ---
 
