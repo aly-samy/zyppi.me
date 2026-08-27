@@ -114,31 +114,6 @@ export function buildTrustedInertSnapshot<T>(
     }
 
     if (typeof val === "object") {
-      if (
-        val instanceof Date ||
-        (val.constructor && val.constructor.name === "Date")
-      ) {
-        return makeIdentityFailure(
-          "INVALID_IDENTITY_INPUT",
-          "Date object is prohibited in V2 JCS",
-          path,
-        );
-      }
-      if (val instanceof Map || val instanceof Set || val instanceof RegExp) {
-        return makeIdentityFailure(
-          "INVALID_IDENTITY_INPUT",
-          "Prohibited object type encountered (Map/Set/RegExp)",
-          path,
-        );
-      }
-      if (ArrayBuffer.isView(val) || val instanceof ArrayBuffer) {
-        return makeIdentityFailure(
-          "INVALID_IDENTITY_INPUT",
-          "Buffers and typed arrays are prohibited in V2 JCS",
-          path,
-        );
-      }
-
       if (activePath.has(val)) {
         return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
@@ -149,6 +124,53 @@ export function buildTrustedInertSnapshot<T>(
 
       if (Array.isArray(val)) {
         activePath.add(val);
+
+        let proto: unknown;
+        try {
+          proto = Object.getPrototypeOf(val);
+        } catch (e) {
+          activePath.delete(val);
+          return makeIdentityFailure(
+            "INVALID_IDENTITY_INPUT",
+            `Proxy/reflection trap exception on array prototype: ${e instanceof Error ? e.message : String(e)}`,
+            path,
+          );
+        }
+
+        if (proto !== Array.prototype) {
+          activePath.delete(val);
+          return makeIdentityFailure(
+            "INVALID_IDENTITY_INPUT",
+            "Array prototype must be standard Array.prototype",
+            path,
+          );
+        }
+
+        let lenDesc: PropertyDescriptor | undefined;
+        try {
+          lenDesc = Object.getOwnPropertyDescriptor(val, "length");
+        } catch (e) {
+          activePath.delete(val);
+          return makeIdentityFailure(
+            "INVALID_IDENTITY_INPUT",
+            `Proxy/reflection trap exception on array length descriptor: ${e instanceof Error ? e.message : String(e)}`,
+            path,
+          );
+        }
+
+        const len =
+          lenDesc && typeof lenDesc.value === "number"
+            ? lenDesc.value
+            : val.length;
+        if (!Number.isInteger(len) || len < 0) {
+          activePath.delete(val);
+          return makeIdentityFailure(
+            "INVALID_IDENTITY_INPUT",
+            `Invalid array length: ${len}`,
+            path,
+          );
+        }
+
         let ownKeys: (string | symbol)[];
         try {
           ownKeys = Reflect.ownKeys(val);
@@ -181,18 +203,18 @@ export function buildTrustedInertSnapshot<T>(
             );
           }
           const idx = parseInt(k, 10);
-          if (idx < 0 || idx >= val.length) {
+          if (idx < 0 || idx >= len) {
             activePath.delete(val);
             return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
-              `Array index '${k}' is out of bounds [0..${val.length - 1}]`,
+              `Array index '${k}' is out of bounds [0..${len - 1}]`,
               path,
             );
           }
         }
 
-        const snapshotArr: unknown[] = new Array(val.length);
-        for (let i = 0; i < val.length; i++) {
+        const snapshotArr: unknown[] = new Array(len);
+        for (let i = 0; i < len; i++) {
           const keyStr = String(i);
           let desc: PropertyDescriptor | undefined;
           try {

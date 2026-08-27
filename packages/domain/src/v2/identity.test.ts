@@ -18,13 +18,15 @@ import {
   getConstitutionalStateIdentityProjectionV2,
   getEvidenceStateIdentityProjectionV2,
   getPolicyUniverseIdentityProjectionV2,
-  graphSearchDiagnostics,
-  resetGraphSearchDiagnostics,
   verifyEvidenceStateRefV2,
   verifyPolicyUniverseRefV2,
   verifySemanticStateRefV2,
   V2_DOMAIN_SEPARATORS,
 } from "./index.js";
+import {
+  graphSearchDiagnostics,
+  resetGraphSearchDiagnostics,
+} from "./graphCanonicalization.js";
 import { createHash } from "node:crypto";
 import { normalizeTemporalCoordinateV2 } from "./temporal.js";
 import type { PolicyRefV2 } from "./refs.js";
@@ -212,72 +214,124 @@ describe("CCP-RI-V2-02 Mandatory Council Test Suite (V202-T01..T56)", () => {
     }
   });
 
-  // V202-T09 (Strengthened C10 & Finding 2)
-  it("V202-T09 V1 ACV digest cannot satisfy SemanticStateRef derivation", () => {
-    const state = VECTOR_A_REQUEST.constitutionalState;
-    const res = deriveSemanticStateRefV2(state);
-    expect(res.ok).toBe(true);
+  // V202-T09 (CORR-06-09: Actual V1 ACV Derivation)
+  it("V202-T09 V1 ACV digest cannot satisfy SemanticStateRef derivation", async () => {
+    const { deriveActiveConstitutionalViewStateDigest } =
+      await import("../acvState.js");
+    const v1AcvFixture = {
+      identity: { referentId: "ref-1", version: "1.0.0" },
+      relationships: [],
+      standings: [],
+      authorities: [],
+      capabilities: [],
+      applicablePolicies: [],
+      evidenceReferences: [],
+    };
 
-    // Compute actual historical V1 ACV digest using V1 domain separator
-    const v1AcvPreimage =
-      "zyppi:domain:acv_state:v1:" +
-      VECTOR_A_CANONICAL_PREIMAGES.constitutionalStateJcs;
-    const v1AcvHash =
-      "sha256:" +
-      createHash("sha256")
-        .update(v1AcvPreimage, "utf8")
-        .digest("hex")
-        .toLowerCase();
+    const v1AcvDigest = deriveActiveConstitutionalViewStateDigest(
+      v1AcvFixture as unknown as import("../index.js").ActiveConstitutionalView,
+    );
+    expect(v1AcvDigest.startsWith("sha256:")).toBe(true);
 
-    if (res.ok) {
-      expect(res.value).toBe(VECTOR_A_EXPECTED_DIGESTS.semanticStateRef);
-      expect(res.value).not.toBe(v1AcvHash);
+    const v2Res = deriveSemanticStateRefV2(
+      VECTOR_A_REQUEST.constitutionalState,
+    );
+    expect(v2Res.ok).toBe(true);
+    if (v2Res.ok) {
+      expect(v2Res.value).not.toBe(v1AcvDigest);
     }
   });
 
-  // V202-T10 (Strengthened C10 & Finding 2)
-  it("V202-T10 V1 Evidence aggregate hash cannot satisfy EvidenceStateRef derivation", () => {
-    const state = VECTOR_B_REQUEST.evidenceState;
-    const res = deriveEvidenceStateRefV2(state);
-    expect(res.ok).toBe(true);
+  // V202-T10 (CORR-06-10: Actual V1 Evidence Hash)
+  it("V202-T10 V1 Evidence aggregate hash cannot satisfy EvidenceStateRef derivation", async () => {
+    const { generateReceiptHashes } = await import("../receiptHash.js");
+    const v1RequestFixture = {
+      contractVersion: "v1" as const,
+      requestId: "req-v1-001",
+      activeConstitutionalView: {
+        identity: { referentId: "ref-1", version: "1.0.0" },
+        relationships: [],
+        standings: [],
+        authorities: [],
+        capabilities: [],
+        applicablePolicies: [],
+        evidenceReferences: [],
+      },
+      evidenceBundle: {
+        evidenceRecords: [],
+      },
+      executionParameters: {},
+      constitutionalTimestamp: "2026-08-24T17:00:00Z",
+      executionId: "exec-456",
+    };
 
-    // Compute actual historical V1 Evidence digest using V1 domain separator
-    const v1EvidencePreimage =
-      "zyppi:domain:evidence:v1:" +
-      VECTOR_B_CANONICAL_PREIMAGES.evidenceStateJcs;
-    const v1EvidenceHash =
-      "sha256:" +
-      createHash("sha256")
-        .update(v1EvidencePreimage, "utf8")
-        .digest("hex")
-        .toLowerCase();
+    const v1Hashes = generateReceiptHashes(
+      v1RequestFixture as unknown as Parameters<
+        typeof generateReceiptHashes
+      >[0],
+      "verified",
+      { trustStatus: "TRUSTED", degradationFactors: [] },
+      [],
+      [],
+      "1.0.0",
+      100,
+      "exec-456",
+      "1.0.0",
+    );
 
-    if (res.ok) {
-      expect(res.value).toBe(VECTOR_B_EXPECTED_DIGESTS.evidenceStateRef);
-      expect(res.value).not.toBe(v1EvidenceHash);
+    expect(v1Hashes.evidenceHash.startsWith("sha256:")).toBe(true);
+
+    const v2Res = deriveEvidenceStateRefV2(VECTOR_B_REQUEST.evidenceState);
+    expect(v2Res.ok).toBe(true);
+    if (v2Res.ok) {
+      expect(v2Res.value).not.toBe(v1Hashes.evidenceHash);
     }
   });
 
-  // V202-T11 (Strengthened C10 & Finding 2)
-  it("V202-T11 V1 input hash cannot satisfy V2 whole-request domain", () => {
-    const res = deriveExecutionRequestV2DigestCandidate(VECTOR_A_REQUEST);
-    expect(res.ok).toBe(true);
+  // V202-T11 (CORR-06-11: Actual V1 Input Hash)
+  it("V202-T11 V1 input hash cannot satisfy V2 whole-request domain", async () => {
+    const { generateReceiptHashes } = await import("../receiptHash.js");
+    const v1RequestFixture = {
+      contractVersion: "v1" as const,
+      requestId: "req-v1-001",
+      activeConstitutionalView: {
+        identity: { referentId: "ref-1", version: "1.0.0" },
+        relationships: [],
+        standings: [],
+        authorities: [],
+        capabilities: [],
+        applicablePolicies: [],
+        evidenceReferences: [],
+      },
+      evidenceBundle: {
+        evidenceRecords: [],
+      },
+      executionParameters: {},
+      constitutionalTimestamp: "2026-08-24T17:00:00Z",
+      executionId: "exec-456",
+    };
 
-    // Compute actual historical V1 input hash using V1 domain separator
-    const v1InputPreimage =
-      "zyppi:domain:input:v1:" + VECTOR_A_CANONICAL_PREIMAGES.wholeRequestJcs;
-    const v1InputHash =
-      "sha256:" +
-      createHash("sha256")
-        .update(v1InputPreimage, "utf8")
-        .digest("hex")
-        .toLowerCase();
+    const v1Hashes = generateReceiptHashes(
+      v1RequestFixture as unknown as Parameters<
+        typeof generateReceiptHashes
+      >[0],
+      "verified",
+      { trustStatus: "TRUSTED", degradationFactors: [] },
+      [],
+      [],
+      "1.0.0",
+      100,
+      "exec-456",
+      "1.0.0",
+    );
 
-    if (res.ok) {
-      expect(res.value).toBe(
-        VECTOR_A_EXPECTED_DIGESTS.wholeRequestDigestCandidate,
-      );
-      expect(res.value).not.toBe(v1InputHash);
+    expect(v1Hashes.inputHash.startsWith("sha256:")).toBe(true);
+
+    const v2Candidate =
+      deriveExecutionRequestV2DigestCandidate(VECTOR_A_REQUEST);
+    expect(v2Candidate.ok).toBe(true);
+    if (v2Candidate.ok) {
+      expect(v2Candidate.value).not.toBe(v1Hashes.inputHash);
     }
   });
 

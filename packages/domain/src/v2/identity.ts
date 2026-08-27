@@ -82,17 +82,22 @@ export function deriveSemanticStateRefV2(
 
 /**
  * Verifies that the supplied SemanticStateRefV2 matches the derived digest from the constitutional state.
+ * Snapshots the hostile component once and performs all derivations, reads, and comparisons strictly on the trusted snapshot.
  */
 export function verifySemanticStateRefV2(
   state: BoundConstitutionalStateV2,
 ): V2IdentityResult<{ readonly matches: boolean }> {
-  const derivedRes = deriveSemanticStateRefV2(state);
+  const snapRes = buildTrustedInertSnapshot(state);
+  if (!snapRes.ok) return snapRes;
+  const trustedState = snapRes.value;
+
+  const derivedRes = deriveSemanticStateRefV2(trustedState);
   if (!derivedRes.ok) return derivedRes;
 
-  if (state.semanticStateRef !== derivedRes.value) {
+  if (trustedState.semanticStateRef !== derivedRes.value) {
     return makeIdentityFailure(
       "COMPONENT_DIGEST_MISMATCH",
-      `SemanticStateRef mismatch: expected '${derivedRes.value}', got '${state.semanticStateRef}'`,
+      `SemanticStateRef mismatch: expected '${derivedRes.value}', got '${trustedState.semanticStateRef}'`,
       "constitutionalState.semanticStateRef",
     );
   }
@@ -137,17 +142,22 @@ export function deriveEvidenceStateRefV2(
 
 /**
  * Verifies that the supplied EvidenceStateRefV2 matches the derived digest from the evidence state.
+ * Snapshots the hostile component once and performs all derivations, reads, and comparisons strictly on the trusted snapshot.
  */
 export function verifyEvidenceStateRefV2(
   state: BoundEvidenceStateV2,
 ): V2IdentityResult<{ readonly matches: boolean }> {
-  const derivedRes = deriveEvidenceStateRefV2(state);
+  const snapRes = buildTrustedInertSnapshot(state);
+  if (!snapRes.ok) return snapRes;
+  const trustedState = snapRes.value;
+
+  const derivedRes = deriveEvidenceStateRefV2(trustedState);
   if (!derivedRes.ok) return derivedRes;
 
-  if (state.evidenceStateRef !== derivedRes.value) {
+  if (trustedState.evidenceStateRef !== derivedRes.value) {
     return makeIdentityFailure(
       "COMPONENT_DIGEST_MISMATCH",
-      `EvidenceStateRef mismatch: expected '${derivedRes.value}', got '${state.evidenceStateRef}'`,
+      `EvidenceStateRef mismatch: expected '${derivedRes.value}', got '${trustedState.evidenceStateRef}'`,
       "evidenceState.evidenceStateRef",
     );
   }
@@ -192,17 +202,22 @@ export function derivePolicyUniverseRefV2(
 
 /**
  * Verifies that the supplied PolicyUniverseRefV2 matches the derived digest from the policy universe.
+ * Snapshots the hostile component once and performs all derivations, reads, and comparisons strictly on the trusted snapshot.
  */
 export function verifyPolicyUniverseRefV2(
   universe: BoundPolicyUniverseV2,
 ): V2IdentityResult<{ readonly matches: boolean }> {
-  const derivedRes = derivePolicyUniverseRefV2(universe);
+  const snapRes = buildTrustedInertSnapshot(universe);
+  if (!snapRes.ok) return snapRes;
+  const trustedUniverse = snapRes.value;
+
+  const derivedRes = derivePolicyUniverseRefV2(trustedUniverse);
   if (!derivedRes.ok) return derivedRes;
 
-  if (universe.policyUniverseRef !== derivedRes.value) {
+  if (trustedUniverse.policyUniverseRef !== derivedRes.value) {
     return makeIdentityFailure(
       "COMPONENT_DIGEST_MISMATCH",
-      `PolicyUniverseRef mismatch: expected '${derivedRes.value}', got '${universe.policyUniverseRef}'`,
+      `PolicyUniverseRef mismatch: expected '${derivedRes.value}', got '${trustedUniverse.policyUniverseRef}'`,
       "policyUniverse.policyUniverseRef",
     );
   }
