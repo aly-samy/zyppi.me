@@ -30,7 +30,7 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 2. **Current Branch Starting Head:** `f77fa2bcfc87482c0699fb5524edd0cd4ce0e299`
 3. **Final Implementation/Evidence Tree Anchor (Commit I SHA):** `ac6522b6876ad25fac81a9c1bfa1d6a08f5da353`
 4. **Receipt Container (Commit J / PR Head SHA):** Materialized in Commit J.
-4. **Target Branch:** `CCP-RI-V2-02-v2-canonicalization-identity`
+5. **Target Branch:** `CCP-RI-V2-02-v2-canonicalization-identity`
 
 ---
 

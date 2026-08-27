@@ -1,8 +1,8 @@
 import {
+  buildTrustedInertSnapshot,
   canonicalizeJcsV2,
   compareUtf8Bytes,
   makeIdentityFailure,
-  validateHostileRuntimeCarrier,
   type V2IdentityResult,
 } from "./canonical.js";
 import type {
@@ -248,22 +248,23 @@ function canonicalizeReferencedNamespace<T>(
 export function canonicalizeConstitutionalStateComponentV2(
   state: BoundConstitutionalStateV2,
 ): V2IdentityResult<Omit<BoundConstitutionalStateV2, "semanticStateRef">> {
-  const carrierErr = validateHostileRuntimeCarrier(
-    state,
-    new Set(),
-    "constitutionalState",
-  );
-  if (carrierErr) {
-    return { ok: false, error: carrierErr };
+  const snapRes = buildTrustedInertSnapshot(state);
+  if (!snapRes.ok) {
+    return snapRes;
   }
-  if (!state || typeof state !== "object" || !Array.isArray(state.stateViews)) {
+  const trustedState = snapRes.value;
+  if (
+    !trustedState ||
+    typeof trustedState !== "object" ||
+    !Array.isArray(trustedState.stateViews)
+  ) {
     return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
       "BoundConstitutionalStateV2 must be an object with stateViews array",
       "constitutionalState",
     );
   }
-  const current = deepClone(state);
+  const current = trustedState;
 
   // Map stateViews omitting viewKey and stateBindingKey from each projection
   const projectedViews = [];
@@ -315,21 +316,18 @@ export function canonicalizeConstitutionalStateComponentV2(
 export function canonicalizeEvidenceStateComponentV2(
   state: BoundEvidenceStateV2,
 ): V2IdentityResult<Omit<BoundEvidenceStateV2, "evidenceStateRef">> {
-  const carrierErr = validateHostileRuntimeCarrier(
-    state,
-    new Set(),
-    "evidenceState",
-  );
-  if (carrierErr) {
-    return { ok: false, error: carrierErr };
+  const snapRes = buildTrustedInertSnapshot(state);
+  if (!snapRes.ok) {
+    return snapRes;
   }
+  const trustedState = snapRes.value;
   if (
-    !state ||
-    typeof state !== "object" ||
-    !Array.isArray(state.evidenceRequirementBindings) ||
-    !Array.isArray(state.suppliedEvidenceMaterial) ||
-    !Array.isArray(state.evidencePresentationBindings) ||
-    !Array.isArray(state.integrityCoordinates)
+    !trustedState ||
+    typeof trustedState !== "object" ||
+    !Array.isArray(trustedState.evidenceRequirementBindings) ||
+    !Array.isArray(trustedState.suppliedEvidenceMaterial) ||
+    !Array.isArray(trustedState.evidencePresentationBindings) ||
+    !Array.isArray(trustedState.integrityCoordinates)
   ) {
     return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
@@ -337,7 +335,7 @@ export function canonicalizeEvidenceStateComponentV2(
       "evidenceState",
     );
   }
-  const current = deepClone(state);
+  const current = trustedState;
 
   // 1. Evidence Requirement Bindings (omit requirementKey)
   const projReqBindings = current.evidenceRequirementBindings.map((b) => {
@@ -421,20 +419,17 @@ export function canonicalizeEvidenceStateComponentV2(
 export function canonicalizePolicyUniverseComponentV2(
   universe: BoundPolicyUniverseV2,
 ): V2IdentityResult<Omit<BoundPolicyUniverseV2, "policyUniverseRef">> {
-  const carrierErr = validateHostileRuntimeCarrier(
-    universe,
-    new Set(),
-    "policyUniverse",
-  );
-  if (carrierErr) {
-    return { ok: false, error: carrierErr };
+  const snapRes = buildTrustedInertSnapshot(universe);
+  if (!snapRes.ok) {
+    return snapRes;
   }
+  const trustedUniverse = snapRes.value;
   if (
-    !universe ||
-    typeof universe !== "object" ||
-    !Array.isArray(universe.applicablePolicyMaterial) ||
-    !universe.dependencyTopology ||
-    !Array.isArray(universe.dependencyTopology.dependencyEdges)
+    !trustedUniverse ||
+    typeof trustedUniverse !== "object" ||
+    !Array.isArray(trustedUniverse.applicablePolicyMaterial) ||
+    !trustedUniverse.dependencyTopology ||
+    !Array.isArray(trustedUniverse.dependencyTopology.dependencyEdges)
   ) {
     return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
@@ -442,7 +437,7 @@ export function canonicalizePolicyUniverseComponentV2(
       "policyUniverse",
     );
   }
-  const current = deepClone(universe);
+  const current = trustedUniverse;
 
   // 1. Applicable Policy Material (omit policyKey)
   const projPolicyMat = current.applicablePolicyMaterial.map((m) => {

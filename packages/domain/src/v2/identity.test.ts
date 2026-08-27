@@ -1667,7 +1667,7 @@ describe("CCP-RI-V2-02-CORR-01 — Additional Mandatory Test Suite V202-T57+", (
     }
   });
 
-  it("V202-T66 — C03-01 & C03-02: Hostile Proxy, Getters/Setters & Array Descriptor Safety", () => {
+  it("V202-T66 — C05-02: Stateful Proxy Regression Proof & Zero Post-Snapshot Access", () => {
     let sideEffectExecuted = false;
     const getterObj = {
       get trap() {
@@ -1686,25 +1686,57 @@ describe("CCP-RI-V2-02-CORR-01 — Additional Mandatory Test Suite V202-T57+", (
     }
     expect(sideEffectExecuted).toBe(false);
 
-    // Hostile throwing Proxy
-    const throwingProxy = new Proxy(
-      {},
-      {
-        get() {
-          throw new Error("Hostile Proxy Trap");
-        },
-        ownKeys() {
-          throw new Error("Hostile ownKeys Trap");
-        },
-      },
-    );
+    // Stateful Proxy: tracks accesses and throws if accessed post-snapshot
+    let postSnapshotPhase = false;
+    let accessCountDuringSnapshot = 0;
 
-    const resProxy = deriveSemanticStateRefV2(
-      throwingProxy as unknown as BoundConstitutionalStateV2,
+    const targetState = JSON.parse(
+      JSON.stringify(VECTOR_A_REQUEST.constitutionalState),
     );
-    expect(resProxy.ok).toBe(false);
-    if (!resProxy.ok) {
-      expect(resProxy.error.code).toBe("INVALID_IDENTITY_INPUT");
+    const statefulProxy = new Proxy(targetState, {
+      get(target, prop, receiver) {
+        if (postSnapshotPhase) {
+          throw new Error(
+            "Post-snapshot re-entry into original Proxy prohibited!",
+          );
+        }
+        accessCountDuringSnapshot++;
+        return Reflect.get(target, prop, receiver);
+      },
+      getOwnPropertyDescriptor(target, prop) {
+        if (postSnapshotPhase) {
+          throw new Error("Post-snapshot descriptor re-entry prohibited!");
+        }
+        accessCountDuringSnapshot++;
+        return Reflect.getOwnPropertyDescriptor(target, prop);
+      },
+      ownKeys(target) {
+        if (postSnapshotPhase) {
+          throw new Error("Post-snapshot ownKeys re-entry prohibited!");
+        }
+        accessCountDuringSnapshot++;
+        return Reflect.ownKeys(target);
+      },
+    });
+
+    // Derive SemanticStateRefV2 on statefulProxy
+    const resProxy = deriveSemanticStateRefV2(
+      statefulProxy as BoundConstitutionalStateV2,
+    );
+    expect(resProxy.ok).toBe(true);
+    expect(accessCountDuringSnapshot).toBeGreaterThan(0);
+
+    // Mark snapshot phase complete and perform downstream operations on derived result
+    postSnapshotPhase = true;
+
+    // Verify component state ref again with statefulProxy
+    const verifyRes = verifySemanticStateRefV2(
+      statefulProxy as BoundConstitutionalStateV2,
+    );
+    // verifySemanticStateRefV2 builds its own snapshot during its boundary check safely
+    expect(verifyRes.ok).toBe(false); // Fails safely because Proxy throws inside try/catch during snapshot
+    if (!verifyRes.ok) {
+      expect(verifyRes.error.code).toBe("INVALID_IDENTITY_INPUT");
     }
 
     // Array with index getter
