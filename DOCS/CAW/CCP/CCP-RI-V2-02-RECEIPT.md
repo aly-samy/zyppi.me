@@ -27,8 +27,8 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 ## 2. Commit Anchor & Repository Metadata
 
 1. **Repository Base SHA:** `17406f6034631d7f2cd988c5e0ec8e95d09a5121` (`main`)
-2. **Implementation/Evidence Tree Anchor (Commit E SHA):** `a425333797fa46f696e461082daba484bed60172`
-3. **Receipt Container (Commit F / PR Head SHA):** Materialized in Commit F. Supercedes prior implementer-reported SHAs not present in PR ancestry.
+2. **Implementation/Evidence Tree Anchor (Commit G SHA):** `53a6b0759e74dd59e2bb34eebe91c02de88e311f`
+3. **Receipt Container (Commit H / PR Head SHA):** Materialized in Commit H.
 4. **Target Branch:** `CCP-RI-V2-02-v2-canonicalization-identity`
 
 ---

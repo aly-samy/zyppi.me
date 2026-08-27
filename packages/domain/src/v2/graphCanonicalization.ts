@@ -2,6 +2,7 @@ import {
   canonicalizeJcsV2,
   compareUtf8Bytes,
   makeIdentityFailure,
+  validateHostileRuntimeCarrier,
   type V2IdentityResult,
 } from "./canonical.js";
 import type {
@@ -35,6 +36,24 @@ export type ReferencedLocalLabelNamespace =
   | "EVALUATION_PARAMETER"
   | "BOUND_CONTEXT"
   | "OWNER_DETERMINATION";
+
+export interface GraphSearchDiagnostics {
+  visitedStates: number;
+  evaluatedTerminals: number;
+  pruneHits: number;
+}
+
+export const graphSearchDiagnostics: GraphSearchDiagnostics = {
+  visitedStates: 0,
+  evaluatedTerminals: 0,
+  pruneHits: 0,
+};
+
+export function resetGraphSearchDiagnostics(): void {
+  graphSearchDiagnostics.visitedStates = 0;
+  graphSearchDiagnostics.evaluatedTerminals = 0;
+  graphSearchDiagnostics.pruneHits = 0;
+}
 
 /**
  * Sorts an array of semantically unordered members by their JCS representation's UTF-8 bytes.
@@ -118,11 +137,17 @@ function canonicalizeReferencedNamespace<T>(
   let bestResultJcs: string | null = null;
   let bestResultObj: T | null = null;
 
+  // State memoization cache for cell-refined states
+  const memoMap = new Map<string, string>();
+
   function exploreIndividualizations(
     remainingLabels: readonly string[],
     currentAssignedMap: ReadonlyMap<string, string>,
   ): V2IdentityResult<void> {
+    graphSearchDiagnostics.visitedStates++;
+
     if (remainingLabels.length === 0) {
+      graphSearchDiagnostics.evaluatedTerminals++;
       const candidateObj = substitute(contextObj, currentAssignedMap);
       const jcsRes = canonicalizeJcsV2(candidateObj);
       if (!jcsRes.ok) return jcsRes;
@@ -172,6 +197,14 @@ function canonicalizeReferencedNamespace<T>(
     }
     if (currentBucket.length > 0) buckets.push(currentBucket);
 
+    // Construct refined state signature key for memoization
+    const refinedStateKey = `${namespace}:assigned=${currentAssignedMap.size}:buckets=${buckets.map((b) => b.length).join(",")}:${signatures.map((s) => s.sig).join("|")}`;
+    if (memoMap.has(refinedStateKey)) {
+      graphSearchDiagnostics.pruneHits++;
+      return { ok: true, value: undefined };
+    }
+    memoMap.set(refinedStateKey, "VISITED");
+
     // Pick the first bucket for individualization
     const targetBucket = buckets[0];
     for (const candidateLbl of targetBucket) {
@@ -207,6 +240,14 @@ function canonicalizeReferencedNamespace<T>(
 export function canonicalizeConstitutionalStateComponentV2(
   state: BoundConstitutionalStateV2,
 ): V2IdentityResult<Omit<BoundConstitutionalStateV2, "semanticStateRef">> {
+  const carrierErr = validateHostileRuntimeCarrier(
+    state,
+    new Set(),
+    "constitutionalState",
+  );
+  if (carrierErr) {
+    return { ok: false, error: carrierErr };
+  }
   if (!state || typeof state !== "object" || !Array.isArray(state.stateViews)) {
     return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
@@ -266,6 +307,14 @@ export function canonicalizeConstitutionalStateComponentV2(
 export function canonicalizeEvidenceStateComponentV2(
   state: BoundEvidenceStateV2,
 ): V2IdentityResult<Omit<BoundEvidenceStateV2, "evidenceStateRef">> {
+  const carrierErr = validateHostileRuntimeCarrier(
+    state,
+    new Set(),
+    "evidenceState",
+  );
+  if (carrierErr) {
+    return { ok: false, error: carrierErr };
+  }
   if (
     !state ||
     typeof state !== "object" ||
@@ -364,6 +413,14 @@ export function canonicalizeEvidenceStateComponentV2(
 export function canonicalizePolicyUniverseComponentV2(
   universe: BoundPolicyUniverseV2,
 ): V2IdentityResult<Omit<BoundPolicyUniverseV2, "policyUniverseRef">> {
+  const carrierErr = validateHostileRuntimeCarrier(
+    universe,
+    new Set(),
+    "policyUniverse",
+  );
+  if (carrierErr) {
+    return { ok: false, error: carrierErr };
+  }
   if (
     !universe ||
     typeof universe !== "object" ||
@@ -1034,6 +1091,8 @@ function sortRequestCollections(
   if (!resBoundContext.ok) return resBoundContext;
 
   const sortedOwnerDets: OwnerDeterminationBindingV2[] = [];
+  const projOwnerDetsForDupCheck: Record<string, unknown>[] = [];
+
   for (const od of req.evaluationContext.ownerDeterminationBindings) {
     const projOps = od.determinationQuestionBinding.questionOperandBindings.map(
       (op) => {
@@ -1063,7 +1122,7 @@ function sortRequestCollections(
       };
     }
 
-    sortedOwnerDets.push({
+    const normOd = {
       ...od,
       determinationQuestionBinding: {
         ...od.determinationQuestionBinding,
@@ -1071,12 +1130,28 @@ function sortRequestCollections(
           resOps.value as unknown as readonly QuestionOperandBindingV2[],
       },
       determinationDependencyDeclaration: sortedDecl,
-    });
+    };
+
+    sortedOwnerDets.push(normOd);
+
+    // C03-04: Omit synthetic determinationBindingKey when checking for semantic duplicates
+    const dupCheckProj = { ...(normOd as unknown as Record<string, unknown>) };
+    delete dupCheckProj.determinationBindingKey;
+    projOwnerDetsForDupCheck.push(dupCheckProj);
   }
+
+  // Check semantic duplicates on projected owner determinations
+  const resDupCheck = sortAndCheckDuplicates(
+    projOwnerDetsForDupCheck,
+    "evaluationContext.ownerDeterminationBindings",
+    false,
+  );
+  if (!resDupCheck.ok) return resDupCheck;
+
   const resOwnerDets = sortAndCheckDuplicates(
     sortedOwnerDets,
     "evaluationContext.ownerDeterminationBindings",
-    false,
+    true,
   );
   if (!resOwnerDets.ok) return resOwnerDets;
 

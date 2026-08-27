@@ -16,11 +16,16 @@ import {
   derivePolicyUniverseRefV2,
   deriveSemanticStateRefV2,
   getConstitutionalStateIdentityProjectionV2,
+  getEvidenceStateIdentityProjectionV2,
+  getPolicyUniverseIdentityProjectionV2,
+  graphSearchDiagnostics,
+  resetGraphSearchDiagnostics,
   verifyEvidenceStateRefV2,
   verifyPolicyUniverseRefV2,
   verifySemanticStateRefV2,
   V2_DOMAIN_SEPARATORS,
-} from "./identity.js";
+} from "./index.js";
+import { createHash } from "node:crypto";
 import { normalizeTemporalCoordinateV2 } from "./temporal.js";
 import type { PolicyRefV2 } from "./refs.js";
 import type {
@@ -1460,5 +1465,402 @@ describe("CCP-RI-V2-02-CORR-01 — Additional Mandatory Test Suite V202-T57+", (
     if (!res.ok) {
       expect(res.error.code).toBe("INVALID_IDENTITY_INPUT");
     }
+  });
+
+  it("V202-T65 — C03-06: Comprehensive Temporal Calendar & High-Precision Offset Matrix", () => {
+    expect(normalizeTemporalCoordinateV2("2026-02-30T12:00:00Z").ok).toBe(
+      false,
+    );
+    expect(normalizeTemporalCoordinateV2("2025-02-29T12:00:00Z").ok).toBe(
+      false,
+    );
+    expect(normalizeTemporalCoordinateV2("2026-04-31T12:00:00Z").ok).toBe(
+      false,
+    );
+
+    const leapRes = normalizeTemporalCoordinateV2("2024-02-29T12:00:00Z");
+    expect(leapRes.ok).toBe(true);
+    if (leapRes.ok) expect(leapRes.value).toBe("2024-02-29T12:00:00Z");
+
+    const year1Res = normalizeTemporalCoordinateV2("0001-01-01T00:00:00Z");
+    expect(year1Res.ok).toBe(true);
+    if (year1Res.ok) expect(year1Res.value).toBe("0001-01-01T00:00:00Z");
+
+    const year99Res = normalizeTemporalCoordinateV2("0099-12-31T23:59:59Z");
+    expect(year99Res.ok).toBe(true);
+    if (year99Res.ok) expect(year99Res.value).toBe("0099-12-31T23:59:59Z");
+
+    const offsetCross = normalizeTemporalCoordinateV2(
+      "2026-12-31T23:00:00-02:00",
+    );
+    expect(offsetCross.ok).toBe(true);
+    if (offsetCross.ok) expect(offsetCross.value).toBe("2027-01-01T01:00:00Z");
+
+    // High precision timezone equivalence comparison
+    const reqOffset = {
+      ...VECTOR_B_REQUEST,
+      executionContext: {
+        ...VECTOR_B_REQUEST.executionContext,
+        temporalCoordinates: {
+          ...VECTOR_B_REQUEST.executionContext.temporalCoordinates,
+          tValid: "2026-08-24T20:00:00.123456789+03:00",
+        },
+      },
+    };
+
+    const reqUtc = {
+      ...VECTOR_B_REQUEST,
+      executionContext: {
+        ...VECTOR_B_REQUEST.executionContext,
+        temporalCoordinates: {
+          ...VECTOR_B_REQUEST.executionContext.temporalCoordinates,
+          tValid: "2026-08-24T17:00:00.123456789Z",
+        },
+      },
+    };
+
+    const cand1 = deriveExecutionRequestV2DigestCandidate(reqOffset);
+    const cand2 = deriveExecutionRequestV2DigestCandidate(reqUtc);
+    expect(cand1.ok).toBe(true);
+    expect(cand2.ok).toBe(true);
+    if (cand1.ok && cand2.ok) {
+      expect(cand1.value).toBe(cand2.value);
+    }
+  });
+
+  it("V202-T66 — C03-01 & C03-02: Hostile Proxy, Getters/Setters & Array Descriptor Safety", () => {
+    let sideEffectExecuted = false;
+    const getterObj = {
+      get trap() {
+        sideEffectExecuted = true;
+        return "side_effect";
+      },
+      b: 1,
+    };
+
+    const resGetter = deriveSemanticStateRefV2(
+      getterObj as unknown as BoundConstitutionalStateV2,
+    );
+    expect(resGetter.ok).toBe(false);
+    if (!resGetter.ok) {
+      expect(resGetter.error.code).toBe("INVALID_IDENTITY_INPUT");
+    }
+    expect(sideEffectExecuted).toBe(false);
+
+    // Hostile throwing Proxy
+    const throwingProxy = new Proxy(
+      {},
+      {
+        get() {
+          throw new Error("Hostile Proxy Trap");
+        },
+        ownKeys() {
+          throw new Error("Hostile ownKeys Trap");
+        },
+      },
+    );
+
+    const resProxy = deriveSemanticStateRefV2(
+      throwingProxy as unknown as BoundConstitutionalStateV2,
+    );
+    expect(resProxy.ok).toBe(false);
+    if (!resProxy.ok) {
+      expect(resProxy.error.code).toBe("INVALID_IDENTITY_INPUT");
+    }
+
+    // Array with index getter
+    const arrGetter = [1, 2];
+    Object.defineProperty(arrGetter, "0", {
+      get() {
+        return 999;
+      },
+      enumerable: true,
+      configurable: true,
+    });
+
+    const resArrGetter = canonicalizeJcsV2(arrGetter);
+    expect(resArrGetter.ok).toBe(false);
+    if (!resArrGetter.ok) {
+      expect(resArrGetter.error.code).toBe("INVALID_IDENTITY_INPUT");
+    }
+  });
+
+  it("V202-T67 — C03-03: Non-Factorial Graph Search Resource Instrumentation Proof", () => {
+    resetGraphSearchDiagnostics();
+
+    // Derive candidate on graph-rich Vector B
+    const res = deriveExecutionRequestV2DigestCandidate(VECTOR_B_REQUEST);
+    expect(res.ok).toBe(true);
+
+    // 10! = 3,628,800. Prove visitedStates is strictly non-factorial (< 1,000)
+    expect(graphSearchDiagnostics.visitedStates).toBeGreaterThan(0);
+    expect(graphSearchDiagnostics.visitedStates).toBeLessThan(1000);
+    expect(graphSearchDiagnostics.evaluatedTerminals).toBeLessThan(100);
+  });
+
+  it("V202-T68 — C03-04: Owner Determination Semantic Duplicate Rejection Without Key Interference", () => {
+    const od1 =
+      VECTOR_B_REQUEST.evaluationContext.ownerDeterminationBindings[0];
+    const odDup = {
+      ...od1,
+      determinationBindingKey: "different_synthetic_key_999",
+    };
+
+    const reqWithDupOd: ExecutionRequestV2 = {
+      ...VECTOR_B_REQUEST,
+      evaluationContext: {
+        ...VECTOR_B_REQUEST.evaluationContext,
+        ownerDeterminationBindings: [od1, odDup],
+      },
+    };
+
+    const res = deriveExecutionRequestV2DigestCandidate(reqWithDupOd);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.error.code).toBe("SEMANTIC_DUPLICATE");
+    }
+  });
+
+  it("V202-T69 — Scope 6: Coupled Multi-Namespace Relabeling Invariance", () => {
+    const req1 = VECTOR_B_REQUEST;
+    const req2: ExecutionRequestV2 = {
+      ...req1,
+      participation: {
+        roleBindings: [
+          { ...req1.participation.roleBindings[0], roleBindingKey: "R_ACTOR" },
+          {
+            ...req1.participation.roleBindings[1],
+            roleBindingKey: "R_PRINCIPAL",
+          },
+        ],
+        agencyBindings: [
+          {
+            ...req1.participation.agencyBindings[0],
+            agencyBindingKey: "A_AGENCY",
+            actorRoleBindingRef: "R_ACTOR",
+            governedSubjectRoleBindingRef: "R_PRINCIPAL",
+          },
+        ],
+      },
+      intent: {
+        ...req1.intent,
+        originatorParticipationRef: "R_PRINCIPAL",
+      },
+      requestedAction: {
+        ...req1.requestedAction,
+        actionPerformerBindings: [
+          {
+            ...req1.requestedAction.actionPerformerBindings[0],
+            performerKey: "P_PERFORMER",
+            actorParticipationRef: "R_ACTOR",
+            agencyReliance: {
+              kind: "DELEGATED_AGENCY_SINGLE",
+              agencyBindingRef: "A_AGENCY",
+            },
+          },
+        ],
+        intentActionCompatibilityBinding: {
+          kind: "OWNER_DETERMINATION",
+          ownerDeterminationBindingRef: "OD_COMPAT",
+        },
+        requestedCapabilityClaimBindings: [
+          {
+            ...req1.requestedAction.requestedCapabilityClaimBindings[0],
+            capabilityClaimKey: "C_CAPABILITY",
+            claimantPerformerRefs: ["P_PERFORMER"],
+          },
+        ],
+      },
+      evaluationContext: {
+        ...req1.evaluationContext,
+        authorizedInputBindings: [
+          {
+            ...req1.evaluationContext.authorizedInputBindings[0],
+            bindingKey: "IN_AUTH",
+          },
+        ],
+        ownerDeterminationBindings: [
+          {
+            ...req1.evaluationContext.ownerDeterminationBindings[0],
+            determinationBindingKey: "OD_COMPAT",
+            determinationQuestionBinding: {
+              ...req1.evaluationContext.ownerDeterminationBindings[0]
+                .determinationQuestionBinding,
+              questionOperandBindings: [
+                {
+                  operandKey: "OP_OPERAND",
+                  operandSlotSemanticRef: {
+                    family: "EVALUATION_SEMANTIC",
+                    ownerRef: "urn:zyppi:owner:council:v1",
+                    artifactId: "slot1-v1",
+                  },
+                  operandKind: "PARTICIPATION_BINDING",
+                  roleBindingRef: "R_PRINCIPAL",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const d1 = deriveExecutionRequestV2DigestCandidate(req1);
+    const d2 = deriveExecutionRequestV2DigestCandidate(req2);
+    expect(d1.ok).toBe(true);
+    expect(d2.ok).toBe(true);
+    if (d1.ok && d2.ok) {
+      expect(d1.value).toBe(d2.value);
+    }
+  });
+
+  it("V202-T70 — Scope 6: Genuine Symmetric Graph Isomorphism & Edge Mutation Sensitivity", () => {
+    const req1 = VECTOR_B_REQUEST;
+    const req2: ExecutionRequestV2 = {
+      ...req1,
+      participation: {
+        roleBindings: [
+          req1.participation.roleBindings[1],
+          req1.participation.roleBindings[0],
+        ],
+        agencyBindings: [...req1.participation.agencyBindings],
+      },
+    };
+
+    const d1 = deriveExecutionRequestV2DigestCandidate(req1);
+    const d2 = deriveExecutionRequestV2DigestCandidate(req2);
+    expect(d1.ok && d2.ok).toBe(true);
+    if (d1.ok && d2.ok) {
+      expect(d1.value).toBe(d2.value);
+    }
+
+    // Mutate one edge
+    const reqMutated: ExecutionRequestV2 = {
+      ...req1,
+      participation: {
+        ...req1.participation,
+        agencyBindings: [
+          {
+            ...req1.participation.agencyBindings[0],
+            actorRoleBindingRef: "rb_principal",
+            governedSubjectRoleBindingRef: "rb_actor",
+          },
+        ],
+      },
+    };
+
+    const dMut = deriveExecutionRequestV2DigestCandidate(reqMutated);
+    expect(dMut.ok).toBe(true);
+    if (d1.ok && dMut.ok) {
+      expect(d1.value).not.toBe(dMut.value);
+    }
+  });
+
+  it("V202-T71 — Scope 7: Independent Golden Verification of All 8 Canonical Preimages & Digests", () => {
+    function computeSha256(domainSeparator: string, jcs: string): string {
+      const hash = createHash("sha256");
+      hash.update(domainSeparator, "utf8");
+      hash.update(jcs, "utf8");
+      return `sha256:${hash.digest("hex")}`;
+    }
+
+    // Vector A Verification
+    const semProjA = getConstitutionalStateIdentityProjectionV2(
+      VECTOR_A_REQUEST.constitutionalState,
+    );
+    const evidProjA = getEvidenceStateIdentityProjectionV2(
+      VECTOR_A_REQUEST.evidenceState,
+    );
+    const polProjA = getPolicyUniverseIdentityProjectionV2(
+      VECTOR_A_REQUEST.policyUniverse,
+    );
+
+    const jcsSemA = semProjA.ok ? canonicalizeJcsV2(semProjA.value) : null;
+    const jcsEvidA = evidProjA.ok ? canonicalizeJcsV2(evidProjA.value) : null;
+    const jcsPolA = polProjA.ok ? canonicalizeJcsV2(polProjA.value) : null;
+
+    expect(jcsSemA && jcsSemA.ok ? jcsSemA.value : "").toBe(
+      VECTOR_A_CANONICAL_PREIMAGES.constitutionalStateJcs,
+    );
+    expect(jcsEvidA && jcsEvidA.ok ? jcsEvidA.value : "").toBe(
+      VECTOR_A_CANONICAL_PREIMAGES.evidenceStateJcs,
+    );
+    expect(jcsPolA && jcsPolA.ok ? jcsPolA.value : "").toBe(
+      VECTOR_A_CANONICAL_PREIMAGES.policyUniverseJcs,
+    );
+
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.CONSTITUTIONAL_STATE,
+        VECTOR_A_CANONICAL_PREIMAGES.constitutionalStateJcs,
+      ),
+    ).toBe(VECTOR_A_EXPECTED_DIGESTS.semanticStateRef);
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.EVIDENCE_STATE,
+        VECTOR_A_CANONICAL_PREIMAGES.evidenceStateJcs,
+      ),
+    ).toBe(VECTOR_A_EXPECTED_DIGESTS.evidenceStateRef);
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.POLICY_UNIVERSE,
+        VECTOR_A_CANONICAL_PREIMAGES.policyUniverseJcs,
+      ),
+    ).toBe(VECTOR_A_EXPECTED_DIGESTS.policyUniverseRef);
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.INPUT,
+        VECTOR_A_CANONICAL_PREIMAGES.wholeRequestJcs,
+      ),
+    ).toBe(VECTOR_A_EXPECTED_DIGESTS.wholeRequestDigestCandidate);
+
+    // Vector B Verification
+    const semProjB = getConstitutionalStateIdentityProjectionV2(
+      VECTOR_B_REQUEST.constitutionalState,
+    );
+    const evidProjB = getEvidenceStateIdentityProjectionV2(
+      VECTOR_B_REQUEST.evidenceState,
+    );
+    const polProjB = getPolicyUniverseIdentityProjectionV2(
+      VECTOR_B_REQUEST.policyUniverse,
+    );
+
+    const jcsSemB = semProjB.ok ? canonicalizeJcsV2(semProjB.value) : null;
+    const jcsEvidB = evidProjB.ok ? canonicalizeJcsV2(evidProjB.value) : null;
+    const jcsPolB = polProjB.ok ? canonicalizeJcsV2(polProjB.value) : null;
+
+    expect(jcsSemB && jcsSemB.ok ? jcsSemB.value : "").toBe(
+      VECTOR_B_CANONICAL_PREIMAGES.constitutionalStateJcs,
+    );
+    expect(jcsEvidB && jcsEvidB.ok ? jcsEvidB.value : "").toBe(
+      VECTOR_B_CANONICAL_PREIMAGES.evidenceStateJcs,
+    );
+    expect(jcsPolB && jcsPolB.ok ? jcsPolB.value : "").toBe(
+      VECTOR_B_CANONICAL_PREIMAGES.policyUniverseJcs,
+    );
+
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.CONSTITUTIONAL_STATE,
+        VECTOR_B_CANONICAL_PREIMAGES.constitutionalStateJcs,
+      ),
+    ).toBe(VECTOR_B_EXPECTED_DIGESTS.semanticStateRef);
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.EVIDENCE_STATE,
+        VECTOR_B_CANONICAL_PREIMAGES.evidenceStateJcs,
+      ),
+    ).toBe(VECTOR_B_EXPECTED_DIGESTS.evidenceStateRef);
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.POLICY_UNIVERSE,
+        VECTOR_B_CANONICAL_PREIMAGES.policyUniverseJcs,
+      ),
+    ).toBe(VECTOR_B_EXPECTED_DIGESTS.policyUniverseRef);
+    expect(
+      computeSha256(
+        V2_DOMAIN_SEPARATORS.INPUT,
+        VECTOR_B_CANONICAL_PREIMAGES.wholeRequestJcs,
+      ),
+    ).toBe(VECTOR_B_EXPECTED_DIGESTS.wholeRequestDigestCandidate);
   });
 });

@@ -23,6 +23,11 @@ export {
   V2_DOMAIN_SEPARATORS,
 } from "./identity.js";
 
+export {
+  graphSearchDiagnostics,
+  resetGraphSearchDiagnostics,
+} from "./graphCanonicalization.js";
+
 export type { JsonPrimitiveV2, JsonValueV2 } from "./json.js";
 export { isStrictJsonValueV2 } from "./json.js";
 

@@ -78,7 +78,16 @@ export function validateJcsUnicodeString(
 
 /**
  * Validates strict JSON value compliance and carrier safety for V2 JCS.
+ * Deeply inspects object/array property descriptors without executing getter side effects or throwing raw Proxy exceptions.
  */
+export function validateHostileRuntimeCarrier(
+  val: unknown,
+  activePath = new Set<unknown>(),
+  path = "",
+): V2IdentityError | null {
+  return validateValueForV2Jcs(val, activePath, path);
+}
+
 function validateValueForV2Jcs(
   val: unknown,
   activePath = new Set<unknown>(),
@@ -181,15 +190,26 @@ function validateValueForV2Jcs(
         // Validate elements & sparse array detection + R03 descriptor check
         for (let i = 0; i < val.length; i++) {
           const keyStr = String(i);
-          if (!Object.prototype.hasOwnProperty.call(val, keyStr)) {
+          let desc: PropertyDescriptor | undefined;
+          try {
+            if (!Object.prototype.hasOwnProperty.call(val, keyStr)) {
+              activePath.delete(val);
+              return makeIdentityError(
+                "INVALID_IDENTITY_INPUT",
+                `Sparse array element at index [${i}] is prohibited`,
+                path ? `${path}[${i}]` : `[${i}]`,
+              );
+            }
+            desc = Object.getOwnPropertyDescriptor(val, keyStr);
+          } catch (e) {
             activePath.delete(val);
             return makeIdentityError(
               "INVALID_IDENTITY_INPUT",
-              `Sparse array element at index [${i}] is prohibited`,
+              `Proxy/reflection trap exception at array index [${i}]: ${e instanceof Error ? e.message : String(e)}`,
               path ? `${path}[${i}]` : `[${i}]`,
             );
           }
-          const desc = Object.getOwnPropertyDescriptor(val, keyStr);
+
           if (!desc || !desc.enumerable) {
             activePath.delete(val);
             return makeIdentityError(
@@ -207,7 +227,7 @@ function validateValueForV2Jcs(
             );
           }
           const err = validateValueForV2Jcs(
-            val[i],
+            desc.value,
             activePath,
             path ? `${path}[${i}]` : `[${i}]`,
           );
@@ -271,11 +291,7 @@ function validateValueForV2Jcs(
         }
 
         const childPath = path ? `${path}.${key}` : key;
-        const err = validateValueForV2Jcs(
-          (val as Record<string, unknown>)[key],
-          activePath,
-          childPath,
-        );
+        const err = validateValueForV2Jcs(desc.value, activePath, childPath);
         if (err) {
           activePath.delete(val);
           return err;
