@@ -77,66 +77,62 @@ export function validateJcsUnicodeString(
 }
 
 /**
- * Validates strict JSON value compliance and carrier safety for V2 JCS.
- * Deeply inspects object/array property descriptors without executing getter side effects or throwing raw Proxy exceptions.
+ * Builds a trusted, inert plain-object/array snapshot from a runtime value in a single descriptor-driven pass.
+ * Catches all Proxy/reflection exceptions, rejects accessors, non-plain prototypes, non-enumerable hidden properties,
+ * and never re-enters the original carrier after snapshot materialization.
  */
-export function validateHostileRuntimeCarrier(
-  val: unknown,
+export function buildTrustedInertSnapshot<T>(
+  val: T,
   activePath = new Set<unknown>(),
   path = "",
-): V2IdentityError | null {
-  return validateValueForV2Jcs(val, activePath, path);
-}
-
-function validateValueForV2Jcs(
-  val: unknown,
-  activePath = new Set<unknown>(),
-  path = "",
-): V2IdentityError | null {
+): V2IdentityResult<T> {
   try {
     if (val === undefined) {
-      return makeIdentityError(
+      return makeIdentityFailure(
         "INVALID_IDENTITY_INPUT",
         "undefined value encountered (undefined is not valid JCS)",
         path,
       );
     }
     if (val === null || typeof val === "boolean") {
-      return null;
+      return { ok: true, value: val };
     }
     if (typeof val === "string") {
-      return validateJcsUnicodeString(val, path);
+      const err = validateJcsUnicodeString(val, path);
+      if (err) return { ok: false, error: err };
+      return { ok: true, value: val };
     }
     if (typeof val === "number") {
       if (!Number.isFinite(val)) {
-        return makeIdentityError(
+        return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
           `Non-finite number encountered: ${val}`,
           path,
         );
       }
-      return null;
+      return { ok: true, value: val };
     }
+
     if (typeof val === "object") {
       if (
         val instanceof Date ||
         (val.constructor && val.constructor.name === "Date")
       ) {
-        return makeIdentityError(
+        return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
           "Date object is prohibited in V2 JCS",
           path,
         );
       }
       if (val instanceof Map || val instanceof Set || val instanceof RegExp) {
-        return makeIdentityError(
+        return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
           "Prohibited object type encountered (Map/Set/RegExp)",
           path,
         );
       }
       if (ArrayBuffer.isView(val) || val instanceof ArrayBuffer) {
-        return makeIdentityError(
+        return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
           "Buffers and typed arrays are prohibited in V2 JCS",
           path,
@@ -144,7 +140,7 @@ function validateValueForV2Jcs(
       }
 
       if (activePath.has(val)) {
-        return makeIdentityError(
+        return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
           "Cyclic reference detected",
           path,
@@ -153,13 +149,22 @@ function validateValueForV2Jcs(
 
       if (Array.isArray(val)) {
         activePath.add(val);
+        let ownKeys: (string | symbol)[];
+        try {
+          ownKeys = Reflect.ownKeys(val);
+        } catch (e) {
+          activePath.delete(val);
+          return makeIdentityFailure(
+            "INVALID_IDENTITY_INPUT",
+            `Proxy/reflection trap exception on array keys: ${e instanceof Error ? e.message : String(e)}`,
+            path,
+          );
+        }
 
-        // Carrier safety check for arrays
-        const ownKeys = Reflect.ownKeys(val);
         for (const k of ownKeys) {
           if (typeof k === "symbol") {
             activePath.delete(val);
-            return makeIdentityError(
+            return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
               "Symbol properties on arrays are prohibited",
               path,
@@ -167,10 +172,9 @@ function validateValueForV2Jcs(
           }
           if (k === "length") continue;
 
-          // Must be a valid canonical array index 0..length-1
           if (!/^(0|[1-9][0-9]*)$/.test(k)) {
             activePath.delete(val);
-            return makeIdentityError(
+            return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
               `Array contains invalid non-canonical index property '${k}'`,
               path,
@@ -179,7 +183,7 @@ function validateValueForV2Jcs(
           const idx = parseInt(k, 10);
           if (idx < 0 || idx >= val.length) {
             activePath.delete(val);
-            return makeIdentityError(
+            return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
               `Array index '${k}' is out of bounds [0..${val.length - 1}]`,
               path,
@@ -187,14 +191,14 @@ function validateValueForV2Jcs(
           }
         }
 
-        // Validate elements & sparse array detection + R03 descriptor check
+        const snapshotArr: unknown[] = new Array(val.length);
         for (let i = 0; i < val.length; i++) {
           const keyStr = String(i);
           let desc: PropertyDescriptor | undefined;
           try {
             if (!Object.prototype.hasOwnProperty.call(val, keyStr)) {
               activePath.delete(val);
-              return makeIdentityError(
+              return makeIdentityFailure(
                 "INVALID_IDENTITY_INPUT",
                 `Sparse array element at index [${i}] is prohibited`,
                 path ? `${path}[${i}]` : `[${i}]`,
@@ -203,7 +207,7 @@ function validateValueForV2Jcs(
             desc = Object.getOwnPropertyDescriptor(val, keyStr);
           } catch (e) {
             activePath.delete(val);
-            return makeIdentityError(
+            return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
               `Proxy/reflection trap exception at array index [${i}]: ${e instanceof Error ? e.message : String(e)}`,
               path ? `${path}[${i}]` : `[${i}]`,
@@ -212,7 +216,7 @@ function validateValueForV2Jcs(
 
           if (!desc || !desc.enumerable) {
             activePath.delete(val);
-            return makeIdentityError(
+            return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
               `Array element at index [${i}] must be enumerable`,
               path ? `${path}[${i}]` : `[${i}]`,
@@ -220,30 +224,42 @@ function validateValueForV2Jcs(
           }
           if (desc.get || desc.set) {
             activePath.delete(val);
-            return makeIdentityError(
+            return makeIdentityFailure(
               "INVALID_IDENTITY_INPUT",
               `Getters and setters are prohibited on array index '${keyStr}'`,
               path ? `${path}[${i}]` : `[${i}]`,
             );
           }
-          const err = validateValueForV2Jcs(
+
+          const elemRes = buildTrustedInertSnapshot(
             desc.value,
             activePath,
             path ? `${path}[${i}]` : `[${i}]`,
           );
-          if (err) {
+          if (!elemRes.ok) {
             activePath.delete(val);
-            return err;
+            return elemRes;
           }
+          snapshotArr[i] = elemRes.value;
         }
+
         activePath.delete(val);
-        return null;
+        return { ok: true, value: snapshotArr as unknown as T };
       }
 
       // Plain prototype check for ordinary objects
-      const proto = Object.getPrototypeOf(val);
+      let proto: unknown;
+      try {
+        proto = Object.getPrototypeOf(val);
+      } catch (e) {
+        return makeIdentityFailure(
+          "INVALID_IDENTITY_INPUT",
+          `Proxy/reflection trap exception on prototype: ${e instanceof Error ? e.message : String(e)}`,
+          path,
+        );
+      }
       if (proto !== Object.prototype && proto !== null) {
-        return makeIdentityError(
+        return makeIdentityFailure(
           "INVALID_IDENTITY_INPUT",
           "Value must be a plain object",
           path,
@@ -251,31 +267,53 @@ function validateValueForV2Jcs(
       }
 
       activePath.add(val);
-      const keys = Reflect.ownKeys(val);
+      let keys: (string | symbol)[];
+      try {
+        keys = Reflect.ownKeys(val);
+      } catch (e) {
+        activePath.delete(val);
+        return makeIdentityFailure(
+          "INVALID_IDENTITY_INPUT",
+          `Proxy/reflection trap exception on object keys: ${e instanceof Error ? e.message : String(e)}`,
+          path,
+        );
+      }
+
+      const snapshotObj: Record<string, unknown> = {};
       for (const key of keys) {
         if (typeof key !== "string") {
           activePath.delete(val);
-          return makeIdentityError(
+          return makeIdentityFailure(
             "INVALID_IDENTITY_INPUT",
             "Object keys must be strings",
             path,
           );
         }
 
-        // C02: Apply Unicode surrogate validation to every object property key
         const keyUnicodeErr = validateJcsUnicodeString(
           key,
           path ? `${path}.${key}` : key,
         );
         if (keyUnicodeErr) {
           activePath.delete(val);
-          return keyUnicodeErr;
+          return { ok: false, error: keyUnicodeErr };
         }
 
-        const desc = Object.getOwnPropertyDescriptor(val, key);
+        let desc: PropertyDescriptor | undefined;
+        try {
+          desc = Object.getOwnPropertyDescriptor(val, key);
+        } catch (e) {
+          activePath.delete(val);
+          return makeIdentityFailure(
+            "INVALID_IDENTITY_INPUT",
+            `Proxy/reflection trap exception on key '${key}': ${e instanceof Error ? e.message : String(e)}`,
+            path,
+          );
+        }
+
         if (!desc || !desc.enumerable) {
           activePath.delete(val);
-          return makeIdentityError(
+          return makeIdentityFailure(
             "INVALID_IDENTITY_INPUT",
             `Object key '${key}' must be enumerable`,
             path,
@@ -283,7 +321,7 @@ function validateValueForV2Jcs(
         }
         if (desc.get || desc.set) {
           activePath.delete(val);
-          return makeIdentityError(
+          return makeIdentityFailure(
             "INVALID_IDENTITY_INPUT",
             `Getters and setters are prohibited on key '${key}'`,
             path,
@@ -291,28 +329,46 @@ function validateValueForV2Jcs(
         }
 
         const childPath = path ? `${path}.${key}` : key;
-        const err = validateValueForV2Jcs(desc.value, activePath, childPath);
-        if (err) {
+        const childRes = buildTrustedInertSnapshot(
+          desc.value,
+          activePath,
+          childPath,
+        );
+        if (!childRes.ok) {
           activePath.delete(val);
-          return err;
+          return childRes;
         }
+        snapshotObj[key] = childRes.value;
       }
+
       activePath.delete(val);
-      return null;
+      return { ok: true, value: snapshotObj as unknown as T };
     }
 
-    return makeIdentityError(
+    return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
       `Unsupported runtime value type: ${typeof val}`,
       path,
     );
   } catch (e) {
-    return makeIdentityError(
+    return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
       e instanceof Error ? e.message : String(e),
       path,
     );
   }
+}
+
+/**
+ * Validates strict JSON value compliance and carrier safety for V2 JCS.
+ */
+export function validateHostileRuntimeCarrier(
+  val: unknown,
+  activePath = new Set<unknown>(),
+  path = "",
+): V2IdentityError | null {
+  const res = buildTrustedInertSnapshot(val, activePath, path);
+  return res.ok ? null : res.error;
 }
 
 function escapeStringJcs(str: string): string {
@@ -384,12 +440,12 @@ function serializeV2JcsInternal(val: unknown): string {
  * RFC 8785 JSON Canonicalization Scheme for V2.
  */
 export function canonicalizeJcsV2(value: unknown): V2IdentityResult<string> {
-  const err = validateValueForV2Jcs(value);
-  if (err) {
-    return { ok: false, error: err };
+  const snapRes = buildTrustedInertSnapshot(value);
+  if (!snapRes.ok) {
+    return snapRes;
   }
   try {
-    const jcs = serializeV2JcsInternal(value);
+    const jcs = serializeV2JcsInternal(snapRes.value);
     return { ok: true, value: jcs };
   } catch (e) {
     return makeIdentityFailure(

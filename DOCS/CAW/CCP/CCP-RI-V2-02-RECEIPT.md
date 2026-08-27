@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-This completion receipt materializes the execution proof for **CCP-RI-V2-02** ("V2 Canonicalization, Component Identity & Whole-Request Input Binding") and corrective mandate **CCP-RI-V2-02-CORR-01** inside `@zyppi/domain`.
+This completion receipt materializes the execution proof for **CCP-RI-V2-02** ("V2 Canonicalization, Component Identity & Whole-Request Input Binding") and corrective mandates **CCP-RI-V2-02-CORR-01**, **CORR-02**, **CORR-03**, and **CORR-04** inside `@zyppi/domain`.
 
 The implementation establishes a generation-distinct, deterministic V2 identity layer:
 
@@ -26,9 +26,10 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 
 ## 2. Commit Anchor & Repository Metadata
 
-1. **Repository Base SHA:** `17406f6034631d7f2cd988c5e0ec8e95d09a5121` (`main`)
-2. **Implementation/Evidence Tree Anchor (Commit G SHA):** `53a6b0759e74dd59e2bb34eebe91c02de88e311f`
-3. **Receipt Container (Commit H / PR Head SHA):** Materialized in Commit H.
+1. **Original Mandated Base SHA:** `17406f6034631d7f2cd988c5e0ec8e95d09a5121` (`main`)
+2. **Current Branch Starting Head:** `f77fa2bcfc87482c0699fb5524edd0cd4ce0e299`
+3. **Final Implementation/Evidence Tree Anchor (Commit I SHA):** `ac6522b6876ad25fac81a9c1bfa1d6a08f5da353`
+4. **Receipt Container (Commit J / PR Head SHA):** Materialized in Commit J.
 4. **Target Branch:** `CCP-RI-V2-02-v2-canonicalization-identity`
 
 ---

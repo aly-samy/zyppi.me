@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  buildTrustedInertSnapshot,
   canonicalizeJcsV2,
   makeIdentityFailure,
   type V2IdentityResult,
@@ -215,8 +216,15 @@ export function verifyPolicyUniverseRefV2(
 export function deriveExecutionRequestV2DigestCandidate(
   req: ExecutionRequestV2,
 ): V2IdentityResult<string> {
-  // 0. C04: Enforce V2-01 structural validation at root identity boundary
-  const structVal = validateExecutionRequestV2(req);
+  // 0a. Build trusted inert snapshot of hostile caller value in one descriptor-driven pass
+  const snapRes = buildTrustedInertSnapshot(req);
+  if (!snapRes.ok) {
+    return snapRes;
+  }
+  const trustedReq = snapRes.value;
+
+  // 0b. C04: Enforce V2-01 structural validation on trusted snapshot
+  const structVal = validateExecutionRequestV2(trustedReq);
   if (!structVal.ok) {
     return makeIdentityFailure(
       "INVALID_IDENTITY_INPUT",
@@ -225,26 +233,26 @@ export function deriveExecutionRequestV2DigestCandidate(
     );
   }
 
-  // 1. Verify component digests
-  const semCheck = verifySemanticStateRefV2(req.constitutionalState);
+  // 1. Verify component digests on trusted snapshot
+  const semCheck = verifySemanticStateRefV2(trustedReq.constitutionalState);
   if (!semCheck.ok) return semCheck;
 
-  const evidCheck = verifyEvidenceStateRefV2(req.evidenceState);
+  const evidCheck = verifyEvidenceStateRefV2(trustedReq.evidenceState);
   if (!evidCheck.ok) return evidCheck;
 
-  const polCheck = verifyPolicyUniverseRefV2(req.policyUniverse);
+  const polCheck = verifyPolicyUniverseRefV2(trustedReq.policyUniverse);
   if (!polCheck.ok) return polCheck;
 
   // 2. Canonicalize temporal coordinates to UTC Z
   const normTimeRes = canonicalizeTemporalCoordinatesV2(
-    req.executionContext.temporalCoordinates,
+    trustedReq.executionContext.temporalCoordinates,
   );
   if (!normTimeRes.ok) return normTimeRes;
 
   const reqWithNormTime: ExecutionRequestV2 = {
-    ...req,
+    ...trustedReq,
     executionContext: {
-      ...req.executionContext,
+      ...trustedReq.executionContext,
       temporalCoordinates: normTimeRes.value,
     },
   };

@@ -197,13 +197,21 @@ function canonicalizeReferencedNamespace<T>(
     }
     if (currentBucket.length > 0) buckets.push(currentBucket);
 
-    // Construct refined state signature key for memoization
-    const refinedStateKey = `${namespace}:assigned=${currentAssignedMap.size}:buckets=${buckets.map((b) => b.length).join(",")}:${signatures.map((s) => s.sig).join("|")}`;
-    if (memoMap.has(refinedStateKey)) {
-      graphSearchDiagnostics.pruneHits++;
-      return { ok: true, value: undefined };
+    // Construct exact partially-individualized graph state key for memoization
+    const partialMap = new Map(currentAssignedMap);
+    for (const remainingLbl of remainingLabels) {
+      partialMap.set(remainingLbl, "__UNASSIGNED__");
     }
-    memoMap.set(refinedStateKey, "VISITED");
+    const partialStateObj = substitute(contextObj, partialMap);
+    const partialJcsRes = canonicalizeJcsV2(partialStateObj);
+    if (partialJcsRes.ok) {
+      const exactStateKey = `${namespace}:${partialJcsRes.value}`;
+      if (memoMap.has(exactStateKey)) {
+        graphSearchDiagnostics.pruneHits++;
+        return { ok: true, value: undefined };
+      }
+      memoMap.set(exactStateKey, "VISITED");
+    }
 
     // Pick the first bucket for individualization
     const targetBucket = buckets[0];
