@@ -1435,7 +1435,9 @@ score the candidate
         ↓
 undo candidate data mask
 ```
+
 After all eight candidates have been evaluated:
+
 ```
 select minimum-score mask
         ↓
@@ -1443,6 +1445,7 @@ apply selected data mask
         ↓
 write final Format Information
 ```
+
 The candidate-scoring stage SHALL NOT write per-candidate Format Information before penalty evaluation.
 
 **Tie-break remains:**
@@ -1475,12 +1478,15 @@ function chooseMask(m: WorkingMatrix, ecc: QrEcc): number {
   return bestMask;
 }
 ```
+
 Finalization:
+
 ```ts
 const mask = chooseMask(m, ecc);
 applyMask(m, mask);
 drawFormatBits(m, ecc, mask);
 ```
+
 The format bits are written only after the winning mask has been selected.
 
 ---
@@ -2001,18 +2007,18 @@ Before implementing Structured Append or either FNC1 mode, create a dedicated re
 
 # 38. ZQE Decision Register
 
-| ID          | Decision                                          | Rationale                           |
-| ----------- | ------------------------------------------------- | ----------------------------------- |
-| ZQE-DEC-001 | Core input is bytes, not string                   | no hidden text encoding             |
-| ZQE-DEC-002 | Caller input is defensively copied                | caller cannot mutate internal state |
-| ZQE-DEC-003 | Public QrSymbol exposes no mutable matrix         | immutable artifact boundary         |
-| ZQE-DEC-004 | FQR fixed to V3-M Byte                            | scope discipline                    |
-| ZQE-DEC-005 | FQR overflow fails instead of promoting version   | deterministic profile               |
-| ZQE-DEC-006 | Two-grid working matrix: color + function-role    | no ambiguous module state           |
+| ID          | Decision                                                     | Rationale                            |
+| ----------- | ------------------------------------------------------------ | ------------------------------------ |
+| ZQE-DEC-001 | Core input is bytes, not string                              | no hidden text encoding              |
+| ZQE-DEC-002 | Caller input is defensively copied                           | caller cannot mutate internal state  |
+| ZQE-DEC-003 | Public QrSymbol exposes no mutable matrix                    | immutable artifact boundary          |
+| ZQE-DEC-004 | FQR fixed to V3-M Byte                                       | scope discipline                     |
+| ZQE-DEC-005 | FQR overflow fails instead of promoting version              | deterministic profile                |
+| ZQE-DEC-006 | Two-grid working matrix: color + function-role               | no ambiguous module state            |
 | ZQE-DEC-007 | Candidate format bits do not participate in FQR mask scoring | conservative standard-ready ordering |
-| ZQE-DEC-008 | Equal mask scores choose lowest mask ID           | deterministic tie                   |
-| ZQE-DEC-009 | Quiet zone belongs to renderer                    | QrSymbol stays native matrix        |
-| ZQE-DEC-010 | Canonical SVG uses integer geometry               | byte reproducibility                |
+| ZQE-DEC-008 | Equal mask scores choose lowest mask ID                      | deterministic tie                    |
+| ZQE-DEC-009 | Quiet zone belongs to renderer                               | QrSymbol stays native matrix         |
+| ZQE-DEC-010 | Canonical SVG uses integer geometry                          | byte reproducibility                 |
 
 ---
 
