@@ -29,12 +29,12 @@ export const PLATFORM_INVARIANTS = Object.freeze({
 });
 
 /**
- * CAW (Constitutional Architecture & Workspace) Program Policy Fragment.
+ * CAW (Commerce Atlas Wedge) Program Policy Fragment.
  * Governs the core CAW workspace nodes in the monorepo.
  */
 export const CAW_PROGRAM_POLICY = Object.freeze({
   programId: "CAW",
-  description: "Constitutional Architecture & Workspace Program",
+  description: "Commerce Atlas Wedge",
   nodes: Object.freeze([
     {
       node: "packages/domain",

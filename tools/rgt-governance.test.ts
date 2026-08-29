@@ -70,12 +70,85 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     const { violations } = runValidation(process.cwd());
     expect(violations).toHaveLength(0);
     expect(ACTIVE_WORKSPACE_POLICY.nodes.size).toBe(9);
-    expect(
-      ACTIVE_WORKSPACE_POLICY.nodes.get("infra").productionDependencies,
-    ).toHaveLength(0);
-    expect(
-      ACTIVE_WORKSPACE_POLICY.nodes.get("infra").devOnlyDependencies,
-    ).toHaveLength(0);
+
+    // Assert exact effective CAW-004 v2.2 dependency ceilings for all nine governed nodes
+    const expectedCeilings: Record<
+      string,
+      {
+        packageName: string | null;
+        production: string[];
+        devOnly: string[];
+      }
+    > = {
+      "packages/domain": {
+        packageName: "@zyppi/domain",
+        production: [],
+        devOnly: [],
+      },
+      "packages/shared": {
+        packageName: "@zyppi/shared",
+        production: [],
+        devOnly: [],
+      },
+      "packages/contracts": {
+        packageName: "@zyppi/contracts",
+        production: ["packages/domain"],
+        devOnly: [],
+      },
+      "packages/runtime": {
+        packageName: "@zyppi/runtime",
+        production: ["packages/domain", "packages/shared"],
+        devOnly: [],
+      },
+      "packages/testing": {
+        packageName: "@zyppi/testing",
+        production: [],
+        devOnly: [
+          "packages/domain",
+          "packages/contracts",
+          "packages/runtime",
+          "packages/shared",
+        ],
+      },
+      "apps/api": {
+        packageName: "@zyppi/api",
+        production: [
+          "packages/runtime",
+          "packages/domain",
+          "packages/contracts",
+        ],
+        devOnly: ["packages/testing"],
+      },
+      "apps/web": {
+        packageName: "@zyppi/web",
+        production: [
+          "packages/contracts",
+          "packages/domain",
+          "packages/shared",
+        ],
+        devOnly: ["packages/testing"],
+      },
+      "edge/worker": {
+        packageName: null,
+        production: ["packages/contracts"],
+        devOnly: [],
+      },
+      infra: {
+        packageName: "@zyppi/infra",
+        production: [],
+        devOnly: [],
+      },
+    };
+
+    for (const [nodePath, expected] of Object.entries(expectedCeilings)) {
+      const nodeDef = ACTIVE_WORKSPACE_POLICY.nodes.get(nodePath);
+      expect(nodeDef).toBeDefined();
+      expect(nodeDef.packageName).toBe(expected.packageName);
+      expect(Array.from(nodeDef.productionDependencies)).toEqual(
+        expected.production,
+      );
+      expect(Array.from(nodeDef.devOnlyDependencies)).toEqual(expected.devOnly);
+    }
   });
 
   it("9.2 Fail-closed unknown node", () => {
@@ -287,7 +360,7 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     // In-memory policy fragment composition preflight
     const ziiFragment = {
       programId: "ZII",
-      description: "Zero-Knowledge / QR Engine Program",
+      description: "Zyppi Interaction Infrastructure",
       nodes: [
         {
           node: "packages/qr-core",
