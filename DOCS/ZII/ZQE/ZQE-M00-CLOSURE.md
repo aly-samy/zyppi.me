@@ -1,11 +1,11 @@
 # ZQE-M00 CLOSURE — Readiness & Finalization Record
 
-**Version:** `0.2 — CLOSURE CANDIDATE`
-**Status:** `CLOSURE IN PROGRESS`
+**Version:** `1.0`
+**Status:** `CLOSED — PASS`
 **Milestone:** `ZQE-M00 — FQR Entry Freeze`
 **Program:** `ZII — Zyppi Interaction Infrastructure`
 **Engine:** `ZQE — Zyppi QR Engine`
-**Date:** `25 August 2026`
+**Date:** `29 August 2026`
 **Repository:** `aly-samy/zyppi.me`
 **Closure Authority:** `Chair — Zyppi Constitutional Council`
 
@@ -339,22 +339,32 @@ This dependency is explicit and not hidden.
 
 # 10. Repository Publication Finding
 
-The canonical repository now proves the CEngS ZII/ZQE loading route.
+The canonical ZII/ZQE M00 corpus is published on `main`.
 
-Current repository code search does not surface the final ZQE M00 corpus (`ZQE-001`, `ZQE-M00`, `ZQE-PLAN`, or ZII-001) as repository-published files.
+Verified canonical authority includes:
 
-This does not invalidate the completed M00 engineering review.
+- `ZII-001 v1.0`;
+- `ZQE-001 v1.0`;
+- `ZQE-PLAN v0.2 — RATIFIED · ACTIVE`;
+- `ZQE QR Engineering Manual v0.4`;
+- `ZQE-M00-SRR v1.0 — CLOSED · PASS`;
+- this ZQE-M00 closure record.
 
-It does mean:
+The CEngS ZII/ZQE context-loading route is live.
 
-> **Ratified ZQE authority must be deliberately published into the canonical repository before an implementation mandate relies upon `CEngS-000` to load it.**
+CR-03 corrective publication was merged to `main` at:
 
-Classification:
+`389ee41fb8115d11b2f89a59cb7019b121ce3541`
+
+Disposition:
 
 ```text
-CLOSURE PUBLICATION ACTION
-not architectural blocker
+PASS — LIVE ON MAIN
 ```
+
+Canonical publication does not authorize ZQE package creation.
+
+RGT or its ratified successor remains the downstream package-admission gate for ZQE-M01.
 
 ---
 
@@ -421,28 +431,18 @@ RATIFIED · ACTIVE
 
 ## CR-03 — Repository Publication
 
-Publish the final M00 authority set into the canonical repository under the appropriate document topology.
-
-At minimum, implementation must be able to resolve:
-
 ```text
-ZII-001
-ZQE-001
-exact AMS mandate
+RESOLVED — PASS
+CANONICAL CORPUS LIVE ON MAIN
 ```
-
-through the canonical corpus.
 
 ## CR-04 — M00 Closure Record
 
-After CR-01 through CR-03 are resolved, issue:
-
 ```text
+RESOLVED — PASS
 ZQE-M00
 CLOSED — PASS
 ```
-
-and record the downstream RGT gate for M01.
 
 ---
 
@@ -469,7 +469,7 @@ and record the downstream RGT gate for M01.
 | RGT package admission             | DOWNSTREAM M01 GATE      |
 | ZQE-001 ratification              | PASS — RATIFIED v1.0     |
 | ZQE-PLAN status normalization     | PASS — RATIFIED · ACTIVE |
-| Canonical corpus publication      | CLOSURE ACTION OPEN      |
+| Canonical corpus publication      | PASS — LIVE ON MAIN      |
 
 ---
 
@@ -486,37 +486,40 @@ No unresolved technical issue requires reopening:
 - verification architecture;
 - standard-readiness evidence.
 
-The remaining work is corpus finalization.
+Corpus finalization is complete.
 
 Therefore:
 
-> **ZQE-M00 CLOSURE READINESS = PASS WITH ONE PUBLICATION ACTION**
+> **ZQE-M00 = CLOSED — PASS**
 
-CR-01 and CR-02 are resolved. The milestone is eligible for final closure immediately after CR-03 canonical corpus publication.
+No further ZQE-M00 architectural, standards-readiness, or publication action remains open.
+
+RGT remains a downstream prerequisite for ZQE-M01 canonical package admission.
 
 ---
 
-# 15. Recommended Final Sequence
+# 15. Post-Closure Sequence
 
 ```text
-1. PUBLISH FINAL M00 CORPUS TO MAIN
+ZQE-M00
+CLOSED — PASS
         ↓
-2. VERIFY CANONICAL RESOLUTION
+ZQE work may pause
         ↓
-3. ISSUE ZQE-M00 CLOSED — PASS
+RGT required before ZQE-M01 package admission
         ↓
-4. CHECK RGT PACKAGE-ADMISSION GATE
-        ↓
-5. START ZQE-M01 WHEN LAWFUL
+ZQE-M01 begins only when that gate is lawful
 ```
+
+M00 closure does not require immediate continuation into M01.
 
 ---
 
-# 16. Current Closure State
+# 16. Final Closure State
 
 ```text
 ZQE-M00 CLOSURE
-STATUS: IN PROGRESS
+STATUS: CLOSED — PASS
 
 TECHNICAL READINESS:
 PASS
@@ -530,5 +533,9 @@ PASS
 FORMAL CORPUS FINALIZATION:
 CR-01 PASS
 CR-02 PASS
-CR-03 OPEN — CANONICAL PUBLICATION
+CR-03 PASS
+CR-04 PASS
+
+DOWNSTREAM:
+RGT REQUIRED BEFORE ZQE-M01 PACKAGE ADMISSION
 ```
