@@ -9,6 +9,7 @@
     { "path": "./apps/api" },
     { "path": "./apps/web" },
     { "path": "./edge/worker" },
-    { "path": "./infra" }
+    { "path": "./infra" },
+    { "path": "./packages/qr-core" }
   ]
 }

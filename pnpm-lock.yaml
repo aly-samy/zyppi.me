@@ -76,6 +76,8 @@ importers:
 
   packages/domain: {}
 
+  packages/qr-core: {}
+
   packages/runtime:
     dependencies:
       "@zyppi/domain":
