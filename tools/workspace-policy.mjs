@@ -35,6 +35,7 @@ export const PLATFORM_INVARIANTS = Object.freeze({
 export const CAW_PROGRAM_POLICY = Object.freeze({
   programId: "CAW",
   description: "Commerce Atlas Wedge",
+  authoritySource: "CAW-004 v2.2",
   nodes: Object.freeze([
     {
       node: "packages/domain",
@@ -339,6 +340,30 @@ export function composeWorkspacePolicy(
 /**
  * Effective active composed workspace policy for the current monorepo.
  */
+/**
+ * ZII (Zyppi Interaction Infrastructure) Program Policy Fragment.
+ * Governs the ZII / ZQE engine-core package in the monorepo.
+ */
+export const ZII_PROGRAM_POLICY = Object.freeze({
+  programId: "ZII",
+  description: "Zyppi Interaction Infrastructure",
+  authoritySource: "ZII-001 v1.0 · ZQE-001 v1.0 · ZQE-PLAN v0.2",
+  nodes: Object.freeze([
+    {
+      node: "packages/qr-core",
+      packageName: "@zyppi/qr-core",
+      owner: "ZII",
+      role: "engine-core",
+      productionDependencies: [],
+      devOnlyDependencies: [],
+    },
+  ]),
+});
+
+/**
+ * Effective active composed workspace policy for the current monorepo.
+ */
 export const ACTIVE_WORKSPACE_POLICY = composeWorkspacePolicy([
   CAW_PROGRAM_POLICY,
+  ZII_PROGRAM_POLICY,
 ]);

@@ -69,7 +69,7 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     // Current live repository MUST validate without graph violations against ACTIVE_WORKSPACE_POLICY
     const { violations } = runValidation(process.cwd());
     expect(violations).toHaveLength(0);
-    expect(ACTIVE_WORKSPACE_POLICY.nodes.size).toBe(9);
+    expect(ACTIVE_WORKSPACE_POLICY.nodes.size).toBe(10);
 
     // Assert exact effective CAW-004 v2.2 dependency ceilings for all nine governed nodes
     const expectedCeilings: Record<
@@ -149,6 +149,15 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
       );
       expect(Array.from(nodeDef.devOnlyDependencies)).toEqual(expected.devOnly);
     }
+
+    // Assert admitted ZII engine-core node properties separately
+    const ziiNode = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-core");
+    expect(ziiNode).toBeDefined();
+    expect(ziiNode.packageName).toBe("@zyppi/qr-core");
+    expect(ziiNode.owner).toBe("ZII");
+    expect(ziiNode.role).toBe("engine-core");
+    expect(Array.from(ziiNode.productionDependencies)).toEqual([]);
+    expect(Array.from(ziiNode.devOnlyDependencies)).toEqual([]);
   });
 
   it("9.2 Fail-closed unknown node", () => {
@@ -348,40 +357,24 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     }
   });
 
-  it("9.10 Hypothetical ZII / qr-core preflight", () => {
-    // Verify physical filesystem DOES NOT contain packages/qr-core or packages/qr-svg
+  it("9.10 ZII / qr-core admission & edge rejection", () => {
+    // Verify physical filesystem DOES contain packages/qr-core and DOES NOT contain packages/qr-svg
     expect(fs.existsSync(path.resolve(process.cwd(), "packages/qr-core"))).toBe(
-      false,
+      true,
     );
     expect(fs.existsSync(path.resolve(process.cwd(), "packages/qr-svg"))).toBe(
       false,
     );
 
-    // In-memory policy fragment composition preflight
-    const ziiFragment = {
-      programId: "ZII",
-      description: "Zyppi Interaction Infrastructure",
-      nodes: [
-        {
-          node: "packages/qr-core",
-          packageName: "@zyppi/qr-core",
-          owner: "ZII",
-          role: "engine-core",
-          productionDependencies: [],
-          devOnlyDependencies: [],
-        },
-      ],
-    };
+    // Assert canonical ACTIVE_WORKSPACE_POLICY includes packages/qr-core
+    expect(ACTIVE_WORKSPACE_POLICY.nodes.has("packages/qr-core")).toBe(true);
+    const nodeDef = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-core");
+    expect(nodeDef.owner).toBe("ZII");
+    expect(nodeDef.role).toBe("engine-core");
+    expect(Array.from(nodeDef.productionDependencies)).toEqual([]);
+    expect(Array.from(nodeDef.devOnlyDependencies)).toEqual([]);
 
-    // 1. Positive preflight: compose CAW + ZII policy fragments successfully
-    const composedPolicy = composeWorkspacePolicy([
-      CAW_PROGRAM_POLICY,
-      ziiFragment,
-    ]);
-    expect(composedPolicy.nodes.has("packages/qr-core")).toBe(true);
-    expect(composedPolicy.nodes.get("packages/qr-core").owner).toBe("ZII");
-
-    // 2. Negative preflight: test unauthorized edge packages/qr-core -> packages/domain
+    // Negative edge proof: test unauthorized edge packages/qr-core -> packages/domain is rejected
     const tempDir = fs.realpathSync(
       fs.mkdtempSync(path.join(os.tmpdir(), "zyppi-rgt-zii-preflight-")),
     );
@@ -404,7 +397,7 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
         "import { domainStuff } from '@zyppi/domain';\n",
       );
 
-      const { violations } = runValidation(tempDir, composedPolicy);
+      const { violations } = runValidation(tempDir, ACTIVE_WORKSPACE_POLICY);
       expect(violations.length).toBeGreaterThan(0);
       const v = violations.find(
         (x) => x.rule === "unauthorized-production-dependency",
