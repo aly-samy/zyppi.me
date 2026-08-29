@@ -2,13 +2,7 @@ export type ZqeStage =
   | "input_validation"
   | "data_encoding"
   | "ecc_generation"
-  | "block_interleaving"
-  | "matrix_construction"
-  | "data_placement"
-  | "mask_evaluation"
-  | "format_generation"
-  | "symbol_finalization"
-  | "rendering";
+  | "block_interleaving";
 
 export interface ZqeErrorShape {
   readonly code: string;
