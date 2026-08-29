@@ -25,7 +25,10 @@
     "testing:boundary": "node tools/verify-package-boundary.mjs --package=packages/testing",
     "boundary:all": "pnpm --recursive --if-present run boundary",
     "graph:validate": "node tools/verify-dependency-graph.mjs",
-    "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm runtime:purity && pnpm boundary:all && pnpm graph:validate && pnpm test",
+    "domain:isolation": "node tools/verify-domain-isolation.mjs",
+    "governance:test": "vitest run tools/rgt-governance.test.ts",
+    "governance:validate": "pnpm runtime:purity && pnpm boundary:all && pnpm graph:validate && pnpm domain:isolation && pnpm governance:test",
+    "ci": "pnpm format:check && pnpm lint && pnpm exec tsc -b && pnpm governance:validate && pnpm test",
     "coverage": "vitest run --coverage"
   },
   "engines": {

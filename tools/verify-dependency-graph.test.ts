@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { runValidation } from "./verify-dependency-graph.mjs";
+import { runDomainIsolationValidation } from "./verify-domain-isolation.mjs";
 
 function setupBaseWorkspace(tempDir: string) {
   const NODES = [
@@ -14,6 +15,7 @@ function setupBaseWorkspace(tempDir: string) {
     "apps/api",
     "apps/web",
     "edge/worker",
+    "infra",
   ];
 
   for (const node of NODES) {
@@ -331,7 +333,7 @@ describe("Zyppi Constitutional Dependency Graph Validator - Automated Negative &
         "import { anchor } from '../gs1/gs1AnchorBridge.js';\n",
       );
 
-      const { violations } = runValidation(tempDir);
+      const { violations } = runDomainIsolationValidation(tempDir);
       expect(violations.length).toBeGreaterThan(0);
       const v = violations.find(
         (x) => x.rule === "gs1-domain-edge-contamination",
@@ -386,7 +388,7 @@ describe("Zyppi Constitutional Dependency Graph Validator - Automated Negative &
         "import { anchor } from '@api/gs1/gs1AnchorBridge.js';\n",
       );
 
-      const { violations } = runValidation(tempDir);
+      const { violations } = runDomainIsolationValidation(tempDir);
       expect(violations.length).toBeGreaterThan(0);
       const v = violations.find(
         (x) => x.rule === "gs1-domain-edge-contamination",

@@ -10,9 +10,6 @@
   "dependencies": {
     "postgres": "^3.4.9"
   },
-  "devDependencies": {
-    "@zyppi/domain": "workspace:*",
-    "@zyppi/contracts": "workspace:*"
-  },
+  "devDependencies": {},
   "peerDependencies": {}
 }
