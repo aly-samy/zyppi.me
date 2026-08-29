@@ -3,7 +3,7 @@
 | Field                        | Value                                                         |
 | :--------------------------- | :------------------------------------------------------------ |
 | **Version**                  | `0.2`                                                         |
-| **Status**                   | APPROVED                                                      |
+| **Status**                   | RATIFIED                                                      |
 | **Lifecycle**                | ACTIVE                                                        |
 | **Program**                  | `ZII — Zyppi Interaction Infrastructure`                      |
 | **Engine**                   | `ZQE — Zyppi QR Engine`                                       |
