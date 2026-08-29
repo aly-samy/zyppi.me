@@ -52,17 +52,5 @@ jobs:
       - name: Install dependencies (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
-      - name: Check formatting
-        run: pnpm format:check
-
-      - name: Run ESLint
-        run: pnpm lint
-
-      - name: TypeScript project build
-        run: pnpm exec tsc -b
-
-      - name: Run Runtime purity validation
-        run: pnpm runtime:purity
-
-      - name: Run tests
-        run: pnpm test
+      - name: Run CI
+        run: pnpm ci

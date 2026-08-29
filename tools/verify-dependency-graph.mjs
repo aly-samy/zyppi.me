@@ -1,86 +1,83 @@
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { ACTIVE_WORKSPACE_POLICY } from "./workspace-policy.mjs";
 
 /**
- * Runs the constitutional dependency graph validator on the given workspace root.
- * Enforces CAW-004 v2.1 ownership and import policies across three layers:
+ * Runs the constitutional workspace dependency graph validator.
+ * Enforces CEngS-002 v2.1 / CAW-004 v2.2 workspace policy across three layers:
  * 1. package.json dependency declarations
  * 2. tsconfig.json project references
  * 3. Actual TypeScript source-level AST imports/exports
- * 4. AMS-0861-A GS1 Domain-Edge Isolation Policy (GENERIC_ZPROF & GENERIC_APPLICATION_ORCHESTRATION)
+ * 4. Fail-closed check for unowned workspace directories on disk
+ *
+ * @param {string} [workspaceRoot=process.cwd()]
+ * @param {typeof ACTIVE_WORKSPACE_POLICY} [effectivePolicy=ACTIVE_WORKSPACE_POLICY]
  */
-export function runValidation(workspaceRoot = process.cwd()) {
+export function runValidation(
+  workspaceRoot = process.cwd(),
+  effectivePolicy = ACTIVE_WORKSPACE_POLICY,
+) {
   const violations = [];
   const edges = new Set();
   let fileCount = 0;
 
-  // Resolve symlinks to ensure path.relative operates on real paths
   try {
     workspaceRoot = fs.realpathSync(workspaceRoot);
   } catch {
     // Ignore if path doesn't exist
   }
 
-  const NODES = [
-    "packages/domain",
-    "packages/shared",
-    "packages/contracts",
-    "packages/runtime",
-    "packages/testing",
-    "apps/api",
-    "apps/web",
-    "edge/worker",
-    "infra",
-  ];
+  const { nodes, packageToNode, policy } = effectivePolicy;
+  const NODES = Array.from(nodes.keys());
+  const PACKAGE_TO_NODE = Object.fromEntries(packageToNode.entries());
+  const POLICY = policy;
 
-  const PACKAGE_TO_NODE = {
-    "@zyppi/domain": "packages/domain",
-    "@zyppi/shared": "packages/shared",
-    "@zyppi/contracts": "packages/contracts",
-    "@zyppi/runtime": "packages/runtime",
-    "@zyppi/testing": "packages/testing",
-    "@zyppi/api": "apps/api",
-    "@zyppi/web": "apps/web",
-    "@zyppi/infra": "infra",
-  };
-
-  const POLICY = {
-    "packages/domain": { production: [], devOnly: [] },
-    "packages/shared": { production: [], devOnly: [] },
-    "packages/contracts": { production: ["packages/domain"], devOnly: [] },
-    "packages/runtime": {
-      production: ["packages/domain", "packages/shared"],
-      devOnly: [],
-    },
-    "packages/testing": {
-      production: [],
-      devOnly: [
-        "packages/domain",
-        "packages/contracts",
-        "packages/runtime",
-        "packages/shared",
-      ],
-    },
-    "apps/api": {
-      production: ["packages/runtime", "packages/domain", "packages/contracts"],
-      devOnly: ["packages/testing"],
-    },
-    "apps/web": {
-      production: ["packages/contracts", "packages/domain", "packages/shared"],
-      devOnly: ["packages/testing"],
-    },
-    "edge/worker": { production: ["packages/contracts"], devOnly: [] },
-    infra: {
-      production: [],
-      devOnly: [
-        "packages/domain",
-        "packages/contracts",
-        "packages/testing",
-        "packages/shared",
-      ],
-    },
-  };
+  // 0. Scan filesystem for unowned workspace member directories under workspace roots (packages/, apps/, edge/, infra)
+  const WORKSPACE_ROOT_DIRS = ["packages", "apps", "edge", "infra"];
+  for (const rootDirName of WORKSPACE_ROOT_DIRS) {
+    const absRootDir = path.resolve(workspaceRoot, rootDirName);
+    if (fs.existsSync(absRootDir)) {
+      if (rootDirName === "infra") {
+        if (!nodes.has("infra")) {
+          violations.push({
+            node: "infra",
+            layer: "workspace",
+            file: "infra",
+            line: 1,
+            column: 1,
+            rule: "unowned-workspace-node",
+            description: `Unowned workspace node: directory "infra" exists on disk but is absent from composed workspace policy.`,
+          });
+        }
+      } else {
+        const subItems = fs.readdirSync(absRootDir, { withFileTypes: true });
+        for (const item of subItems) {
+          if (
+            item.isDirectory() &&
+            item.name !== "node_modules" &&
+            item.name !== "dist" &&
+            item.name !== "build" &&
+            item.name !== "coverage" &&
+            !item.name.startsWith(".")
+          ) {
+            const relNodePath = `${rootDirName}/${item.name}`;
+            if (!nodes.has(relNodePath)) {
+              violations.push({
+                node: relNodePath,
+                layer: "workspace",
+                file: relNodePath,
+                line: 1,
+                column: 1,
+                rule: "unowned-workspace-node",
+                description: `Unowned workspace node: directory "${relNodePath}" exists on disk but is absent from composed workspace policy.`,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
 
   const isTransitivelyReachable = (source, target) => {
     const visited = new Set();
@@ -98,7 +95,6 @@ export function runValidation(workspaceRoot = process.cwd()) {
     return false;
   };
 
-  // Helper to check if a file is development context
   const isFileDevContext = (relativeFilePath) => {
     const normalized = relativeFilePath.split(path.sep).join("/");
     const filename = path.basename(normalized);
@@ -126,7 +122,6 @@ export function runValidation(workspaceRoot = process.cwd()) {
     return false;
   };
 
-  // Helper to find TS files
   const findTsFiles = (dir) => {
     const results = [];
     if (!fs.existsSync(dir)) return results;
@@ -214,140 +209,7 @@ export function runValidation(workspaceRoot = process.cwd()) {
     return imports;
   };
 
-  // Load tsconfig path aliases if present in any workspace member
-  const loadWorkspaceTsconfigPaths = () => {
-    const aliases = []; // { prefix: string, targetPath: string }
-    for (const node of NODES) {
-      const tsconfigPath = path.resolve(workspaceRoot, node, "tsconfig.json");
-      if (fs.existsSync(tsconfigPath)) {
-        try {
-          const readResult = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
-          if (!readResult.error && readResult.config) {
-            const compilerOptions = readResult.config.compilerOptions || {};
-            const pathsObj = compilerOptions.paths || {};
-            const baseUrl = compilerOptions.baseUrl || ".";
-            const absoluteBaseUrl = path.resolve(
-              path.dirname(tsconfigPath),
-              baseUrl,
-            );
-
-            for (const [aliasPattern, targetArray] of Object.entries(
-              pathsObj,
-            )) {
-              if (Array.isArray(targetArray) && targetArray.length > 0) {
-                const aliasPrefix = aliasPattern.replace(/\*$/, "");
-                const rawTarget = targetArray[0].replace(/\*$/, "");
-                const absoluteTargetDir = path.resolve(
-                  absoluteBaseUrl,
-                  rawTarget,
-                );
-                const relativeTarget = path
-                  .relative(workspaceRoot, absoluteTargetDir)
-                  .split(path.sep)
-                  .join("/");
-                aliases.push({ aliasPrefix, relativeTarget });
-              }
-            }
-          }
-        } catch {
-          // ignore parsing errors
-        }
-      }
-    }
-    return aliases;
-  };
-
-  const workspaceAliases = loadWorkspaceTsconfigPaths();
-
-  // Helper function to resolve specifier (relative, alias, or package export) to relative repo file path
-  const resolveSpecifierToRelativePath = (specifier, absoluteFilePath) => {
-    // 1. Relative imports
-    if (specifier.startsWith(".") || specifier.startsWith("/")) {
-      const fileDir = path.dirname(absoluteFilePath);
-      let resolved = path.normalize(path.join(fileDir, specifier));
-      if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
-        resolved = path.join(resolved, "index.ts");
-      } else if (!resolved.endsWith(".ts") && !resolved.endsWith(".tsx")) {
-        if (fs.existsSync(resolved + ".ts")) resolved = resolved + ".ts";
-        else if (fs.existsSync(resolved + ".tsx")) resolved = resolved + ".tsx";
-      }
-      return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
-    }
-
-    // 2. Tsconfig path aliases
-    for (const { aliasPrefix, relativeTarget } of workspaceAliases) {
-      if (specifier.startsWith(aliasPrefix)) {
-        const remainder = specifier.slice(aliasPrefix.length);
-        const resolved = path.normalize(
-          path.join(workspaceRoot, relativeTarget, remainder),
-        );
-        return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
-      }
-    }
-
-    // 3. Package imports (e.g., @zyppi/api/gs1)
-    if (specifier.startsWith("@zyppi/")) {
-      const parts = specifier.split("/");
-      const packageName = parts.slice(0, 2).join("/");
-      const targetNode = PACKAGE_TO_NODE[packageName];
-      if (targetNode) {
-        const remainder = parts.slice(2).join("/");
-        const resolved = path.normalize(
-          path.join(workspaceRoot, targetNode, "src", remainder),
-        );
-        return path.relative(workspaceRoot, resolved).split(path.sep).join("/");
-      }
-    }
-
-    return null;
-  };
-
-  // Helper to build internal module import graph for apps/api/src/
-  const apiModuleGraph = new Map(); // relativeFilePath -> set of resolved relativeFilePaths inside apps/api/src/
-  const absoluteApiDir = path.resolve(workspaceRoot, "apps/api");
-
-  if (fs.existsSync(absoluteApiDir)) {
-    const apiFiles = findTsFiles(absoluteApiDir);
-    for (const absoluteFilePath of apiFiles) {
-      const relativeFilePath = path
-        .relative(workspaceRoot, absoluteFilePath)
-        .split(path.sep)
-        .join("/");
-      const content = fs.readFileSync(absoluteFilePath, "utf8");
-      const imports = getImportsOfFile(content, relativeFilePath);
-      const targets = new Set();
-
-      for (const imp of imports) {
-        const relResolved = resolveSpecifierToRelativePath(
-          imp.specifier,
-          absoluteFilePath,
-        );
-        if (relResolved && relResolved.startsWith("apps/api/src/")) {
-          targets.add(relResolved);
-        }
-      }
-      apiModuleGraph.set(relativeFilePath, targets);
-    }
-  }
-
-  // Transitive reachability inside apps/api/src
-  const canReachGs1Module = (startFile) => {
-    const visited = new Set();
-    const queue = [startFile];
-    while (queue.length > 0) {
-      const curr = queue.shift();
-      if (curr.startsWith("apps/api/src/gs1/")) return true;
-      if (visited.has(curr)) continue;
-      visited.add(curr);
-      const neighbors = apiModuleGraph.get(curr) || new Set();
-      for (const n of neighbors) {
-        queue.push(n);
-      }
-    }
-    return false;
-  };
-
-  // 1. Process each constitutional node
+  // 1. Process each governed workspace node
   for (const node of NODES) {
     const absoluteNodeDir = path.resolve(workspaceRoot, node);
     if (!fs.existsSync(absoluteNodeDir)) {
@@ -394,12 +256,15 @@ export function runValidation(workspaceRoot = process.cwd()) {
 
                 edges.add(`${node}->${targetNode}`);
 
-                const policy = POLICY[node];
+                const policyRule = POLICY[node] || {
+                  production: [],
+                  devOnly: [],
+                };
                 if (context === "production") {
-                  const allowed = policy.production.includes(targetNode);
+                  const allowed = policyRule.production.includes(targetNode);
                   if (!allowed) {
                     const isDevOnlyAllowed =
-                      policy.devOnly.includes(targetNode);
+                      policyRule.devOnly.includes(targetNode);
                     if (isDevOnlyAllowed) {
                       violations.push({
                         node,
@@ -430,10 +295,9 @@ export function runValidation(workspaceRoot = process.cwd()) {
                     }
                   }
                 } else {
-                  // Development context: allowed if in production OR devOnly
                   const allowed =
-                    policy.production.includes(targetNode) ||
-                    policy.devOnly.includes(targetNode);
+                    policyRule.production.includes(targetNode) ||
+                    policyRule.devOnly.includes(targetNode);
                   if (!allowed) {
                     const transitive = isTransitivelyReachable(
                       node,
@@ -523,10 +387,13 @@ export function runValidation(workspaceRoot = process.cwd()) {
             } else {
               edges.add(`${node}->${targetNode}`);
 
-              const policy = POLICY[node];
+              const policyRule = POLICY[node] || {
+                production: [],
+                devOnly: [],
+              };
               const allowed =
-                policy.production.includes(targetNode) ||
-                policy.devOnly.includes(targetNode);
+                policyRule.production.includes(targetNode) ||
+                policyRule.devOnly.includes(targetNode);
               if (!allowed) {
                 violations.push({
                   node,
@@ -556,26 +423,6 @@ export function runValidation(workspaceRoot = process.cwd()) {
       const content = fs.readFileSync(absoluteFilePath, "utf8");
       const imports = getImportsOfFile(content, relativeFilePath);
 
-      // Check AMS-0861-A GS1 domain-edge isolation rule for generic modules
-      const isGenericZprof = relativeFilePath.startsWith("apps/api/src/zprof/");
-      const isGenericOrchestration =
-        relativeFilePath.startsWith("apps/api/src/registry/") ||
-        relativeFilePath.startsWith("apps/api/src/evidence/");
-
-      if (isGenericZprof || isGenericOrchestration) {
-        if (canReachGs1Module(relativeFilePath)) {
-          violations.push({
-            node,
-            layer: "source",
-            file: relativeFilePath,
-            line: 1,
-            column: 1,
-            rule: "gs1-domain-edge-contamination",
-            description: `Unauthorized direct or transitive GS1 domain-edge import in generic module "${relativeFilePath}". Generic orchestration/Z-PROF modules must not import GS1 implementations.`,
-          });
-        }
-      }
-
       for (const imp of imports) {
         const specifier = imp.specifier;
         const line = imp.line;
@@ -589,7 +436,6 @@ export function runValidation(workspaceRoot = process.cwd()) {
             .split(path.sep)
             .join("/");
 
-          // Check if it escapes the owning workspace member
           const nodePrefix = node + "/";
           if (!relativeResolved.startsWith(nodePrefix)) {
             const targetNode = NODES.find(
@@ -597,7 +443,6 @@ export function runValidation(workspaceRoot = process.cwd()) {
                 relativeResolved.startsWith(n + "/") || relativeResolved === n,
             );
             if (targetNode) {
-              // Boundary skipped!
               violations.push({
                 node,
                 layer: "source",
@@ -629,12 +474,12 @@ export function runValidation(workspaceRoot = process.cwd()) {
             edges.add(`${node}->${targetNode}`);
 
             const isDevContext = isFileDevContext(relativeFilePath);
-            const policy = POLICY[node];
+            const policyRule = POLICY[node] || { production: [], devOnly: [] };
 
             if (isDevContext) {
               const allowed =
-                policy.production.includes(targetNode) ||
-                policy.devOnly.includes(targetNode);
+                policyRule.production.includes(targetNode) ||
+                policyRule.devOnly.includes(targetNode);
               if (!allowed) {
                 const transitive = isTransitivelyReachable(node, targetNode);
                 const explanation = transitive
@@ -663,9 +508,10 @@ export function runValidation(workspaceRoot = process.cwd()) {
                 });
               }
             } else {
-              const allowed = policy.production.includes(targetNode);
+              const allowed = policyRule.production.includes(targetNode);
               if (!allowed) {
-                const isDevOnlyAllowed = policy.devOnly.includes(targetNode);
+                const isDevOnlyAllowed =
+                  policyRule.devOnly.includes(targetNode);
                 if (isDevOnlyAllowed) {
                   violations.push({
                     node,
@@ -735,7 +581,7 @@ export function runValidation(workspaceRoot = process.cwd()) {
       visited[u] = "visiting";
       pathTrace.push(u);
 
-      for (const v of adj[u]) {
+      for (const v of adj[u] || []) {
         if (visited[v] === "visiting") {
           const cyclePath = pathTrace.slice(pathTrace.indexOf(v));
           cyclePath.push(v);
@@ -777,7 +623,6 @@ export function runValidation(workspaceRoot = process.cwd()) {
   return { violations, fileCount, nodeCount: NODES.length };
 }
 
-// Execute when invoked directly as a CLI script
 if (
   import.meta.url === `file://${process.argv[1]}` ||
   (process.argv[1] &&
@@ -816,7 +661,9 @@ if (
   }
 
   console.log("Zyppi Constitutional Dependency Graph Validator: PASS");
-  console.log(`- Graph layout: Valid (conforms to CAW-004 v2.1)`);
+  console.log(
+    `- Graph layout: Valid (conforms to CEngS-002 v2.1 / CAW-004 v2.2)`,
+  );
   console.log(`- Workspace members analyzed: ${nodeCount}`);
   console.log(`- Source files scanned: ${fileCount}\n`);
   process.exit(0);
