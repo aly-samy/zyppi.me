@@ -1,8 +1,8 @@
-# ZQE QR Engineering Manual v0.3
+# ZQE QR Engineering Manual v0.4
 
 ## Clean-Room Implementation Edition — QR Code Model 2 / TypeScript
 
-**Status:** Engineering Companion
+**Status:** Engineering Companion — Standard-Readiness Corrective
 **Purpose:** Implementation guidance for `@zyppi/qr-core` and `@zyppi/qr-svg`
 **Primary Target:** FQR-1 — QR Code Model 2, Version 3, ECC M, Byte mode
 **Extended Target:** QR Code Model 2, Versions 1–40, ECC L/M/Q/H
@@ -1418,35 +1418,36 @@ Lower is better.
 
 ---
 
-# 21. Candidate Format Bits During Scoring
+# 21. Candidate Scoring Order
 
-[ZQE DECISION]
+[FQR-1 REQUIRED]
 
-The chosen ZQE reference strategy scores each candidate after writing that candidate's format bits.
+For `zqe/fqr1`, candidate scoring follows the conservative standard-ready sequence.
 
-Procedure for mask `m`:
+For each mask ID:
 
 ```text
-1. Apply mask m.
-2. Write format bits that identify ECC + m.
-3. Score the full candidate.
-4. Undo the mask.
-5. Continue.
+apply candidate data mask
+        ↓
+leave Format Information cells reserved/unwritten
+        ↓
+score the candidate
+        ↓
+undo candidate data mask
 ```
+After all eight candidates have been evaluated:
+```
+select minimum-score mask
+        ↓
+apply selected data mask
+        ↓
+write final Format Information
+```
+The candidate-scoring stage SHALL NOT write per-candidate Format Information before penalty evaluation.
 
-This behavior matches Project Nayuki's mature reference encoder.
+**Tie-break remains:**
 
-This manual does **not** claim that the 2024 standard uniquely requires this exact internal ordering.
-
-The ZQE determinism rule is:
-
-> `zqe/fqr1` uses candidate format bits during penalty evaluation.
-
-Tie-break:
-
-> If two masks have exactly the same minimum score, select the numerically lowest mask ID.
-
-Because candidates are visited 0→7 and replacement occurs only when `score < bestScore`, the lowest tied mask naturally wins.
+> If multiple masks have the same minimum score, choose the numerically lowest mask ID.
 
 ---
 
@@ -1459,8 +1460,8 @@ function chooseMask(m: WorkingMatrix, ecc: QrEcc): number {
 
   for (let mask = 0; mask < 8; mask++) {
     applyMask(m, mask);
-    drawFormatBits(m, ecc, mask);
 
+    // Format Information remains reserved/unwritten while scoring.
     const score = penaltyScore(m.modules);
 
     if (score < bestScore) {
@@ -1469,20 +1470,18 @@ function chooseMask(m: WorkingMatrix, ecc: QrEcc): number {
     }
 
     applyMask(m, mask); // undo DATA mask
-    // format cells will be overwritten on next candidate
   }
 
   return bestMask;
 }
 ```
-
 Finalization:
-
 ```ts
 const mask = chooseMask(m, ecc);
 applyMask(m, mask);
 drawFormatBits(m, ecc, mask);
 ```
+The format bits are written only after the winning mask has been selected.
 
 ---
 
@@ -2010,7 +2009,7 @@ Before implementing Structured Append or either FNC1 mode, create a dedicated re
 | ZQE-DEC-004 | FQR fixed to V3-M Byte                            | scope discipline                    |
 | ZQE-DEC-005 | FQR overflow fails instead of promoting version   | deterministic profile               |
 | ZQE-DEC-006 | Two-grid working matrix: color + function-role    | no ambiguous module state           |
-| ZQE-DEC-007 | Candidate format bits participate in mask scoring | chosen reference behavior           |
+| ZQE-DEC-007 | Candidate format bits do not participate in FQR mask scoring | conservative standard-ready ordering |
 | ZQE-DEC-008 | Equal mask scores choose lowest mask ID           | deterministic tie                   |
 | ZQE-DEC-009 | Quiet zone belongs to renderer                    | QrSymbol stays native matrix        |
 | ZQE-DEC-010 | Canonical SVG uses integer geometry               | byte reproducibility                |
@@ -2142,7 +2141,9 @@ function modules
   ↓
 codeword placement + 7 remainder bits
   ↓
-evaluate 8 masks
+evaluate 8 masks with format cells reserved
+  ↓
+select mask
   ↓
 format BCH
   ↓
