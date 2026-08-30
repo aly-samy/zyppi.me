@@ -69,7 +69,7 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     // Current live repository MUST validate without graph violations against ACTIVE_WORKSPACE_POLICY
     const { violations } = runValidation(process.cwd());
     expect(violations).toHaveLength(0);
-    expect(ACTIVE_WORKSPACE_POLICY.nodes.size).toBe(10);
+    expect(ACTIVE_WORKSPACE_POLICY.nodes.size).toBe(11);
 
     // Assert exact effective CAW-004 v2.2 dependency ceilings for all nine governed nodes
     const expectedCeilings: Record<
@@ -151,13 +151,23 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     }
 
     // Assert admitted ZII engine-core node properties separately
-    const ziiNode = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-core");
-    expect(ziiNode).toBeDefined();
-    expect(ziiNode.packageName).toBe("@zyppi/qr-core");
-    expect(ziiNode.owner).toBe("ZII");
-    expect(ziiNode.role).toBe("engine-core");
-    expect(Array.from(ziiNode.productionDependencies)).toEqual([]);
-    expect(Array.from(ziiNode.devOnlyDependencies)).toEqual([]);
+    const ziiCoreNode = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-core");
+    expect(ziiCoreNode).toBeDefined();
+    expect(ziiCoreNode.packageName).toBe("@zyppi/qr-core");
+    expect(ziiCoreNode.owner).toBe("ZII");
+    expect(ziiCoreNode.role).toBe("engine-core");
+    expect(Array.from(ziiCoreNode.productionDependencies)).toEqual([]);
+    expect(Array.from(ziiCoreNode.devOnlyDependencies)).toEqual([]);
+
+    const ziiSvgNode = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-svg");
+    expect(ziiSvgNode).toBeDefined();
+    expect(ziiSvgNode.packageName).toBe("@zyppi/qr-svg");
+    expect(ziiSvgNode.owner).toBe("ZII");
+    expect(ziiSvgNode.role).toBe("engine-renderer");
+    expect(Array.from(ziiSvgNode.productionDependencies)).toEqual([
+      "packages/qr-core",
+    ]);
+    expect(Array.from(ziiSvgNode.devOnlyDependencies)).toEqual([]);
   });
 
   it("9.2 Fail-closed unknown node", () => {
@@ -357,22 +367,31 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
     }
   });
 
-  it("9.10 ZII / qr-core admission & edge rejection", () => {
-    // Verify physical filesystem DOES contain packages/qr-core and DOES NOT contain packages/qr-svg
+  it("9.10 ZII / qr-core & qr-svg admission & edge governance", () => {
+    // Verify physical filesystem DOES contain packages/qr-core and packages/qr-svg
     expect(fs.existsSync(path.resolve(process.cwd(), "packages/qr-core"))).toBe(
       true,
     );
     expect(fs.existsSync(path.resolve(process.cwd(), "packages/qr-svg"))).toBe(
-      false,
+      true,
     );
 
-    // Assert canonical ACTIVE_WORKSPACE_POLICY includes packages/qr-core
+    // Assert canonical ACTIVE_WORKSPACE_POLICY includes packages/qr-core and packages/qr-svg
     expect(ACTIVE_WORKSPACE_POLICY.nodes.has("packages/qr-core")).toBe(true);
-    const nodeDef = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-core");
-    expect(nodeDef.owner).toBe("ZII");
-    expect(nodeDef.role).toBe("engine-core");
-    expect(Array.from(nodeDef.productionDependencies)).toEqual([]);
-    expect(Array.from(nodeDef.devOnlyDependencies)).toEqual([]);
+    const coreDef = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-core");
+    expect(coreDef.owner).toBe("ZII");
+    expect(coreDef.role).toBe("engine-core");
+    expect(Array.from(coreDef.productionDependencies)).toEqual([]);
+    expect(Array.from(coreDef.devOnlyDependencies)).toEqual([]);
+
+    expect(ACTIVE_WORKSPACE_POLICY.nodes.has("packages/qr-svg")).toBe(true);
+    const svgDef = ACTIVE_WORKSPACE_POLICY.nodes.get("packages/qr-svg");
+    expect(svgDef.owner).toBe("ZII");
+    expect(svgDef.role).toBe("engine-renderer");
+    expect(Array.from(svgDef.productionDependencies)).toEqual([
+      "packages/qr-core",
+    ]);
+    expect(Array.from(svgDef.devOnlyDependencies)).toEqual([]);
 
     // Negative edge proof: test unauthorized edge packages/qr-core -> packages/domain is rejected
     const tempDir = fs.realpathSync(
@@ -407,6 +426,111 @@ describe("RGT Governance & Preflight Test Suite (RGT-07)", () => {
       expect(v.description).toContain("@zyppi/domain");
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+
+    // Negative edge proof: test unauthorized edge packages/qr-svg -> packages/domain is rejected
+    const tempDirSvg = fs.realpathSync(
+      fs.mkdtempSync(path.join(os.tmpdir(), "zyppi-rgt-zii-svg-preflight-")),
+    );
+    try {
+      setupBaseWorkspace(tempDirSvg);
+      const qrCoreDir = path.join(tempDirSvg, "packages/qr-core");
+      fs.mkdirSync(path.join(qrCoreDir, "src"), { recursive: true });
+      fs.writeFileSync(
+        path.join(qrCoreDir, "package.json"),
+        JSON.stringify({
+          name: "@zyppi/qr-core",
+          version: "0.1.0",
+          private: true,
+          dependencies: {},
+        }),
+      );
+      fs.writeFileSync(path.join(qrCoreDir, "src/index.ts"), "export {};\n");
+
+      const qrSvgDir = path.join(tempDirSvg, "packages/qr-svg");
+      fs.mkdirSync(path.join(qrSvgDir, "src"), { recursive: true });
+      fs.writeFileSync(
+        path.join(qrSvgDir, "package.json"),
+        JSON.stringify({
+          name: "@zyppi/qr-svg",
+          version: "0.1.0",
+          private: true,
+          dependencies: {
+            "@zyppi/qr-core": "workspace:*",
+          },
+        }),
+      );
+      // Unauthorized edge from qr-svg to @zyppi/domain
+      fs.writeFileSync(
+        path.join(qrSvgDir, "src/index.ts"),
+        "import { domainStuff } from '@zyppi/domain';\n",
+      );
+
+      const { violations } = runValidation(tempDirSvg, ACTIVE_WORKSPACE_POLICY);
+      expect(violations.length).toBeGreaterThan(0);
+      const v = violations.find(
+        (x) => x.rule === "unauthorized-production-dependency",
+      );
+      expect(v).toBeDefined();
+      expect(v.node).toBe("packages/qr-svg");
+      expect(v.description).toContain("@zyppi/domain");
+    } finally {
+      fs.rmSync(tempDirSvg, { recursive: true, force: true });
+    }
+
+    // Negative edge proof: test unauthorized edge packages/qr-core -> packages/qr-svg is rejected
+    const tempDirReverse = fs.realpathSync(
+      fs.mkdtempSync(
+        path.join(os.tmpdir(), "zyppi-rgt-zii-reverse-preflight-"),
+      ),
+    );
+    try {
+      setupBaseWorkspace(tempDirReverse);
+      const qrCoreDir = path.join(tempDirReverse, "packages/qr-core");
+      fs.mkdirSync(path.join(qrCoreDir, "src"), { recursive: true });
+      fs.writeFileSync(
+        path.join(qrCoreDir, "package.json"),
+        JSON.stringify({
+          name: "@zyppi/qr-core",
+          version: "0.1.0",
+          private: true,
+          dependencies: {},
+        }),
+      );
+      // Unauthorized edge from qr-core to qr-svg
+      fs.writeFileSync(
+        path.join(qrCoreDir, "src/index.ts"),
+        "import { renderQrSvg } from '@zyppi/qr-svg';\n",
+      );
+
+      const qrSvgDir = path.join(tempDirReverse, "packages/qr-svg");
+      fs.mkdirSync(path.join(qrSvgDir, "src"), { recursive: true });
+      fs.writeFileSync(
+        path.join(qrSvgDir, "package.json"),
+        JSON.stringify({
+          name: "@zyppi/qr-svg",
+          version: "0.1.0",
+          private: true,
+          dependencies: {
+            "@zyppi/qr-core": "workspace:*",
+          },
+        }),
+      );
+      fs.writeFileSync(path.join(qrSvgDir, "src/index.ts"), "export {};\n");
+
+      const { violations } = runValidation(
+        tempDirReverse,
+        ACTIVE_WORKSPACE_POLICY,
+      );
+      expect(violations.length).toBeGreaterThan(0);
+      const v = violations.find(
+        (x) => x.rule === "unauthorized-production-dependency",
+      );
+      expect(v).toBeDefined();
+      expect(v.node).toBe("packages/qr-core");
+      expect(v.description).toContain("@zyppi/qr-svg");
+    } finally {
+      fs.rmSync(tempDirReverse, { recursive: true, force: true });
     }
   });
 });

@@ -10,6 +10,7 @@
     { "path": "./apps/web" },
     { "path": "./edge/worker" },
     { "path": "./infra" },
-    { "path": "./packages/qr-core" }
+    { "path": "./packages/qr-core" },
+    { "path": "./packages/qr-svg" }
   ]
 }
