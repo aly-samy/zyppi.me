@@ -171,15 +171,23 @@ describe("ZQE-M03 QrSymbol Compiler & Verification Suite", () => {
   });
 
   describe("23.2 Structural Geometry & Bounds", () => {
-    it("returns size 29 and false for out-of-bounds coordinates", () => {
+    it("returns size 29 and false for out-of-bounds, NaN, or fractional coordinates", () => {
       const sym = compileQr(FIXTURES.A.payload, "zqe/fqr1");
       expect(sym.size).toBe(29);
 
+      // Out-of-bounds
       expect(sym.getModule(-1, 0)).toBe(false);
       expect(sym.getModule(0, -1)).toBe(false);
       expect(sym.getModule(29, 0)).toBe(false);
       expect(sym.getModule(0, 29)).toBe(false);
       expect(sym.getModule(100, 100)).toBe(false);
+
+      // Non-integral or NaN coordinates
+      expect(sym.getModule(Number.NaN, 0)).toBe(false);
+      expect(sym.getModule(0, Number.NaN)).toBe(false);
+      expect(sym.getModule(1.5, 0)).toBe(false);
+      expect(sym.getModule(0, 2.7)).toBe(false);
+      expect(sym.getModule(Number.POSITIVE_INFINITY, 0)).toBe(false);
     });
 
     it("verifies permanent dark module at (8, 21) is dark", () => {
@@ -251,13 +259,30 @@ describe("ZQE-M03 QrSymbol Compiler & Verification Suite", () => {
     });
 
     it("verifies strict verification passes for full byte range 0x00..0xFF across payloads", () => {
-      const payload = new Uint8Array(42);
-      for (let i = 0; i < 42; i++) {
-        payload[i] = (i * 37 + 13) % 256;
+      const seen = new Set<number>();
+
+      // Generate 7 deterministic payloads of 37 or 42 bytes covering all 256 byte values 0x00..0xFF
+      for (let block = 0; block < 7; block++) {
+        const startVal = block * 37;
+        const len = Math.min(37, 256 - startVal);
+        const payload = new Uint8Array(len);
+
+        for (let i = 0; i < len; i++) {
+          const byteVal = startVal + i;
+          payload[i] = byteVal;
+          seen.add(byteVal);
+        }
+
+        const sym = compileQr(payload, "zqe/fqr1");
+        const verification = strictVerifyQrSymbol(sym);
+        expect(verification.pass).toBe(true);
       }
-      const sym = compileQr(payload, "zqe/fqr1");
-      const verification = strictVerifyQrSymbol(sym);
-      expect(verification.pass).toBe(true);
+
+      // Assert that every byte value 0x00..0xFF (all 256 values) was seen and tested
+      expect(seen.size).toBe(256);
+      for (let v = 0; v <= 255; v++) {
+        expect(seen.has(v)).toBe(true);
+      }
     });
 
     it("proves deterministic repetition: same payload produces byte-identical matrix", () => {

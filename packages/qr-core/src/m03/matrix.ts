@@ -19,7 +19,14 @@ export function finalizeSymbol(m: WorkingMatrix, mask: QrMask): QrSymbol {
     errorCorrection: "M",
     mask,
     getModule(x: number, y: number): boolean {
-      if (x < 0 || y < 0 || x >= size || y >= size) {
+      if (
+        !Number.isInteger(x) ||
+        !Number.isInteger(y) ||
+        x < 0 ||
+        y < 0 ||
+        x >= size ||
+        y >= size
+      ) {
         return false;
       }
       return snapshot[y][x];
