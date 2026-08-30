@@ -79,6 +79,22 @@ describe("ZQE-M04 Deterministic SVG Renderer Test Suite", () => {
         }
       }
     });
+
+    it("Reads getModule exactly once per module coordinate (exactly 841 calls)", () => {
+      const symbol = compileQr(FIXTURES.A, "zqe/fqr1");
+      let callCount = 0;
+      const wrappedSymbol: QrSymbol = {
+        ...symbol,
+        getModule: (x: number, y: number) => {
+          callCount++;
+          return symbol.getModule(x, y);
+        },
+      };
+
+      renderQrSvg(wrappedSymbol);
+
+      expect(callCount).toBe(841);
+    });
   });
 
   describe("21. Required Renderer Tests", () => {

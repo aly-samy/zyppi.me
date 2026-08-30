@@ -11,7 +11,7 @@ function createRenderInvalidSymbolError(reason: string): ZqeError {
   });
 }
 
-function validateQrSymbolInput(symbol: unknown): QrSymbol {
+function validateAndSnapshotQrSymbol(symbol: unknown): boolean[][] {
   if (typeof symbol !== "object" || symbol === null) {
     throw createRenderInvalidSymbolError(
       "Input symbol must be a non-null object.",
@@ -63,6 +63,10 @@ function validateQrSymbolInput(symbol: unknown): QrSymbol {
 
   const getModuleFn = s.getModule as (x: number, y: number) => boolean;
 
+  const modules: boolean[][] = Array.from({ length: 29 }, () =>
+    Array<boolean>(29).fill(false),
+  );
+
   for (let y = 0; y < 29; y++) {
     for (let x = 0; x < 29; x++) {
       let modVal: unknown;
@@ -79,10 +83,12 @@ function validateQrSymbolInput(symbol: unknown): QrSymbol {
           `getModule(${x},${y}) returned non-boolean value of type '${typeof modVal}'.`,
         );
       }
+
+      modules[y][x] = modVal;
     }
   }
 
-  return s as unknown as QrSymbol;
+  return modules;
 }
 
 /**
@@ -97,13 +103,13 @@ function validateQrSymbolInput(symbol: unknown): QrSymbol {
  * - single line, no trailing newline, no extra whitespace
  */
 export function renderQrSvg(symbol: QrSymbol): string {
-  const validSymbol = validateQrSymbolInput(symbol);
+  const modules = validateAndSnapshotQrSymbol(symbol);
 
   let darkRects = "";
 
   for (let y = 0; y < 29; y++) {
     for (let x = 0; x < 29; x++) {
-      if (validSymbol.getModule(x, y)) {
+      if (modules[y][x]) {
         darkRects += `<rect x="${x + 4}" y="${y + 4}" width="1" height="1"/>`;
       }
     }
