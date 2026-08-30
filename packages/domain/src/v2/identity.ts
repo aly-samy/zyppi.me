@@ -224,13 +224,20 @@ export function verifyPolicyUniverseRefV2(
   return { ok: true, value: { matches: true } };
 }
 
+export interface NormalizedExecutionRequestV2Material {
+  readonly normalizedReq: ExecutionRequestV2;
+  readonly jcs: string;
+}
+
 /**
- * Derives the deterministic whole-request V2 digest candidate from an ExecutionRequestV2 structure.
- * Performs component ref verification, temporal normalization, and whole-graph local label canonicalization.
+ * Shared production root-normalization path.
+ * Performs snapshotting, V2-01 structural validation, component verification,
+ * temporal normalization, graph/collection canonicalization, and JCS serialization.
+ * Internal to identity.ts (and exported for unit tests, NOT re-exported in v2/index.ts).
  */
-export function deriveExecutionRequestV2DigestCandidate(
+export function normalizeExecutionRequestV2IdentityMaterial(
   req: ExecutionRequestV2,
-): V2IdentityResult<string> {
+): V2IdentityResult<NormalizedExecutionRequestV2Material> {
   // 0a. Build trusted inert snapshot of hostile caller value in one descriptor-driven pass
   const snapRes = buildTrustedInertSnapshot(req);
   if (!snapRes.ok) {
@@ -280,10 +287,28 @@ export function deriveExecutionRequestV2DigestCandidate(
   const jcsRes = canonicalizeJcsV2(canonReqRes.value);
   if (!jcsRes.ok) return jcsRes;
 
-  // 5. Derive whole-request digest candidate using domain separator "zyppi:domain:input:v2:"
+  return {
+    ok: true,
+    value: {
+      normalizedReq: canonReqRes.value,
+      jcs: jcsRes.value,
+    },
+  };
+}
+
+/**
+ * Derives the deterministic whole-request V2 digest candidate from an ExecutionRequestV2 structure.
+ * Performs component ref verification, temporal normalization, and whole-graph local label canonicalization.
+ */
+export function deriveExecutionRequestV2DigestCandidate(
+  req: ExecutionRequestV2,
+): V2IdentityResult<string> {
+  const normRes = normalizeExecutionRequestV2IdentityMaterial(req);
+  if (!normRes.ok) return normRes;
+
   const candidateDigest = computeV2Digest(
     V2_DOMAIN_SEPARATORS.INPUT,
-    jcsRes.value,
+    normRes.value.jcs,
   );
   return { ok: true, value: candidateDigest };
 }
