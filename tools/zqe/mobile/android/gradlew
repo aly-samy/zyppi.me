@@ -1,0 +1,67 @@
+#!/usr/bin/env sh
+###############################################################################
+# Gradle wrapper script
+###############################################################################
+
+# Attempt to set APP_HOME
+# Resolve links: $0 may be a link
+PRG="$0"
+# Need this for relative symlinks.
+while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        PRG="$link"
+    else
+        PRG=`dirname "$PRG"`/"$link"
+    fi
+done
+SAVED="`pwd`"
+CDPATH=""
+cd "`dirname \"$PRG\"`/" >/dev/null
+APP_HOME="`pwd -P`"
+cd "$SAVED" >/dev/null
+
+APP_NAME="Gradle"
+APP_BASE_NAME=`basename "$0"`
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Use the maximum available, or 160MB, for the default head limit setting.
+# Memory options can be specified in the default_jvm_opts or JAVA_OPTS / GRADLE_OPTS.
+
+# Use existing JAVA_HOME or find java command
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/bin/java" ] ; then
+        JAVACMD="$JAVA_HOME/jre/bin/java"
+    else
+        JAVACMD="$JAVA_HOME/bin/java"
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD="java"
+    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+fi
+
+# Increase default memory limit
+if [ -z "$GRADLE_OPTS" ] ; then
+    GRADLE_OPTS="-Xmx512m"
+fi
+
+# Find wrapper jar
+WRAPPER_JAR="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+if [ ! -f "$WRAPPER_JAR" ] ; then
+    # Downloader / Bootstrapper using jar in distribution if wrapper jar missing
+    exec "$JAVACMD" "-classpath" "$APP_HOME/gradle/wrapper/gradle-wrapper.properties" "org.gradle.wrapper.GradleWrapperMain" "$@"
+fi
+
+exec "$JAVACMD" "-jar" "$WRAPPER_JAR" "$@"

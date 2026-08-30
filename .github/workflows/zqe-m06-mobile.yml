@@ -50,6 +50,9 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm-rules.rules
           sudo udevadm control --reload-rules && sudo udevadm trigger
 
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x tools/zqe/mobile/android/gradlew
+
       - name: Run Android ML Kit Instrumentation Tests on API 35 Emulator
         uses: ReactiveCircus/android-emulator-runner@v2
         with:
