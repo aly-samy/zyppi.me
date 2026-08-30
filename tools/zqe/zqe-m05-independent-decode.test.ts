@@ -62,6 +62,7 @@ function rasterizeSvgToPng(svgString: string): {
 
 describe("AMS-ZQE-M05-INDEPENDENT-DECODE-GATE-01", () => {
   let wasmPathResolved: string;
+  let networkAttemptedDuringInit = false;
 
   beforeAll(async () => {
     wasmPathResolved = require.resolve("zxing-wasm/reader/zxing_reader.wasm");
@@ -74,12 +75,28 @@ describe("AMS-ZQE-M05-INDEPENDENT-DECODE-GATE-01", () => {
       wasmBuffer.byteOffset + wasmBuffer.byteLength,
     );
 
-    await prepareZXingModule({
-      overrides: {
-        wasmBinary: exactWasm,
-      },
-      fireImmediately: true,
-    });
+    let networkAttempted = false;
+    const originalFetch = globalThis.fetch;
+
+    globalThis.fetch = (async (...args: Parameters<typeof fetch>) => {
+      networkAttempted = true;
+      throw new Error(
+        `M05 network isolation violation: fetch attempted for ${String(args[0])}`,
+      );
+    }) as typeof fetch;
+
+    try {
+      await prepareZXingModule({
+        overrides: {
+          wasmBinary: exactWasm,
+        },
+        fireImmediately: true,
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    networkAttemptedDuringInit = networkAttempted;
   });
 
   it("01. Decoder WASM provenance and local loading without remote fetch", () => {
@@ -87,6 +104,7 @@ describe("AMS-ZQE-M05-INDEPENDENT-DECODE-GATE-01", () => {
     expect(ZXING_CPP_COMMIT).toBeDefined();
     expect(ZXING_WASM_SHA256).toBeDefined();
     expect(existsSync(wasmPathResolved)).toBe(true);
+    expect(networkAttemptedDuringInit).toBe(false);
   });
 
   it("02. Fixture A exact decode", async () => {
@@ -194,12 +212,22 @@ describe("AMS-ZQE-M05-INDEPENDENT-DECODE-GATE-01", () => {
     expect(results).toHaveLength(0);
   });
 
-  it("09. Production package manifests contain no decoder/rasterizer dependencies", () => {
+  it("09. Production package manifests contain no decoder/rasterizer dependencies and root devDependencies are explicitly placed", () => {
+    const rootPkgPath = resolve(process.cwd(), "package.json");
     const corePkgPath = resolve(process.cwd(), "packages/qr-core/package.json");
     const svgPkgPath = resolve(process.cwd(), "packages/qr-svg/package.json");
 
+    const rootPkg = JSON.parse(readFileSync(rootPkgPath, "utf-8"));
     const corePkg = JSON.parse(readFileSync(corePkgPath, "utf-8"));
     const svgPkg = JSON.parse(readFileSync(svgPkgPath, "utf-8"));
+
+    expect(rootPkg.devDependencies?.["@resvg/resvg-js"]).toBe("2.6.2");
+    expect(rootPkg.devDependencies?.["zxing-wasm"]).toBe("3.1.3");
+    expect(rootPkg.devDependencies?.["@zyppi/qr-core"]).toBe("workspace:*");
+    expect(rootPkg.devDependencies?.["@zyppi/qr-svg"]).toBe("workspace:*");
+
+    expect(rootPkg.dependencies?.["@resvg/resvg-js"]).toBeUndefined();
+    expect(rootPkg.dependencies?.["zxing-wasm"]).toBeUndefined();
 
     const forbidden = ["zxing-wasm", "@resvg/resvg-js", "@sec-ant/zxing-wasm"];
 
