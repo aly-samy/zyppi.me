@@ -357,6 +357,14 @@ export const ZII_PROGRAM_POLICY = Object.freeze({
       productionDependencies: [],
       devOnlyDependencies: [],
     },
+    {
+      node: "packages/qr-svg",
+      packageName: "@zyppi/qr-svg",
+      owner: "ZII",
+      role: "engine-renderer",
+      productionDependencies: ["packages/qr-core"],
+      devOnlyDependencies: [],
+    },
   ]),
 });
 

@@ -7,7 +7,8 @@ export type ZqeStage =
   | "data_placement"
   | "mask_evaluation"
   | "format_generation"
-  | "symbol_finalization";
+  | "symbol_finalization"
+  | "rendering";
 
 export interface ZqeErrorShape {
   readonly code: string;
