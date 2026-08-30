@@ -54,10 +54,11 @@ jobs:
         run: chmod +x tools/zqe/mobile/android/gradlew
 
       - name: Run Android ML Kit Instrumentation Tests on API 35 Emulator
-        uses: ReactiveCircus/android-emulator-runner@v2
+        # ReactiveCircus/android-emulator-runner v2
+        uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         with:
           api-level: 35
-          target: google_atd
+          target: google_apis
           arch: x86_64
           profile: pixel_6
           script: cd tools/zqe/mobile/android && ./gradlew connectedCheck
