@@ -57,7 +57,7 @@ jobs:
         uses: ReactiveCircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: google_atd
           arch: x86_64
           profile: pixel_6
           script: cd tools/zqe/mobile/android && ./gradlew connectedCheck
