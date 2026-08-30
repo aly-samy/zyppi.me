@@ -1,0 +1,101 @@
+[
+  {
+    "filename": "pristine_A.png",
+    "payloadId": "A",
+    "payloadSha256": "bd68ab3476a08c12c26492389e317096619c54a3fb7e61d13e1047ee2502e843",
+    "expectedBytesHex": "48454c4c4f205a59505049",
+    "transformId": "PRISTINE",
+    "imageSha256": "c2bc8de9282075f9bbcd8809891c9be051152cac6243bd3e7f98f2b73c487966",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "pristine_B.png",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "PRISTINE",
+    "imageSha256": "3c171a8834a4f042d6cb6674eaeddfcca3f5aaaa44e34f1a76570b82ab6c2087",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "pristine_C.png",
+    "payloadId": "C",
+    "payloadSha256": "50c21a65588849150446e953cf26a67ea7a80296ea15b944dbf2803df414eac6",
+    "expectedBytesHex": "5a595050492d465152312d43415041434954592d424f554e444152592d30303030303030303030303031",
+    "transformId": "PRISTINE",
+    "imageSha256": "7f469cc7f25f734e1d44e4da277505565182cbbbc93ec64b29d548b513c95866",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "pristine_E.png",
+    "payloadId": "E",
+    "payloadSha256": "725860310bdc78b647e494537b54674af8794f04a5965b81dbe178432d88b7f4",
+    "expectedBytesHex": "5a595050492d465152312d494e544552494f522d544553542d32303236",
+    "transformId": "PRISTINE",
+    "imageSha256": "9e1b1b447cac13812dcdf72f9f98a0295869c5be31ba5a645efd49a84810f2e7",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "negative_blank.png",
+    "payloadId": "BLANK",
+    "payloadSha256": "",
+    "expectedBytesHex": "",
+    "transformId": "BLANK_WHITE",
+    "imageSha256": "14b73a6a6181fb00fddc2815e7d3da3e4d0de2c95503602a7865785f13ae5a88",
+    "expectedResult": "NO_BARCODE"
+  },
+  {
+    "filename": "b_scale_4px.png",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "SCALE_4PX",
+    "imageSha256": "aca73c5252fc373625b1f348fa2705dfe3e23c39bb1f70278981bc5c6a6af6e2",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "b_rot_pos15.png",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "ROT_POS15",
+    "imageSha256": "331ac4ba4759fab3d8e98ae3b9a85eef6c99651fe4a62ac7e8568addbe97e6cd",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "b_perspective_baseline.png",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "PERSPECTIVE_BASELINE",
+    "imageSha256": "fb43ee492d6b6fa3dbf3da905efc63fab9b0fea2901a0b999c2fc9f232d245d5",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "b_blur_sigma_1_2.png",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "BLUR_SIGMA_1_2",
+    "imageSha256": "76b7affb924b726177cdefe7f07b749c7c0894a16a1ecf65c6917ad941094f1c",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "b_low_contrast_0_65_b45.png",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "LOW_CONTRAST_0_65_B45",
+    "imageSha256": "41fe86e6296d15e9d28bd5d405b7cc894e40fe297ee57a54bbb89a8ee8951aa5",
+    "expectedResult": "SUCCESS"
+  },
+  {
+    "filename": "b_resample_jpeg_q65.jpg",
+    "payloadId": "B",
+    "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+    "expectedBytesHex": "68747470733a2f2f69642e6773312e6f72672f30312f3039353230313233343536373838",
+    "transformId": "RESAMPLE_JPEG_Q65",
+    "imageSha256": "846aa256c6e7eaa59bf2e20a19c16205ae4e55f4f31a77c1ae694a3fb0c86950",
+    "expectedResult": "SUCCESS"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "payloadId": "B",
+  "payloadText": "https://id.gs1.org/01/09520123456788",
+  "payloadSha256": "6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd",
+  "canonicalSvgSha256": "dd084fcd09c56ba2f9f384a738c037ed9d295f0b91b16155045d4c1a2689fe5d",
+  "profileId": "zqe/fqr1",
+  "printDimensions": "37mm x 37mm",
+  "svgFile": "payload-b-showcase.svg",
+  "htmlFile": "payload-b-showcase.html"
+}
