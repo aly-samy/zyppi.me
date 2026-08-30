@@ -36,7 +36,7 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 ## 2. Repository Provenance
 
 - **Original Mandated Base:** `17406f6034631d7f2cd988c5e0ec8e95d09a5121`
-- **CORR-07 Starting GitHub Head:** `ecaa20fe3fba5784a51897989263e3a5ec385767`
+- **CORR-07 Starting GitHub Head:** `8991b913092e7729440d6da38a3661bcbb8e78f9`
 - **Authoritative Submitted Implementation Tree:** TO BE VERIFIED EXTERNALLY BY COUNCIL FROM GITHUB
 - **Authoritative Final PR Head:** TO BE VERIFIED EXTERNALLY BY COUNCIL FROM GITHUB
 - **Receipt Container SHA:** NOT SELF-EMBEDDED; VERIFIED EXTERNALLY BY COUNCIL
@@ -46,12 +46,9 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 ## 3. Exact Files Modified & Added
 
 ```text
-packages/domain/src/v2/canonical.ts                (MODIFIED)
 packages/domain/src/v2/graphCanonicalization.ts     (MODIFIED)
 packages/domain/src/v2/identity.ts                 (MODIFIED)
-packages/domain/src/v2/fixtures/identityVectors.ts (MODIFIED)
 packages/domain/src/v2/identity.test.ts            (MODIFIED)
-packages/domain/src/v2/index.ts                    (MODIFIED)
 DOCS/CAW/CCP/CCP-RI-V2-02-RECEIPT.md               (MODIFIED)
 ```
 
@@ -239,7 +236,7 @@ Executed in `packages/domain/src/v2/identity.test.ts`:
 - `pnpm runtime:purity` — **PASS**
 - `pnpm boundary:all` — **PASS**
 - `pnpm graph:validate` — **PASS**
-- `pnpm exec vitest run packages/domain/` — **PASS** (All 575 domain unit tests green across 20 test files, including 85 V2 identity tests)
+- `pnpm exec vitest run packages/domain/` — **PASS** (All 589 domain unit tests green across 20 test files, including 85 V2 identity tests)
 
 ---
 
