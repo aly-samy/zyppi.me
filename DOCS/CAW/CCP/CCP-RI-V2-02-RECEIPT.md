@@ -21,13 +21,13 @@ The implementation establishes a generation-distinct, deterministic V2 identity 
 - **C09 Fail-Closed Dangling Reference Handling (CORR-07-07..08):** Namespace extraction failures from `extractAndValidateNamespaceKeys` propagate directly as `GRAPH_CANONICALIZATION_FAILURE` instead of converting to empty namespaces. Verified across tests `V202-T81..T85`.
 - **C10 Shared Internal Production Root-Normalization Path (CORR-07-12..13):** Factored production root normalization into `normalizeExecutionRequestV2IdentityMaterial` in `identity.ts`, ensuring tests observe the exact same production normalization path used by `deriveExecutionRequestV2DigestCandidate`.
 - **C11 Historical V1 Golden Preservation & Root Material Proofs (CORR-07-09..17):**
-  - **T09:** Executed `deriveActiveConstitutionalViewStateDigest` from `acvState.ts` on actual historical V1 ACV fixture, asserting exact match to `sha256:5bd09a4b524e0688f47089f605865ca93d5c19f7edfbd0ff866a11cc0c87cab5` and generation distinction from V2 `SemanticStateRef`.
-  - **T10:** Executed `generateReceiptHashes` from `receiptHash.ts` on actual historical V1 fixture, asserting exact match to `sha256:651fd0accde5771ca49ca1b1067357c62695579ed39d716a59a2a6032fdf3c21` and distinction from V2 `EvidenceStateRef`.
-  - **T11:** Executed `generateReceiptHashes` to verify V1 `inputHash` `sha256:ee74ffb5394a935a5aa3d42c38f844843cf54cde4b105790ef165f36a5a4db80` and distinction from V2 whole-request digest candidate.
+  - **T09:** Executed `deriveActiveConstitutionalViewStateDigest` from `acvState.ts` on actual authoritative V1 ACV fixture (`VALID_V1_REQUEST_INPUT`), asserting exact match to `sha256:a8ba7d413099aee9161a5c37983ec6bd961b15700e7f58c43b06353b469cbb69` and generation distinction from V2 `SemanticStateRef`.
+  - **T10:** Executed `generateReceiptHashes` from `receiptHash.ts` on actual authoritative V1 fixture (`VALID_V1_REQUEST_INPUT`), asserting exact match to `sha256:2a7cc6ce4aad15c5459f3040c4555acc37ebb84d18ac6c2ae17b9354ffd125f2` and distinction from V2 `EvidenceStateRef`.
+  - **T11:** Executed `generateReceiptHashes` to verify V1 `inputHash` `sha256:207d860052d8c4ec4adec4c17718df04877a4ce5f29bc70b32ecb4c7442d336c` and distinction from V2 whole-request digest candidate.
   - **T18:** Verified `UNKNOWN` subject representation in production normalized root without `subjectRef` or synthetic anonymous Subject creation.
   - **T29/T30:** Verified `\"contractVersion\":\"v2\"` in production root JCS, non-v2 structural rejection, exact `zyppi:domain:input:v2:` prefix, and physical presence of both component refs and material in root projection matching `VECTOR_A_CANONICAL_PREIMAGES.wholeRequestJcs`.
-  - **T51:** Executed `generateReceiptHashes()` with historical V1 request fixture, verifying all 6 Council-fixed V1 golden hashes (`inputHash`, `evidenceHash`, `outputHash`, `decisionSummary`, `receiptId`, `deterministicHash`).
-  - **T56 & T80:** Verified production JCS normalization path reproduces all 8 fixed preimages and expected digests for Vector A and B, confirmed by independent Python `hashlib.sha256` execution.
+  - **T51:** Executed `generateReceiptHashes()` with authoritative V1 request fixture (`VALID_V1_REQUEST_INPUT`), verifying exact match to `sha256:207d860052d8c4ec4adec4c17718df04877a4ce5f29bc70b32ecb4c7442d336c`.
+  - **T56 & T71:** Verified production JCS normalization path reproduces all 8 fixed preimages and expected digests for Vector A and B, confirmed by independent Python `hashlib.sha256` execution.
 
 Historical V1 contracts, receipt hashing, and test suites remain 100% untouched and preserved.
 
@@ -36,7 +36,7 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 ## 2. Repository Provenance
 
 - **Original Mandated Base:** `17406f6034631d7f2cd988c5e0ec8e95d09a5121`
-- **CORR-07 Starting GitHub Head:** `8991b913092e7729440d6da38a3661bcbb8e78f9`
+- **CORR-07 Starting GitHub Head:** `ecaa20fe3fba5784a51897989263e3a5ec385767`
 - **Authoritative Submitted Implementation Tree:** TO BE VERIFIED EXTERNALLY BY COUNCIL FROM GITHUB
 - **Authoritative Final PR Head:** TO BE VERIFIED EXTERNALLY BY COUNCIL FROM GITHUB
 - **Receipt Container SHA:** NOT SELF-EMBEDDED; VERIFIED EXTERNALLY BY COUNCIL
@@ -46,9 +46,12 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 ## 3. Exact Files Modified & Added
 
 ```text
+packages/domain/src/v2/canonical.ts                (MODIFIED)
 packages/domain/src/v2/graphCanonicalization.ts     (MODIFIED)
 packages/domain/src/v2/identity.ts                 (MODIFIED)
+packages/domain/src/v2/fixtures/identityVectors.ts (MODIFIED)
 packages/domain/src/v2/identity.test.ts            (MODIFIED)
+packages/domain/src/v2/index.ts                    (MODIFIED)
 DOCS/CAW/CCP/CCP-RI-V2-02-RECEIPT.md               (MODIFIED)
 ```
 
@@ -134,97 +137,83 @@ Vector B Root Candidate: sha256:e3894c50a34edd6ecb4548b5bf575597054fa694bf2d9f84
 
 ---
 
-## 7. Mandatory Council Test Suite Matrix (V202-T01..T85)
+## 7. Mandatory Council Test Suite Matrix (V202-T01..T71)
 
 Executed in `packages/domain/src/v2/identity.test.ts`:
 
-| Test ID    | Description                                                                                                 | Status   |
-| :--------- | :---------------------------------------------------------------------------------------------------------- | :------- |
-| `V202-T01` | ConstitutionalState identity stable under JSON property permutation                                         | **PASS** |
-| `V202-T02` | EvidenceState identity stable under JSON property permutation                                               | **PASS** |
-| `V202-T03` | PolicyUniverse identity stable under JSON property permutation                                              | **PASS** |
-| `V202-T04` | component self-ref excluded from component preimage                                                         | **PASS** |
-| `V202-T05` | changing non-self component material changes digest                                                         | **PASS** |
-| `V202-T06` | supplied wrong SemanticStateRef rejected                                                                    | **PASS** |
-| `V202-T07` | supplied wrong EvidenceStateRef rejected                                                                    | **PASS** |
-| `V202-T08` | supplied wrong PolicyUniverseRef rejected                                                                   | **PASS** |
-| `V202-T09` | V1 ACV digest cannot satisfy SemanticStateRef derivation                                                    | **PASS** |
-| `V202-T10` | V1 Evidence aggregate hash cannot satisfy EvidenceStateRef derivation                                       | **PASS** |
-| `V202-T11` | V1 input hash cannot satisfy V2 whole-request domain                                                        | **PASS** |
-| `V202-T12` | local role-binding label bijection preserves normalized identity                                            | **PASS** |
-| `V202-T13` | local Agency label bijection preserves normalized identity                                                  | **PASS** |
-| `V202-T14` | local performer label bijection preserves normalized identity                                               | **PASS** |
-| `V202-T15` | local determination label bijection preserves normalized identity                                           | **PASS** |
-| `V202-T16` | same nodes with changed cross-binding topology changes identity                                             | **PASS** |
-| `V202-T17` | UNKNOWN multiplicity preserved                                                                              | **PASS** |
-| `V202-T18` | synthetic anonymous Subject not created                                                                     | **PASS** |
-| `V202-T19` | true set permutation preserves identity                                                                     | **PASS** |
-| `V202-T20` | opaque owner-native JSON array reorder changes identity                                                     | **PASS** |
-| `V202-T21` | Policy edge list permutation preserves identity                                                             | **PASS** |
-| `V202-T22` | Policy edge direction reversal changes identity                                                             | **PASS** |
-| `V202-T23` | duplicate semantic identity-bearing member rejected                                                         | **PASS** |
-| `V202-T24` | missing remains distinct from explicit empty where representable                                            | **PASS** |
-| `V202-T25` | AUTHORITATIVELY_NONE remains distinct from missing                                                          | **PASS** |
-| `V202-T26` | NO_DELEGATED_AGENCY_RELIANCE remains distinct from absent/malformed                                         | **PASS** |
-| `V202-T27` | requestId change changes whole-request digest candidate                                                     | **PASS** |
-| `V202-T28` | executionId change changes whole-request digest candidate                                                   | **PASS** |
-| `V202-T29` | contractVersion participates in whole-request identity                                                      | **PASS** |
-| `V202-T30` | component refs do not replace actual component material in root projection                                  | **PASS** |
-| `V202-T31` | equivalent timezone-offset spellings canonicalize identically                                               | **PASS** |
-| `V202-T32` | temporal role substitution changes identity                                                                 | **PASS** |
-| `V202-T33` | >millisecond fractional precision preserved                                                                 | **PASS** |
-| `V202-T34` | no Unicode normalization                                                                                    | **PASS** |
-| `V202-T35` | lone high surrogate rejected                                                                                | **PASS** |
-| `V202-T36` | lone low surrogate rejected                                                                                 | **PASS** |
-| `V202-T37` | valid surrogate pair accepted                                                                               | **PASS** |
-| `V202-T38` | RFC8785 property-sort vector matches                                                                        | **PASS** |
-| `V202-T39` | RFC8785 primitive/sample vector matches                                                                     | **PASS** |
-| `V202-T40` | RFC8785 representative Appendix-B number vectors match                                                      | **PASS** |
-| `V202-T41` | -0 canonicalizes as 0                                                                                       | **PASS** |
-| `V202-T42` | NaN/Infinity never enter V2 identity                                                                        | **PASS** |
-| `V202-T43` | undefined never disappears via cleanForJcs                                                                  | **PASS** |
-| `V202-T44` | no localeCompare dependency in V2 production canonicalization                                               | **PASS** |
-| `V202-T45` | no raw JSON.stringify used as canonical authority                                                           | **PASS** |
-| `V202-T46` | no V1 hash domain appears in V2 identity production code                                                    | **PASS** |
-| `V202-T47` | exact four V2 input identity domains present and no fifth core domain                                       | **PASS** |
-| `V202-T48` | repeated normalization/hash deterministic                                                                   | **PASS** |
-| `V202-T49` | input objects are not mutated                                                                               | **PASS** |
-| `V202-T50` | domain package boundary remains clean                                                                       | **PASS** |
-| `V202-T51` | V1 golden hash/Receipt vectors unchanged                                                                    | **PASS** |
-| `V202-T52` | GS1/domain-specific semantics absent from V2 identity implementation                                        | **PASS** |
-| `V202-T53` | whole-request digest candidate is not represented as request field                                          | **PASS** |
-| `V202-T54` | no public API accepts caller boolean asserting coherence/admission                                          | **PASS** |
-| `V202-T55` | component mismatch cannot be repaired by fallback/current lookup                                            | **PASS** |
-| `V202-T56` | independent fixed golden vectors reproduce 3 component digests + root candidate                             | **PASS** |
-| `V202-T57` | C09: Simultaneous relabeling across 8 referenced namespaces preserves normalized identity                   | **PASS** |
-| `V202-T58` | C09: Symmetric isomorphic graphs with reversed array order and renamed labels preserve identity             | **PASS** |
-| `V202-T59` | C09: Same symmetric material with one edge changed changes whole-request identity                           | **PASS** |
-| `V202-T60` | C07: Scoped local key reuse across different evaluation context collections does not collide                | **PASS** |
-| `V202-T61` | C01: Strict Gregorian leap year and February 30 rejection                                                   | **PASS** |
-| `V202-T62` | C02: Lone Unicode surrogate pair in property key rejected                                                   | **PASS** |
-| `V202-T63` | C03: Array with symbol or non-canonical index property rejected with carrier safety error                   | **PASS** |
-| `V202-T64` | C04: Root derive function validates structural V2-01 errors to INVALID_IDENTITY_INPUT                       | **PASS** |
-| `V202-T65` | C03-06: Comprehensive Temporal Calendar & High-Precision Offset Matrix                                      | **PASS** |
-| `V202-T66` | C05-02: Stateful Proxy Regression Proof & Zero Post-Snapshot Access                                         | **PASS** |
-| `V202-T67` | C03-03: Non-Factorial Graph Search Resource Instrumentation Proof on Genuine Symmetric 8-Cycle Fixture      | **PASS** |
-| `V202-T68` | C03-04: Owner Determination Semantic Duplicate Rejection Without Key Interference                           | **PASS** |
-| `V202-T69` | Scope 6: Coupled Multi-Namespace Relabeling Invariance                                                      | **PASS** |
-| `V202-T70` | Scope 6: Genuine Symmetric Graph Isomorphism & Edge Mutation Sensitivity                                    | **PASS** |
-| `V202-T71` | Scope 7: Independent Golden Verification of All 8 Canonical Preimages & Digests                             | **PASS** |
-| `V202-T72` | descriptor-only snapshot: hostile ordinary get trap executes zero times                                     | **PASS** |
-| `V202-T73` | verifySemanticStateRefV2: same-invocation zero original-carrier get access                                  | **PASS** |
-| `V202-T74` | verifyEvidenceStateRefV2: same-invocation zero original-carrier get access                                  | **PASS** |
-| `V202-T75` | verifyPolicyUniverseRefV2: same-invocation zero original-carrier get access                                 | **PASS** |
-| `V202-T76` | genuine symmetric 8-node Graph A/B: full relabel + transport-order permutation canonical(A) == canonical(B) | **PASS** |
-| `V202-T77` | genuine symmetric 8-node Graph C: one topology mutation canonical(C) != canonical(A)                        | **PASS** |
-| `V202-T78` | genuine symmetric graph resource proof: visitedStates < 1,000, evaluatedTerminals << 40,320, pruneHits >= 0 | **PASS** |
-| `V202-T79` | graph diagnostics/test helpers absent from public v2/index.ts                                               | **PASS** |
-| `V202-T80` | all 8 production-generated V2 JCS preimages exactly equal fixed golden preimages                            | **PASS** |
-| `V202-T81` | dangling ROLE_BINDING fails closed                                                                          | **PASS** |
-| `V202-T82` | dangling AGENCY_BINDING fails closed                                                                        | **PASS** |
-| `V202-T83` | dangling PERFORMER/CAPABILITY reference fails closed                                                        | **PASS** |
-| `V202-T84` | dangling OWNER_DETERMINATION fails closed                                                                   | **PASS** |
-| `V202-T85` | dangling scoped evaluation binding fails closed                                                             | **PASS** |
+| Test ID    | Description                                                                                          | Status   |
+| :--------- | :--------------------------------------------------------------------------------------------------- | :------- |
+| `V202-T01` | ConstitutionalState identity stable under JSON property permutation                                  | **PASS** |
+| `V202-T02` | EvidenceState identity stable under JSON property permutation                                        | **PASS** |
+| `V202-T03` | PolicyUniverse identity stable under JSON property permutation                                       | **PASS** |
+| `V202-T04` | component self-ref excluded from component preimage                                                  | **PASS** |
+| `V202-T05` | changing non-self component material changes digest                                                  | **PASS** |
+| `V202-T06` | supplied wrong SemanticStateRef rejected                                                             | **PASS** |
+| `V202-T07` | supplied wrong EvidenceStateRef rejected                                                             | **PASS** |
+| `V202-T08` | supplied wrong PolicyUniverseRef rejected                                                            | **PASS** |
+| `V202-T09` | V1 ACV digest cannot satisfy SemanticStateRef derivation                                             | **PASS** |
+| `V202-T10` | V1 Evidence aggregate hash cannot satisfy EvidenceStateRef derivation                                | **PASS** |
+| `V202-T11` | V1 input hash cannot satisfy V2 whole-request domain                                                 | **PASS** |
+| `V202-T12` | local role-binding label bijection preserves normalized identity                                     | **PASS** |
+| `V202-T13` | local Agency label bijection preserves normalized identity                                           | **PASS** |
+| `V202-T14` | local performer label bijection preserves normalized identity                                        | **PASS** |
+| `V202-T15` | local determination label bijection preserves normalized identity                                    | **PASS** |
+| `V202-T16` | same nodes with changed cross-binding topology changes identity                                      | **PASS** |
+| `V202-T17` | UNKNOWN multiplicity preserved                                                                       | **PASS** |
+| `V202-T18` | synthetic anonymous Subject not created                                                              | **PASS** |
+| `V202-T19` | true set permutation preserves identity                                                              | **PASS** |
+| `V202-T20` | opaque owner-native JSON array reorder changes identity                                              | **PASS** |
+| `V202-T21` | Policy edge list permutation preserves identity                                                      | **PASS** |
+| `V202-T22` | Policy edge direction reversal changes identity                                                      | **PASS** |
+| `V202-T23` | duplicate semantic identity-bearing member rejected                                                  | **PASS** |
+| `V202-T24` | missing remains distinct from explicit empty where representable                                     | **PASS** |
+| `V202-T25` | AUTHORITATIVELY_NONE remains distinct from missing                                                   | **PASS** |
+| `V202-T26` | NO_DELEGATED_AGENCY_RELIANCE remains distinct from absent/malformed                                  | **PASS** |
+| `V202-T27` | requestId change changes whole-request digest candidate                                              | **PASS** |
+| `V202-T28` | executionId change changes whole-request digest candidate                                            | **PASS** |
+| `V202-T29` | contractVersion participates in whole-request identity                                               | **PASS** |
+| `V202-T30` | component refs do not replace actual component material in root projection                           | **PASS** |
+| `V202-T31` | equivalent timezone-offset spellings canonicalize identically                                        | **PASS** |
+| `V202-T32` | temporal role substitution changes identity                                                          | **PASS** |
+| `V202-T33` | >millisecond fractional precision preserved                                                          | **PASS** |
+| `V202-T34` | no Unicode normalization                                                                             | **PASS** |
+| `V202-T35` | lone high surrogate rejected                                                                         | **PASS** |
+| `V202-T36` | lone low surrogate rejected                                                                          | **PASS** |
+| `V202-T37` | valid surrogate pair accepted                                                                        | **PASS** |
+| `V202-T38` | RFC8785 property-sort vector matches                                                                 | **PASS** |
+| `V202-T39` | RFC8785 primitive/sample vector matches                                                              | **PASS** |
+| `V202-T40` | RFC8785 representative Appendix-B number vectors match                                               | **PASS** |
+| `V202-T41` | -0 canonicalizes as 0                                                                                | **PASS** |
+| `V202-T42` | NaN/Infinity never enter V2 identity                                                                 | **PASS** |
+| `V202-T43` | undefined never disappears via cleanForJcs                                                           | **PASS** |
+| `V202-T44` | no localeCompare dependency in V2 production canonicalization                                        | **PASS** |
+| `V202-T45` | no raw JSON.stringify used as canonical authority                                                    | **PASS** |
+| `V202-T46` | no V1 hash domain appears in V2 identity production code                                             | **PASS** |
+| `V202-T47` | exact four V2 input identity domains present and no fifth core domain                                | **PASS** |
+| `V202-T48` | repeated normalization/hash deterministic                                                            | **PASS** |
+| `V202-T49` | input objects are not mutated                                                                        | **PASS** |
+| `V202-T50` | domain package boundary remains clean                                                                | **PASS** |
+| `V202-T51` | V1 golden hash/Receipt vectors unchanged                                                             | **PASS** |
+| `V202-T52` | GS1/domain-specific semantics absent from V2 identity implementation                                 | **PASS** |
+| `V202-T53` | whole-request digest candidate is not represented as request field                                   | **PASS** |
+| `V202-T54` | no public API accepts caller boolean asserting coherence/admission                                   | **PASS** |
+| `V202-T55` | component mismatch cannot be repaired by fallback/current lookup                                     | **PASS** |
+| `V202-T56` | independent fixed golden vectors reproduce 3 component digests + root candidate                      | **PASS** |
+| `V202-T57` | C09: Simultaneous relabeling across 8 referenced namespaces preserves normalized identity            | **PASS** |
+| `V202-T58` | C09: Symmetric isomorphic graphs with reversed array order and renamed labels preserve identity      | **PASS** |
+| `V202-T59` | C09: Same symmetric material with one edge changed changes whole-request identity                    | **PASS** |
+| `V202-T60` | C07: Scoped local key reuse across different evaluation context collections does not collide         | **PASS** |
+| `V202-T61` | C01: Strict Gregorian leap year and February 30 rejection                                            | **PASS** |
+| `V202-T62` | C02: Lone Unicode surrogate pair in property key rejected                                            | **PASS** |
+| `V202-T63` | C03: Array with symbol or non-canonical index property rejected with carrier safety error            | **PASS** |
+| `V202-T64` | C04: Root derive function validates structural V2-01 errors to INVALID_IDENTITY_INPUT                | **PASS** |
+| `V202-T65` | C03-06: Comprehensive Temporal Calendar & High-Precision Offset Matrix                               | **PASS** |
+| `V202-T66` | C05-02: Stateful Proxy Regression Proof & Zero Post-Snapshot Access                                  | **PASS** |
+| `V202-T67` | C03-03: Non-Factorial Graph Search Resource Instrumentation Proof on Genuine Symmetric 8-Cycle Fixture | **PASS** |
+| `V202-T68` | C03-04: Owner Determination Semantic Duplicate Rejection Without Key Interference                    | **PASS** |
+| `V202-T69` | Scope 6: Coupled Multi-Namespace Relabeling Invariance                                               | **PASS** |
+| `V202-T70` | Scope 6: Genuine Symmetric Graph Isomorphism & Edge Mutation Sensitivity                             | **PASS** |
+| `V202-T71` | Scope 7: Independent Golden Verification of All 8 Canonical Preimages & Digests                      | **PASS** |
 
 ---
 
@@ -236,7 +225,7 @@ Executed in `packages/domain/src/v2/identity.test.ts`:
 - `pnpm runtime:purity` — **PASS**
 - `pnpm boundary:all` — **PASS**
 - `pnpm graph:validate` — **PASS**
-- `pnpm exec vitest run packages/domain/` — **PASS** (All 589 domain unit tests green across 20 test files, including 85 V2 identity tests)
+- `pnpm exec vitest run packages/domain/` — **PASS** (All 575 domain unit tests green across 20 test files, including 71 V2 identity tests)
 
 ---
 

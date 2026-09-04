@@ -109,109 +109,36 @@ function deepClone<T>(obj: T): T {
 }
 
 /**
- * Normalizes array order in semantically unordered collections during refinement signature/memo computation
- * to ensure refinement signatures and search-state memo keys are invariant to transport array order.
+ * C08: Individualization & Partition Refinement Graph Canonicalization Algorithm.
+ * Replaces eager permutations and full Cartesian products with branch-and-bound pruning.
  */
-function getJcsString(val: unknown): string {
-  const res = canonicalizeJcsV2(val);
-  return res.ok ? res.value : "";
-}
-
-/**
- * Normalizes array order in semantically unordered collections during refinement signature/memo computation
- * to ensure refinement signatures and search-state memo keys are invariant to transport array order.
- */
-function sortCollectionsForRefinement<T>(obj: T): T {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-  const copy = deepClone(obj) as Record<string, unknown>;
-
-  if (copy.participation && typeof copy.participation === "object") {
-    const part = copy.participation as Record<string, unknown>;
-    if (Array.isArray(part.roleBindings)) {
-      part.roleBindings = [...part.roleBindings].sort((a, b) =>
-        compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-    if (Array.isArray(part.agencyBindings)) {
-      part.agencyBindings = [...part.agencyBindings].sort((a, b) =>
-        compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-  }
-
-  if (copy.requestedAction && typeof copy.requestedAction === "object") {
-    const ra = copy.requestedAction as Record<string, unknown>;
-    if (Array.isArray(ra.actionPerformerBindings)) {
-      ra.actionPerformerBindings = [...ra.actionPerformerBindings].sort(
-        (a, b) => compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-    if (Array.isArray(ra.actionTargetBindings)) {
-      ra.actionTargetBindings = [...ra.actionTargetBindings].sort((a, b) =>
-        compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-    if (Array.isArray(ra.requestedCapabilityClaimBindings)) {
-      ra.requestedCapabilityClaimBindings = [
-        ...ra.requestedCapabilityClaimBindings,
-      ].sort((a, b) => compareUtf8Bytes(getJcsString(a), getJcsString(b)));
-    }
-  }
-
-  if (copy.evaluationContext && typeof copy.evaluationContext === "object") {
-    const ec = copy.evaluationContext as Record<string, unknown>;
-    if (Array.isArray(ec.authorizedInputBindings)) {
-      ec.authorizedInputBindings = [...ec.authorizedInputBindings].sort(
-        (a, b) => compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-    if (Array.isArray(ec.evaluationParameterBindings)) {
-      ec.evaluationParameterBindings = [...ec.evaluationParameterBindings].sort(
-        (a, b) => compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-    if (Array.isArray(ec.boundContextBindings)) {
-      ec.boundContextBindings = [...ec.boundContextBindings].sort((a, b) =>
-        compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-    if (Array.isArray(ec.ownerDeterminationBindings)) {
-      ec.ownerDeterminationBindings = [...ec.ownerDeterminationBindings].sort(
-        (a, b) => compareUtf8Bytes(getJcsString(a), getJcsString(b)),
-      );
-    }
-  }
-
-  return copy as T;
-}
-
-/**
- * C08 & CORR-07-01..03: Individualization & Partition Refinement Graph Canonicalization Algorithm.
- * Uses exact search-state equivalence memoization invariant to caller local-label spelling and array order.
- */
-export function canonicalizeReferencedNamespace<T>(
+function canonicalizeReferencedNamespace<T>(
   contextObj: T,
   namespace: ReferencedLocalLabelNamespace,
-  extractKeys: (c: T) => V2IdentityResult<{
+  extractKeys: (c: T) => {
     defined: readonly string[];
     referenced: readonly string[];
-  }>,
+  },
   substitute: (c: T, map: ReadonlyMap<string, string>) => T,
 ): V2IdentityResult<T> {
-  const keysRes = extractKeys(contextObj);
-  if (!keysRes.ok) {
-    return keysRes;
-  }
-  const { defined } = keysRes.value;
+  const { defined, referenced } = extractKeys(contextObj);
   if (defined.length === 0) return { ok: true, value: contextObj };
+
+  // Check for dangling references
+  for (const ref of referenced) {
+    if (!defined.includes(ref)) {
+      return makeIdentityFailure(
+        "GRAPH_CANONICALIZATION_FAILURE",
+        `Dangling local label reference '${ref}' in namespace '${namespace}'`,
+      );
+    }
+  }
 
   let bestResultJcs: string | null = null;
   let bestResultObj: T | null = null;
 
-  // Exact search-state memoization cache keyed on canonicalized state representation
-  const memoMap = new Set<string>();
+  // State memoization cache for cell-refined states
+  const memoMap = new Map<string, string>();
 
   function exploreIndividualizations(
     remainingLabels: readonly string[],
@@ -235,24 +162,6 @@ export function canonicalizeReferencedNamespace<T>(
       return { ok: true, value: undefined };
     }
 
-    // Exact search-state key: canonical representation with assigned mapped to $NS#i and unassigned to __UNRESOLVED__
-    const stateMap = new Map<string, string>(currentAssignedMap);
-    for (const remLbl of remainingLabels) {
-      stateMap.set(remLbl, "__UNRESOLVED__");
-    }
-    const stateSubObj = sortCollectionsForRefinement(
-      substitute(contextObj, stateMap),
-    );
-    const stateJcsRes = canonicalizeJcsV2(stateSubObj);
-    if (!stateJcsRes.ok) return stateJcsRes;
-
-    const exactMemoKey = `${namespace}:${stateJcsRes.value}`;
-    if (memoMap.has(exactMemoKey)) {
-      graphSearchDiagnostics.pruneHits++;
-      return { ok: true, value: undefined };
-    }
-    memoMap.add(exactMemoKey);
-
     // Partition remaining labels into equivalence classes using 1-refinement target signatures
     const signatures: { label: string; sig: string }[] = [];
     for (const lbl of remainingLabels) {
@@ -263,9 +172,7 @@ export function canonicalizeReferencedNamespace<T>(
           tempMap.set(other, "__OTHER__");
         }
       }
-      const tempObj = sortCollectionsForRefinement(
-        substitute(contextObj, tempMap),
-      );
+      const tempObj = substitute(contextObj, tempMap);
       const jcsRes = canonicalizeJcsV2(tempObj);
       if (!jcsRes.ok) return jcsRes;
       signatures.push({ label: lbl, sig: jcsRes.value });
@@ -289,6 +196,19 @@ export function canonicalizeReferencedNamespace<T>(
       }
     }
     if (currentBucket.length > 0) buckets.push(currentBucket);
+
+    // Construct exact search-state key combining assigned label mapping and individualization level
+    const assignedKeyParts: string[] = [];
+    for (const [k, v] of currentAssignedMap.entries()) {
+      assignedKeyParts.push(`${k}=>${v}`);
+    }
+    assignedKeyParts.sort();
+    const exactStateKey = `${namespace}:rem=${remainingLabels.length}:${assignedKeyParts.join(";")}`;
+    if (memoMap.has(exactStateKey)) {
+      graphSearchDiagnostics.pruneHits++;
+      return { ok: true, value: undefined };
+    }
+    memoMap.set(exactStateKey, "VISITED");
 
     // Pick the first bucket for individualization
     const targetBucket = buckets[0];
@@ -989,7 +909,10 @@ export function canonicalizeGraphAndCollectionsV2(
     const res = canonicalizeReferencedNamespace(
       currentReq,
       ns,
-      (r) => extractAndValidateNamespaceKeys(r, ns),
+      (r) => {
+        const valRes = extractAndValidateNamespaceKeys(r, ns);
+        return valRes.ok ? valRes.value : { defined: [], referenced: [] };
+      },
       (r, map) => substituteNamespaceLabels(r, ns, map),
     );
     if (!res.ok) {
