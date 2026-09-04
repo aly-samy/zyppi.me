@@ -109,19 +109,115 @@ function deepClone<T>(obj: T): T {
 }
 
 /**
+ * Masks local keys in uncanonicalized namespaces to `__LOCAL_KEY__` so caller label spellings in downstream namespaces
+ * do not leak into 1-refinement signatures or memo state keys during canonicalization of the current namespace.
+ */
+function maskUncanonicalizedNamespaces(
+  req: ExecutionRequestV2,
+  currentNs: ReferencedLocalLabelNamespace,
+): ExecutionRequestV2 {
+  const currentIdx = REFERENCED_NAMESPACE_ORDER.indexOf(currentNs);
+  const cloned = deepClone(req);
+
+  for (let i = currentIdx + 1; i < REFERENCED_NAMESPACE_ORDER.length; i++) {
+    const ns = REFERENCED_NAMESPACE_ORDER[i];
+    switch (ns) {
+      case "AGENCY_BINDING": {
+        for (const ab of cloned.participation.agencyBindings) {
+          (ab as { agencyBindingKey: string }).agencyBindingKey =
+            "__LOCAL_KEY__";
+        }
+        break;
+      }
+      case "PERFORMER": {
+        for (const ap of cloned.requestedAction.actionPerformerBindings) {
+          (ap as { performerKey: string }).performerKey = "__LOCAL_KEY__";
+        }
+        break;
+      }
+      case "CAPABILITY_CLAIM": {
+        for (const rc of cloned.requestedAction
+          .requestedCapabilityClaimBindings) {
+          (rc as { capabilityClaimKey: string }).capabilityClaimKey =
+            "__LOCAL_KEY__";
+        }
+        break;
+      }
+      case "AUTHORIZED_INPUT": {
+        for (const b of cloned.evaluationContext.authorizedInputBindings) {
+          (b as { bindingKey: string }).bindingKey = "__LOCAL_KEY__";
+        }
+        break;
+      }
+      case "EVALUATION_PARAMETER": {
+        for (const b of cloned.evaluationContext.evaluationParameterBindings) {
+          (b as { bindingKey: string }).bindingKey = "__LOCAL_KEY__";
+        }
+        break;
+      }
+      case "BOUND_CONTEXT": {
+        for (const b of cloned.evaluationContext.boundContextBindings) {
+          (b as { bindingKey: string }).bindingKey = "__LOCAL_KEY__";
+        }
+        break;
+      }
+      case "OWNER_DETERMINATION": {
+        for (const od of cloned.evaluationContext.ownerDeterminationBindings) {
+          (od as { determinationBindingKey: string }).determinationBindingKey =
+            "__LOCAL_KEY__";
+          for (const op of od.determinationQuestionBinding
+            .questionOperandBindings) {
+            (op as { operandKey: string }).operandKey = "__LOCAL_KEY__";
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  return cloned;
+}
+
+/**
+ * Helper to sort unordered collections inside a substituted candidate object before computing its state key signature.
+ * Ensures search-state memo keys are invariant to transport array order.
+ */
+function sortCollectionsForRefinement(obj: unknown): unknown {
+  if (obj === null || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) {
+    const sortedItems = obj.map(sortCollectionsForRefinement);
+    const jcsItems = sortedItems.map((item) => {
+      const res = canonicalizeJcsV2(item);
+      return { item, jcs: res.ok ? res.value : "" };
+    });
+    jcsItems.sort((a, b) => compareUtf8Bytes(a.jcs, b.jcs));
+    return jcsItems.map((i) => i.item);
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
+    result[key] = sortCollectionsForRefinement(val);
+  }
+  return result;
+}
+
+/**
  * C08: Individualization & Partition Refinement Graph Canonicalization Algorithm.
  * Replaces eager permutations and full Cartesian products with branch-and-bound pruning.
  */
 function canonicalizeReferencedNamespace<T>(
   contextObj: T,
   namespace: ReferencedLocalLabelNamespace,
-  extractKeys: (c: T) => {
+  extractKeys: (c: T) => V2IdentityResult<{
     defined: readonly string[];
     referenced: readonly string[];
-  },
+  }>,
   substitute: (c: T, map: ReadonlyMap<string, string>) => T,
 ): V2IdentityResult<T> {
-  const { defined, referenced } = extractKeys(contextObj);
+  const keysRes = extractKeys(contextObj);
+  if (!keysRes.ok) return keysRes;
+
+  const { defined, referenced } = keysRes.value;
   if (defined.length === 0) return { ok: true, value: contextObj };
 
   // Check for dangling references
@@ -149,7 +245,17 @@ function canonicalizeReferencedNamespace<T>(
     if (remainingLabels.length === 0) {
       graphSearchDiagnostics.evaluatedTerminals++;
       const candidateObj = substitute(contextObj, currentAssignedMap);
-      const jcsRes = canonicalizeJcsV2(candidateObj);
+      const maskedCandidate =
+        typeof candidateObj === "object" &&
+        candidateObj !== null &&
+        "contractVersion" in candidateObj
+          ? maskUncanonicalizedNamespaces(
+              candidateObj as unknown as ExecutionRequestV2,
+              namespace,
+            )
+          : candidateObj;
+      const sortedCandidate = sortCollectionsForRefinement(maskedCandidate);
+      const jcsRes = canonicalizeJcsV2(sortedCandidate);
       if (!jcsRes.ok) return jcsRes;
 
       if (
@@ -166,14 +272,24 @@ function canonicalizeReferencedNamespace<T>(
     const signatures: { label: string; sig: string }[] = [];
     for (const lbl of remainingLabels) {
       const tempMap = new Map(currentAssignedMap);
-      tempMap.set(lbl, "__TARGET__");
+      tempMap.set(lbl, "__0_TARGET__");
       for (const other of remainingLabels) {
         if (other !== lbl) {
-          tempMap.set(other, "__OTHER__");
+          tempMap.set(other, "__1_OTHER__");
         }
       }
       const tempObj = substitute(contextObj, tempMap);
-      const jcsRes = canonicalizeJcsV2(tempObj);
+      const maskedTempObj =
+        typeof tempObj === "object" &&
+        tempObj !== null &&
+        "contractVersion" in tempObj
+          ? maskUncanonicalizedNamespaces(
+              tempObj as unknown as ExecutionRequestV2,
+              namespace,
+            )
+          : tempObj;
+      const sortedTempObj = sortCollectionsForRefinement(maskedTempObj);
+      const jcsRes = canonicalizeJcsV2(sortedTempObj);
       if (!jcsRes.ok) return jcsRes;
       signatures.push({ label: lbl, sig: jcsRes.value });
     }
@@ -197,13 +313,26 @@ function canonicalizeReferencedNamespace<T>(
     }
     if (currentBucket.length > 0) buckets.push(currentBucket);
 
-    // Construct exact search-state key combining assigned label mapping and individualization level
-    const assignedKeyParts: string[] = [];
-    for (const [k, v] of currentAssignedMap.entries()) {
-      assignedKeyParts.push(`${k}=>${v}`);
+    // Construct caller-label independent search-state key
+    const memoSubMap = new Map(currentAssignedMap);
+    for (const rem of remainingLabels) {
+      memoSubMap.set(rem, "__UNRESOLVED__");
     }
-    assignedKeyParts.sort();
-    const exactStateKey = `${namespace}:rem=${remainingLabels.length}:${assignedKeyParts.join(";")}`;
+    const memoObj = substitute(contextObj, memoSubMap);
+    const maskedMemoObj =
+      typeof memoObj === "object" &&
+      memoObj !== null &&
+      "contractVersion" in memoObj
+        ? maskUncanonicalizedNamespaces(
+            memoObj as unknown as ExecutionRequestV2,
+            namespace,
+          )
+        : memoObj;
+    const sortedMemoObj = sortCollectionsForRefinement(maskedMemoObj);
+    const memoJcsRes = canonicalizeJcsV2(sortedMemoObj);
+    if (!memoJcsRes.ok) return memoJcsRes;
+
+    const exactStateKey = `${namespace}:${memoJcsRes.value}`;
     if (memoMap.has(exactStateKey)) {
       graphSearchDiagnostics.pruneHits++;
       return { ok: true, value: undefined };
@@ -909,10 +1038,7 @@ export function canonicalizeGraphAndCollectionsV2(
     const res = canonicalizeReferencedNamespace(
       currentReq,
       ns,
-      (r) => {
-        const valRes = extractAndValidateNamespaceKeys(r, ns);
-        return valRes.ok ? valRes.value : { defined: [], referenced: [] };
-      },
+      (r) => extractAndValidateNamespaceKeys(r, ns),
       (r, map) => substituteNamespaceLabels(r, ns, map),
     );
     if (!res.ok) {
