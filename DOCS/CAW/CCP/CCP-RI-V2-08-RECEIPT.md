@@ -64,7 +64,7 @@ No V1 pipeline entrypoints or internal functions are promoted.
 - V2 Domain Regression (`packages/domain/src/v2/`): 151/151 PASS
 - V2-03 Regression (`v2ExecutionMaterialization.test.ts`): 22/22 PASS
 - V2-04 Regression (`executionGenerationBoundary.test.ts`): 33/33 PASS
-- Non-DB Monorepo Suite (`pnpm test ...`): 1,391/1,389 PASS green.
+- Non-DB Monorepo Suite (`pnpm test ...`): 1,391/1,391 PASS green.
 
 ### Quality Gates & Governance
 
