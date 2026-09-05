@@ -74,6 +74,7 @@
 - `packages/domain/src/v2/**`: UNTOUCHED
 - `packages/domain/src/index.ts`: UNTOUCHED
 - `packages/runtime/**`: UNTOUCHED
+- `packages/testing/replay/**`: UNTOUCHED
 - `apps/api/src/registry/pipelineOrchestrator.ts`: UNTOUCHED
 - `apps/api/src/zprof/lifecycle.ts`: UNTOUCHED
 - `apps/api/src/zprof/v2ExecutionMaterialization.ts`: UNTOUCHED
