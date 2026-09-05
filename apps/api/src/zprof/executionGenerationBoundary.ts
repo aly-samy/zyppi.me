@@ -108,6 +108,10 @@ export type ExecutionGenerationDispatchResult =
  *
  * Performs zero Runtime execution and never falls back across generations upon failure.
  */
+function hasOwn(obj: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
 export function dispatchRawExecutionRequest(
   rawJson: string,
 ): ExecutionGenerationDispatchResult {
@@ -148,7 +152,7 @@ export function dispatchRawExecutionRequest(
   const rootObj = parsed as Record<string, unknown>;
 
   // 4. Generation classification
-  if ("contractVersion" in rootObj) {
+  if (hasOwn(rootObj, "contractVersion")) {
     const cv = rootObj.contractVersion;
     if (cv === "v2") {
       // Explicit V2 path
@@ -191,7 +195,9 @@ export function dispatchRawExecutionRequest(
   }
 
   // contractVersion is absent
-  const hasV2Marker = V2_EXCLUSIVE_MARKERS.some((marker) => marker in rootObj);
+  const hasV2Marker = V2_EXCLUSIVE_MARKERS.some((marker) =>
+    hasOwn(rootObj, marker),
+  );
   if (hasV2Marker) {
     return {
       ok: false,

@@ -6,6 +6,7 @@ import {
   deriveExecutionRequestV2DigestCandidate,
   derivePolicyUniverseRefV2,
   deriveSemanticStateRefV2,
+  validateExecutionRequest,
   type ExecutionRequest,
   type ExecutionRequestV2,
 } from "@zyppi/domain";
@@ -657,6 +658,44 @@ describe("CCP-RI-V2-04 — Generation Dispatch + Raw Boundary", () => {
 
       expect(res.generation).toBe("v1");
       expect(res.executionRequest).toEqual(VALID_V1_REQUEST_OBJ);
+
+      const directV1Res = validateExecutionRequest(
+        JSON.parse(VALID_V1_RAW_JSON),
+      );
+      expect(directV1Res.ok).toBe(true);
+      if (!directV1Res.ok) return;
+
+      expect(res.executionRequest).toEqual(directV1Res.value);
+    });
+
+    it("V204-H01 — Inherited generation properties ignored", () => {
+      const proto = Object.prototype as Record<string, unknown>;
+      const originalCv = proto.contractVersion;
+      const originalIntent = proto.intent;
+
+      try {
+        proto.contractVersion = "v2";
+        proto.intent = { someKey: "someValue" };
+
+        // Even with Object.prototype polluted, valid markerless V1 raw JSON must still dispatch to V1
+        const res = dispatchRawExecutionRequest(VALID_V1_RAW_JSON);
+        expect(res.ok).toBe(true);
+        if (!res.ok) return;
+
+        expect(res.generation).toBe("v1");
+        expect(res.executionRequest.requestId).toBe("req-v1-001");
+      } finally {
+        if (originalCv === undefined) {
+          delete proto.contractVersion;
+        } else {
+          proto.contractVersion = originalCv;
+        }
+        if (originalIntent === undefined) {
+          delete proto.intent;
+        } else {
+          proto.intent = originalIntent;
+        }
+      }
     });
   });
 
