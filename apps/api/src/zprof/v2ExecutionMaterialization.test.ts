@@ -2,17 +2,21 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  deriveEvidenceStateRefV2,
   deriveExecutionRequestV2DigestCandidate,
+  derivePolicyUniverseRefV2,
+  deriveSemanticStateRefV2,
   validateExecutionRequestV2,
   type ExecutionRequestV2,
 } from "@zyppi/domain";
+import { buildEvaluationCoordinate } from "./ec.js";
 import {
   materializeExecutionRequestV2,
   type ExecutionRequestV2MaterializationInput,
 } from "./v2ExecutionMaterialization.js";
 
 /**
- * Fixtures A & B from authoritative V2-02 identity vector set.
+ * Local test vectors derived from authoritative V2-02 identity vector set.
  */
 const OWNER_COUNCIL = {
   family: "OWNER" as const,
@@ -186,11 +190,6 @@ const VECTOR_A_REQUEST: ExecutionRequestV2 = {
     budget: 1000,
   },
 };
-
-const VECTOR_A_EXPECTED_DIGESTS = {
-  wholeRequestDigestCandidate:
-    "sha256:0ca6861d1d3732b4fa67ce841a039cb73d09393ac932d14e546c4d3345ae0a98",
-} as const;
 
 const VECTOR_B_REQUEST: ExecutionRequestV2 = {
   contractVersion: "v2",
@@ -548,6 +547,213 @@ const VECTOR_B_EXPECTED_DIGESTS = {
 } as const;
 
 /**
+ * Domain-neutral synthetic fixture for V203-T01 & V203-T18 genericity proofs.
+ * Contains zero GS1, GTIN, GLN, Digital Link, DPP, or commerce terms.
+ */
+const SYNTHETIC_PROV = {
+  family: "PROVENANCE" as const,
+  ownerRef: "urn:zyppi:owner:synthetic:v1",
+  artifactId: "synthetic-prov-001",
+};
+
+const rawSyntheticConstitutionalState = {
+  semanticStateRef: "",
+  stateViews: [
+    {
+      viewKey: "synthetic_view_1",
+      viewScope: {
+        family: "SCOPE" as const,
+        ownerRef: "urn:zyppi:owner:synthetic:v1",
+        artifactId: "generic-scope-v1",
+      },
+      stateBindings: [
+        {
+          stateBindingKey: "synthetic_binding_1",
+          kind: "IDENTITY_STATE" as const,
+          subjectRef: {
+            family: "SUBJECT" as const,
+            ownerRef: "urn:zyppi:owner:synthetic:v1",
+            artifactId: "actor-001",
+          },
+          stateSemanticRef: {
+            family: "STATE_SEMANTIC" as const,
+            ownerRef: "urn:zyppi:owner:synthetic:v1",
+            artifactId: "generic-state-v1",
+          },
+          exactStateRef: {
+            family: "STATE_INSTANCE" as const,
+            ownerRef: "urn:zyppi:owner:synthetic:v1",
+            artifactId: "instance-001",
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const derivedSyntheticSemanticStateRef = deriveSemanticStateRefV2(
+  rawSyntheticConstitutionalState as unknown as Parameters<
+    typeof deriveSemanticStateRefV2
+  >[0],
+);
+
+const syntheticConstitutionalState = {
+  ...rawSyntheticConstitutionalState,
+  semanticStateRef: derivedSyntheticSemanticStateRef.ok
+    ? derivedSyntheticSemanticStateRef.value
+    : "",
+};
+
+const rawSyntheticEvidenceState = {
+  evidenceStateRef: "",
+  evidenceRequirementBindings: [],
+  suppliedEvidenceMaterial: [],
+  evidencePresentationBindings: [],
+  integrityCoordinates: [],
+};
+
+const derivedSyntheticEvidenceStateRef = deriveEvidenceStateRefV2(
+  rawSyntheticEvidenceState as unknown as Parameters<
+    typeof deriveEvidenceStateRefV2
+  >[0],
+);
+
+const syntheticEvidenceState = {
+  ...rawSyntheticEvidenceState,
+  evidenceStateRef: derivedSyntheticEvidenceStateRef.ok
+    ? derivedSyntheticEvidenceStateRef.value
+    : "",
+};
+
+const rawSyntheticPolicyUniverse = {
+  policyUniverseRef: "",
+  applicablePolicyMaterial: [],
+  dependencyTopology: {
+    dependencyEdges: [],
+  },
+  applicabilityProvenanceBinding: SYNTHETIC_PROV,
+};
+
+const derivedSyntheticPolicyUniverseRef = derivePolicyUniverseRefV2(
+  rawSyntheticPolicyUniverse as unknown as Parameters<
+    typeof derivePolicyUniverseRefV2
+  >[0],
+);
+
+const syntheticPolicyUniverse = {
+  ...rawSyntheticPolicyUniverse,
+  policyUniverseRef: derivedSyntheticPolicyUniverseRef.ok
+    ? derivedSyntheticPolicyUniverseRef.value
+    : "",
+};
+
+const SYNTHETIC_NEUTRAL_REQUEST: ExecutionRequestV2 = {
+  contractVersion: "v2",
+  requestId: "req-v2-synthetic-001",
+  participation: {
+    roleBindings: [
+      {
+        roleBindingKey: "rb_actor",
+        role: "ACTOR",
+        subject: {
+          kind: "KNOWN",
+          subjectRef: {
+            family: "SUBJECT",
+            ownerRef: "urn:zyppi:owner:synthetic:v1",
+            artifactId: "actor-001",
+          },
+        },
+      },
+    ],
+    agencyBindings: [],
+  },
+  intent: {
+    originatorParticipationRef: "rb_actor",
+    intentCategory: "DISCOVER",
+    intentTargetRef: {
+      family: "TARGET",
+      ownerRef: "urn:zyppi:owner:synthetic:v1",
+      artifactId: "resource-001",
+    },
+    candidateStateBinding: {
+      stateTargetRef: {
+        family: "TARGET",
+        ownerRef: "urn:zyppi:owner:synthetic:v1",
+        artifactId: "resource-001",
+      },
+      stateSemanticRef: {
+        family: "STATE_SEMANTIC",
+        ownerRef: "urn:zyppi:owner:synthetic:v1",
+        artifactId: "generic-state-v1",
+      },
+      exactStateInstance: {
+        kind: "GOVERNED_ARTIFACT_REF",
+        stateInstanceRef: {
+          family: "STATE_INSTANCE",
+          ownerRef: "urn:zyppi:owner:synthetic:v1",
+          artifactId: "instance-001",
+        },
+      },
+    },
+  },
+  requestedAction: {
+    actionSemanticRef: {
+      family: "ACTION_SEMANTIC",
+      ownerRef: "urn:zyppi:owner:synthetic:v1",
+      artifactId: "inspect-resource-v1",
+    },
+    intentActionCompatibilityBinding: {
+      kind: "GOVERNED_SEMANTIC_CONTRACT",
+      exactCompatibilityContractRef: {
+        family: "COMPATIBILITY_CONTRACT",
+        ownerRef: "urn:zyppi:owner:synthetic:v1",
+        artifactId: "compat-contract-001",
+      },
+    },
+    actionPerformerBindings: [
+      {
+        performerKey: "pk_performer",
+        actorParticipationRef: "rb_actor",
+        agencyReliance: {
+          kind: "NO_DELEGATED_AGENCY_RELIANCE",
+        },
+      },
+    ],
+    actionTargetBindings: [
+      {
+        targetSlotSemanticRef: {
+          family: "TARGET_SLOT_SEMANTIC",
+          ownerRef: "urn:zyppi:owner:synthetic:v1",
+          artifactId: "generic-target-slot-v1",
+        },
+        targetRef: {
+          family: "TARGET",
+          ownerRef: "urn:zyppi:owner:synthetic:v1",
+          artifactId: "resource-001",
+        },
+      },
+    ],
+    requestedCapabilityClaimBindings: [],
+  },
+  constitutionalState: syntheticConstitutionalState,
+  evidenceState: syntheticEvidenceState,
+  policyUniverse: syntheticPolicyUniverse,
+  evaluationContext: {
+    authorizedInputBindings: [],
+    evaluationParameterBindings: [],
+    boundContextBindings: [],
+    ownerDeterminationBindings: [],
+  },
+  executionContext: {
+    executionId: "exec-v2-synthetic-001",
+    temporalCoordinates: {
+      tEInput: "2026-09-01T00:00:00Z",
+    },
+    budget: 1000,
+  },
+};
+
+/**
  * Helper to convert an ExecutionRequestV2 into ExecutionRequestV2MaterializationInput by omitting contractVersion.
  */
 function toMaterializationInput(
@@ -561,16 +767,21 @@ function toMaterializationInput(
 describe("CCP-RI-V2-03 — Application V2 Materialization Seam", () => {
   describe("Core materialization", () => {
     it("V203-T01 — Valid generic materialization", () => {
-      const input = toMaterializationInput(VECTOR_A_REQUEST);
+      const input = toMaterializationInput(SYNTHETIC_NEUTRAL_REQUEST);
       const res = materializeExecutionRequestV2(input);
 
       expect(res.ok).toBe(true);
       if (!res.ok) return;
 
       expect(res.executionRequest.contractVersion).toBe("v2");
-      expect(res.wholeRequestDigestCandidate).toBe(
-        VECTOR_A_EXPECTED_DIGESTS.wholeRequestDigestCandidate,
+
+      const expectedDigest = deriveExecutionRequestV2DigestCandidate(
+        res.executionRequest,
       );
+      expect(expectedDigest.ok).toBe(true);
+      if (!expectedDigest.ok) return;
+
+      expect(res.wholeRequestDigestCandidate).toBe(expectedDigest.value);
     });
 
     it("V203-T02 — V2 generation marker", () => {
@@ -714,14 +925,18 @@ describe("CCP-RI-V2-03 — Application V2 Materialization Seam", () => {
     });
 
     it("V203-T10 — Lawful transport permutation", () => {
-      const input1 = toMaterializationInput(VECTOR_A_REQUEST);
+      const input1 = toMaterializationInput(VECTOR_B_REQUEST);
 
-      // Permute key order in roleBindings (V2-02 graph canonicalizer sorts collections deterministically)
+      // Perform an actual multi-element collection order permutation on VECTOR_B_REQUEST
+      expect(input1.participation.roleBindings.length).toBeGreaterThan(1);
       const input2: ExecutionRequestV2MaterializationInput = {
         ...input1,
         participation: {
           ...input1.participation,
-          roleBindings: [...input1.participation.roleBindings].reverse(),
+          roleBindings: [
+            input1.participation.roleBindings[1]!,
+            input1.participation.roleBindings[0]!,
+          ],
         },
       };
 
@@ -803,18 +1018,17 @@ describe("CCP-RI-V2-03 — Application V2 Materialization Seam", () => {
 
     it("V203-T14 — No semantic fallback", () => {
       const input = toMaterializationInput(VECTOR_A_REQUEST);
-      const invalidInput = {
-        ...input,
-        requestId: "", // Invalid empty requestId
-      };
+      const inputCopy = { ...input };
+      delete (inputCopy as Record<string, unknown>).requestedAction;
 
-      const res = materializeExecutionRequestV2(invalidInput);
+      const res = materializeExecutionRequestV2(
+        inputCopy as ExecutionRequestV2MaterializationInput,
+      );
       expect(res.ok).toBe(false);
       if (res.ok) return;
 
       expect(res.stage).toBe("STRUCTURAL_VALIDATION");
-      expect(res.error.code).toBe("INVALID_VALUE");
-      expect(res.error.path).toBe("requestId");
+      expect(res.error.code).toBe("INVALID_RUNTIME_VALUE");
     });
 
     it("V203-T15 — Temporal explicitness", () => {
@@ -858,26 +1072,43 @@ describe("CCP-RI-V2-03 — Application V2 Materialization Seam", () => {
     });
 
     it("V203-T17 — Existing V1 path preserved", () => {
-      // Proves V1 composition tests run and remain valid (executed as part of full suite)
-      expect(true).toBe(true);
+      // Directly invoke existing V1 EvaluationCoordinate builder to prove V1 pathway remains operational
+      const ecRes = buildEvaluationCoordinate({
+        sccId:
+          "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        bcgId:
+          "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        pinnedSemanticStateRef: {
+          ref: "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        },
+        boundContext: { policies: [] },
+        evidenceIntegrityCoordinates: [],
+        temporalCoordinates: { tEInput: "2026-08-24T17:00:00Z" },
+      });
+      expect(ecRes.ok).toBe(true);
+      if (ecRes.ok) {
+        expect(ecRes.coordinate.sccId).toBe(
+          "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        );
+      }
     });
   });
 
   describe("Genericity / boundary", () => {
     it("V203-T18 — Synthetic non-GS1 twin", () => {
-      const input = toMaterializationInput(VECTOR_A_REQUEST);
+      const input = toMaterializationInput(SYNTHETIC_NEUTRAL_REQUEST);
       const res = materializeExecutionRequestV2(input);
 
       expect(res.ok).toBe(true);
       if (!res.ok) return;
 
-      // Verify request uses generic non-GS1 artifacts
+      // Verify request uses generic non-GS1 synthetic artifacts
       expect(res.executionRequest.intent.intentTargetRef.artifactId).toBe(
-        "asset-001",
+        "resource-001",
       );
       expect(
         res.executionRequest.requestedAction.actionSemanticRef.artifactId,
-      ).toBe("read-trade-item-v1");
+      ).toBe("inspect-resource-v1");
     });
 
     it("V203-T19 — No source mutation", () => {

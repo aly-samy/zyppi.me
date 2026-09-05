@@ -96,7 +96,7 @@ export interface ExecutionRequestV2MaterializationFailure {
 Execution command: `pnpm exec vitest run apps/api/src/zprof/v2ExecutionMaterialization.test.ts`
 Result: **22/22 PASS**
 
-- `V203-T01 — Valid generic materialization`: PASS
+- `V203-T01 — Valid generic materialization`: PASS (Uses domain-neutral synthetic fixture `SYNTHETIC_NEUTRAL_REQUEST` containing zero GS1/commerce vocabulary)
 - `V203-T02 — V2 generation marker`: PASS
 - `V203-T03 — Structural validity`: PASS
 - `V203-T04 — Constitutional identity mismatch`: PASS
@@ -105,15 +105,15 @@ Result: **22/22 PASS**
 - `V203-T07 — No silent identity repair`: PASS
 - `V203-T08 — Root candidate equality`: PASS
 - `V203-T09 — Repeatability`: PASS
-- `V203-T10 — Lawful transport permutation`: PASS
+- `V203-T10 — Lawful transport permutation`: PASS (Reverses multi-element `roleBindings` in `VECTOR_B_REQUEST` and verifies `digest(A) == digest(B)`)
 - `V203-T11 — Meaningful mutation`: PASS
 - `V203-T12 — UNKNOWN preservation`: PASS
 - `V203-T13 — Owner determination pass-through`: PASS
-- `V203-T14 — No semantic fallback`: PASS
+- `V203-T14 — No semantic fallback`: PASS (Removes mandatory property `requestedAction` from input and verifies `STRUCTURAL_VALIDATION` failure closed with `INVALID_RUNTIME_VALUE`)
 - `V203-T15 — Temporal explicitness`: PASS
 - `V203-T16 — V1-shaped material rejected`: PASS
-- `V203-T17 — Existing V1 path preserved`: PASS
-- `V203-T18 — Synthetic non-GS1 twin`: PASS
+- `V203-T17 — Existing V1 path preserved`: PASS (Directly invokes `buildEvaluationCoordinate` with valid inputs and verifies operational V1 outcome)
+- `V203-T18 — Synthetic non-GS1 twin`: PASS (Materializes generic synthetic request with zero GS1, GTIN, GLN, Digital Link, DPP, or commerce terms)
 - `V203-T19 — No source mutation`: PASS
 - `V203-T20 — Exact assembly`: PASS
 - `V203-T21 — Runtime independence`: PASS
@@ -122,7 +122,7 @@ Result: **22/22 PASS**
 ## Verification Suite Results
 
 1. **Targeted Materialization Suite**: `pnpm exec vitest run apps/api/src/zprof/v2ExecutionMaterialization.test.ts`
-   - Result: 22/22 passed (119ms)
+   - Result: 22/22 passed (155ms)
 2. **Full Z-PROF Suite**: `pnpm exec vitest run apps/api/src/zprof/`
    - Result: 247/247 passed across 7 test files
 3. **V2 Domain Regression Suite**: `pnpm exec vitest run packages/domain/src/v2/`
@@ -132,12 +132,18 @@ Result: **22/22 PASS**
 
 ## Repository Quality Gates
 
+Mandated seven repository quality gates:
+
 - `pnpm format:check`: PASS
 - `pnpm lint`: PASS
 - `pnpm exec tsc -b`: PASS
 - `pnpm runtime:purity`: PASS
 - `pnpm boundary:all`: PASS
 - `pnpm graph:validate`: PASS
+- `pnpm test`: PASS (1219 passed, 29 skipped)
+
+Additional governance verification:
+
 - `pnpm governance:validate`: PASS
 
 ## Negative Audits
