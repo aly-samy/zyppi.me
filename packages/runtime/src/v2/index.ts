@@ -24,3 +24,16 @@ export type {
   OwnerDeterminationIntegrationV2Result,
   OwnerDeterminationIntegrationV2Success,
 } from "./ownerDeterminationIntegration.js";
+
+export { evaluateExecutabilityAndOutcomeV2 } from "./executabilityOutcome.js";
+export type {
+  ExecutabilityBlockerV2,
+  ExecutabilityDeterminationV2,
+  ExecutabilityOutcomeFrameV2,
+  ExecutabilityOutcomeV2ErrorCode,
+  ExecutabilityOutcomeV2Failure,
+  ExecutabilityOutcomeV2Result,
+  ExecutabilityOutcomeV2Success,
+  ExecutionOwnerResultBindingsV2,
+  OutcomeMaterializationV2,
+} from "./executabilityOutcome.js";

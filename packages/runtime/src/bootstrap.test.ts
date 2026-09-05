@@ -7,6 +7,7 @@ describe("Runtime Package Bootstrap", () => {
       validateExecutionEnvelopeCompatibilityV2: expect.any(Function),
       prepareProductionExecutionV2: expect.any(Function),
       integrateOwnerDeterminationsV2: expect.any(Function),
+      evaluateExecutabilityAndOutcomeV2: expect.any(Function),
     });
   });
 });

@@ -1041,6 +1041,7 @@ describe("CCP-RI-V2-07 Owner Evaluation Integration Mandate (V207-T01..V207-T30)
     );
 
     expect(exportedFunctions.sort()).toEqual([
+      "evaluateExecutabilityAndOutcomeV2",
       "integrateOwnerDeterminationsV2",
       "prepareProductionExecutionV2",
       "validateExecutionEnvelopeCompatibilityV2",
