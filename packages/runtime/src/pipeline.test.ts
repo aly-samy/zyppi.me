@@ -262,8 +262,10 @@ describe("Runtime Pipeline Scaffold Tests", () => {
   });
 
   // 10.7: Public API containment
-  it("confirms that the public entry point exposes zero symbols", () => {
-    expect({ ...runtimeIndex }).toEqual({});
+  it("confirms that the public entry point exposes the intended V2 capability", () => {
+    expect({ ...runtimeIndex }).toEqual({
+      validateExecutionEnvelopeCompatibilityV2: expect.any(Function),
+    });
   });
 
   // 12.1: Context Propagation Test
