@@ -991,6 +991,7 @@ describe("CCP-RI-V2-06 Production / Test Isolation Mandate (V206-T01..V206-T30)"
     );
 
     expect(exportedFunctions.sort()).toEqual([
+      "evaluateExecutabilityAndOutcomeV2",
       "integrateOwnerDeterminationsV2",
       "prepareProductionExecutionV2",
       "validateExecutionEnvelopeCompatibilityV2",
