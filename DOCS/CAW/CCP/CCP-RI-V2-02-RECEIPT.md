@@ -17,7 +17,7 @@ The implementation establishes a generation-distinct, deterministic V2 identity 
 - **C05 Incidental Key Erasure:** Unreferenced local keys (`viewKey`, `stateBindingKey`, `requirementKey`, `materialKey`, `coordinateKey`, `policyKey`, `operandKey`) are omitted from normalized component projections.
 - **C06 Semantic Duplicates After Key Erasure:** Identity-bearing members that become identical after key erasure return `SEMANTIC_DUPLICATE` (`packages/domain/src/v2/graphCanonicalization.ts`).
 - **C07 Local Namespace Scoping:** Evaluation context binding namespaces are strictly separated by collection (`AUTHORIZED_INPUT`, `EVALUATION_PARAMETER`, `BOUND_CONTEXT`).
-- **C08 Exact Search-State Equivalence & Order-Independent Refinement (CORR-07-01..08):** Search-state memoization keys are constructed by substituting assigned labels with `$NS#i` and unassigned labels with `__UNRESOLVED__`, then computing exact JCS canonical representations over array-sorted collections (`sortCollectionsForRefinement`). This guarantees search-state memo keys are invariant to caller local-label text and transport array order while preserving remaining subproblem equivalence.
+- **C08 Exact Search-State Equivalence & Order-Independent Refinement (CORR-07-01..08):** Unsafe memoization/pruning (`memoMap` based on collapsed `__UNRESOLVED__` search-state keys) was completely removed to prevent incorrect state collapsing across distinct individualization paths. The graph canonicalization algorithm partitions remaining labels into equivalence buckets using 1-refinement target signatures (`__0_TARGET__` vs `__1_OTHER__`), explores branches MSB-first, and selects the lexicographically least JCS canonical representation (`bestResultJcs`) among candidate terminals without heuristic or lossy pruning.
 - **C09 Fail-Closed Dangling Reference Handling (CORR-07-07..08):** Namespace extraction failures from `extractAndValidateNamespaceKeys` propagate directly as `GRAPH_CANONICALIZATION_FAILURE` instead of converting to empty namespaces. Verified across tests `V202-T81..T85`.
 - **C10 Shared Internal Production Root-Normalization Path (CORR-07-12..13):** Factored production root normalization into `normalizeExecutionRequestV2IdentityMaterial` in `identity.ts`, ensuring tests observe the exact same production normalization path used by `deriveExecutionRequestV2DigestCandidate`.
 - **C11 Historical V1 Golden Preservation & Root Material Proofs (CORR-07-09..17):**
@@ -47,6 +47,7 @@ Historical V1 contracts, receipt hashing, and test suites remain 100% untouched 
 
 ```text
 packages/domain/src/v2/canonical.ts                (MODIFIED)
+packages/domain/src/v2/temporal.ts                 (MODIFIED)
 packages/domain/src/v2/graphCanonicalization.ts     (MODIFIED)
 packages/domain/src/v2/identity.ts                 (MODIFIED)
 packages/domain/src/v2/fixtures/identityVectors.ts (MODIFIED)
