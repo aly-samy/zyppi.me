@@ -233,9 +233,6 @@ function canonicalizeReferencedNamespace<T>(
   let bestResultJcs: string | null = null;
   let bestResultObj: T | null = null;
 
-  // State memoization cache for cell-refined states
-  const memoMap = new Map<string, string>();
-
   function exploreIndividualizations(
     remainingLabels: readonly string[],
     currentAssignedMap: ReadonlyMap<string, string>,
@@ -312,32 +309,6 @@ function canonicalizeReferencedNamespace<T>(
       }
     }
     if (currentBucket.length > 0) buckets.push(currentBucket);
-
-    // Construct caller-label independent search-state key
-    const memoSubMap = new Map(currentAssignedMap);
-    for (const rem of remainingLabels) {
-      memoSubMap.set(rem, "__UNRESOLVED__");
-    }
-    const memoObj = substitute(contextObj, memoSubMap);
-    const maskedMemoObj =
-      typeof memoObj === "object" &&
-      memoObj !== null &&
-      "contractVersion" in memoObj
-        ? maskUncanonicalizedNamespaces(
-            memoObj as unknown as ExecutionRequestV2,
-            namespace,
-          )
-        : memoObj;
-    const sortedMemoObj = sortCollectionsForRefinement(maskedMemoObj);
-    const memoJcsRes = canonicalizeJcsV2(sortedMemoObj);
-    if (!memoJcsRes.ok) return memoJcsRes;
-
-    const exactStateKey = `${namespace}:${memoJcsRes.value}`;
-    if (memoMap.has(exactStateKey)) {
-      graphSearchDiagnostics.pruneHits++;
-      return { ok: true, value: undefined };
-    }
-    memoMap.set(exactStateKey, "VISITED");
 
     // Pick the first bucket for individualization
     const targetBucket = buckets[0];
