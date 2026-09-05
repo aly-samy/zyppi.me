@@ -1,7 +1,27 @@
 export type {
+  V2IdentityErrorCode,
+  V2IdentityError,
+  V2IdentityResult,
+} from "./canonical.js";
+
+export type {
   ExecutionRequestV2ValidationErrorCode,
   ExecutionRequestV2ValidationError,
 } from "./errors.js";
+
+export {
+  deriveEvidenceStateRefV2,
+  deriveExecutionRequestV2DigestCandidate,
+  derivePolicyUniverseRefV2,
+  deriveSemanticStateRefV2,
+  getConstitutionalStateIdentityProjectionV2,
+  getEvidenceStateIdentityProjectionV2,
+  getPolicyUniverseIdentityProjectionV2,
+  verifyEvidenceStateRefV2,
+  verifyPolicyUniverseRefV2,
+  verifySemanticStateRefV2,
+  V2_DOMAIN_SEPARATORS,
+} from "./identity.js";
 
 export type { JsonPrimitiveV2, JsonValueV2 } from "./json.js";
 export { isStrictJsonValueV2 } from "./json.js";
