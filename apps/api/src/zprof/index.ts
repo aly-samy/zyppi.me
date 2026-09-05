@@ -20,3 +20,4 @@ export {
   verifyExecutionReceiptIntegrity,
   evaluateAssessmentRequest,
 } from "./lifecycle.js";
+export * from "./v2ExecutionMaterialization.js";
