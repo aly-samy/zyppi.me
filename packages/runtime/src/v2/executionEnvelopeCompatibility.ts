@@ -67,15 +67,18 @@ function areRefsEqual(
   );
 }
 
-function refFingerprint(ref: ConstitutionalRefBaseV2): string {
-  return [
+/**
+ * Collision-safe exact key representation for constitutional references.
+ */
+function exactRefKey(ref: ConstitutionalRefBaseV2): string {
+  return JSON.stringify([
     ref.family,
     ref.ownerRef,
     ref.artifactId,
-    ref.version ?? "null",
-    ref.stateRef ?? "null",
-    ref.provenanceRef ?? "null",
-  ].join("|");
+    ref.version ?? null,
+    ref.stateRef ?? null,
+    ref.provenanceRef ?? null,
+  ]);
 }
 
 export function validateExecutionEnvelopeCompatibilityV2(
@@ -340,12 +343,12 @@ export function validateExecutionEnvelopeCompatibilityV2(
   // 17.3 Cycles prohibited
   const policyAdj = new Map<string, Set<string>>();
   for (const p of applicablePolicies) {
-    policyAdj.set(refFingerprint(p.policyRef), new Set<string>());
+    policyAdj.set(exactRefKey(p.policyRef), new Set<string>());
   }
   for (const edge of request.policyUniverse.dependencyTopology
     .dependencyEdges) {
-    const fromKey = refFingerprint(edge.dependeePolicyRef);
-    const toKey = refFingerprint(edge.dependentPolicyRef);
+    const fromKey = exactRefKey(edge.dependeePolicyRef);
+    const toKey = exactRefKey(edge.dependentPolicyRef);
     const set = policyAdj.get(fromKey);
     if (set) {
       set.add(toKey);

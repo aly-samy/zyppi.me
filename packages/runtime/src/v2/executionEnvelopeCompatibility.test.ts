@@ -1504,6 +1504,68 @@ describe("CCP-RI-V2-05 Mandatory Test Matrix (V205-T01..V205-T32)", () => {
   });
 });
 
+describe("CCP-RI-V2-05 Adversarial Regression Proofs (V205-H01)", () => {
+  it("V205-H01 — Policy graph reference identity is collision-safe", () => {
+    const polRefA: PolicyRefV2 = {
+      family: "POLICY",
+      ownerRef: "urn:owner:a|b",
+      artifactId: "c",
+      version: "1.0.0",
+      stateRef: "state-001",
+      provenanceRef: "prov-001",
+    };
+
+    const polRefB: PolicyRefV2 = {
+      family: "POLICY",
+      ownerRef: "urn:owner:a",
+      artifactId: "b|c",
+      version: "1.0.0",
+      stateRef: "state-001",
+      provenanceRef: "prov-001",
+    };
+
+    const req = createValidV2Request();
+
+    const policyUniverse = {
+      ...req.policyUniverse,
+      applicablePolicyMaterial: [
+        {
+          policyKey: "pol_A",
+          policyRef: polRefA,
+          material: { rule: "rule-A" },
+        },
+        {
+          policyKey: "pol_B",
+          policyRef: polRefB,
+          material: { rule: "rule-B" },
+        },
+      ],
+      dependencyTopology: {
+        dependencyEdges: [
+          { dependeePolicyRef: polRefA, dependentPolicyRef: polRefB },
+        ],
+      },
+    };
+
+    const polRef = derivePolicyUniverseRefV2(policyUniverse);
+    expect(polRef.ok).toBe(true);
+    const derivedRef = polRef.ok
+      ? polRef.value
+      : policyUniverse.policyUniverseRef;
+
+    const testReq = {
+      ...req,
+      policyUniverse: {
+        ...policyUniverse,
+        policyUniverseRef: derivedRef,
+      },
+    };
+
+    const res = validateExecutionEnvelopeCompatibilityV2(testReq);
+    expect(res.ok).toBe(true);
+  });
+});
+
 describe("V2-05 Negative-Space & Boundary Audits", () => {
   it("preserves UNKNOWN subject bindings without auto-rejection", () => {
     const baseReq = createValidV2Request();
