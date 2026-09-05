@@ -291,6 +291,30 @@ export function evaluateExecutabilityAndOutcomeV2(
   const authorization = authorizationCandidates[0] ?? null;
   const trustResult = trustResultCandidates[0] ?? null;
 
+  // Step 3b — Cross-role determination distinctness check
+  const nonNullRoles = [policyAggregate, authorization, trustResult].filter(
+    (r): r is OwnerDeterminationBindingV2 => r !== null,
+  );
+  for (let i = 0; i < nonNullRoles.length; i++) {
+    for (let j = i + 1; j < nonNullRoles.length; j++) {
+      if (
+        nonNullRoles[i] === nonNullRoles[j] ||
+        nonNullRoles[i].determinationBindingKey ===
+          nonNullRoles[j].determinationBindingKey
+      ) {
+        return {
+          ok: false,
+          stage: "EXECUTABILITY_OUTCOME",
+          error: {
+            code: "OWNER_RESULT_ROLE_AMBIGUOUS",
+            message:
+              "A single owner determination binding cannot occupy multiple V2-08 constitutional roles",
+          },
+        };
+      }
+    }
+  }
+
   // Step 4 — Reference integrity checks
   if (
     (policyAggregate !== null &&

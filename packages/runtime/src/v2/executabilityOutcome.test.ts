@@ -1410,9 +1410,149 @@ describe("CCP-RI-V2-08 Executability / Outcome Mandate (V208-T01..V208-T40 & Adv
     expect(code).not.toContain('contains("POL")');
     expect(code).not.toContain('contains("SEC")');
     expect(code).not.toContain("toLowerCase");
+
+    // Cross-role distinctness guard audit
+    expect(code).toContain("nonNullRoles");
   });
 
   describe("Mandatory Adversarial Cases", () => {
+    // V208-H01 — Aggregate / Authorization dual-role binding rejected
+    it("V208-H01 — Aggregate / Authorization dual-role binding rejected", () => {
+      const dualRoleBinding: OwnerDeterminationBindingV2 = {
+        determinationBindingKey: "pol_dual_1",
+        determinationQuestionBinding: {
+          questionSemanticRef: {
+            family: "QUESTION_SEMANTIC",
+            ownerRef: "urn:zyppi:owner:council:v1",
+            artifactId: "q-pol-dual",
+          },
+          questionOperandBindings: [
+            {
+              operandKey: "op_pol_uni",
+              operandSlotSemanticRef: {
+                family: "EVALUATION_SEMANTIC",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "slot-pol-uni",
+              },
+              operandKind: "POLICY_UNIVERSE",
+              policyUniverseRef:
+                "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            },
+            {
+              operandKey: "op_req_act",
+              operandSlotSemanticRef: {
+                family: "EVALUATION_SEMANTIC",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "slot-req-act",
+              },
+              operandKind: "REQUESTED_ACTION",
+              requestedActionRef: "REQUESTED_ACTION",
+            },
+            {
+              operandKey: "op_perf",
+              operandSlotSemanticRef: {
+                family: "EVALUATION_SEMANTIC",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "slot-perf",
+              },
+              operandKind: "ACTION_PERFORMER",
+              performerRef: "performer_1",
+            },
+            {
+              operandKey: "op_target",
+              operandSlotSemanticRef: {
+                family: "EVALUATION_SEMANTIC",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "slot-target",
+              },
+              operandKind: "ACTION_TARGET",
+              targetSlotSemanticRef: {
+                family: "TARGET_SLOT_SEMANTIC",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "slot-001",
+              },
+              targetRef: {
+                family: "TARGET",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "target-001",
+              },
+            },
+          ],
+        },
+        constitutionalOwnerRef: {
+          family: "OWNER",
+          ownerRef: "urn:zyppi:owner:council:v1",
+          artifactId: "POL-001",
+        },
+        ownerNativeResult: {
+          aggregateResult: "ALLOW",
+          authorizationDecision: "Authorized",
+        } as unknown as import("@zyppi/domain").JsonValueV2,
+        exactStateRef: {
+          family: "STATE_INSTANCE",
+          ownerRef: "urn:zyppi:owner:council:v1",
+          artifactId: "inst-pol-dual",
+        },
+        exactRuleRef: {
+          family: "RULE",
+          ownerRef: "urn:zyppi:owner:council:v1",
+          artifactId: "rule-pol-dual",
+        },
+        assessedAtCoordinateRef: "tEInput",
+        provenanceRef: {
+          family: "PROVENANCE",
+          ownerRef: "urn:zyppi:owner:council:v1",
+          artifactId: "prov-pol-dual",
+        },
+        determinationDependencyDeclaration: { kind: "AUTHORITATIVELY_NONE" },
+      };
+
+      const secTrust = createSecTrustBinding("definite");
+      const req = createValidV2Request(
+        [dualRoleBinding, secTrust],
+        "VERIFY",
+        1000,
+      );
+
+      const res = evaluateExecutabilityAndOutcomeV2(req);
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.stage).toBe("EXECUTABILITY_OUTCOME");
+        expect(res.error.code).toBe("OWNER_RESULT_ROLE_AMBIGUOUS");
+      }
+    });
+
+    it("Distinct POL bindings (Binding A for aggregate, Binding B for authorization) remain lawful", () => {
+      const bindingA = createPolAggregateBinding("ALLOW", "pol_agg_A");
+      const bindingB = createPolAuthBinding("Authorized", "pol_auth_B");
+      const secTrust = createSecTrustBinding("definite", [], "sec_trust_C");
+
+      expect(bindingA).not.toBe(bindingB);
+      expect(bindingA.determinationBindingKey).not.toBe(
+        bindingB.determinationBindingKey,
+      );
+
+      const req = createValidV2Request(
+        [bindingA, bindingB, secTrust],
+        "VERIFY",
+        1000,
+      );
+
+      const res = evaluateExecutabilityAndOutcomeV2(req);
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.frame.executability.status).toBe("DETERMINED");
+        if (res.frame.executability.status === "DETERMINED") {
+          expect(res.frame.executability.value).toBe(true);
+        }
+        expect(res.frame.outcome).toEqual({
+          status: "PRODUCED",
+          outcome: "verified",
+          basisBindingKeys: ["pol_agg_A", "pol_auth_B", "sec_trust_C"].sort(),
+        });
+      }
+    });
+
     it("POL result missing question operands -> CONTRACT_INVALID", () => {
       const polAggNoOps = createPolAggregateBinding(
         "ALLOW",

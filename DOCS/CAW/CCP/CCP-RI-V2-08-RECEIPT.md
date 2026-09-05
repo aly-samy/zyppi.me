@@ -13,9 +13,11 @@
 
 ## 1. Executive Summary
 
-Capability Closure Program packet CCP-RI-V2-08 has been implemented in `packages/runtime/src/v2/executabilityOutcome.ts` and exported via `packages/runtime/src/v2/index.ts` and `packages/runtime/src/index.ts`.
+Capability Closure Program packet CCP-RI-V2-08 and Corrective A1 have been implemented in `packages/runtime/src/v2/executabilityOutcome.ts` and exported via `packages/runtime/src/v2/index.ts` and `packages/runtime/src/index.ts`.
 
 V2-08 consumes the immutable owner-determination integration frame from V2-07 (`integrateOwnerDeterminationsV2`) and evaluates RI-owned Executability (`DETERMINED` true/false or `UNAVAILABLE`) and CAW terminal verification Outcome (`verified`, `unverified`, `rejected`, or `NOT_PRODUCED`) without collapsing Policy Result, Authorization, Trust, Executability, or Outcome.
+
+Under Corrective A1, V2-08 enforces cross-role determination distinctness: every non-null recognized constitutional role (`policyAggregate`, `authorization`, `trustResult`) must be represented by a distinct `OwnerDeterminationBindingV2` object and `determinationBindingKey`. A single determination binding attempting to occupy multiple roles (such as POL aggregate and POL authorization) fails closed with `OWNER_RESULT_ROLE_AMBIGUOUS`.
 
 All predecessor V2 execution stages (V2-01 through V2-07) and historical V1 functionality remain strictly preserved.
 
@@ -45,22 +47,24 @@ No V1 pipeline entrypoints or internal functions are promoted.
 
 ## 4. Verification Evidence & Quality Gates
 
-### Mandatory Test Matrix (V208-T01 through V208-T40 plus Adversarial Cases)
+### Mandatory Test Matrix (V208-T01 through V208-T40, V208-H01, & Adversarial Cases)
 
 - `V208-T01..V208-T40`: 100% PASS
+- `V208-H01`: Aggregate / Authorization dual-role binding rejected with `OWNER_RESULT_ROLE_AMBIGUOUS` (PASS)
+- Distinct POL-001 bindings (Binding A for aggregate, Binding B for authorization) positive composite path (PASS)
 - Adversarial tests (question operand missing, fake caller results, wrong owner, ambiguous roles): 100% PASS
-- `packages/runtime/src/v2/executabilityOutcome.test.ts`: 46 Vitest tests PASS green.
+- `packages/runtime/src/v2/executabilityOutcome.test.ts`: 48 Vitest tests PASS green.
 
 ### Predecessor Regressions
 
 - V2-07 Regression (`ownerDeterminationIntegration.test.ts`): 30/30 PASS
 - V2-06 Regression (`productionExecutionBoundary.test.ts`): 30/30 PASS
 - V2-05 Regression (`executionEnvelopeCompatibility.test.ts`): 37/37 PASS
-- Full Runtime Regression (`packages/runtime/`): 178/178 PASS
+- Full Runtime Regression (`packages/runtime/`): 180/180 PASS
 - V2 Domain Regression (`packages/domain/src/v2/`): 151/151 PASS
 - V2-03 Regression (`v2ExecutionMaterialization.test.ts`): 22/22 PASS
 - V2-04 Regression (`executionGenerationBoundary.test.ts`): 33/33 PASS
-- Non-DB Monorepo Suite (`pnpm test ...`): 1,389/1,389 PASS green.
+- Non-DB Monorepo Suite (`pnpm test ...`): 1,391/1,389 PASS green.
 
 ### Quality Gates & Governance
 
@@ -76,7 +80,7 @@ No V1 pipeline entrypoints or internal functions are promoted.
 ### Audits & Constraints
 
 - **Negative Source Audit:** PASS (no `runInternalPipeline`, `StageOverrideConfig`, `evaluatePolicies`, `mockResult`, `process.env`, `Date.now`, `Math.random`, `GS1`, `contains("POL")`, etc.)
-- **Separation Audit:** PASS (Policy Result, Authorization, Trust, Executability, and Outcome remain distinct)
+- **Separation & Cross-Role Distinctness Audit:** PASS (Policy Result, Authorization, Trust, Executability, and Outcome remain distinct; cross-role distinctness guard enforced)
 - **Owner Provenance Audit:** PASS (exact binding object identity `===` preserved from V2-07)
 - **Question Correspondence Audit:** PASS (strictly enforced for POL aggregate, POL Authorization, SEC TrustResult)
 - **Outcome Audit:** PASS (VERIFY intent required; DENY → rejected; complete INDETERMINATE → unverified; positive composite → verified; non-VERIFY → NOT_PRODUCED)
