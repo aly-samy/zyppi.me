@@ -265,6 +265,7 @@ describe("Runtime Pipeline Scaffold Tests", () => {
   it("confirms that the public entry point exposes the intended V2 capability", () => {
     expect({ ...runtimeIndex }).toEqual({
       validateExecutionEnvelopeCompatibilityV2: expect.any(Function),
+      prepareProductionExecutionV2: expect.any(Function),
     });
   });
 
