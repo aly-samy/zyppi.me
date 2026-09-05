@@ -23,6 +23,19 @@ export {
   V2_DOMAIN_SEPARATORS,
 } from "./identity.js";
 
+export {
+  deriveExecutionOutputHashV2,
+  deriveReceiptDeterministicHashV2,
+  deriveReceiptEvidenceHashV2,
+  deriveReceiptIdV2,
+  V2_RECEIPT_DOMAIN_SEPARATORS,
+} from "./receiptCrypto.js";
+export type {
+  ExecutionOutputMaterialV2,
+  ReceiptDeterministicHashPreimageV2,
+  ReceiptIdPreimageV2,
+} from "./receiptCrypto.js";
+
 export type { JsonPrimitiveV2, JsonValueV2 } from "./json.js";
 export { isStrictJsonValueV2 } from "./json.js";
 
@@ -51,6 +64,8 @@ export type {
   TargetRefV2,
   TargetSlotSemanticRefV2,
 } from "./refs.js";
+
+export { normalizeTemporalCoordinateV2 } from "./temporal.js";
 
 export type {
   ActionPerformerBindingV2,
