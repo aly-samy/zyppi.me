@@ -1376,6 +1376,7 @@ describe("CCP-RI-V2-08 Executability / Outcome Mandate (V208-T01..V208-T40 & Adv
     expect(exportedFunctions.sort()).toEqual([
       "evaluateExecutabilityAndOutcomeV2",
       "integrateOwnerDeterminationsV2",
+      "materializeExecutionReceiptV2",
       "prepareProductionExecutionV2",
       "validateExecutionEnvelopeCompatibilityV2",
     ]);

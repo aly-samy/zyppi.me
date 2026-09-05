@@ -37,3 +37,14 @@ export type {
   ExecutionOwnerResultBindingsV2,
   OutcomeMaterializationV2,
 } from "./executabilityOutcome.js";
+
+export { materializeExecutionReceiptV2 } from "./receiptMaterialization.js";
+export type {
+  ExecutionReceiptV2,
+  ExecutabilityOutcomeV2FailureResult,
+  ReceiptMaterializationFrameV2,
+  ReceiptMaterializationV2ErrorCode,
+  ReceiptMaterializationV2Failure,
+  ReceiptMaterializationV2Result,
+  ReceiptMaterializationV2Success,
+} from "./receiptMaterialization.js";
