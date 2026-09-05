@@ -15,3 +15,12 @@ export type {
   ProductionExecutionPreparationV2Result,
   ProductionExecutionPreparationV2Success,
 } from "./productionExecutionBoundary.js";
+
+export { integrateOwnerDeterminationsV2 } from "./ownerDeterminationIntegration.js";
+export type {
+  OwnerDeterminationIntegrationFrameV2,
+  OwnerDeterminationIntegrationV2ErrorCode,
+  OwnerDeterminationIntegrationV2Failure,
+  OwnerDeterminationIntegrationV2Result,
+  OwnerDeterminationIntegrationV2Success,
+} from "./ownerDeterminationIntegration.js";
