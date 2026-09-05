@@ -1331,21 +1331,123 @@ describe("CCP-RI-V2-10 — Native End-to-End Proof Suite", () => {
   // 4. Participant Foundation PFG-E2E-01..05 Proofs (V210-T30..T34)
   describe("Participant Foundation PFG-E2E Proofs", () => {
     it("V210-T30 — PFG-E2E-01 Self Execution", () => {
-      const req = createBaseV2Request();
-      // Actor == Governed Subject and agencyReliance == NO_DELEGATED_AGENCY_RELIANCE
-      expect(req.participation.roleBindings[0].subject).toEqual({
-        kind: "KNOWN",
-        subjectRef: {
-          family: "SUBJECT",
-          ownerRef: "urn:zyppi:owner:council:v1",
-          artifactId: "actor-001",
+      const subjectRefS = {
+        family: "SUBJECT" as const,
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "actor-001",
+      };
+
+      const selfReq: ExecutionRequestV2 = createBaseV2Request({
+        participation: {
+          roleBindings: [
+            {
+              roleBindingKey: "rb_actor",
+              role: "ACTOR",
+              subject: {
+                kind: "KNOWN",
+                subjectRef: subjectRefS,
+              },
+            },
+            {
+              roleBindingKey: "rb_governed",
+              role: "GOVERNED_SUBJECT",
+              subject: {
+                kind: "KNOWN",
+                subjectRef: subjectRefS,
+              },
+            },
+          ],
+          agencyBindings: [],
+        },
+        intent: {
+          originatorParticipationRef: "rb_actor",
+          intentCategory: "VERIFY",
+          intentTargetRef: {
+            family: "TARGET",
+            ownerRef: "urn:zyppi:owner:council:v1",
+            artifactId: "asset-001",
+          },
+          candidateStateBinding: {
+            stateTargetRef: {
+              family: "TARGET",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "asset-001",
+            },
+            stateSemanticRef: {
+              family: "STATE_SEMANTIC",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "verification-v1",
+            },
+            exactStateInstance: {
+              kind: "GOVERNED_ARTIFACT_REF",
+              stateInstanceRef: {
+                family: "STATE_INSTANCE",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "instance-001",
+              },
+            },
+          },
+        },
+        requestedAction: {
+          actionSemanticRef: {
+            family: "ACTION_SEMANTIC",
+            ownerRef: "urn:zyppi:owner:council:v1",
+            artifactId: "verify-asset-v1",
+          },
+          intentActionCompatibilityBinding: {
+            kind: "GOVERNED_SEMANTIC_CONTRACT",
+            exactCompatibilityContractRef: {
+              family: "COMPATIBILITY_CONTRACT",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "compat-contract-001",
+            },
+          },
+          actionPerformerBindings: [
+            {
+              performerKey: "pk1",
+              actorParticipationRef: "rb_actor",
+              agencyReliance: {
+                kind: "NO_DELEGATED_AGENCY_RELIANCE",
+              },
+            },
+          ],
+          actionTargetBindings: [
+            {
+              targetSlotSemanticRef: {
+                family: "TARGET_SLOT_SEMANTIC",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "primary-target-v1",
+              },
+              targetRef: {
+                family: "TARGET",
+                ownerRef: "urn:zyppi:owner:council:v1",
+                artifactId: "asset-001",
+              },
+            },
+          ],
+          requestedCapabilityClaimBindings: [],
         },
       });
+
+      // Assert explicit self-execution shape: Actor SubjectRef == Governed Subject SubjectRef
+      const actorSubj = selfReq.participation.roleBindings.find(
+        (rb) => rb.role === "ACTOR",
+      )?.subject;
+      const govSubj = selfReq.participation.roleBindings.find(
+        (rb) => rb.role === "GOVERNED_SUBJECT",
+      )?.subject;
+
+      expect(actorSubj?.kind).toBe("KNOWN");
+      expect(govSubj?.kind).toBe("KNOWN");
+      if (actorSubj?.kind === "KNOWN" && govSubj?.kind === "KNOWN") {
+        expect(actorSubj.subjectRef).toEqual(govSubj.subjectRef);
+      }
+      expect(selfReq.participation.agencyBindings).toEqual([]);
       expect(
-        req.requestedAction.actionPerformerBindings[0].agencyReliance.kind,
+        selfReq.requestedAction.actionPerformerBindings[0].agencyReliance.kind,
       ).toBe("NO_DELEGATED_AGENCY_RELIANCE");
 
-      const matRes = materializeExecutionRequestV2(toMatInput(req));
+      const matRes = materializeExecutionRequestV2(toMatInput(selfReq));
       expect(matRes.ok).toBe(true);
       if (!matRes.ok) return;
 
@@ -1436,9 +1538,104 @@ describe("CCP-RI-V2-10 — Native End-to-End Proof Suite", () => {
     });
 
     it("V210-T32 — PFG-E2E-03 Same Subject, Different Context", () => {
-      const req1 = createBaseV2Request({ requestId: "req-context-1" });
+      const subjectRefS = {
+        family: "SUBJECT" as const,
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "actor-001",
+      };
+
+      const rawStateA = {
+        semanticStateRef: "",
+        stateViews: [
+          {
+            viewKey: "vk1",
+            viewScope: {
+              family: "SCOPE" as const,
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "global-v1",
+            },
+            stateBindings: [
+              {
+                stateBindingKey: "sb_standing",
+                kind: "STANDING_STATE" as const,
+                subjectRef: subjectRefS,
+                stateSemanticRef: {
+                  family: "STATE_SEMANTIC" as const,
+                  ownerRef: "urn:zyppi:owner:council:v1",
+                  artifactId: "standing-v1",
+                },
+                exactStateRef: {
+                  family: "STATE_INSTANCE" as const,
+                  ownerRef: "urn:zyppi:owner:council:v1",
+                  artifactId: "standing-active",
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const semResA = deriveSemanticStateRefV2(
+        rawStateA as unknown as Parameters<typeof deriveSemanticStateRefV2>[0],
+      );
+      expect(semResA.ok).toBe(true);
+      if (!semResA.ok) return;
+
+      const constStateA = {
+        ...rawStateA,
+        semanticStateRef: semResA.value,
+      };
+
+      const rawStateB = {
+        semanticStateRef: "",
+        stateViews: [
+          {
+            viewKey: "vk1",
+            viewScope: {
+              family: "SCOPE" as const,
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "global-v1",
+            },
+            stateBindings: [
+              {
+                stateBindingKey: "sb_standing",
+                kind: "STANDING_STATE" as const,
+                subjectRef: subjectRefS,
+                stateSemanticRef: {
+                  family: "STATE_SEMANTIC" as const,
+                  ownerRef: "urn:zyppi:owner:council:v1",
+                  artifactId: "standing-v1",
+                },
+                exactStateRef: {
+                  family: "STATE_INSTANCE" as const,
+                  ownerRef: "urn:zyppi:owner:council:v1",
+                  artifactId: "standing-suspended",
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const semResB = deriveSemanticStateRefV2(
+        rawStateB as unknown as Parameters<typeof deriveSemanticStateRefV2>[0],
+      );
+      expect(semResB.ok).toBe(true);
+      if (!semResB.ok) return;
+
+      const constStateB = {
+        ...rawStateB,
+        semanticStateRef: semResB.value,
+      };
+
+      const req1 = createBaseV2Request({
+        requestId: "req-context-1",
+        constitutionalState: constStateA,
+      });
+
       const req2 = createBaseV2Request({
         requestId: "req-context-2",
+        constitutionalState: constStateB,
         executionContext: {
           executionId: "exec-context-2",
           temporalCoordinates: { tEInput: "2026-08-25T10:00:00Z" },
@@ -1453,10 +1650,17 @@ describe("CCP-RI-V2-10 — Native End-to-End Proof Suite", () => {
       expect(matRes2.ok).toBe(true);
       if (!matRes1.ok || !matRes2.ok) return;
 
+      // Both retain same canonical SubjectRef
       expect(
         matRes1.executionRequest.participation.roleBindings[0].subject,
       ).toEqual(matRes2.executionRequest.participation.roleBindings[0].subject);
 
+      // Governed semantic state differs
+      expect(
+        matRes1.executionRequest.constitutionalState.semanticStateRef,
+      ).not.toBe(matRes2.executionRequest.constitutionalState.semanticStateRef);
+
+      // Whole request digest candidate differs
       expect(matRes1.wholeRequestDigestCandidate).not.toBe(
         matRes2.wholeRequestDigestCandidate,
       );
@@ -2084,16 +2288,33 @@ describe("CCP-RI-V2-10 — Native End-to-End Proof Suite", () => {
     });
 
     it("V210-T39 — No V1 / Override / Mock Authority in Native V2 Path", () => {
-      const v2RuntimePath = resolve(
-        __dirname,
-        "../../../../packages/runtime/src/v2/receiptMaterialization.ts",
-      );
-      const content = readFileSync(v2RuntimePath, "utf8");
+      const pathsToAudit = [
+        "apps/api/src/zprof/v2ExecutionMaterialization.ts",
+        "apps/api/src/zprof/executionGenerationBoundary.ts",
+        "packages/runtime/src/v2/executionEnvelopeCompatibility.ts",
+        "packages/runtime/src/v2/productionExecutionBoundary.ts",
+        "packages/runtime/src/v2/ownerDeterminationIntegration.ts",
+        "packages/runtime/src/v2/executabilityOutcome.ts",
+        "packages/runtime/src/v2/receiptMaterialization.ts",
+      ];
 
-      expect(content).not.toContain("runInternalPipeline");
-      expect(content).not.toContain("generateReceiptHashes");
-      expect(content).not.toContain("StageOverrideConfig");
-      expect(content).not.toContain("DEFAULT_RI_STAGE_OVERRIDES");
+      const repoRoot = resolve(__dirname, "../../../..");
+
+      const prohibitedTokens = [
+        "runInternalPipeline",
+        "generateReceiptHashes",
+        "StageOverrideConfig",
+        "DEFAULT_RI_STAGE_OVERRIDES",
+      ];
+
+      for (const relPath of pathsToAudit) {
+        const fullPath = resolve(repoRoot, relPath);
+        const content = readFileSync(fullPath, "utf8");
+
+        for (const token of prohibitedTokens) {
+          expect(content).not.toContain(token);
+        }
+      }
     });
 
     it("V210-T40 — No New V2-10 Runtime Semantic Surface", () => {

@@ -159,9 +159,9 @@ ExecutionRequestV2
 
 ## 9. Participant PFG-E2E-01..05 Results
 
-- **PFG-E2E-01 (Self Execution):** `Actor == Governed Subject` and `NO_DELEGATED_AGENCY_RELIANCE` traverses native V2 chain cleanly without fake agency or role-authority collapse (`V210-T30`).
+- **PFG-E2E-01 (Self Execution):** `ACTOR` and `GOVERNED_SUBJECT` role bindings reference the exact same `SubjectRef S` (`actor-001`) with `agencyBindings = []` and `NO_DELEGATED_AGENCY_RELIANCE`, traversing native V2 chain cleanly to `outcome = verified` without fake agency or role-authority collapse (`V210-T30`).
 - **PFG-E2E-02 (Delegated Execution):** `Actor != Governed Subject` with explicit `AgencyBindingV2` and `DELEGATED_AGENCY_SINGLE` traverses natively with distinct Actor and Governed Subject roles (`V210-T31`).
-- **PFG-E2E-03 (Same Subject, Different Context):** Same canonical `SubjectRef` evaluated under different execution contexts produces distinct Whole-Request Digests and distinct Receipt IDs without subject duplication (`V210-T32`).
+- **PFG-E2E-03 (Same Subject, Different Context):** Same canonical `SubjectRef S` evaluated under different governed constitutional state contexts (`STANDING_STATE` exactStateRef `standing-active` vs `standing-suspended`) produces distinct derived `semanticStateRef`s, distinct Whole-Request Digests, and distinct Receipt IDs without subject duplication (`V210-T32`).
 - **PFG-E2E-04 (Historical T1 vs Later T2 State):** Execution A @ T1 remains byte/value stable on replay even when Execution B @ T2 evaluates altered/revoked authority state (`V210-T33`).
 - **PFG-E2E-05 (UNKNOWN Subject Preservation):** `SubjectBindingV2.kind == "UNKNOWN"` preserved through `inputHash` into valid Receipt without identity guessing or user/account/tenant dossier fields (`V210-T34`).
 
@@ -170,9 +170,9 @@ ExecutionRequestV2
 ## 10. V1 Downgrade Audit
 
 - **V2 -> V1 Downgrade Observed:** ZERO
-- **Native V2 Path Calls to `runInternalPipeline`:** ZERO
-- **Native V2 Path Calls to `generateReceiptHashes`:** ZERO
-- **Native V2 Path Calls to `StageOverrideConfig` / `DEFAULT_RI_STAGE_OVERRIDES`:** ZERO
+- **Native V2 Execution Path Calls to `runInternalPipeline`:** ZERO (Audited across `v2ExecutionMaterialization.ts`, `executionGenerationBoundary.ts`, `executionEnvelopeCompatibility.ts`, `productionExecutionBoundary.ts`, `ownerDeterminationIntegration.ts`, `executabilityOutcome.ts`, `receiptMaterialization.ts`)
+- **Native V2 Execution Path Calls to `generateReceiptHashes`:** ZERO
+- **Native V2 Execution Path Calls to `StageOverrideConfig` / `DEFAULT_RI_STAGE_OVERRIDES`:** ZERO
 - **Historical V1 Path Preservation:** Historical markerless V1 raw JSON dispatches to `generation = "v1"` without modification (`V210-T15`).
 
 ---
@@ -210,7 +210,7 @@ ExecutionRequestV2
 ## 14. Synthetic Non-GS1 Twin Result
 
 - **Synthetic Twin Test:** `V210-T37`
-- **Execution:** Explicitly synthetic request with zero GS1, GTIN, GLN, Digital Link, DPP, or EPCIS identifiers (`synthetic-subject`, `resource-001`, `inspect-resource-v1`).
+- **Execution:** Explicitly synthetic request using synthetic owner `urn:zyppi:owner:synthetic:v1` with zero GS1, GTIN, GLN, Digital Link, DPP, or EPCIS identifiers (`subject-synth-1`, `target-synth-1`, `action-synth-1`, `slot-synth-1`, `compat-synth-1`, `inst-synth-1`, `rule-synth-1`).
 - **Result:** Traverses generic V2 chain natively to `ExecutionReceiptV2` with `outcome = verified`.
 - **Conclusion:** Generic RI is 100% independent of GS1.
 
