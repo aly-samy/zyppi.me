@@ -8,7 +8,7 @@
 - **Subtitle**: Bound Owner Determination Consumption & Dependency Scheduling
 - **Issuing Authority**: Zyppi Constitutional Council
 - **Target Agent**: Jules — AI Software Engineer
-- **Status**: IMPLEMENTATION COMPLETE — READY FOR COUNCIL RE-VERIFICATION
+- **Status**: SUBMITTED — PENDING COUNCIL RE-VERIFICATION
 
 ---
 
@@ -84,6 +84,8 @@ All 7 regression targets executed and passed 100% green:
 6. `pnpm test apps/api/src/zprof/v2ExecutionMaterialization.test.ts` (22/22 passed)
 7. `pnpm test apps/api/src/zprof/executionGenerationBoundary.test.ts` (33/33 passed)
 
+The generated replay artifact `packages/testing/replay/receipts/latest.json` was restored to its exact mandated baseline state prior to final submission.
+
 ---
 
 ## Quality Gates & Audits
@@ -109,7 +111,7 @@ All 7 regression targets executed and passed 100% green:
 3. **Ownership Preservation Audit**: Confirmed V2-07 does not rewrite or construct `ownerNativeResult`, `constitutionalOwnerRef`, `determinationQuestionBinding`, `exactStateRef`, `exactRuleRef`, `assessedAtCoordinateRef`, `provenanceRef`, or `determinationDependencyDeclaration`.
 4. **Dependency Audit**: Verified all explicit `dependencyRefs` are honored, `AUTHORITATIVELY_NONE` has zero dependencies, scheduling direction is dependency-before-dependent, same-layer determinations are independent, and result values do not alter topology.
 5. **Public API Audit**: Confirmed root value exports for `@zyppi/runtime` are strictly `validateExecutionEnvelopeCompatibilityV2`, `prepareProductionExecutionV2`, and `integrateOwnerDeterminationsV2`.
-6. **Protected Boundaries Audit**: Confirmed zero modifications to `packages/domain/**`, `packages/contracts/**`, `apps/api/**`, `infra/**`, `edge/**`, `.github/**`, `packages/runtime/src/pipeline.ts`, `packages/runtime/src/types.ts`, `packages/runtime/src/evaluator.ts`, `v2/executionEnvelopeCompatibility.ts`, `v2/productionExecutionBoundary.ts`, or `packages/testing/replay/**`.
+6. **Protected Boundaries Audit**: Confirmed zero modifications to protected paths `packages/domain/**`, `packages/contracts/**`, `apps/api/**`, `infra/**`, `edge/**`, `.github/**`, `packages/runtime/src/pipeline.ts`, `packages/runtime/src/types.ts`, `packages/runtime/src/evaluator.ts`, `v2/executionEnvelopeCompatibility.ts`, `v2/productionExecutionBoundary.ts`, or `packages/testing/replay/**`. Modifying `packages/runtime/src/v2/productionExecutionBoundary.test.ts` is limited strictly to updating public API export containment assertions (`V206-T30`).
 
 ---
 
@@ -127,7 +129,7 @@ Alongside type-only exports for envelope compatibility, production isolation, an
 
 ---
 
-## Changed Files Summary
+## Truthful Final Seven-File Diff
 
 ```text
 packages/runtime/src/v2/ownerDeterminationIntegration.ts       NEW
@@ -135,6 +137,7 @@ packages/runtime/src/v2/ownerDeterminationIntegration.test.ts  NEW
 packages/runtime/src/v2/index.ts                               MODIFIED
 packages/runtime/src/bootstrap.test.ts                         MODIFIED (assertion update)
 packages/runtime/src/pipeline.test.ts                          MODIFIED (assertion update)
+packages/runtime/src/v2/productionExecutionBoundary.test.ts    MODIFIED (assertion update)
 DOCS/CAW/CCP/CCP-RI-V2-07-RECEIPT.md                          NEW
 ```
 
