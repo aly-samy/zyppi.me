@@ -990,9 +990,10 @@ describe("CCP-RI-V2-06 Production / Test Isolation Mandate (V206-T01..V206-T30)"
         "function",
     );
 
-    expect(exportedFunctions).toEqual([
-      "validateExecutionEnvelopeCompatibilityV2",
+    expect(exportedFunctions.sort()).toEqual([
+      "integrateOwnerDeterminationsV2",
       "prepareProductionExecutionV2",
+      "validateExecutionEnvelopeCompatibilityV2",
     ]);
   });
 });
