@@ -24,6 +24,7 @@ export {
 } from "./identity.js";
 
 export {
+  canonicalizeReceiptDecisionSummaryV2,
   deriveExecutionOutputHashV2,
   deriveReceiptDeterministicHashV2,
   deriveReceiptEvidenceHashV2,

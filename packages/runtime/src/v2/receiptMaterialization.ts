@@ -1,4 +1,5 @@
 import {
+  canonicalizeReceiptDecisionSummaryV2,
   deriveExecutionOutputHashV2,
   deriveExecutionRequestV2DigestCandidate,
   deriveReceiptDeterministicHashV2,
@@ -54,10 +55,15 @@ export type ReceiptMaterializationV2Failure = {
   };
 };
 
+export type ExecutabilityOutcomeV2FailureResult = Exclude<
+  ExecutabilityOutcomeV2Result,
+  { readonly ok: true }
+>;
+
 export type ReceiptMaterializationV2Result =
   | ReceiptMaterializationV2Success
   | ReceiptMaterializationV2Failure
-  | ExecutabilityOutcomeV2Result;
+  | ExecutabilityOutcomeV2FailureResult;
 
 /**
  * Recursively freezes an object graph in-place.
@@ -93,10 +99,13 @@ function constructDecisionSummary(
   policyAggregate: OwnerDeterminationBindingV2 | null,
 ): { ok: true; summaryString: string } | { ok: false; message: string } {
   if (policyAggregate === null) {
-    return {
-      ok: true,
-      summaryString: '{"status":"NOT_PRODUCED"}',
-    };
+    const canonRes = canonicalizeReceiptDecisionSummaryV2({
+      status: "NOT_PRODUCED",
+    });
+    if (!canonRes.ok) {
+      return { ok: false, message: canonRes.error.message };
+    }
+    return { ok: true, summaryString: canonRes.value };
   }
 
   const res = policyAggregate.ownerNativeResult;
@@ -132,20 +141,12 @@ function constructDecisionSummary(
     provenanceRef: policyAggregate.provenanceRef,
   };
 
-  // Canonicalize to JCS object string
-  // Plain property sort for JCS
-  const sortedKeys = Object.keys(summaryObj).sort((a, b) =>
-    a < b ? -1 : a > b ? 1 : 0,
-  );
-  const parts: string[] = [];
-  for (const k of sortedKeys) {
-    const keyStr = JSON.stringify(k);
-    const valStr = JSON.stringify(summaryObj[k as keyof typeof summaryObj]);
-    parts.push(`${keyStr}:${valStr}`);
+  const canonRes = canonicalizeReceiptDecisionSummaryV2(summaryObj);
+  if (!canonRes.ok) {
+    return { ok: false, message: canonRes.error.message };
   }
-  const summaryString = "{" + parts.join(",") + "}";
 
-  return { ok: true, summaryString };
+  return { ok: true, summaryString: canonRes.value };
 }
 
 /**

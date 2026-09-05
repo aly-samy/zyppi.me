@@ -40,6 +40,15 @@ export interface ReceiptDeterministicHashPreimageV2 {
 }
 
 /**
+ * Canonicalizes a bounded decision summary object graph under RFC 8785 JCS.
+ */
+export function canonicalizeReceiptDecisionSummaryV2(
+  material: unknown,
+): V2IdentityResult<string> {
+  return canonicalizeJcsV2(material);
+}
+
+/**
  * Computes SHA-256 output digest under `zyppi:domain:output:v2:` over JCS canonicalized output material.
  */
 export function deriveExecutionOutputHashV2(

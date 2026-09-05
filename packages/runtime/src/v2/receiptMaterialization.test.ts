@@ -717,6 +717,11 @@ describe("CCP-RI-V2-09 Mandatory Test Matrix (V209-T01..V209-T42)", () => {
 
   // V209-T05 — V2-06 Failure Preserved
   it("V209-T05 — V2-06 Failure Preserved", () => {
+    // Note: V2-06 (prepareProductionExecutionV2) defensive isolation guards
+    // run snapshot re-validation. Under public V2-05 envelope validation, public ExecutionRequestV2
+    // inputs that pass V2-05 produce valid inert snapshots.
+    // Here we verify that an invalid request fails closed at predecessor stage STRUCTURAL_VALIDATION
+    // and prove control-flow preservation of ProductionExecutionIsolationV2Failure in ReceiptMaterializationV2Result.
     const req = createValidV2Request();
     const badProd = { ...req, testMode: true };
     const res = materializeExecutionReceiptV2(badProd);
@@ -728,6 +733,11 @@ describe("CCP-RI-V2-09 Mandatory Test Matrix (V209-T01..V209-T42)", () => {
 
   // V209-T06 — V2-07 Failure Preserved
   it("V209-T06 — V2-07 Failure Preserved", () => {
+    // Note: V2-07 (integrateOwnerDeterminationsV2) dependency scheduling checks evaluate dependency DAGs.
+    // V2-05 Law G already validates and rejects dependency cycles and dangling references at the
+    // EXECUTION_ENVELOPE_COMPATIBILITY stage.
+    // Here we test a dependency cycle input to verify it fails closed before receipt materialization,
+    // and prove control-flow preservation of OwnerDeterminationIntegrationV2Failure in ReceiptMaterializationV2Result.
     const bA = createBinding("A", ["B"]);
     const bB = createBinding("B", ["A"]);
     const req = createValidV2Request([bA, bB]);
@@ -735,6 +745,7 @@ describe("CCP-RI-V2-09 Mandatory Test Matrix (V209-T01..V209-T42)", () => {
     expect(res.ok).toBe(false);
     if (!res.ok) {
       expect(res.stage).toBe("EXECUTION_ENVELOPE_COMPATIBILITY");
+      expect(res.error.code).toBe("OWNER_DEPENDENCY_INCOMPATIBLE");
     }
   });
 
@@ -1565,6 +1576,146 @@ describe("CCP-RI-V2-09 Mandatory Test Matrix (V209-T01..V209-T42)", () => {
     expect(code).not.toContain("validateExecutionReceipt");
     expect(code).not.toContain("StageOverrideConfig");
     expect(code).not.toContain("evaluatePolicies");
+  });
+
+  // V209-H01 — Nested Decision Summary Property-Order Invariance
+  it("V209-H01 — Nested Decision Summary Property-Order Invariance", () => {
+    const polAgg1: OwnerDeterminationBindingV2 = {
+      determinationBindingKey: "pol_agg_1",
+      determinationQuestionBinding: {
+        questionSemanticRef: {
+          family: "QUESTION_SEMANTIC",
+          ownerRef: "urn:zyppi:owner:council:v1",
+          artifactId: "q-pol-agg",
+        },
+        questionOperandBindings: [
+          {
+            operandKey: "op_pol_uni",
+            operandSlotSemanticRef: {
+              family: "EVALUATION_SEMANTIC",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "slot-pol-uni",
+            },
+            operandKind: "POLICY_UNIVERSE",
+            policyUniverseRef:
+              "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          },
+          {
+            operandKey: "op_req_act",
+            operandSlotSemanticRef: {
+              family: "EVALUATION_SEMANTIC",
+              ownerRef: "urn:zyppi:owner:council:v1",
+              artifactId: "slot-req-act",
+            },
+            operandKind: "REQUESTED_ACTION",
+            requestedActionRef: "REQUESTED_ACTION",
+          },
+        ],
+      },
+      constitutionalOwnerRef: {
+        family: "OWNER",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "POL-001",
+      },
+      ownerNativeResult: { aggregateResult: "ALLOW" },
+      exactStateRef: {
+        family: "STATE_INSTANCE",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "inst-pol-agg",
+      },
+      exactRuleRef: {
+        family: "RULE",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "rule-pol-agg",
+      },
+      assessedAtCoordinateRef: "tEInput",
+      provenanceRef: {
+        family: "PROVENANCE",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "prov-pol-agg",
+      },
+      determinationDependencyDeclaration: { kind: "AUTHORITATIVELY_NONE" },
+    };
+
+    // Construct polAgg2 with reversed key insertion order on all nested refs
+    const polAgg2: OwnerDeterminationBindingV2 = {
+      determinationBindingKey: "pol_agg_1",
+      determinationQuestionBinding: {
+        questionSemanticRef: {
+          artifactId: "q-pol-agg",
+          ownerRef: "urn:zyppi:owner:council:v1",
+          family: "QUESTION_SEMANTIC",
+        },
+        questionOperandBindings:
+          polAgg1.determinationQuestionBinding.questionOperandBindings,
+      },
+      constitutionalOwnerRef: {
+        artifactId: "POL-001",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        family: "OWNER",
+      },
+      ownerNativeResult: { aggregateResult: "ALLOW" },
+      exactStateRef: {
+        artifactId: "inst-pol-agg",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        family: "STATE_INSTANCE",
+      },
+      exactRuleRef: {
+        artifactId: "rule-pol-agg",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        family: "RULE",
+      },
+      assessedAtCoordinateRef: "tEInput",
+      provenanceRef: {
+        artifactId: "prov-pol-agg",
+        ownerRef: "urn:zyppi:owner:council:v1",
+        family: "PROVENANCE",
+      },
+      determinationDependencyDeclaration: { kind: "AUTHORITATIVELY_NONE" },
+    };
+
+    const req1 = createValidV2Request([polAgg1]);
+    const req2 = createValidV2Request([polAgg2]);
+
+    const res1 = materializeExecutionReceiptV2(req1);
+    const res2 = materializeExecutionReceiptV2(req2);
+
+    expect(res1.ok).toBe(true);
+    expect(res2.ok).toBe(true);
+    if (
+      res1.ok &&
+      res2.ok &&
+      res1.frame.kind === "RECEIPT_MATERIALIZATION_V2" &&
+      res2.frame.kind === "RECEIPT_MATERIALIZATION_V2"
+    ) {
+      expect(res1.frame.executionReceipt.decisionSummary).toBe(
+        res2.frame.executionReceipt.decisionSummary,
+      );
+      expect(res1.frame.executionReceipt.inputHash).toBe(
+        res2.frame.executionReceipt.inputHash,
+      );
+      expect(res1.frame.executionReceipt.receiptId).toBe(
+        res2.frame.executionReceipt.receiptId,
+      );
+      expect(res1.frame.executionReceipt.deterministicHash).toBe(
+        res2.frame.executionReceipt.deterministicHash,
+      );
+    }
+  });
+
+  // A2 — Static type assertion proving ok: true narrows frame.kind strictly to RECEIPT_MATERIALIZATION_V2
+  it("A2 — Static type assertion proving ok: true narrows frame.kind strictly to RECEIPT_MATERIALIZATION_V2", () => {
+    const polAgg = createPolAggregateBinding("ALLOW");
+    const req = createValidV2Request([polAgg]);
+    const result = materializeExecutionReceiptV2(req);
+
+    if (result.ok) {
+      type VerifiedKind = typeof result.frame.kind;
+      const staticKindAssertion: VerifiedKind = "RECEIPT_MATERIALIZATION_V2";
+      expect(staticKindAssertion).toBe("RECEIPT_MATERIALIZATION_V2");
+      expect(result.frame.kind).toBe("RECEIPT_MATERIALIZATION_V2");
+      expect(result.frame.executionReceipt).toBeDefined();
+    }
   });
 
   // V209-T42 — Public API Exactness

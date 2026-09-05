@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-CCP-RI-V2-09 materializes the first native V2 constitutional `ExecutionReceipt` from the exact V2-08 execution-disposition frame. It delegates first to V2-08 (`evaluateExecutabilityAndOutcomeV2`), preserves every predecessor failure unchanged, consumes only the immutable V2-08 success frame, materializes the exact ten-field constitutional Receipt surface, creates native V2 cryptographic domains under JCS (RFC 8785) + UTF-8 + SHA-256 in a pure Domain V2 helper (`packages/domain/src/v2/receiptCrypto.ts`), preserves the existing V2 input digest directly as `inputHash`, cryptographically binds RI-owned V2 output semantics (`executability` and `outcome`) in a separate output domain without recursively hashing the Receipt, cryptographically binds the normalized V2 Evidence state in a separate Evidence domain, preserves the exact supplied `executionId`, deterministically identifies the admitted V2 policy state through `policyUniverseRef`, constructs a bounded canonical policy `decisionSummary` without re-evaluating POL, maps `executionTime` to canonical UTC-Z `tEInput`, derives deterministic non-circular `receiptId` and `deterministicHash`, preserves Participant historical attribution through exact V2 input binding, and stops before V2-10 end-to-end proof, persistence, PRJ, or public API work.
+CCP-RI-V2-09 materializes the first native V2 constitutional `ExecutionReceipt` from the exact V2-08 execution-disposition frame. It delegates first to V2-08 (`evaluateExecutabilityAndOutcomeV2`), preserves every predecessor failure unchanged, consumes only the immutable V2-08 success frame, materializes the exact ten-field constitutional Receipt surface, creates native V2 cryptographic domains under JCS (RFC 8785) + UTF-8 + SHA-256 in a pure Domain V2 helper (`packages/domain/src/v2/receiptCrypto.ts`), preserves the existing V2 input digest directly as `inputHash`, cryptographically binds RI-owned V2 output semantics (`executability` and `outcome`) in a separate output domain without recursively hashing the Receipt, cryptographically binds the normalized V2 Evidence state in a separate Evidence domain, preserves the exact supplied `executionId`, deterministically identifies the admitted V2 policy state through `policyUniverseRef`, constructs a bounded canonical policy `decisionSummary` using `canonicalizeReceiptDecisionSummaryV2` without re-evaluating POL, maps `executionTime` to canonical UTC-Z `tEInput`, derives deterministic non-circular `receiptId` and `deterministicHash`, preserves Participant historical attribution through exact V2 input binding, and stops before V2-10 end-to-end proof, persistence, PRJ, or public API work.
 
 ---
 
@@ -23,7 +23,7 @@ CCP-RI-V2-09 materializes the first native V2 constitutional `ExecutionReceipt` 
 
 ---
 
-## 3. Public Capability Surface
+## 3. Public Capability Surface & Result Union (Corrective A2)
 
 - **Module:** `packages/runtime/src/v2/receiptMaterialization.ts`
 - **Re-exported via:** `packages/runtime/src/v2/index.ts` and `packages/runtime/src/index.ts`
@@ -33,6 +33,19 @@ CCP-RI-V2-09 materializes the first native V2 constitutional `ExecutionReceipt` 
   ```
 - **Declared Parameters:** Exactly 1 (`input: unknown`). Extra JS arguments have zero effect.
 - **Predecessor Delegation:** First operation is `evaluateExecutabilityAndOutcomeV2(input)`. Predecessor failures returned unchanged.
+- **Result Union (Corrective A2):**
+  ```ts
+  export type ExecutabilityOutcomeV2FailureResult = Exclude<
+    ExecutabilityOutcomeV2Result,
+    { readonly ok: true }
+  >;
+
+  export type ReceiptMaterializationV2Result =
+    | ReceiptMaterializationV2Success
+    | ReceiptMaterializationV2Failure
+    | ExecutabilityOutcomeV2FailureResult;
+  ```
+  When `result.ok === true`, `result.frame.kind` statically narrows strictly to `"RECEIPT_MATERIALIZATION_V2"`. Predecessor success (`EXECUTABILITY_OUTCOME_V2`) is excluded.
 
 ---
 
@@ -47,13 +60,13 @@ The materialized `ExecutionReceiptV2` contains exactly ten fields:
 5. `outputHash`: `sha256:<64 lowercase hex>` derived under domain `zyppi:domain:output:v2:` over `{ executability, outcome }`.
 6. `evidenceHash`: `sha256:<64 lowercase hex>` derived under domain `zyppi:domain:evidence:v2:` over normalized evidence projection.
 7. `policyVersion`: Preserved string directly from `executionRequest.policyUniverse.policyUniverseRef`.
-8. `decisionSummary`: JCS canonical string representing bounded POL aggregate result (`status: "PRODUCED"`) or `{"status":"NOT_PRODUCED"}`.
+8. `decisionSummary`: JCS canonical string derived via `canonicalizeReceiptDecisionSummaryV2` representing bounded POL aggregate result (`status: "PRODUCED"`) or `{"status":"NOT_PRODUCED"}` (Corrective A1).
 9. `executionTime`: Canonical normalized UTC-Z ISO-8601 string of `tEInput` via `normalizeTemporalCoordinateV2`.
 10. `deterministicHash`: `sha256:<64 lowercase hex>` derived under domain `zyppi:domain:receipt:v2:` over 9-field preimage (excluding `deterministicHash`).
 
 ---
 
-## 5. Cryptographic Domain Audit
+## 5. Cryptographic Domain & Non-Circularity Audit
 
 All cryptographic hashing is performed in pure Domain V2 helper (`packages/domain/src/v2/receiptCrypto.ts`) under RFC 8785 JCS + UTF-8 + SHA-256:
 
@@ -70,6 +83,7 @@ Non-circularity verified:
 - `evidenceHash` does not hash itself or the Receipt.
 - `receiptId` preimage excludes `receiptId` and `deterministicHash`.
 - `deterministicHash` preimage excludes `deterministicHash`.
+- Parameterized 9-field sensitivity test for `deriveReceiptDeterministicHashV2` verified in `receiptCrypto.test.ts` (Corrective B2).
 
 ---
 
@@ -87,25 +101,20 @@ Non-circularity verified:
 
 ---
 
-## 7. Mandatory Source Audits
+## 7. Predecessor Preservation Audit (Corrective B3)
 
-- **Runtime Source (`packages/runtime/src/v2/receiptMaterialization.ts`):**
-  - Zero `node:crypto`, `crypto`, or Web Crypto imports.
-  - Zero `Date.now()`, `new Date()`, `performance.now()`, or ambient time reads.
-  - Zero `process.env`, `fs`, `fetch`, `axios`, postgres, or I/O.
-  - Zero V1 helper calls (`generateReceiptHashes`, `runInternalPipeline`, `StageOverrideConfig`, etc.).
-  - Zero GS1 or domain-specific logic.
-  - Deep-freezing applied to all returned Runtime structures.
-
-- **Domain Crypto Source (`packages/domain/src/v2/receiptCrypto.ts`):**
-  - Pure domain helper importing only `node:crypto` and canonical V2 JCS utilities.
-  - Zero Runtime, Application, API, database, or network imports.
+- **V2-01 Structural Validation:** Malformed input fails closed at `STRUCTURAL_VALIDATION`.
+- **V2-02 Identity Validation:** Component digest mismatch fails closed at `IDENTITY_VALIDATION`.
+- **V2-05 Envelope Compatibility:** Envelope incompatibility fails closed at `EXECUTION_ENVELOPE_COMPATIBILITY`.
+- **V2-06 Production Isolation:** `prepareProductionExecutionV2` snapshot re-validation failures propagate as `PRODUCTION_EXECUTION_V2` / `SNAPSHOT_REVALIDATION_FAILED` or `SNAPSHOT_DIGEST_MISMATCH`. (Note: Public V2-05 inputs produce valid inert snapshots; structural failures are caught at `STRUCTURAL_VALIDATION`).
+- **V2-07 Owner Determination Integration:** `integrateOwnerDeterminationsV2` dependency scheduling failures propagate as `OWNER_DETERMINATION_INTEGRATION_V2` / `OWNER_DEPENDENCY_SCHEDULING_FAILED`. (Note: V2-05 Law G evaluates and catches dependency cycles at `EXECUTION_ENVELOPE_COMPATIBILITY`).
+- **V2-08 Executability / Outcome:** Executability and Outcome failures propagate as `EXECUTABILITY_OUTCOME`.
 
 ---
 
 ## 8. Verification Matrix & Test Execution
 
-### Mandatory Test Matrix (V209-T01 .. V209-T42) — 42/42 PASS
+### Mandatory Test Matrix & Adversarial Suite — 44/44 PASS
 
 - `V209-T01`: Positive Receipt Materialization (PASS)
 - `V209-T02`: Structural Failure Preserved (PASS)
@@ -149,8 +158,10 @@ Non-circularity verified:
 - `V209-T40`: UNKNOWN Subject Preservation (PASS)
 - `V209-T41`: V1 Isolation (PASS)
 - `V209-T42`: Public API Exactness (PASS)
+- `V209-H01`: Nested Decision Summary Property-Order Invariance (PASS - Corrective A1)
+- `A2`: Static type assertion proving `ok: true` narrows `frame.kind` strictly to `RECEIPT_MATERIALIZATION_V2` (PASS - Corrective A2)
 
-### Quality Gates Execution Summary
+### Seven Mandatory Quality Gates (Corrective B1)
 
 1. `pnpm format:check` — PASS
 2. `pnpm lint` — PASS
@@ -158,7 +169,9 @@ Non-circularity verified:
 4. `pnpm runtime:purity` — PASS
 5. `pnpm boundary:all` — PASS
 6. `pnpm graph:validate` — PASS
-7. `pnpm governance:validate` — PASS
+7. `pnpm test` — PASS
+
+Additional: `pnpm governance:validate` — PASS
 
 ---
 
