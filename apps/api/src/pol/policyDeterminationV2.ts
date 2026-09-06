@@ -20,6 +20,7 @@ import {
   type QuestionOperandBindingV2,
   type QuestionSemanticRefV2,
   type RequestedActionBindingV2,
+  type RoleBindingV2,
   type RuleRefV2,
   type StateInstanceRefV2,
   type StateSemanticRefV2,
@@ -99,7 +100,6 @@ export interface PolRuleSet01Material {
       readonly exactStateRef: StateInstanceRefV2;
     }[];
   };
-  readonly [key: string]: unknown;
 }
 
 function deepFreeze<T>(obj: T): T {
@@ -161,12 +161,43 @@ function refEquals(a: unknown, b: unknown): boolean {
 
 function isValidConstitutionalRef(ref: unknown, family?: string): boolean {
   if (!isPlainObject(ref)) return false;
-  if (typeof ref.family !== "string" || ref.family.trim() === "") return false;
-  if (family !== undefined && ref.family !== family) return false;
-  if (typeof ref.ownerRef !== "string" || ref.ownerRef.trim() === "")
+  const allowedRefKeys = new Set([
+    "family",
+    "ownerRef",
+    "artifactId",
+    "version",
+    "stateRef",
+    "provenanceRef",
+  ]);
+  for (const k of Reflect.ownKeys(ref)) {
+    if (typeof k !== "string" || !allowedRefKeys.has(k)) {
+      return false;
+    }
+  }
+
+  const r = ref as Record<string, unknown>;
+  if (typeof r.family !== "string" || r.family.trim() === "") return false;
+  if (family !== undefined && r.family !== family) return false;
+  if (typeof r.ownerRef !== "string" || r.ownerRef.trim() === "") return false;
+  if (typeof r.artifactId !== "string" || r.artifactId.trim() === "")
     return false;
-  if (typeof ref.artifactId !== "string" || ref.artifactId.trim() === "")
+
+  if (
+    hasOwnProp(r, "version") &&
+    (typeof r.version !== "string" || r.version.trim() === "")
+  )
     return false;
+  if (
+    hasOwnProp(r, "stateRef") &&
+    (typeof r.stateRef !== "string" || r.stateRef.trim() === "")
+  )
+    return false;
+  if (
+    hasOwnProp(r, "provenanceRef") &&
+    (typeof r.provenanceRef !== "string" || r.provenanceRef.trim() === "")
+  )
+    return false;
+
   return true;
 }
 
@@ -196,7 +227,22 @@ function parseAndValidateRuleSet01Material(
   }
 
   // Material declares ruleset = POL-POLICY-RULESET-01
-  // Require own properties: ruleEffect, requiredTrustStatuses, authorization
+  // Enforce closed-world top-level own-key set: ruleset, ruleEffect, requiredTrustStatuses, authorization
+  const allowedMaterialKeys = new Set([
+    "ruleset",
+    "ruleEffect",
+    "requiredTrustStatuses",
+    "authorization",
+  ]);
+  for (const k of Reflect.ownKeys(material)) {
+    if (typeof k !== "string" || !allowedMaterialKeys.has(k)) {
+      return {
+        ok: false,
+        error: `RuleSet01 material contains unadmitted own property '${String(k)}'.`,
+      };
+    }
+  }
+
   if (
     !hasOwnProp(material, "ruleEffect") ||
     !hasOwnProp(material, "requiredTrustStatuses") ||
@@ -278,6 +324,22 @@ function parseAndValidateRuleSet01Material(
         error: "'authorization' must be null or a plain object.",
       };
     }
+
+    // Enforce closed-world keys on authorization object
+    const allowedAuthKeys = new Set([
+      "actionSemanticRef",
+      "authorizedTargets",
+      "requiredPerformerStates",
+    ]);
+    for (const k of Reflect.ownKeys(authorization)) {
+      if (typeof k !== "string" || !allowedAuthKeys.has(k)) {
+        return {
+          ok: false,
+          error: `authorization object contains unadmitted own property '${String(k)}'.`,
+        };
+      }
+    }
+
     if (
       !hasOwnProp(authorization, "actionSemanticRef") ||
       !hasOwnProp(authorization, "authorizedTargets") ||
@@ -322,6 +384,18 @@ function parseAndValidateRuleSet01Material(
           error: "Element in authorizedTargets must be a plain object.",
         };
       }
+
+      // Enforce closed-world keys on authorizedTarget entry
+      const allowedTgtKeys = new Set(["targetSlotSemanticRef", "targetRef"]);
+      for (const k of Reflect.ownKeys(tgt)) {
+        if (typeof k !== "string" || !allowedTgtKeys.has(k)) {
+          return {
+            ok: false,
+            error: `authorizedTarget entry contains unadmitted own property '${String(k)}'.`,
+          };
+        }
+      }
+
       if (
         !hasOwnProp(tgt, "targetSlotSemanticRef") ||
         !hasOwnProp(tgt, "targetRef")
@@ -392,6 +466,22 @@ function parseAndValidateRuleSet01Material(
           error: "Element in requiredPerformerStates must be a plain object.",
         };
       }
+
+      // Enforce closed-world keys on requiredPerformerState entry
+      const allowedStateKeys = new Set([
+        "kind",
+        "stateSemanticRef",
+        "exactStateRef",
+      ]);
+      for (const k of Reflect.ownKeys(reqSt)) {
+        if (typeof k !== "string" || !allowedStateKeys.has(k)) {
+          return {
+            ok: false,
+            error: `requiredPerformerState entry contains unadmitted own property '${String(k)}'.`,
+          };
+        }
+      }
+
       if (
         !hasOwnProp(reqSt, "kind") ||
         !hasOwnProp(reqSt, "stateSemanticRef") ||
@@ -637,7 +727,8 @@ export function producePolAggregatePolicyResultV2(
     tEInput?: unknown;
   };
 
-  const secTrustResult = hasOwnProp(input, "secTrustResult")
+  const secTrustResultSupplied = hasOwnProp(input, "secTrustResult");
+  const secTrustResult = secTrustResultSupplied
     ? (input as Record<string, unknown>).secTrustResult
     : undefined;
 
@@ -741,16 +832,29 @@ export function producePolAggregatePolicyResultV2(
     }
   }
 
-  // If SEC is required, verify secTrustResult
+  // A2: Distinguish absent SEC dependency from invalid supplied SEC dependency
   let verifiedSecBinding: OwnerDeterminationBindingV2 | null = null;
   if (secRequiredByAny) {
-    if (
-      secTrustResult === undefined ||
-      secTrustResult === null ||
-      !isPlainObject(secTrustResult)
-    ) {
-      // secTrustResult is absent when required -> will yield INDETERMINATE for policies requiring SEC
+    if (!secTrustResultSupplied) {
+      // secTrustResult property was NOT supplied on input -> absent dependency
+      // verifiedSecBinding remains null; policies requiring SEC yield INDETERMINATE with reason SEC_TRUST_RESULT_MISSING
     } else {
+      // secTrustResult property WAS explicitly supplied on input
+      if (
+        secTrustResult === undefined ||
+        secTrustResult === null ||
+        !isPlainObject(secTrustResult)
+      ) {
+        return {
+          ok: false,
+          error: {
+            code: "POL_SEC_DEPENDENCY_INVALID",
+            message:
+              "Explicitly supplied secTrustResult is null or not a valid object.",
+          },
+        };
+      }
+
       const secBinding =
         secTrustResult as unknown as OwnerDeterminationBindingV2;
 
@@ -1278,6 +1382,7 @@ export function producePolAuthorizationV2(
       suppliedAggregateBinding,
       tEInput,
       usedRoleBindingKeys: [],
+      resolvedPerformerParticipation: [],
     });
   }
 
@@ -1291,6 +1396,7 @@ export function producePolAuthorizationV2(
       suppliedAggregateBinding,
       tEInput,
       usedRoleBindingKeys: [],
+      resolvedPerformerParticipation: [],
     });
   }
 
@@ -1333,6 +1439,7 @@ export function producePolAuthorizationV2(
       suppliedAggregateBinding,
       tEInput,
       usedRoleBindingKeys: [],
+      resolvedPerformerParticipation: [],
     });
   }
 
@@ -1348,6 +1455,10 @@ export function producePolAuthorizationV2(
   }[] = [];
 
   const usedRoleBindingKeys: string[] = [];
+  const resolvedPerformerParticipation: {
+    performerKey: string;
+    roleBinding: RoleBindingV2;
+  }[] = [];
 
   for (const perfBinding of actionPerformerBindings) {
     if (
@@ -1399,6 +1510,7 @@ export function producePolAuthorizationV2(
         suppliedAggregateBinding,
         tEInput,
         usedRoleBindingKeys: [],
+        resolvedPerformerParticipation: [],
       });
     }
 
@@ -1408,6 +1520,10 @@ export function producePolAuthorizationV2(
       roleBindingKey: rb.roleBindingKey,
     });
     usedRoleBindingKeys.push(rb.roleBindingKey);
+    resolvedPerformerParticipation.push({
+      performerKey: perfBinding.performerKey,
+      roleBinding: rb,
+    });
   }
 
   // Flatten state bindings from constitutionalState
@@ -1455,6 +1571,7 @@ export function producePolAuthorizationV2(
         suppliedAggregateBinding,
         tEInput,
         usedRoleBindingKeys,
+        resolvedPerformerParticipation,
       });
     }
 
@@ -1477,6 +1594,7 @@ export function producePolAuthorizationV2(
           suppliedAggregateBinding,
           tEInput,
           usedRoleBindingKeys,
+          resolvedPerformerParticipation,
         });
       }
     }
@@ -1503,6 +1621,7 @@ export function producePolAuthorizationV2(
             suppliedAggregateBinding,
             tEInput,
             usedRoleBindingKeys,
+            resolvedPerformerParticipation,
           });
         }
       }
@@ -1519,6 +1638,7 @@ export function producePolAuthorizationV2(
     suppliedAggregateBinding,
     tEInput,
     usedRoleBindingKeys,
+    resolvedPerformerParticipation,
   });
 }
 
@@ -1531,6 +1651,10 @@ function buildAuthorizationSuccessResult(params: {
   suppliedAggregateBinding: OwnerDeterminationBindingV2;
   tEInput: string;
   usedRoleBindingKeys: readonly string[];
+  resolvedPerformerParticipation: readonly {
+    performerKey: string;
+    roleBinding: RoleBindingV2;
+  }[];
 }): PolAuthorizationProductionV2Result {
   const {
     authorizationDecision,
@@ -1541,6 +1665,7 @@ function buildAuthorizationSuccessResult(params: {
     suppliedAggregateBinding,
     tEInput,
     usedRoleBindingKeys,
+    resolvedPerformerParticipation,
   } = params;
 
   const ownerNativeResult: PolAuthorizationOwnerNativeResultV2 = {
@@ -1552,11 +1677,13 @@ function buildAuthorizationSuccessResult(params: {
     boundRequestedAction.actionPerformerBindings || [];
   const actionTargetBindings = boundRequestedAction.actionTargetBindings || [];
 
+  // A3: Include exact resolved performer participation material in deterministic preimage
   const preimage = {
     ownerRef: "urn:zyppi:owner:pol:v1",
     ruleRef: "POL-AUTHORIZATION-RULESET-01",
     policyUniverseRef: boundPolicyUniverse.policyUniverseRef,
     requestedAction: boundRequestedAction,
+    resolvedPerformerParticipation,
     usedRoleBindingKeys,
     semanticStateRef: boundConstitutionalState.semanticStateRef,
     aggregateBindingKey: suppliedAggregateBinding.determinationBindingKey,

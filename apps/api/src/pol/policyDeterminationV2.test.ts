@@ -2107,7 +2107,7 @@ describe("CCP-POL-PROD-01 Native V2 Policy & Authorization Foundation", () => {
     });
   });
 
-  describe("POL01-H01..H08 Mandatory Hardening Tests", () => {
+  describe("POL01-H01..H14 Mandatory Hardening Tests", () => {
     it("POL01-H01 — inherited Aggregate inputs rejected", () => {
       const baseProto = { tEInput: "2026-03-31T12:00:00.000Z" };
       const inputObj = Object.create(baseProto);
@@ -2361,6 +2361,260 @@ describe("CCP-POL-PROD-01 Native V2 Policy & Authorization Foundation", () => {
       expect(authRes.ok).toBe(false);
       if (authRes.ok) return;
       expect(authRes.error.code).toBe("POL_AGGREGATE_DEPENDENCY_INVALID");
+    });
+
+    it("POL01-H09 — unknown top-level RuleSet01 key rejected", () => {
+      const p1 = createPolicyRef("pol-unadmitted-top");
+      const badMat = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: [],
+        authorization: null,
+        unadmittedTopLevelKey: "unauthorized_extra_value",
+      };
+
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: p1, material: badMat },
+      ]);
+      const ra = createValidRequestedAction();
+      const es = createValidBoundEvidenceState();
+
+      const res = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+      expect(res.error.code).toBe("POL_POLICY_MATERIAL_INVALID");
+    });
+
+    it("POL01-H10 — unknown nested authorization semantic key rejected", () => {
+      const actionSemanticRef = createActionSemanticRef("action-transfer");
+      const targetSlotSemanticRef = createTargetSlotSemanticRef("slot-account");
+      const targetRef = createTargetRef("target-account-123");
+
+      const badMat = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: [],
+        authorization: {
+          actionSemanticRef,
+          authorizedTargets: [{ targetSlotSemanticRef, targetRef }],
+          requiredPerformerStates: [],
+          unadmittedAuthKey: "unauthorized_extra_field",
+        },
+      };
+
+      const p1 = createPolicyRef("pol-unadmitted-auth");
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: p1, material: badMat },
+      ]);
+      const ra = createValidRequestedAction();
+      const es = createValidBoundEvidenceState();
+
+      const res = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+      expect(res.error.code).toBe("POL_POLICY_MATERIAL_INVALID");
+    });
+
+    it("POL01-H11 — unknown target/state requirement semantic key rejected", () => {
+      const actionSemanticRef = createActionSemanticRef("action-transfer");
+      const targetSlotSemanticRef = createTargetSlotSemanticRef("slot-account");
+      const targetRef = createTargetRef("target-account-123");
+
+      const badTargetMat = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: [],
+        authorization: {
+          actionSemanticRef,
+          authorizedTargets: [
+            { targetSlotSemanticRef, targetRef, unadmittedTargetKey: true },
+          ],
+          requiredPerformerStates: [],
+        },
+      };
+
+      const p1 = createPolicyRef("pol-unadmitted-target");
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: p1, material: badTargetMat },
+      ]);
+      const ra = createValidRequestedAction();
+      const es = createValidBoundEvidenceState();
+
+      const res = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+      expect(res.error.code).toBe("POL_POLICY_MATERIAL_INVALID");
+    });
+
+    it("POL01-H12 — explicit null SEC dependency rejected", () => {
+      const p1 = createPolicyRef("pol-trust-req");
+      const mat: PolRuleSet01Material = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: ["definite"],
+        authorization: null,
+      };
+
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: p1, material: mat },
+      ]);
+      const ra = createValidRequestedAction();
+      const es = createValidBoundEvidenceState();
+
+      const res = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+        secTrustResult: null, // Explicitly supplied null
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+      expect(res.error.code).toBe("POL_SEC_DEPENDENCY_INVALID");
+    });
+
+    it("POL01-H13 — malformed supplied SEC dependency rejected", () => {
+      const p1 = createPolicyRef("pol-trust-req");
+      const mat: PolRuleSet01Material = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: ["definite"],
+        authorization: null,
+      };
+
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: p1, material: mat },
+      ]);
+      const ra = createValidRequestedAction();
+      const es = createValidBoundEvidenceState();
+
+      const res = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+        secTrustResult: {
+          malformed: true,
+        } as unknown as OwnerDeterminationBindingV2, // Explicitly supplied malformed object
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+      expect(res.error.code).toBe("POL_SEC_DEPENDENCY_INVALID");
+    });
+
+    it("POL01-H14 — different exact Subject binding changes Authorization identity", () => {
+      const actionSemanticRef = createActionSemanticRef("action-transfer");
+      const targetSlotSemanticRef = createTargetSlotSemanticRef("slot-account");
+      const targetRef = createTargetRef("target-account-123");
+
+      const mat: PolRuleSet01Material = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: [],
+        authorization: {
+          actionSemanticRef,
+          authorizedTargets: [{ targetSlotSemanticRef, targetRef }],
+          requiredPerformerStates: [],
+        },
+      };
+
+      const polRef = createPolicyRef("pol-auth-1");
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: polRef, material: mat },
+      ]);
+      const ra = createValidRequestedAction({
+        actionId: "action-transfer",
+        targetId: "target-account-123",
+      });
+      const es = createValidBoundEvidenceState();
+
+      const part1 = createValidParticipation({
+        roleBindingKey: "role_alice",
+        subjectId: "alice-v1",
+      });
+      const cs1 = createValidBoundConstitutionalState({
+        subjectId: "alice-v1",
+      });
+
+      const part2 = createValidParticipation({
+        roleBindingKey: "role_alice",
+        subjectId: "alice-v2",
+      });
+      const cs2 = createValidBoundConstitutionalState({
+        subjectId: "alice-v2",
+      });
+
+      const aggRes = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+      });
+      expect(aggRes.ok).toBe(true);
+      if (!aggRes.ok) return;
+
+      const authRes1 = producePolAuthorizationV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        participation: part1,
+        constitutionalState: cs1,
+        evidenceState: es,
+        tEInput,
+        policyAggregate: aggRes.determination,
+      });
+
+      const authRes2 = producePolAuthorizationV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        participation: part2,
+        constitutionalState: cs2,
+        evidenceState: es,
+        tEInput,
+        policyAggregate: aggRes.determination,
+      });
+
+      expect(authRes1.ok).toBe(true);
+      expect(authRes2.ok).toBe(true);
+      if (!authRes1.ok || !authRes2.ok) return;
+
+      const native1 = authRes1.determination
+        .ownerNativeResult as unknown as PolAuthorizationOwnerNativeResultV2;
+      const native2 = authRes2.determination
+        .ownerNativeResult as unknown as PolAuthorizationOwnerNativeResultV2;
+
+      expect(native1.authorizationDecision).toBe("Authorized");
+      expect(native2.authorizationDecision).toBe("Authorized");
+
+      // Verify that determinationBindingKey, exactStateRef, and provenanceRef differ
+      expect(authRes1.determination.determinationBindingKey).not.toBe(
+        authRes2.determination.determinationBindingKey,
+      );
+      expect(canonicalizeJcs(authRes1.determination.exactStateRef)).not.toBe(
+        canonicalizeJcs(authRes2.determination.exactStateRef),
+      );
+      expect(canonicalizeJcs(authRes1.determination.provenanceRef)).not.toBe(
+        canonicalizeJcs(authRes2.determination.provenanceRef),
+      );
     });
   });
 
