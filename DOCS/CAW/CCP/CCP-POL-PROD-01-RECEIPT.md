@@ -165,10 +165,11 @@ Authorization over an empty universe produces `Denied` with reason `NO_AUTHORIZA
 
 ## 15. SEC Exact Dependency Verification
 
-Per Council Corrective 01 A2, if SEC is required by policy:
+Per Council Corrective 01 A2 and Council Corrective 02 A2.1:
 
 - Omitting property `secTrustResult` -> policy `INDETERMINATE` (`SEC_TRUST_RESULT_MISSING`).
 - Explicitly supplying `secTrustResult` as `null` or a malformed/invalid/unmatched determination -> structural `POL_SEC_DEPENDENCY_INVALID`.
+- In `producePolAuthorizationV2`, presence of `secTrustResult` is tracked via `secTrustResultSupplied` and explicitly forwarded to `producePolAggregatePolicyResultV2` using `...(secTrustResultSupplied ? { secTrustResult } : {})`, preserving explicit invalid values so recomputation fails closed with `POL_AGGREGATE_DEPENDENCY_INVALID` without silent downgrade to omission.
 - Valid SEC determination -> recomputed via `produceSecTrustResultV2` and matched on exact value and binding key. Set-membership check performed on `requiredTrustStatuses` without ranking or thresholds.
 
 ---
@@ -186,7 +187,7 @@ Per Council Corrective 01 A2, if SEC is required by policy:
 
 ## 17. Authorization Aggregate Dependency Verification
 
-`producePolAuthorizationV2` re-executes `producePolAggregatePolicyResultV2` over supplied inputs and requires exact deterministic value equality and binding key match with supplied `policyAggregate`. Returns `POL_AGGREGATE_DEPENDENCY_INVALID` on mismatch.
+`producePolAuthorizationV2` re-executes `producePolAggregatePolicyResultV2` over supplied inputs and requires exact deterministic value equality and binding key match with supplied `policyAggregate`. Returns `POL_AGGREGATE_DEPENDENCY_INVALID` on mismatch or recomputation failure.
 
 ---
 
@@ -276,20 +277,21 @@ All 40 mandatory tests in `apps/api/src/pol/policyDeterminationV2.test.ts` pass 
 
 ---
 
-## 31. POL01-H01..H14 Hardening Tests
+## 31. POL01-H01..H15 Hardening Tests
 
-All 14 hardening tests (`POL01-H01..H14`) pass green:
+All 15 hardening tests (`POL01-H01..H15`) pass green:
 
 - `H01..H08`: Original hardening tests.
 - `H09..H11`: Council Corrective 01 A1 closed-world key validation tests.
 - `H12..H13`: Council Corrective 01 A2 missing vs malformed SEC dependency tests.
-- `H14`: Council Corrective 01 A3 subject-binding sensitive JCS preimage test.
+- `H14`: Council Corrective 01 A3 and Corrective 02 H14 participant-sensitive authorization identity regression proof (using identical `constitutionalState`).
+- `H15`: Council Corrective 02 H15 test proving that Authorization preserves explicit invalid `secTrustResult: null` / malformed SEC presence and fails closed with `POL_AGGREGATE_DEPENDENCY_INVALID`.
 
 ---
 
 ## 32. Regression Counts
 
-- POL test suite: 57 tests passing.
+- POL test suite: 58 tests passing.
 - SEC test suite: 32 tests passing.
 - V2 Domain test suite: 157 tests passing.
 - V2 Runtime test suite: 189 tests passing.
@@ -340,7 +342,7 @@ Restored formatting on `DOCS/ZII/ZQE/` and `tools/zqe/` files modified by worksp
 
 # 38. Deviations / Blockers
 
-None. All constraints and Council correctives met without scope expansion.
+None. All constraints and Council Corrective 02 requirements met without scope expansion.
 
 ---
 

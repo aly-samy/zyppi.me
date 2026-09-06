@@ -1194,7 +1194,8 @@ export function producePolAuthorizationV2(
     policyAggregate?: unknown;
   };
 
-  const secTrustResult = hasOwnProp(input, "secTrustResult")
+  const secTrustResultSupplied = hasOwnProp(input, "secTrustResult");
+  const secTrustResult = secTrustResultSupplied
     ? (input as Record<string, unknown>).secTrustResult
     : undefined;
 
@@ -1339,7 +1340,7 @@ export function producePolAuthorizationV2(
     requestedAction: boundRequestedAction,
     evidenceState: boundEvidenceState,
     tEInput,
-    ...(secTrustResult ? { secTrustResult } : {}),
+    ...(secTrustResultSupplied ? { secTrustResult } : {}),
   });
 
   if (!recomputedAggregateRes.ok) {

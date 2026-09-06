@@ -2547,20 +2547,16 @@ describe("CCP-POL-PROD-01 Native V2 Policy & Authorization Foundation", () => {
         targetId: "target-account-123",
       });
       const es = createValidBoundEvidenceState();
+      // Use exactly the same constitutionalState for both Authorization calls
+      const cs = createValidBoundConstitutionalState();
 
       const part1 = createValidParticipation({
         roleBindingKey: "role_alice",
         subjectId: "alice-v1",
       });
-      const cs1 = createValidBoundConstitutionalState({
-        subjectId: "alice-v1",
-      });
 
       const part2 = createValidParticipation({
         roleBindingKey: "role_alice",
-        subjectId: "alice-v2",
-      });
-      const cs2 = createValidBoundConstitutionalState({
         subjectId: "alice-v2",
       });
 
@@ -2577,7 +2573,7 @@ describe("CCP-POL-PROD-01 Native V2 Policy & Authorization Foundation", () => {
         policyUniverse: pu,
         requestedAction: ra,
         participation: part1,
-        constitutionalState: cs1,
+        constitutionalState: cs,
         evidenceState: es,
         tEInput,
         policyAggregate: aggRes.determination,
@@ -2587,7 +2583,7 @@ describe("CCP-POL-PROD-01 Native V2 Policy & Authorization Foundation", () => {
         policyUniverse: pu,
         requestedAction: ra,
         participation: part2,
-        constitutionalState: cs2,
+        constitutionalState: cs,
         evidenceState: es,
         tEInput,
         policyAggregate: aggRes.determination,
@@ -2614,6 +2610,78 @@ describe("CCP-POL-PROD-01 Native V2 Policy & Authorization Foundation", () => {
       );
       expect(canonicalizeJcs(authRes1.determination.provenanceRef)).not.toBe(
         canonicalizeJcs(authRes2.determination.provenanceRef),
+      );
+    });
+
+    it("POL01-H15 — Authorization preserves explicit invalid SEC presence", () => {
+      const p1 = createPolicyRef("pol-trust-req");
+      const mat: PolRuleSet01Material = {
+        ruleset: "POL-POLICY-RULESET-01",
+        ruleEffect: "PERMIT",
+        requiredTrustStatuses: ["definite"],
+        authorization: null,
+      };
+
+      const pu = createValidBoundPolicyUniverse([
+        { policyKey: "k1", policyRef: p1, material: mat },
+      ]);
+      const ra = createValidRequestedAction();
+      const es = createValidBoundEvidenceState();
+      const part = createValidParticipation();
+      const cs = createValidBoundConstitutionalState();
+
+      // Produce lawful Aggregate WITHOUT secTrustResult
+      const aggRes = producePolAggregatePolicyResultV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        evidenceState: es,
+        tEInput,
+      });
+
+      expect(aggRes.ok).toBe(true);
+      if (!aggRes.ok) return;
+
+      const nativeAgg = aggRes.determination
+        .ownerNativeResult as unknown as PolAggregateOwnerNativeResultV2;
+      expect(nativeAgg.aggregateResult).toBe("INDETERMINATE");
+      expect(nativeAgg.policyDecisions[0].reasonCodes).toEqual([
+        "SEC_TRUST_RESULT_MISSING",
+      ]);
+
+      // Invoke Authorization using that exact Aggregate but explicitly provide secTrustResult: null
+      const authResNull = producePolAuthorizationV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        participation: part,
+        constitutionalState: cs,
+        evidenceState: es,
+        tEInput,
+        policyAggregate: aggRes.determination,
+        secTrustResult: null,
+      });
+
+      expect(authResNull.ok).toBe(false);
+      if (authResNull.ok) return;
+      expect(authResNull.error.code).toBe("POL_AGGREGATE_DEPENDENCY_INVALID");
+
+      // Also assert malformed object in the same test
+      const authResMalformed = producePolAuthorizationV2({
+        policyUniverse: pu,
+        requestedAction: ra,
+        participation: part,
+        constitutionalState: cs,
+        evidenceState: es,
+        tEInput,
+        policyAggregate: aggRes.determination,
+        secTrustResult: {
+          malformed: true,
+        } as unknown as OwnerDeterminationBindingV2,
+      });
+
+      expect(authResMalformed.ok).toBe(false);
+      if (authResMalformed.ok) return;
+      expect(authResMalformed.error.code).toBe(
+        "POL_AGGREGATE_DEPENDENCY_INVALID",
       );
     });
   });
