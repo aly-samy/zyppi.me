@@ -79,15 +79,15 @@ export function produceSecTrustResultV2(
     input === null ||
     typeof input !== "object" ||
     Array.isArray(input) ||
-    !("tEInput" in input) ||
-    !("evidenceState" in input)
+    !Object.prototype.hasOwnProperty.call(input, "tEInput") ||
+    !Object.prototype.hasOwnProperty.call(input, "evidenceState")
   ) {
     return {
       ok: false,
       error: {
         code: "SEC_INPUT_INVALID",
         message:
-          "Input must be an object containing non-empty string 'tEInput' and 'evidenceState'.",
+          "Input must be an object containing non-empty string own-property 'tEInput' and own-property 'evidenceState'.",
       },
     };
   }
@@ -169,28 +169,13 @@ export function produceSecTrustResultV2(
 
   for (const [keyStr, mats] of materialByRefKey.entries()) {
     if (mats.length > 1) {
-      const firstJcs = safeCanonicalizeJcs(mats[0].material);
-      if (!firstJcs.ok) {
-        return {
-          ok: false,
-          error: {
-            code: "SEC_EVIDENCE_BINDING_AMBIGUOUS",
-            message: `Supplied evidence material for key '${keyStr}' failed canonicalization.`,
-          },
-        };
-      }
-      for (let i = 1; i < mats.length; i++) {
-        const iJcs = safeCanonicalizeJcs(mats[i].material);
-        if (!iJcs.ok || iJcs.value !== firstJcs.value) {
-          return {
-            ok: false,
-            error: {
-              code: "SEC_EVIDENCE_BINDING_AMBIGUOUS",
-              message: `Multiple conflicting supplied evidence materials found for evidenceRef key '${keyStr}'.`,
-            },
-          };
-        }
-      }
+      return {
+        ok: false,
+        error: {
+          code: "SEC_EVIDENCE_BINDING_AMBIGUOUS",
+          message: `Multiple supplied evidence material entries found for evidenceRef key '${keyStr}'.`,
+        },
+      };
     }
   }
 

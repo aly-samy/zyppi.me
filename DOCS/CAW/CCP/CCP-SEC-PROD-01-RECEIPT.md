@@ -48,6 +48,9 @@ Exposed via `apps/api/src/sec/index.ts`. Accepts strictly one semantic input. Ca
 ## 5. Input Contract
 
 Consumes strictly one semantic object `{ evidenceState: BoundEvidenceStateV2, tEInput: string }`.
+
+**Council Corrective 01 (A1):** Input validation requires `Object.prototype.hasOwnProperty.call(input, "tEInput")` and `Object.prototype.hasOwnProperty.call(input, "evidenceState")`. Inputs existing only on prototype chains are rejected with `SEC_INPUT_INVALID` (verified via `SEC01-H01`).
+
 Caller-supplied overrides (`trustStatus`, `degradationFactors`, `ownerNativeResult`, `constitutionalOwnerRef`, `CurrentlyTrusted`, `Authorization`, `Outcome`, `Executability`) are prohibited and ignored.
 
 ---
@@ -76,7 +79,8 @@ If `evidenceRequirementBindings.length === 0`, emits `NO_EVIDENCE_REQUIREMENTS_D
 
 For every relevant presented evidence reference:
 
-1. Verifies exact resolution to supplied material. Missing material emits `PRESENTED_EVIDENCE_MATERIAL_MISSING`. Ambiguous conflicting materials emit `SEC_EVIDENCE_BINDING_AMBIGUOUS`.
+1. Verifies exact-one resolution to supplied material.
+   - **Council Corrective 01 (A2):** Exactly 1 supplied-material entry is required. 0 supplied entries emits `PRESENTED_EVIDENCE_MATERIAL_MISSING`. >1 supplied entries for the same `evidenceRef` fails closed immediately with `SEC_EVIDENCE_BINDING_AMBIGUOUS` (verified via `SEC01-H02`), regardless of material payload equivalence.
 2. Verifies presence of a governing integrity coordinate. Missing coordinate emits `INTEGRITY_COORDINATE_MISSING`.
 3. Verifies algorithm `sha256` (case-insensitive). Unsupported algorithm emits `INTEGRITY_ALGORITHM_UNSUPPORTED`.
 4. JCS-canonicalizes supplied material, computes `sha256:<hex>`, and compares to `expectedDigest`. Hash mismatch emits `INTEGRITY_MISMATCH`.
@@ -171,9 +175,9 @@ Zero GS1, GTIN, GLN, Digital Link, trade item, DPP, or EPCIS vocabulary in produ
 
 ---
 
-## 21. SEC01-T01..T30
+## 21. SEC01-T01..T30 & SEC01-H01..H02
 
-All 30 unit & integration tests in `apps/api/src/sec/trustResultV2.test.ts` pass green:
+All 32 unit & integration tests in `apps/api/src/sec/trustResultV2.test.ts` pass green:
 
 - `SEC01-T01`: Fully covered + verified evidence → `definite`
 - `SEC01-T02`: Missing required evidence → `uncertain` (`MISSING_REQUIRED_EVIDENCE`)
@@ -205,17 +209,19 @@ All 30 unit & integration tests in `apps/api/src/sec/trustResultV2.test.ts` pass
 - `SEC01-T28`: Extra JavaScript argument immunity
 - `SEC01-T29`: Native V2-08 recognition
 - `SEC01-T30`: Trust status does not become RI threshold
+- `SEC01-H01`: Inherited SEC semantic inputs rejected (`SEC_INPUT_INVALID`)
+- `SEC01-H02`: Same `evidenceRef` with >1 supplied entries fails closed (`SEC_EVIDENCE_BINDING_AMBIGUOUS`)
 
 ---
 
 ## 22. Regression Counts
 
-- `apps/api/src/sec/trustResultV2.test.ts`: 30 passed
+- `apps/api/src/sec/trustResultV2.test.ts`: 32 passed
 - `packages/domain/src/evidenceVerification.test.ts`: 15 passed
 - `packages/domain/src/v2/`: 157 passed
 - `packages/runtime/src/v2/`: 189 passed
 - `apps/api/src/zprof/v2NativeEndToEnd.test.ts`: 40 passed
-- Full non-DB unit test suite: 59 test files, 1511 tests passed
+- Full non-DB unit test suite: 59 test files, 1513 tests passed
 
 ---
 
@@ -227,7 +233,7 @@ All 30 unit & integration tests in `apps/api/src/sec/trustResultV2.test.ts` pass
 - `pnpm runtime:purity`: PASS
 - `pnpm boundary:all`: PASS
 - `pnpm graph:validate`: PASS
-- `pnpm test`: PASS (1511 tests passing green)
+- `pnpm test`: PASS (1513 tests passing green)
 
 ---
 
@@ -264,7 +270,7 @@ Total changed files: exactly four new files.
 
 - **Branch:** `CCP-SEC-PROD-01-native-v2-trustresult`
 - **Target:** `main`
-- **State:** DRAFT PR (to be opened)
+- **State:** DRAFT PR (to be updated)
 
 ---
 

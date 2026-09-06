@@ -1483,4 +1483,79 @@ describe("CCP-SEC-PROD-01 Native V2 TrustResult Production (SEC01-T01..T30)", ()
       ).not.toHaveProperty("currentlyTrusted");
     }
   });
+
+  describe("Council Corrective 01 Adversarial Cases (SEC01-H01 & SEC01-H02)", () => {
+    // SEC01-H01 — Inherited SEC semantic inputs rejected
+    it("SEC01-H01 — Inherited SEC semantic inputs rejected", () => {
+      const proto = {
+        evidenceState: createValidBoundEvidenceState(),
+        tEInput: "2026-08-08T14:30:00Z",
+      };
+      const inheritedInput = Object.create(proto);
+
+      const res = produceSecTrustResultV2(inheritedInput);
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("SEC_INPUT_INVALID");
+      }
+    });
+
+    // SEC01-H02 — Same evidenceRef with multiple distinct supplied entries fails closed
+    it("SEC01-H02 — Same evidenceRef with multiple distinct supplied entries fails closed", () => {
+      const evidRef = {
+        family: "EVIDENCE" as const,
+        ownerRef: "urn:zyppi:owner:cert-auth:v1",
+        artifactId: "ev-001",
+      };
+
+      const ownerRef1 = {
+        family: "OWNER" as const,
+        ownerRef: "urn:zyppi:owner:cert-auth:v1",
+        artifactId: "cert-auth-001",
+      };
+
+      const ownerRef2 = {
+        family: "OWNER" as const,
+        ownerRef: "urn:zyppi:owner:cert-auth:v1",
+        artifactId: "cert-auth-002",
+      };
+
+      const schemaRef = {
+        family: "STATE_ARTIFACT" as const,
+        ownerRef: "urn:zyppi:owner:council:v1",
+        artifactId: "schema-001",
+      };
+
+      const matContent = { sig: "0x123456" };
+
+      const evidenceState = createValidBoundEvidenceState({
+        suppliedEvidenceMaterial: [
+          {
+            materialKey: "mat_key_1",
+            evidenceRef: evidRef,
+            ownerRef: ownerRef1,
+            schemaRef,
+            material: matContent,
+          },
+          {
+            materialKey: "mat_key_2",
+            evidenceRef: evidRef, // same evidenceRef!
+            ownerRef: ownerRef2, // distinct ownerRef!
+            schemaRef,
+            material: matContent,
+          },
+        ],
+      });
+
+      const res = produceSecTrustResultV2({
+        evidenceState,
+        tEInput: "2026-08-08T14:30:00Z",
+      });
+
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error.code).toBe("SEC_EVIDENCE_BINDING_AMBIGUOUS");
+      }
+    });
+  });
 });
