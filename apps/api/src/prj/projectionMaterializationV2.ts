@@ -2061,8 +2061,8 @@ export function materializePrjProjectionV2(
     ...partialArtifact,
   };
 
-  return {
-    ok: true,
-    projection: deepFreeze(projection),
-  };
+  return deepFreeze({
+    ok: true as const,
+    projection,
+  });
 }

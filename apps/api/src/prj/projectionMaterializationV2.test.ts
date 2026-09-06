@@ -2630,6 +2630,27 @@ describe("CCP-PRJ-PROD-01 Native V2 Governed Reality-View Projection Materializa
       expect(content).toMatch(/outcomeFrame\.ownerResults\.authorization/);
       expect(content).not.toMatch(/ownerDeterminations\.find\(/);
     });
+
+    it("H22 — successful PRJ result contract is deeply immutable", () => {
+      const req = createValidExecutionRequest();
+      const rv = createValidBoundRealityView();
+      const spec = createValidBoundSpecification();
+
+      const result = materializePrjProjectionV2({
+        executionRequest: req,
+        realityView: rv,
+        boundSpecification: spec,
+      });
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+
+      expect(Object.isFrozen(result)).toBe(true);
+      expect(Object.isFrozen(result.projection)).toBe(true);
+      expect(Object.isFrozen(result.projection.output)).toBe(true);
+      expect(Object.isFrozen(result.projection.derivationProof)).toBe(true);
+      expect(Object.isFrozen(result.projection.sourceReality)).toBe(true);
+    });
   });
 
   describe("Disappearance Tests", () => {
