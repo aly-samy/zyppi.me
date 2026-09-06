@@ -7,15 +7,9 @@
 - Feature Branch: `CCP-PRJ-PROD-01-native-v2-governed-reality-view-projection`
 - Verification Status: READY FOR COUNCIL RE-VERIFICATION
 
-## 2. PRJ-Series Reconciliation
+## 2. PRJ-Series Reconciliation & Council Corrective 01
 
-Reconciled against governing PRJ series documents:
-
-- `PRJ-001 — Projection Architecture Constitution`
-- `PRJ-002 — GS1 Digital Link Projection Specification`
-- `PRJ-003 — Digital Product Passport Projection Specification`
-
-Key reconciliations:
+Reconciled against governing PRJ series documents (`PRJ-001`, `PRJ-002`, `PRJ-003`) and Council Corrective 01 (A1, A2, A3):
 
 1. Projection content derives strictly from an explicit governed `BoundPrjRealityViewV1` or native `ContextEnvelope`, never from Runtime frames or ExecutionReceipts.
 2. `source_zid` remains a mandatory Projection Core element.
@@ -23,6 +17,9 @@ Key reconciliations:
 4. Native RI/POL/SEC results govern admission; they are not projection-content sources.
 5. `PRJ-PROJECTION-RULESET-01` is the first generic materialization grammar beneath registered Projection Specifications.
 6. Unsupported field-level policy interface requests fail closed with `PRJ_POLICY_INTERFACE_UNSUPPORTED`.
+7. **Corrective A1**: `requiredCapabilityRef` in RuleSet01 specifications strictly requires `family: "REQUESTED_CAPABILITY"`, `ownerRef: "urn:zyppi:owner:prj:v1"`, `artifactId === spec.specId`, and `version === spec.version`, returning `PRJ_SPECIFICATION_INVALID` on mismatch.
+8. **Corrective A2**: Projection output is completely detached from Reality/specification inputs via JCS serialization and parsing prior to final artifact assembly. `deepFreeze` has no `Object.isFrozen(obj)` short-circuit, ensuring full deep immutability while caller Reality/specification inputs remain unfrozen.
+9. **Corrective A3**: PRJ consumes RI-classified `ownerResults` directly (`outcomeFrame.ownerResults.policyAggregate` and `outcomeFrame.ownerResults.authorization`) without performing an independent classification scan over `ownerDeterminationBindings`.
 
 ## 3. PRJ Ownership
 
@@ -140,7 +137,7 @@ export interface BoundPrjRealityViewV1 {
 
 ## 23. RI Verification
 
-- Invokes public `materializeExecutionReceiptV2(executionRequest)`. Upstream failure yields `PRJ_UPSTREAM_EXECUTION_FAILED`.
+- Invokes public `materializeExecutionReceiptV2(executionRequest)`. Upstream failure yields `PRJ_UPSTREAM_EXECUTION_FAILED` preserving stage and code in details.
 
 ## 24. Sealed Request
 
@@ -223,7 +220,7 @@ export interface BoundPrjRealityViewV1 {
 
 ## 43. Immutability
 
-- All returned results and internal artifacts are deeply frozen using `deepFreeze`.
+- All returned results and internal artifacts are deeply frozen using `deepFreeze` without skipping already-frozen objects.
 
 ## 44. Purity
 
@@ -231,7 +228,7 @@ export interface BoundPrjRealityViewV1 {
 
 ## 45. Reality Non-Mutation
 
-- Zero mutation of Reality View, `ExecutionRequestV2`, or constitutional state.
+- Zero mutation of Reality View, `ExecutionRequestV2`, or constitutional state. Subtree output is completely detached from input objects.
 
 ## 46. Projection-from-Projection
 
@@ -253,13 +250,13 @@ export interface BoundPrjRealityViewV1 {
 
 - All 40 mandatory functional test scenarios implemented and passing in `apps/api/src/prj/projectionMaterializationV2.test.ts`.
 
-## 51. PRJ01-H01..H16
+## 51. PRJ01-H01..H21
 
-- All 16 mandatory hardening test scenarios implemented and passing in `apps/api/src/prj/projectionMaterializationV2.test.ts`.
+- All 21 mandatory hardening test scenarios (including Corrective 01's H17, H18, H19, H20, H21) implemented and passing in `apps/api/src/prj/projectionMaterializationV2.test.ts`.
 
 ## 52. Regression Counts
 
-- `apps/api/src/prj/projectionMaterializationV2.test.ts`: 59 tests PASS
+- `apps/api/src/prj/projectionMaterializationV2.test.ts`: 64 tests PASS
 - `apps/api/src/sec/trustResultV2.test.ts`: 32 tests PASS
 - `apps/api/src/pol/policyDeterminationV2.test.ts`: 58 tests PASS
 - `packages/domain/src/v2/identity.test.ts`: 85 tests PASS
@@ -269,7 +266,7 @@ export interface BoundPrjRealityViewV1 {
 - `packages/runtime/src/v2/receiptMaterialization.test.ts`: 44 tests PASS
 - `apps/api/src/zprof/v2NativeEndToEnd.test.ts`: 40 tests PASS
 - Full Runtime suite (`packages/runtime/`): 274 tests PASS
-- Targeted suite total: 462 tests PASS
+- Targeted suite total: 467 tests PASS
 
 ## 53. Quality Gates
 

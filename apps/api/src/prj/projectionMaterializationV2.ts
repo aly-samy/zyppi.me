@@ -3,7 +3,6 @@ import {
   type ActionSemanticRefV2,
   type ExecutionRequestV2,
   type JsonValueV2,
-  type OwnerDeterminationBindingV2,
   type OwnerRefV2,
   type ProvenanceRefV2,
   type RequestedCapabilityRefV2,
@@ -210,10 +209,9 @@ function deepFreeze<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") {
     return obj;
   }
-  if (Object.isFrozen(obj)) {
-    return obj;
+  if (!Object.isFrozen(obj)) {
+    Object.freeze(obj);
   }
-  Object.freeze(obj);
   for (const key of Reflect.ownKeys(obj)) {
     const val = (obj as Record<string | symbol, unknown>)[key];
     if (val !== null && typeof val === "object") {
@@ -1246,11 +1244,18 @@ function validateAndReDeriveSpecification(
     };
   }
 
-  if (!isValidRefV2(ruleset.requiredCapabilityRef, "REQUESTED_CAPABILITY")) {
+  const reqCapRef = ruleset.requiredCapabilityRef as Record<string, unknown>;
+  if (
+    !isValidRefV2(ruleset.requiredCapabilityRef, "REQUESTED_CAPABILITY") ||
+    reqCapRef.ownerRef !== "urn:zyppi:owner:prj:v1" ||
+    reqCapRef.artifactId !== spec.specId ||
+    reqCapRef.version !== spec.version
+  ) {
     return {
       ok: false,
       code: "PRJ_SPECIFICATION_INVALID",
-      message: "requiredCapabilityRef is invalid.",
+      message:
+        "requiredCapabilityRef must be owned by urn:zyppi:owner:prj:v1 with artifactId and version matching specId and version.",
     };
   }
 
@@ -1762,23 +1767,32 @@ export function materializePrjProjectionV2(
   }
 
   if (!riReceiptRes.ok) {
-    const upstreamMsg =
+    const stageStr = "stage" in riReceiptRes ? String(riReceiptRes.stage) : "";
+    const errObj =
       "error" in riReceiptRes &&
       riReceiptRes.error &&
-      typeof riReceiptRes.error === "object" &&
-      "message" in riReceiptRes.error
-        ? String(riReceiptRes.error.message)
+      typeof riReceiptRes.error === "object"
+        ? riReceiptRes.error
+        : null;
+    const errCodeStr = errObj && "code" in errObj ? String(errObj.code) : "";
+    const errMsgStr =
+      errObj && "message" in errObj
+        ? String(errObj.message)
         : "Upstream execution failed.";
+
+    const details = [stageStr, errCodeStr].filter(Boolean).join("/");
+    const formattedMsg = details ? `[${details}] ${errMsgStr}` : errMsgStr;
+
     return {
       ok: false,
       error: {
         code: "PRJ_UPSTREAM_EXECUTION_FAILED",
-        message: upstreamMsg,
+        message: formattedMsg,
       },
     };
   }
 
-  // 6. Consume Exact Sealed Request from RI Frame
+  // 6. Consume Exact Sealed Request & Classified Owner Results from RI Frame
   const receiptFrame = riReceiptRes.frame;
   const outcomeFrame = receiptFrame.executabilityOutcomeFrame;
   const integrationFrame = outcomeFrame.ownerIntegrationFrame;
@@ -1786,25 +1800,9 @@ export function materializePrjProjectionV2(
   const sealedExecutionRequest = prodFrame.executionRequest;
   const executionReceipt = receiptFrame.executionReceipt;
 
-  // 7. Enforce POL Gate & RI Executability Gate
-  const ownerDeterminations =
-    sealedExecutionRequest.evaluationContext.ownerDeterminationBindings || [];
-
-  const polAggregate = ownerDeterminations.find(
-    (b: OwnerDeterminationBindingV2) =>
-      b.constitutionalOwnerRef?.family === "OWNER" &&
-      b.constitutionalOwnerRef?.ownerRef === "urn:zyppi:owner:pol:v1" &&
-      b.constitutionalOwnerRef?.artifactId === "POL-001" &&
-      b.exactRuleRef?.artifactId === "POL-AGGREGATE-RULESET-01",
-  );
-
-  const polAuthorization = ownerDeterminations.find(
-    (b: OwnerDeterminationBindingV2) =>
-      b.constitutionalOwnerRef?.family === "OWNER" &&
-      b.constitutionalOwnerRef?.ownerRef === "urn:zyppi:owner:pol:v1" &&
-      b.constitutionalOwnerRef?.artifactId === "POL-001" &&
-      b.exactRuleRef?.artifactId === "POL-AUTHORIZATION-RULESET-01",
-  );
+  // 7. Enforce POL Gate & RI Executability Gate using RI-classified owner results
+  const polAggregate = outcomeFrame.ownerResults.policyAggregate;
+  const polAuthorization = outcomeFrame.ownerResults.authorization;
 
   if (!polAggregate || !polAuthorization) {
     return {
@@ -1880,10 +1878,10 @@ export function materializePrjProjectionV2(
     };
   }
 
-  const output = evalRes.value;
+  const rawOutput = evalRes.value;
 
-  // Enforce output size bound
-  const outputCanon = safeCanonicalizeJcs(output);
+  // Enforce output size bound & detached output generation
+  const outputCanon = safeCanonicalizeJcs(rawOutput);
   if (!outputCanon.ok) {
     return {
       ok: false,
@@ -1893,6 +1891,9 @@ export function materializePrjProjectionV2(
       },
     };
   }
+
+  // Convert rawOutput into a completely detached fresh object graph via JCS parse
+  const output: JsonValueV2 = JSON.parse(outputCanon.value);
 
   if (
     Buffer.byteLength(outputCanon.value, "utf8") > MAX_OUTPUT_JCS_UTF8_BYTES

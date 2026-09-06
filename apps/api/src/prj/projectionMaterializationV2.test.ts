@@ -224,11 +224,15 @@ function createStateInstanceRef(id: string): StateInstanceRefV2 {
   };
 }
 
-function createRequestedCapabilityRef(id: string): RequestedCapabilityRefV2 {
+function createRequestedCapabilityRef(
+  id: string,
+  version?: string,
+): RequestedCapabilityRefV2 {
   return {
     family: "REQUESTED_CAPABILITY",
     ownerRef: "urn:zyppi:owner:prj:v1",
     artifactId: id,
+    version: version ?? "1.0.0",
   };
 }
 
@@ -237,6 +241,7 @@ function createValidRequestedAction(params?: {
   targetId?: string;
   targetSlotId?: string;
   capabilityId?: string;
+  capabilityVersion?: string;
 }): RequestedActionBindingV2 {
   const actionSemanticRef = createActionSemanticRef(
     params?.actionId ?? "action-view",
@@ -246,7 +251,8 @@ function createValidRequestedAction(params?: {
   );
   const targetRef = createTargetRef(params?.targetId ?? "target-123");
   const requestedCapabilityRef = createRequestedCapabilityRef(
-    params?.capabilityId ?? "cap-prj-spec-1",
+    params?.capabilityId ?? "spec-001",
+    params?.capabilityVersion ?? "1.0.0",
   );
 
   return {
@@ -390,7 +396,6 @@ function createValidBoundSpecification(params?: {
   const version = params?.version ?? "1.0.0";
   const provenanceRef = PROVENANCE_REF;
   const actionId = params?.actionId ?? "action-view";
-  const capabilityId = params?.capabilityId ?? "cap-prj-spec-1";
   const targetSlotId = params?.targetSlotId ?? "slot-target-1";
   const policyInterfaceRef =
     params?.policyInterfaceRef ?? "prj:policy-interface:whole-projection:v1";
@@ -438,7 +443,7 @@ function createValidBoundSpecification(params?: {
   const specification: PrjProjectionRuleSet01 = {
     ruleset: "PRJ-PROJECTION-RULESET-01",
     requiredActionSemanticRef: createActionSemanticRef(actionId),
-    requiredCapabilityRef: createRequestedCapabilityRef(capabilityId),
+    requiredCapabilityRef: createRequestedCapabilityRef(specId, version),
     requiredTargetSlotSemanticRefs: [createTargetSlotSemanticRef(targetSlotId)],
     root: rootNode,
   };
@@ -499,6 +504,7 @@ function createValidExecutionRequest(params?: {
   actionId?: string;
   targetId?: string;
   capabilityId?: string;
+  capabilityVersion?: string;
   targetSlotId?: string;
 }): ExecutionRequestV2 {
   const tEInput = "2026-03-31T12:00:00.000Z";
@@ -506,7 +512,8 @@ function createValidExecutionRequest(params?: {
     actionId: params?.actionId ?? "action-view",
     targetId: params?.targetId ?? "target-123",
     targetSlotId: params?.targetSlotId ?? "slot-target-1",
-    capabilityId: params?.capabilityId ?? "cap-prj-spec-1",
+    capabilityId: params?.capabilityId ?? "spec-001",
+    capabilityVersion: params?.capabilityVersion ?? "1.0.0",
   });
   const es = createValidBoundEvidenceState();
   const pu = createValidBoundPolicyUniverse([
@@ -2392,6 +2399,236 @@ describe("CCP-PRJ-PROD-01 Native V2 Governed Reality-View Projection Materializa
         res2.error.code === "PRJ_REALITY_VIEW_INVALID" ||
           res2.error.code === "PRJ_REALITY_VIEW_DIGEST_MISMATCH",
       ).toBe(true);
+    });
+
+    it("H17 — non-PRJ capability owner cannot bind a PRJ specification", () => {
+      const specId = "spec-001";
+      const version = "1.0.0";
+      const provenanceRef = PROVENANCE_REF;
+
+      const foreignCapabilityRef: RequestedCapabilityRefV2 = {
+        family: "REQUESTED_CAPABILITY",
+        ownerRef: "urn:zyppi:owner:council:v1", // Non-PRJ owner
+        artifactId: specId,
+        version,
+      };
+
+      const specification: PrjProjectionRuleSet01 = {
+        ruleset: "PRJ-PROJECTION-RULESET-01",
+        requiredActionSemanticRef: createActionSemanticRef("action-view"),
+        requiredCapabilityRef: foreignCapabilityRef,
+        requiredTargetSlotSemanticRefs: [
+          createTargetSlotSemanticRef("slot-target-1"),
+        ],
+        root: { kind: "LITERAL", value: "test" },
+      };
+
+      const specPreimage = { specId, version, provenanceRef, specification };
+      const specificationDigest = computeSha256(canonicalizeJcs(specPreimage));
+
+      const regPreimage = {
+        registrationId: `reg-${specId}`,
+        projectionType: `prj:type:${specId}`,
+        specificationRef: { specId, version, specificationDigest },
+        freshnessModelRef: "model:freshness:v1",
+        completenessModelRef: "model:completeness:v1",
+        policyInterfaceRef: "prj:policy-interface:whole-projection:v1",
+        supportedProfileRefs: ["profile:v1"],
+        provenanceRef,
+      };
+      const registrationDigest = computeSha256(canonicalizeJcs(regPreimage));
+
+      const spec: BoundPrjProjectionSpecificationV1 = {
+        specId,
+        version,
+        provenanceRef,
+        specificationDigest,
+        registration: {
+          registrationId: `reg-${specId}`,
+          projectionType: `prj:type:${specId}`,
+          specificationRef: { specId, version, specificationDigest },
+          freshnessModelRef: "model:freshness:v1",
+          completenessModelRef: "model:completeness:v1",
+          policyInterfaceRef: "prj:policy-interface:whole-projection:v1",
+          supportedProfileRefs: ["profile:v1"],
+          provenanceRef,
+          registrationDigest,
+        },
+        specification,
+      };
+
+      const req = createValidExecutionRequest();
+      // Match request capability claim to the foreign capability ref
+      (
+        req.requestedAction
+          .requestedCapabilityClaimBindings[0] as unknown as Record<
+          string,
+          unknown
+        >
+      ).requestedCapabilityRef = foreignCapabilityRef;
+
+      const rv = createValidBoundRealityView();
+
+      const res = materializePrjProjectionV2({
+        executionRequest: req,
+        realityView: rv,
+        boundSpecification: spec,
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+
+      expect(res.error.code).toBe("PRJ_SPECIFICATION_INVALID");
+    });
+
+    it("H18 — unrelated PRJ capability artifact cannot bind another specification", () => {
+      const specId = "spec-A";
+      const version = "1.0.0";
+      const provenanceRef = PROVENANCE_REF;
+
+      const mismatchedCapabilityRef: RequestedCapabilityRefV2 = {
+        family: "REQUESTED_CAPABILITY",
+        ownerRef: "urn:zyppi:owner:prj:v1",
+        artifactId: "spec-B", // Unrelated artifactId
+        version,
+      };
+
+      const specification: PrjProjectionRuleSet01 = {
+        ruleset: "PRJ-PROJECTION-RULESET-01",
+        requiredActionSemanticRef: createActionSemanticRef("action-view"),
+        requiredCapabilityRef: mismatchedCapabilityRef,
+        requiredTargetSlotSemanticRefs: [
+          createTargetSlotSemanticRef("slot-target-1"),
+        ],
+        root: { kind: "LITERAL", value: "test" },
+      };
+
+      const specPreimage = { specId, version, provenanceRef, specification };
+      const specificationDigest = computeSha256(canonicalizeJcs(specPreimage));
+
+      const regPreimage = {
+        registrationId: `reg-${specId}`,
+        projectionType: `prj:type:${specId}`,
+        specificationRef: { specId, version, specificationDigest },
+        freshnessModelRef: "model:freshness:v1",
+        completenessModelRef: "model:completeness:v1",
+        policyInterfaceRef: "prj:policy-interface:whole-projection:v1",
+        supportedProfileRefs: ["profile:v1"],
+        provenanceRef,
+      };
+      const registrationDigest = computeSha256(canonicalizeJcs(regPreimage));
+
+      const spec: BoundPrjProjectionSpecificationV1 = {
+        specId,
+        version,
+        provenanceRef,
+        specificationDigest,
+        registration: {
+          registrationId: `reg-${specId}`,
+          projectionType: `prj:type:${specId}`,
+          specificationRef: { specId, version, specificationDigest },
+          freshnessModelRef: "model:freshness:v1",
+          completenessModelRef: "model:completeness:v1",
+          policyInterfaceRef: "prj:policy-interface:whole-projection:v1",
+          supportedProfileRefs: ["profile:v1"],
+          provenanceRef,
+          registrationDigest,
+        },
+        specification,
+      };
+
+      const req = createValidExecutionRequest({
+        capabilityId: "spec-B",
+        capabilityVersion: version,
+      });
+
+      const rv = createValidBoundRealityView();
+
+      const res = materializePrjProjectionV2({
+        executionRequest: req,
+        realityView: rv,
+        boundSpecification: spec,
+      });
+
+      expect(res.ok).toBe(false);
+      if (res.ok) return;
+
+      expect(res.error.code).toBe("PRJ_SPECIFICATION_INVALID");
+    });
+
+    it("H19 — projecting an object-valued Reality subtree does not freeze or mutate Reality", () => {
+      const req = createValidExecutionRequest();
+      const material = {
+        nested: {
+          value: "original",
+        },
+      };
+
+      const rv = createValidBoundRealityView({ material });
+      const spec = createValidBoundSpecification({
+        rulesetRoot: {
+          kind: "SOURCE",
+          source: "REALITY_VIEW",
+          path: ["nested"],
+          requirement: "REQUIRED",
+        },
+      });
+
+      const res = materializePrjProjectionV2({
+        executionRequest: req,
+        realityView: rv,
+        boundSpecification: spec,
+      });
+
+      expect(res.ok).toBe(true);
+      if (!res.ok) return;
+
+      expect(Object.isFrozen(material)).toBe(false);
+      expect(Object.isFrozen(material.nested)).toBe(false);
+      expect(res.projection.output).not.toBe(material.nested);
+
+      // Mutate original Reality
+      material.nested.value = "changed";
+
+      // Projection output remains detached and original
+      expect((res.projection.output as { value: string }).value).toBe(
+        "original",
+      );
+    });
+
+    it("H20 — object-valued LITERAL does not freeze specification input", () => {
+      const req = createValidExecutionRequest();
+      const rv = createValidBoundRealityView();
+
+      const literalObj = { nestedKey: "literalValue" };
+      const spec = createValidBoundSpecification({
+        rulesetRoot: {
+          kind: "LITERAL",
+          value: literalObj,
+        },
+      });
+
+      const res = materializePrjProjectionV2({
+        executionRequest: req,
+        realityView: rv,
+        boundSpecification: spec,
+      });
+
+      expect(res.ok).toBe(true);
+      if (!res.ok) return;
+
+      expect(Object.isFrozen(literalObj)).toBe(false);
+      expect(res.projection.output).not.toBe(literalObj);
+      expect(Object.isFrozen(res.projection.output)).toBe(true);
+    });
+
+    it("H21 — PRJ admission consumes RI-classified ownerResults", () => {
+      const filePath = resolve(__dirname, "./projectionMaterializationV2.ts");
+      const content = readFileSync(filePath, "utf8");
+
+      expect(content).toMatch(/outcomeFrame\.ownerResults\.policyAggregate/);
+      expect(content).toMatch(/outcomeFrame\.ownerResults\.authorization/);
+      expect(content).not.toMatch(/ownerDeterminations\.find\(/);
     });
   });
 
