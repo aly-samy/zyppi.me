@@ -1,0 +1,4604 @@
+# ZII-PREP — Zyppi Interaction Infrastructure Preparation & Reconciliation
+
+| Field | Value |
+| :--- | :--- |
+| **Status** | ACTIVE DISCOVERY — NON-RATIFIED |
+| **Date** | 22 August 2026 |
+| **Authority** | Chair-initiated architectural preparation |
+| **Implementation authority** | None |
+| **Primary proving implementation** | ZQE — Zyppi QR Engine |
+| **Repository target** | `aly-samy/zyppi.me` monorepo, subject to repository-governance reconciliation |
+
+---
+
+## PREP Mission
+
+ZII-PREP shall answer:
+> *What interaction infrastructure does Zyppi actually need, what does Zyppi already have, where should each previous proposal live, and what minimum architecture lets ZQE become the first implementation without making QR the universal model?*
+
+It shall not begin by assuming that every brainstorming name deserves permanent architectural status.
+
+The three uploaded proposals remain **evidence, not authority**:
+- **zTOUCH / zQR** explores identity-native touchpoints and a possible carrier-independent envelope.
+- **ZRB / ZPIF** explores a future constitutional physical-Reality boundary plus a technical device/interface ecosystem.
+- **ZyPub / Zync** explores reference-based connected access versus bounded direct publication through arbitrary carriers.
+
+CEngS supplies an important reconciliation rule: *implementation knowledge is distinct from constitutional law, and a rule appearing in two places is a defect—every rule gets one home.*
+
+That becomes the governing discipline of PREP.
+
+---
+
+## Authority Order for Reconciliation
+
+When sources disagree, ZII-PREP will use this order:
+
+```text
+1. Ratified Zyppi constitutional authority
+      ↓
+2. Ratified CEngS engineering law/standards
+      ↓
+3. Active architecture such as CAW / Z-PROF where applicable
+      ↓
+4. Repository implementation reality
+      ↓
+5. Exploratory proposals
+      ↓
+6. Prior Council brainstorming/recommendations
+      ↓
+7. External standards/research
+      ↓
+8. New ZII hypotheses
+```
+
+An exploratory proposal cannot override current architecture simply because its idea is newer. Likewise, current implementation does not automatically become constitutional truth.
+
+---
+
+## The Golden Question Becomes a PREP Instrument
+
+The authoritative formulation we found is:
+
+> **Who did what, to whom, where, when, and how do we know?**
+
+Mapping to: **Subject**, **Event**, **Object**, **Place**, **Valid Time** and **Evidence**. Missing dimensions must remain missing; governance and authority do not become Reality merely because they govern it.
+
+For ZII we will add a boundary analysis around that question. For every engine / adapter / profile / interaction:
+- Which Golden Question dimensions does it **RECEIVE**?
+- Which does it **REPRESENT**?
+- Which does it **TRANSFORM** technically?
+- Which does it **OBSERVE**?
+- Which does it have **Evidence** for?
+- Which is it **prohibited** from inventing?
+- Where does constitutional interpretation begin?
+
+This is better than forcing every engine to contain all six dimensions.
+
+**For ZQE, for example:**
+| Dimension | ZQE Boundary |
+| :--- | :--- |
+| **Who?** | Outside ZQE |
+| **Did what?** | ZQE encoded supplied payload |
+| **To whom?** | No constitutional Object inferred |
+| **Where?** | Outside ZQE |
+| **When?** | No implicit time |
+| **How know?** | Technical conformance / deterministic artifact |
+
+This already protects `qr-core` from accumulating user identity, policy, location, timestamps, ZPI semantics or Evidence responsibilities.
+
+---
+
+## Preliminary Reconciliation Ledger
+
+*These are PREP dispositions, not ratifications.*
+
+| Concept | PREP disposition | Reason |
+| :--- | :--- | :--- |
+| **ZII** | ADOPT as working program | Missing technical umbrella for interaction engines/utilities |
+| **ZQE** | ADOPT as first reference implementation | Concrete, bounded first engine |
+| **zTOUCH** | ADAPT / investigate | Valuable semantic interaction concept, but not the engine umbrella |
+| **zQR** | ADAPT / separate from ZQE | Should mean Zyppi-aware QR usage/profile, not QR mathematics |
+| **zTouch Envelope** | OPEN / investigate deeply | Strong hypothesis but may overlap existing composition/context/projection architecture |
+| **ZRB** | PRESERVE + DEFER | Constitutional physical observation/actuation boundary is larger than ZII |
+| **ZPIF** | ABSORB candidate | Most proposed technical responsibilities overlap ZII |
+| **ZyPub** | PRESERVE / adjacent capability | Publication semantics can consume ZII carriers |
+| **Zync** | PRESERVE / outside ZII | Connected resolution/access mode, not a carrier engine |
+| **ZPI / zPIS** | PRESERVE separately | Addressing/resolution infrastructure, not carrier infrastructure |
+| **Animated QR** | DEFER as experimental consumer | Potential ZyPub optical implementation using ZQE |
+| **GS1 Digital Link QR** | FIRST external integration case | Important CAW/ZQE interoperability proof, not ZQE semantics |
+
+This immediately removes the largest ambiguity:
+**ZQE ≠ zQR** and **ZII ≠ zTOUCH**.
+
+---
+
+## Reconciliation Findings
+
+### Finding A — zTOUCH versus ZII
+The original `zTOUCH` proposal called zTOUCH a carrier-agnostic identity-touchpoint initiative and placed `zQR`, `zNFC`, `zRFID` and `zBLE` beneath it. The newer ZII idea reveals that this contains two different responsibilities.
+
+- **ZII** answers: *How does Zyppi technically encode, render, materialize, transmit, capture, decode, inspect and validate interaction mechanisms?*
+- **zTOUCH** potentially answers: *How does a Zyppi-aware touchpoint associate an interaction with persistent Identity and richer Zyppi semantics?*
+
+Therefore the candidate relationship becomes:
+
+```text
+Semantic / product interaction
+      zTOUCH
+        │
+   ┌────┴────┐
+  zQR       zNFC
+   │         │
+   ▼         ▼
+  ZQE      NFC Engine
+   └────┬────┘
+        ▼
+       ZII
+```
+*This preserves zTOUCH's useful insight without making it the engineering framework.*
+
+### Finding B — zQR versus ZQE
+This must be made explicit immediately.
+
+**ZQE — Zyppi QR Engine** (Technical)
+```text
+payload
+  ↓
+QR encoding
+  ↓
+QrSymbol
+  ↓
+renderer
+```
+*No Zyppi Identity semantics required.*
+
+**zQR** (Potential higher-level Zyppi interaction profile)
+```text
+Identity / address / external identifier
+  ↓
+zQR semantics
+  ↓
+carrier payload
+  ↓
+ZQE
+  ↓
+QR
+```
+The original `zQR` proposal correctly requires ordinary QR compatibility and explicitly rejects dependence on proprietary matrices or Zyppi-only readers. That becomes a zQR/ZII interoperability constraint, not a change to QR itself. This resolves the earlier naming confusion without discarding either concept.
+
+### Finding C — ZPIF Substantially Overlaps ZII
+ZPIF proposed: adapters, module interfaces, protocols, SDKs, capability manifests, conformance tests, certification, compatibility, manufacturer tooling. These are overwhelmingly interaction-infrastructure responsibilities.
+
+So the working hypothesis is:
+```text
+ZPIF
+  ↓
+technical responsibilities absorbed into
+  ↓
+ZII
+```
+However, one part should not be silently absorbed: *the future third-party/OEM certified-device ecosystem.* That could eventually become a specialized ZII program such as:
+```text
+ZII
+ └── Device / OEM Integration
+      ├── certification
+      ├── module manifests
+      ├── manufacturer tooling
+      └── device adapters
+```
+Whether the public name ZPIF survives for that narrower subsystem remains OPEN. So PREP does not yet retire the name. It marks it **ABSORB-CANDIDATE**.
+
+### Finding D — ZRB Remains Distinct
+The ZRB proposal is qualitatively different. It asks:
+```text
+Physical Reality
+  ↓
+observation
+  ↓
+admissible digital representation
+
+AND
+
+authorized digital outcome
+  ↓
+actuation
+  ↓
+physical effect
+```
+And explicitly separates device assertions from proof of physical effects. That is constitutional territory involving Evidence, trust, authority and Reality. Therefore: **ZRB ≠ ZII**.
+
+A useful future relationship may be:
+```text
+Constitutional systems
+      │
+     ZRB  (governed Reality boundary)
+      │
+     ZII  (technical engines / adapters / devices)
+      │
+physical mechanisms
+```
+But ZII development does not require ZRB ratification. This matters because the original ZRB proposal correctly deferred a generalized physical-interface constitution and explicitly said the current GS1 QR flow does not need it. We preserve that constraint.
+
+### Finding E — ZyPub Uses ZII
+ZyPub already concluded that optical communication is only a carrier and should not define the architecture. It envisioned carrier adapters including QR, NFC, BLE, LiFi, audio and future mechanisms. ZII now provides a natural implementation home for those mechanisms.
+
+```text
+ZyPub (publication semantics)
+  │
+  ▼
+publication encoding/orchestration
+  │
+  ▼
+ZII
+ ├── QR
+ ├── NFC
+ ├── BLE
+ └── ...
+```
+**For animated QR:**
+```text
+ZyPub Progressive
+  ↓
+fragmentation / sequencing / FEC
+  ↓
+series of payload frames
+  ↓
+ZQE
+  ↓
+series<QrSymbol>
+  ↓
+display adapter
+```
+ZQE should know nothing about publications, keyframes, fountain codes, epochs or constitutional state. The ZyPub proposal itself already requires transport mechanics to terminate before Runtime.
+
+### Finding F — Zync Is Orthogonal
+The strongest ZyPub/Zync refinement was:
+> *Zync = resolve by reference. ZyPub = acquire by publication.*
+
+That means Zync is not another engine family. Conceptually:
+```text
+Acquisition
+  │
+  ├──────────┴──────────┐
+  ▼                     ▼
+Zync                  ZyPub
+(reference resolution)  (direct publication)
+  │                     │
+HTTP/API/etc.             ZII (carrier mechanisms)
+```
+We should preserve this distinction for later communication architecture work. No need to solve it during ZQE.
+
+### Finding G — The zTouch Envelope Needs Special Scrutiny
+This is the first major unresolved architectural issue. The proposed `zTouch Envelope` contains: **Identity, Stable Context, Intent Hints, Trust / Seal, Version** and was intentionally left conceptual rather than a schema. That remains promising.
+
+But the newer Z-PROF architecture now creates a possible overlap. Z-PROF expressly forbids itself from redefining Identity, Evidence, Trust, Policy, Runtime or semantic projection, and treats composition primarily as declarative binding of independently owned capabilities.
+
+Therefore PREP must answer:
+> *Is zTouch Envelope truly a new semantic object, or merely a carrier/materialization envelope that references already governed Identity, Context, Evidence, intent vocabulary, trust material and profiles?*
+
+My provisional direction is the latter. Potentially:
+```text
+zTouch Envelope
+  ≠ new semantic ontology
+
+zTouch Envelope
+  = bounded carrier-facing composition/
+    serialization of independently governed references
+```
+But this should not be ratified until the overlap audit is complete. This becomes one of ZII-PREP's highest-priority constitutional questions.
+
+### Finding H — CAW Already Gives ZII a Strong Boundary
+CAW currently says:
+```text
+Carrier Capture
+  ↓
+Gateway
+  ↓
+Normalize
+  ↓
+Identity resolution
+  ↓
+Runtime
+```
+And explicitly requires the Runtime to remain indifferent to QR, NFC, RFID, BLE or future carriers. ZII therefore should not replace that rule. Instead:
+```text
+ZII (provides carrier-specific machinery)
+  ↓
+CAW Gateway/Application (uses appropriate ZII machinery)
+  ↓
+Runtime (still receives normalized constitutional input)
+```
+That is a very strong integration boundary.
+
+### Finding I — Repository Reality Supports ZII, but Governance Needs Correction
+The current monorepo supports `apps/`, `packages/`, `edge/*`, and `infra`. But the dependency validator still hard-codes the existing CAW-era package graph and treats unknown `@zyppi/*` package dependencies as violations. The generic package-boundary verifier also currently understands architectural layers such as foundation, runtime, contracts, and testing; that vocabulary may not cleanly express a renderer like `qr-svg`.
+
+Therefore ZII-PREP must solve:
+```text
+platform repository governance
+  ↓
+CAW package family
+ZII package family
+future package families
+```
+Without pretending every new package belongs to CAW. No ZQE package should be created before that decision is documented.
+
+---
+
+## ZII-PREP Workstreams
+
+Rather than six permanent documents, these are sections/workstreams inside one living `ZII-PREP.md`.
+
+| Workstream | Focus | Inputs / Outputs |
+| :--- | :--- | :--- |
+| **PREP-A** | Evidence & Prior-Work Reconciliation | **Inputs:** zTOUCH/zQR, ZRB/ZPIF, ZyPub/Zync, ZPI/zPIS, ZQE, CAW, Z-PROF, CEngS, repo reality, Council critiques. **Output:** Reconciliation Ledger. |
+| **PREP-B** | Constitutional Ownership Audit | For each proposed responsibility: Who already owns this? Does ZII need it? Would ZII duplicate something? Is it infrastructure or constitutional meaning? Owners tested against ZRM, ARM, SIOS, SEC, POL, RI, PRJ, RSN, Z-PROF, CEngS, CAW. |
+| **PREP-C** | Golden Question Boundary Audit | Test ZII, Engine, Renderer, Adapter, Capture, Decode, zTOUCH, ZyPub, future ZRB against all six Reality dimensions. |
+| **PREP-D** | Repository Readiness Audit | Resolve workspace placement, package metadata, dependency graph authority, boundary tooling, TS references, CI enforcement, conformance infrastructure, release/version boundaries. |
+| **PREP-E** | Standards & Sibling Research | Research official standards only where needed for architectural decisions (QR, Data Matrix, NFC/NDEF, RFID/EPC, BLE). Objective: ensure QR does not create a false universal abstraction. |
+| **PREP-F** | ZQE Entry Contract | At PREP closure, determine the exact minimum specification needed before `ZQE-M01` can begin. Sibling stress test is mandatory (QR, NFC, RFID, BLE, Data Matrix). |
+
+---
+
+## Preliminary ZII Invariants Emerging from Reconciliation
+
+*These are candidates for PREP testing, not yet ZII law:*
+
+- **ZII-P01 — Interaction Technology Independence:** ZII must not structurally depend on QR.
+- **ZII-P02 — Carrier Is Not Identity:** Carrier artifacts never become constitutional Identity.
+- **ZII-P03 — Canonical Native Artifact:** Each engine exposes the technically appropriate native artifact.
+- **ZII-P04 — Core / Materialization Separation:** Encoding or construction is separable from rendering, writing, broadcasting or device I/O where the technology permits.
+- **ZII-P05 — Constitutional Non-Invention:** ZII must not invent Identity, Evidence, Policy, Authority, Trust, Reality or Intent semantics.
+- **ZII-P06 — External Standards Authority:** Where a technology is externally standardized, ZII implements the applicable standard rather than redefining it.
+- **ZII-P07 — Explicit Profiles:** Deterministic behavior is bounded by explicit engine/profile versions.
+- **ZII-P08 — Conformance Is First-Class:** Every engine has independently verifiable conformance requirements.
+- **ZII-P09 — Replaceability:** Removing one engine must not invalidate Zyppi's constitutional meaning.
+- **ZII-P10 — No First-Engine Privilege:** ZQE may establish patterns but QR-specific concepts may not become generic ZII concepts without sibling validation.
+
+*These are the first hypotheses PREP should attack, not celebrate.*
+
+---
+
+## Immediate Research / Clarification Docket
+
+I see six questions requiring deeper work before ZII-D1:
+
+1. **ZPIF disposition:** Is everything technical absorbed into ZII, or does ZPIF survive as the future certified OEM/device integration subset?
+2. **zTouch Envelope:** Is it a legitimate carrier-facing envelope, or does it accidentally duplicate Z-PROF composition, Context, Identity, Evidence or SEC trust constructs?
+3. **ZII scope boundary:** Does ZII cover both generation/materialization and capture/decoding, or do these become separate engine capabilities under one umbrella?
+4. **Repository authority:** What platform-level mechanism replaces the present hard-coded CAW dependency universe without weakening mechanical boundaries?
+5. **Engine contract:** What is truly common across QR, NFC, RFID, BLE and Data Matrix—and what only appears common because QR is first?
+6. **ZQE relationship to current CAW:** What minimum integration point allows CAW to use ZQE for GS1 QR without making CAW an owner of ZQE or ZQE aware of GS1?
+
+*These are specific enough to research; none is a generic "future question."*
+
+---
+
+## Council Questions to Prepare
+
+For future Claude/Gemini/Qwen Council review, I would send narrowly separated questions rather than asking them to redesign ZII wholesale. For example:
+
+- **Council Question ZII-CQ-01 — Constitutional Placement:** Given ZRM/RI/SEC/POL/CEngS/CAW/Z-PROF, does ZII require any new constitutional authority to operate as a technical interaction-engine infrastructure, or can it exist entirely as an execution/implementation series under existing law? Identify only concrete ownership conflicts.
+- **Council Question ZII-CQ-02 — zTouch Envelope Collision Audit:** Does the proposed Identity + Stable Context + Intent Hints + Trust/Seal carrier envelope create duplicate semantic authority relative to ZRM, Z-PROF, Context, POL and SEC? Classify each field as reference, representation, governed semantic content, or invalid duplication.
+- **Council Question ZII-CQ-03 — ZPIF Disposition:** Compare ZPIF's proposed responsibilities with ZII. Identify which should be absorbed into ZII, which remain uniquely physical-device/OEM concerns, and whether a separately named framework remains architecturally justified.
+- **Council Question ZII-CQ-04 — First-Engine Privilege Test:** Stress the proposed ZII engine abstraction against QR, Data Matrix, NFC/NDEF, RFID/EPC and BLE. Identify every QR-specific assumption masquerading as a generic engine concept.
+
+*Those are questions worth taking to independent Council members.*
+
+---
+
+## Current Phase Status
+
+```text
+ZII-PREP
+ │
+ ├── A. Evidence register                  STARTED
+ ├── B. Prior concept reconciliation       STARTED
+ ├── C. Golden Question audit              STARTED
+ ├── D. Constitutional ownership audit     NEXT
+ ├── E. Repository readiness               PARTIALLY EVIDENCED
+ ├── F. Standards/sibling research         PENDING
+ └── G. Integrated PREP disposition        PENDING
+```
+
+The next proper step is **PREP-B: Constitutional Ownership & Overlap Audit**.
+
+That is where we take every candidate ZII responsibility—engine, renderer, adapter, conformance, touchpoint profile, envelope, publication, device integration, physical capture—and map it explicitly against ZRM, SIOS, SEC, POL, RI, Z-PROF, CEngS and CAW, marking each responsibility:
+
+**OWNED / CONSUMED / REFERENCED / PROHIBITED / OPEN**
+
+That audit should tell us whether the architecture we have sketched is genuinely clean before we begin writing `ZII-001`.
+
+---
+---
+
+# ZII-PREP-B — Constitutional Ownership Audit
+
+| Field | Value |
+| :--- | :--- |
+| **Status** | COMPLETE FOR PREP PURPOSES |
+| **Implementation authority** | NONE |
+
+---
+
+## Executive Result
+
+> **ZII does not require new constitutional sovereignty to perform its core mission.**  
+> Its legitimate ownership is technical interaction infrastructure. Existing Zyppi authorities already own Reality, Identity, Event/Evidence, Trust, Policy, constitutional execution, domain composition, and application-level resolution.
+
+That conclusion is strongly supported by the corpus:
+- **ZRM** makes Reality and Representation distinct and technology-independent; a QR symbol, NFC record, BLE frame, or similar artifact is therefore a Representation, never Reality itself.
+- **SEC** assigns policy logic to POL and explicitly says transport alone never establishes constitutional trust.
+- **RI** explicitly excludes compiler behavior, experience rendering, SDK implementation, and infrastructure from Runtime ownership.
+- **CAW** already establishes the critical carrier boundary: carrier-specific parsing occurs before the carrier-blind Runtime.
+
+---
+
+## PREP-B Classification Vocabulary
+
+For this audit:
+
+| Classification | Meaning |
+| :--- | :--- |
+| **OWNED BY ZII** | ZII may define the technical contract/behavior |
+| **CONSUMED BY ZII** | ZII may receive/use the artifact but does not own its meaning |
+| **REFERENCED BY ZII** | ZII must respect the external authority without implementing its semantics |
+| **PROHIBITED TO ZII** | ZII must not define, infer, or decide this meaning |
+| **DEFERRED** | Legitimate issue, but owned by a later architectural investigation |
+
+---
+
+## Master Constitutional Ownership Matrix
+
+| Responsibility | PREP-B classification | Existing authority | Decision |
+| :--- | :--- | :--- | :--- |
+| QR/Data Matrix/NFC/RFID/BLE encoding algorithms | **OWNED BY ZII** | External technology standards + CEngS | ZII may implement standards-bound technical algorithms |
+| Carrier decoding algorithms | **OWNED BY ZII** | External standards + CEngS | Technical decode only |
+| Native engine artifact (QrSymbol, NDEF representation, BLE frame, etc.) | **OWNED BY ZII** | CEngS subordinate | Technical Representation only |
+| Renderers / serializers | **OWNED BY ZII** | CEngS | SVG, binary serialization, print representation, etc. |
+| Diagnostic / explainability trace of encoding | **OWNED BY ZII** | CEngS | Technical explanation, not constitutional explanation |
+| Engine profile/version contract | **OWNED BY ZII** | CEngS | e.g. `zqe/1`; independent of payload semantics |
+| Standards conformance suite | **OWNED BY ZII** | External standards + CEngS | Technical conformance only |
+| Interoperability tests | **OWNED BY ZII** | CEngS | Cross-engine/device/decoder testing |
+| Performance benchmarks | **OWNED BY ZII** | CEngS | No constitutional meaning |
+| Technical engine error taxonomy | **OWNED BY ZII** | constrained by CEngS | Explicit deterministic failures |
+| Supported technical features | **OWNED BY ZII** | ZII | Use Support/Feature Manifest, not constitutional Capability |
+| Device driver / writer / broadcaster mechanics | **OWNED BY ZII** technically | CEngS / Infrastructure | May perform I/O; does not establish constitutional meaning |
+| Camera/NFC/RFID/BLE capture mechanics | **OWNED BY ZII** technically | CAW Gateway precedent / CEngS | Capture and parse technology-specific input |
+| Technical carrier provenance | **OWNED/CONSUMED** narrowly | ZRM/SEC downstream | ZII may preserve raw device/process metadata, not decide its evidentiary weight |
+| Identity semantics | **PROHIBITED TO ZII** | ZRM | ZII may carry an identifier as bytes; never define Identity |
+| Referent semantics | **PROHIBITED TO ZII** | ZRM | Same |
+| Touchpoint constitutional meaning | **PROHIBITED / REFERENCED** | ZRM-005 | zTOUCH may build on it; ZII must not redefine it |
+| Event semantics | **PROHIBITED TO ZII** | ZRM | Physical/digital operation does not let ZII declare constitutional Event truth |
+| Evidence semantics | **PROHIBITED TO ZII** | ZRM/SIOS | ZII outputs may later support Evidence; ZII does not decide Evidence truth |
+| Current Reality/state | **PROHIBITED TO ZII** | ZRM | Encoded information may be stale or false |
+| Place/context meaning | **PROHIBITED / CONSUMED** | ZRM / Z-PROF / relevant profiles | ZII may transport data but not determine Context |
+| Intent semantics | **PROHIBITED TO ZII** | ZRM semantic architecture | No free-standing ZII Intent system |
+| Intent authorization | **PROHIBITED TO ZII** | POL | Intent hints cannot authorize action |
+| Policy evaluation | **PROHIBITED TO ZII** | POL | POL owns authorization/policy decisions |
+| Constitutional Capability decisions | **PROHIBITED TO ZII** | POL/SEC | Technical feature support must remain distinct |
+| Trust | **PROHIBITED TO ZII** | SEC | Never emit `trusted=true` as constitutional conclusion |
+| Attestation meaning / security standing | **PROHIBITED TO ZII** | SEC | ZII may transport or technically validate crypto material only |
+| Cryptographic implementation mechanics | **POTENTIALLY OWNED BY PROFILE** | implementation profile | SEC deliberately does not prescribe algorithms; profile may |
+| Runtime execution | **PROHIBITED TO ZII** | RI | ZII is not Constitutional Runtime |
+| Execution Receipt | **PROHIBITED TO ZII** | RI | ZII may generate technical generation records, not RI receipts |
+| Replay/degraded constitutional execution | **PROHIBITED TO ZII** | RI | Physical transport replay protection may be technical, but constitutional replay remains RI |
+| Domain translation | **PROHIBITED TO ZII** | SIOS | Carrier parsing ≠ domain-semantic translation |
+| Constitutional composition/domain binding | **PROHIBITED TO ZII** | Z-PROF | ZII cannot become a composition engine |
+| GS1 semantics | **REFERENCED / CONSUMED** | GS1 + Z-PROF/application | ZQE sees payload, not GS1 meaning |
+| ZPI/zPIS addressing semantics | **REFERENCED / CONSUMED** | future ZPI/zPIS | ZII may encode an address but does not own it |
+| zTOUCH semantics | **ADJACENT / NOT ZII CORE** | future zTOUCH | Potential higher interaction-profile layer |
+| ZyPub publication semantics | **ADJACENT / NOT ZII CORE** | future ZyPub | Can consume ZII engines |
+| Zync connected-resolution semantics | **OUTSIDE ZII** | future Zync/resolution architecture | Orthogonal |
+| Physical-observation constitutional admission | **DEFERRED** | candidate future ZRB | ZII provides mechanics, not admission authority |
+| Physical-actuation constitutional admission/proof | **DEFERRED** | candidate future ZRB + ZRM/SEC/POL/RI | ZII can actuate technically, but cannot prove Reality changed |
+| OEM/manufacturer certification ecosystem | **DEFERRED** | future ZII/ZPIF investigation | Not initial ZII scope |
+
+This largely confirms the responsibility split already hypothesized in the ZRB/ZPIF exploration, which assigned Reality/Event/Evidence to ZRM, trust/security to SEC, policy to POL, Runtime execution to RI, and technical interface mechanics to the implementation framework.
+
+---
+
+## The Constitutional Shape of ZII
+
+The audit supports this boundary:
+
+```text
+EXISTING CONSTITUTIONAL / SEMANTIC AUTHORITY
+────────────────────────────────────────────
+ZRM        Reality · Identity · Event · Evidence
+SIOS       Translation / information architecture
+SEC        Trust · Attestation · Security
+POL        Policy · Authorization · Capability decisions
+Z-PROF     Governed composition / domain binding
+RI         Constitutional execution / receipts / replay
+────────────────────────────────────────────
+                    │
+                    │ governed inputs / references
+                    ▼
+────────────────────────────────────────────
+ZII — TECHNICAL INTERACTION INFRASTRUCTURE
+────────────────────────────────────────────
+Engines
+Encoding / decoding
+Canonical technical artifacts
+Renderers
+Technical adapters
+Device I/O
+Conformance
+Diagnostics
+Versioned engine profiles
+Interoperability
+────────────────────────────────────────────
+                    │
+                    │ physical/digital mechanisms
+                    ▼
+QR · NFC · RFID · BLE · Data Matrix · future
+```
+
+The constitutional direction is intentionally one-way:  
+> **ZII may materialize or observe governed representations. It does not create their constitutional meaning.**
+
+This follows ZRM's rule that Representations may be accurate, incomplete, conflicting, obsolete, or false and must never be treated as Reality itself.
+
+---
+
+## Golden Question Ownership Audit
+
+The Golden Question is useful precisely because it exposes what ZII must not infer.
+
+| ZII component | Who | Did what | To whom/what | Where | When | How do we know |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Pure encoder** | unknown | technically encoded bytes | supplied payload | unknown | unknown | deterministic technical result |
+| **Renderer** | unknown | rendered technical artifact | supplied symbol | unknown | unknown | deterministic renderer result |
+| **Decoder** | unknown | decoded observed carrier | carrier/signal | unknown unless externally supplied | unknown unless supplied | decoder result only |
+| **Capture adapter** | may preserve device ref | captured signal | observed carrier | may preserve raw location metadata | may preserve capture time | raw provenance, not constitutional Evidence automatically |
+| **Writer/printer adapter** | caller supplied externally | attempted physical write/print | physical target supplied externally | may preserve device/site metadata | operation time | technical result only |
+| **BLE broadcaster** | caller supplied externally | emitted frame | local radio environment | device location if supplied | transmission time | technical telemetry only |
+| **Conformance harness** | irrelevant | tested implementation | engine/artifact | test environment | test run | technical proof of conformance |
+| **ZQE** | none constitutionally | encoded payload → QrSymbol | no Referent inferred | none | none | exact deterministic reconstruction |
+
+The key constitutional rule remains:  
+> *Observation acquires Evidence; Reality is not created by observation, and a Representation never becomes Reality merely because a device produced it.*
+
+---
+
+## Critical Physical-Effect Boundary
+
+PREP-B resolves the Qwen concern about physical actuation more precisely.
+
+There are three different classes of operation:
+
+### A. Representation Transformation
+```text
+payload → QrSymbol → SVG
+```
+No physical Reality claim required.
+
+### B. Technical I/O
+```text
+NDEF bytes → NFC writer
+BLE frame  → radio broadcaster
+SVG        → printer command
+```
+
+### C. Constitutional Physical Claim
+```text
+"NFC tag X was successfully written"
+"Label Y is physically attached to Product Z"
+"Door physically opened"
+"Robot moved Object A"
+```
+
+> **ZII may own A and the mechanics of B.**  
+> **It does not own the constitutional truth of C.**
+
+The earlier ZRB exploration states the rule correctly: a command and proof that its physical effect occurred are different things; device `success: true` does not automatically establish constitutional Reality.
+
+Therefore the outbound long-term architecture remains:
+
+```text
+POL / RI authorized outcome
+      ↓
+Application orchestration
+      ↓
+ZII technical adapter
+      ↓
+physical device
+      ↓
+physical effect
+      ↓
+observation / provenance
+      ↓
+future ZRB admission boundary
+      ↓
+ZRM Event / Evidence
+```
+
+ZRB remains deferred; ZII does not need it to build ZQE. The original ZRB proposal itself explicitly says current GS1 QR interaction does not require generalized ZRB/ZPIF infrastructure.
+
+---
+
+## Inbound Observation Boundary
+
+The mirror direction is equally important:
+
+```text
+Physical carrier / signal
+      ↓
+ZII capture adapter
+      ↓
+technology-specific decode
+      ↓
+technical payload + raw provenance
+      ↓
+Application / Gateway
+      ↓
+constitutional admission / resolution
+      ↓
+Runtime
+```
+
+CAW already proves this pattern. Its carrier capture lives in the Gateway, normalization/identity resolution in Application, while Evidence/Runtime/Policy/Receipt remain carrier-blind downstream.
+
+This means:
+- A ZII decoder can say *"these bytes were decoded."* It cannot say *"this Identity is authentic."*
+- A ZII camera adapter can say *"this signal/image was captured."* It cannot say *"the claimed Event is constitutionally proven."*
+
+That separation should become a permanent ZII invariant candidate.
+
+---
+
+## Policy and Capability Boundary
+
+This audit produces an important vocabulary correction.
+
+SEC explicitly states that POL-001 exclusively governs authorization rules, policy evaluation, capability decisions, and policy lifecycle.
+
+Therefore ZII should avoid calling this:
+```typescript
+CapabilityManifest
+```
+for a simple declaration such as:
+```text
+supportsQrModel2
+supportsEci
+supportsNdefUri
+supportsBleAdvertising
+```
+
+That invites collision with constitutional Capability.
+
+**Preferred working terminology:**
+```typescript
+EngineSupportManifest
+// or:
+FeatureManifest
+```
+
+Then:
+```text
+Technical support:
+"this engine can encode ECI"
+
+      ≠
+
+Constitutional capability:
+"this Subject is authorized to perform action X"
+```
+
+This distinction should move forward into PREP-D and eventual ZII vocabulary.
+
+---
+
+## Trust and Cryptography Boundary
+
+SEC creates a particularly useful separation.
+
+SEC owns constitutional trust, identity integrity, attestation, revocation, and security invariants. But SEC deliberately does not prescribe signature algorithms, hash functions, encryption standards, key exchange, OAuth/JWT/TLS, or implementation infrastructure; those belong to implementation profiles.
+
+Therefore ZII can eventually contain technical machinery such as:
+- verify signature bytes
+- compute hash
+- parse certificate structure
+- validate frame MAC
+
+when an authorized carrier/profile requires it.
+
+But its output must remain technical:
+```text
+signatureValid = true
+```
+**not** constitutional:
+```text
+trusted = true
+```
+
+The zTOUCH exploration itself reached the same conclusion: cryptographic signatures can prove integrity/issuer properties but do not automatically prove current authority or physical-instance authenticity.
+
+---
+
+## Runtime Boundary
+
+RI gives us perhaps the strongest confirmation that ZII is outside the Constitutional Runtime.
+
+RI-006 explicitly says Runtime does not define:
+- compiler behavior;
+- policy logic;
+- experience rendering;
+- SDK implementation;
+- user interface behavior;
+- infrastructure deployment.
+
+And RI summarizes itself as executing constitutional truth without defining or creating constitutional authority.
+
+Therefore:
+- ZQE encoder
+- SVG renderer
+- NFC serializer
+- BLE packet builder
+- RFID encoder
+
+**must not be placed inside Runtime merely because some are pure/deterministic.**
+
+> *Purity does not equal Runtime membership.*
+
+---
+
+## Z-PROF / SIOS Boundary
+
+Z-PROF is also cleanly separated.
+
+It may declare required information and bind governed constitutional capabilities, but it does not become Evidence authority, authorization authority, projection engine, data-access layer, or universal Translation Layer. SIOS Translation Layers remain responsible for translating external/domain language into constitutional concepts.
+
+Therefore:
+```text
+ZII decoder:
+GS1 URI bytes → parsed technical structure
+
+      does not imply:
+
+ZII:
+GS1 concept → constitutional semantic meaning
+```
+
+That latter operation belongs to existing translation/domain/profile architecture.
+
+This is important for ZQE:
+> **ZQE may encode a GS1 Digital Link without understanding a single GS1 business concept.**
+
+---
+
+## Domain-Specific Ownership Results
+
+### zTOUCH Ownership Result
+PREP-B confirms that zTOUCH cannot be part of ZII core semantics.
+
+The exploratory document itself correctly says Touchpoint already exists in Zyppi and zTOUCH should enrich the Touchpoint→Identity boundary rather than create another primitive.
+
+Therefore:
+```text
+zTOUCH  =  possible higher interaction profile/protocol family
+ZII     =  technical engine infrastructure
+```
+
+The proposed *zTouch Envelope* remains unresolved and moves to PREP-C, because its Identity, Context, Intent Hints, and Trust/Seal fields risk duplicating existing constitutional ownership.
+
+PREP-B does, however, establish one rule for PREP-C:
+> *Any surviving zTouch Envelope must contain representations/references to governed concepts, never redefine them.*
+
+### ZyPub / Zync Ownership Result
+PREP-B confirms the earlier disposition:
+```text
+Zync    =  connected/reference acquisition concept
+ZyPub   =  bounded direct-publication concept
+ZII     =  carrier/interaction machinery either may use
+```
+
+The ZyPub proposal already insists that the transport can change while semantics remain canonical, and that physical carrier mechanics terminate before Runtime.
+
+Thus neither ZyPub nor Zync belongs inside the ZII engine contract.
+
+### ZPIF Ownership Result
+PREP-B materially advances the ZPIF question.
+
+The technical core of ZPIF is redundant with ZII:
+- adapters
+- module interfaces
+- protocol integration
+- SDK support
+- technical manifests
+- conformance
+- compatibility tooling
+
+Those can ultimately live under ZII.
+
+However, this part remains distinct and deferred:
+- manufacturer enrollment
+- device certification
+- operational attestation
+- device trust lifecycle
+- revocation
+- "Zyppi Ready" ecosystem
+
+because those concerns cross SEC, POL, Identity, Registry, and potentially future ZRB responsibilities. The exploratory ZPIF proposal itself separates certification eligibility from runtime trust.
+
+**PREP-B disposition:**
+- ZPIF as a general technical framework: **ABSORB INTO ZII.**
+- ZPIF as an OEM/certified physical-device ecosystem: **DEFER**, name not yet retired.
+
+That question no longer blocks core ZII/ZQE.
+
+---
+
+## PREP-B Constitutional Invariants Promoted for Further Testing
+
+The audit supports strengthening several earlier hypotheses:
+
+- **ZII-B01 — Technical Sovereignty Only**  
+  ZII owns interaction mechanics, not constitutional meaning.
+
+- **ZII-B02 — Representation Never Becomes Reality**  
+  No carrier artifact or decoded payload is Reality merely by existing.
+
+- **ZII-B03 — Carrier Is Not Identity**  
+  ZII never creates Identity semantics from a carrier.
+
+- **ZII-B04 — Technical Observation Is Not Constitutional Evidence**  
+  Capture/decoding may produce candidate material/provenance; Evidence status belongs downstream.
+
+- **ZII-B05 — Technical Success Is Not Physical Proof**  
+  A successful device command does not prove the resulting Reality state.
+
+- **ZII-B06 — Support Is Not Capability**  
+  Engine feature support must remain distinct from POL/SEC Capability.
+
+- **ZII-B07 — Cryptographic Validity Is Not Trust**  
+  Technical crypto verification cannot emit constitutional Trust.
+
+- **ZII-B08 — Parsing Is Not Semantic Translation**  
+  Technology syntax belongs to ZII; constitutional/domain meaning does not.
+
+- **ZII-B09 — Purity Does Not Imply Runtime Membership**  
+  Pure engines remain outside RI unless they actually fulfill the Runtime role.
+
+- **ZII-B10 — ZII Shall Remain Replaceable**  
+  Replacing QR/NFC/BLE implementation cannot alter constitutional meaning.
+
+*These are still PREP findings, not yet ratified ZII law.*
+
+---
+
+## PREP-B Outcome by Authority
+
+The clean ownership model is now:
+
+```text
+ZRM
+  owns Reality / Representation / Identity /
+       Referent / Event / Evidence / Touchpoint semantics
+
+SIOS
+  owns constitutional information translation architecture
+
+SEC
+  owns Trust / Attestation / security guarantees
+
+POL
+  owns authorization / policy /
+       constitutional Capability decisions
+
+Z-PROF
+  owns governed domain composition / binding
+
+RI
+  owns constitutional execution / receipts / replay
+
+CAW
+  owns its Commerce wedge application flow
+
+CEngS
+  owns engineering law / repository discipline
+
+ZII
+  owns technical interaction engines,
+       artifacts, renderers, adapters,
+       profiles, conformance and tooling
+```
+
+**No authority collision is necessary.**
+
+---
+
+## PREP-B Unresolved Items
+
+PREP-B leaves only matters that correctly belong to later work:
+
+| Item | Destination |
+| :--- | :--- |
+| Exact zTouch Envelope disposition | PREP-C |
+| Trust/Seal field replacement | PREP-C |
+| Context representation rules | PREP-C |
+| Intent Hint representation rules | PREP-C |
+| Exact package roles/layers | PREP-D |
+| Global monorepo governance | PREP-D |
+| Generic engine abstraction sibling test | PREP-E |
+| NFC/RFID/BLE standards comparison | PREP-E |
+| ZQE implementation entry contract | PREP-F |
+| Constitutional physical observation/actuation admission | Future ZRB |
+| OEM certification ecosystem | Deferred ZII/ZPIF exploration |
+
+---
+
+## PREP-B Closure Verdict
+
+> **PREP-B PASSES.**
+>
+> The audit found no requirement for ZII to become a new constitutional authority.  
+> It found a strong, defensible execution boundary:
+>
+> *ZII owns how interaction technologies are technically expressed, generated, rendered, transmitted, captured, decoded, inspected and tested. It does not own what those interactions mean constitutionally.*
+>
+> Or in the shortest form:
+>
+> **ZII may know HOW.**  
+> **It may carry WHAT.**  
+> **It must not decide WHAT IT MEANS.**
+
+The next blocking phase is now clearly **PREP-C — zTOUCH / zTouch Envelope Constitutional Collision Audit**, because that is the first place where Identity, Context, Intent and Trust risk crossing from carried representation into duplicated semantic authority.
+
+---
+---
+
+# ZII-PREP-C — zTOUCH / zTouch Envelope Constitutional Collision Audit
+
+| Field | Value |
+| :--- | :--- |
+| **Status** | COMPLETE FOR PREP PURPOSES — PASS WITH REQUIRED REFACTOR |
+| **Implementation authority** | NONE |
+| **Primary question** | Can zTOUCH and the proposed zTouch Envelope survive without creating parallel Identity, Context, Intent, Trust, Policy, Evidence, Profile, or Runtime semantics? |
+
+---
+
+## Executive Verdict
+
+**Yes, zTOUCH can survive. Yes, an envelope concept can survive.** But the original envelope model must be narrowed and renamed semantically.
+
+The original proposal described the envelope as:
+```text
+Identity
+Context
+Intent Hints
+Trust / Seal
+```
+while explicitly warning that it should not create a parallel constitution.
+
+That warning was correct, because the four labels collide directly with already-governed Zyppi concepts.
+
+The constitutional-safe formulation is instead:
+> **A zTouch Envelope is a bounded, carrier-facing representation that may transport references, descriptive assertions, interaction hints, and integrity/provenance material. It does not own or determine the constitutional meaning of anything it carries.**
+
+The core correction is:
+
+| Old conceptual language | PREP-C safe language |
+| :--- | :--- |
+| Identity | → **Resolution / Identity Reference** |
+| Context | → **Contextual Reference / Descriptive Assertion** |
+| Intent Hints | → **Interaction Hints referencing governed vocabulary** |
+| Trust / Seal | → **Integrity / Provenance / Attestation Material** |
+| Version | → **Envelope/Binding Version only** |
+
+This is not cosmetic. It changes the constitutional ownership model.
+
+---
+
+## zTOUCH: No Constitutional Collision If Properly Scoped
+
+ZRM already defines **Touchpoint**.
+A Touchpoint is an Object playing the structural role of an access mechanism into identity resolution; Touchpoint, resolved Identity, and Referent remain distinct.
+
+Therefore zTOUCH must not mean:
+- a new kind of constitutional Touchpoint
+- a new Identity system
+
+The surviving meaning is:
+> **zTOUCH is a Zyppi interaction/protocol initiative for creating richer interoperable uses of already-governed Touchpoints.**
+
+Conceptually:
+```text
+ZRM
+│
+└── Touchpoint
+      │
+      ▼
+zTOUCH protocol/product family
+      │
+      ├── zQR
+      └── zNFC ...
+```
+zTOUCH is therefore subordinate to the existing Touchpoint meaning.
+
+**PREP-C disposition:**
+`zTOUCH: SURVIVES — ADAPT`
+- Not a primitive.
+- Not a new ontology.
+- Not a ZII engine framework.
+
+---
+
+## zTOUCH and ZII Remain Distinct
+
+The clean relationship is:
+
+```text
+zTOUCH
+"What should a Zyppi-aware touchpoint carry or expose?"
+      │
+      ▼
+ZII
+"How do we technically encode/materialize/capture it?"
+      │
+      ├── ZQE
+      └── NFC Engine
+```
+
+This preserves:
+- `zQR ≠ ZQE`
+- `zTOUCH ≠ ZII`
+
+A zQR may use ZQE.
+ZQE does not need zQR.
+That remains one of the strongest architectural separations produced by PREP.
+
+---
+
+## Field Collisions & Refactoring
+
+### Identity Field Collision
+The exploratory envelope asks:
+> *"Who am I?"*
+
+and suggests identity reference, identity class/type reference, envelope version, and issuer reference.
+
+There are two problems.
+1. The carrier is not the Identity.
+2. The value carried by a QR/NFC/etc. may not even be a canonical Zyppi Identity. It could be:
+   - GS1 identifier
+   - ZPI address
+   - external URI
+   - customer identifier
+   - opaque resolution token
+   - other governed access path
+
+ZRM already defines Touchpoint resolution as:
+```text
+AccessPath
+      ↓
+  resolve()
+      ↓
+   Identity
+```
+So the envelope should not conceptually say:
+```typescript
+identity: ...
+```
+as though it contains constitutional Identity.
+
+**Safer concept:**
+`Resolution Reference` or, where exact semantics justify it, `Identity Reference`
+
+With one critical invariant:
+> **The reference never becomes the Identity merely because it is carried by the envelope.**
+
+**Identity type/class:**
+This is more dangerous.
+Something like `type = product` could collide with ARM/domain/profile semantics.
+Therefore an envelope may only carry a governed external or constitutional classification reference where one already exists.
+It shall not invent its own type system.
+
+| Candidate content | Disposition |
+| :--- | :--- |
+| Identity object | **PROHIBITED** |
+| Resolution reference | **SURVIVES** |
+| Existing Identity reference | **SURVIVES as reference** |
+| External identifier | **SURVIVES under external authority** |
+| Free-form identity type | **PROHIBITED** |
+| Governed profile/class reference | **OPTIONAL REFERENCE** |
+| Issuer reference | **SURVIVES, but creates no authority by itself** |
+
+### Context Field Collision
+The original proposal was already cautious: it suggested carrying only stable information and warned that printed context can become stale.
+
+The newer Z-PROF architecture makes the boundary stronger.
+The ratified Z-PROF contract explicitly distinguishes:
+```text
+Context Requirement
+      ≠
+Context Interpretation
+```
+and permits Z-PROF to route or require Context without acquiring authority to interpret it.
+
+Z-PROF's Domain Template architecture also explicitly treats Time, Place, Jurisdiction, Actor, Intent, Transaction Context, etc. as governed dimensions rather than arbitrary metadata.
+
+Therefore a zTouch Envelope cannot introduce:
+```text
+context = current truth
+location = authoritative current Place
+warrantyActive = true
+```
+as an unqualified constitutional fact.
+
+**Three different things must be separated:**
+
+| Category | Description | Examples |
+| :--- | :--- | :--- |
+| **A. Envelope metadata** | Describes the envelope itself | envelope version, carrier binding version, encoding identifier |
+| **B. Descriptive assertions / references** | Claims or references (non-authoritative unless validated) | batch reference, location reference, product-class reference, issuer-supplied descriptor |
+| **C. Evaluation Context** | Belongs downstream | Z-PROF/AMS-0860 explicit version/context/evidence/evaluation bindings |
+
+**PREP-C disposition:**
+The top-level envelope field named simply:
+`Context`
+**DOES NOT SURVIVE.**
+
+Replace conceptually with:
+`Contextual References / Descriptive Assertions`
+and treat all such content as non-authoritative unless separately validated under its governing source.
+
+### Intent Hints Collision
+This is subtler.
+The original proposal correctly says Intent Hints are not capabilities or permissions and proposes reusing Zyppi's governed closed Intent vocabulary.
+
+But ZRM defines Intent more precisely:
+> *Intent is a Relationship between a Subject and a desired candidate future State.*
+
+It also preserves the closed vocabulary such as Discover, Access, Verify, Authenticate, Register, Claim, Purchase, Transfer, Return, Support, Subscribe and Trigger.
+
+Therefore:
+```text
+QR says "Verify"
+```
+does not itself instantiate:
+```text
+intent(subject, object, futureState)
+```
+There may not even be an identified Subject yet.
+That means calling the carrier field `Intent` would be constitutionally wrong.
+Calling it `Intent Hint` is better, but still close enough to create confusion.
+
+**PREP-C distinction:**
+
+| Concept | Structure |
+| :--- | :--- |
+| **Actual Intent** | Subject → desires → future State |
+| **Carrier Interaction Hint** | "This touchpoint commonly supports interactions of category Verify" |
+
+The second is discoverability metadata, not an Intent Relationship.
+
+**Preferred working language:**
+`Interaction Hints`
+
+These may reference the governed Intent vocabulary:
+```yaml
+interactionHints:
+  - Verify
+  - Register
+  - Support
+```
+but the semantics are explicitly:
+> *"These interaction categories may be relevant."*
+
+not:
+> *"An Actor has expressed these Intents."*
+
+and certainly not:
+> *"These actions are authorized."*
+
+**Important consequence:**
+Interaction Hints should be moved out of the mandatory envelope core.
+Many touchpoints need none.
+They should be an optional zTOUCH extension.
+
+**PREP-C disposition:**
+`Intent Hints` → **ADAPT to Interaction Hints.**
+- reference governed labels;
+- never instantiate constitutional Intent;
+- never imply authorization;
+- never imply applicability;
+- optional extension only.
+
+### Trust / Seal Collision
+This is the clearest collision.
+
+SEC defines Trust as a governed lifecycle involving Identity, attestation, capability, policy satisfaction and Runtime compliance. Only active Trust may authorize execution.
+
+Z-PROF independently reinforces the boundary:
+> *Z-PROF consumes SEC-governed security/trust mechanisms and cannot create alternative trust, attestation, or cryptographic authority.*
+
+And the ZyPub exploration reached the same insight:
+> *Trust is computed, not transported.*
+
+Therefore:
+`Trust / Seal`
+must be removed from the zTouch Envelope vocabulary.
+
+A carrier can contain:
+- signature
+- issuer reference
+- certificate reference
+- attestation reference
+- content digest
+- key identifier
+- proof material
+
+A technical reader can potentially conclude:
+```text
+signature cryptographically valid
+```
+It cannot conclude:
+```text
+constitutionally trusted
+```
+without SEC/POL/standing/current-state evaluation.
+
+**Replacement concept:**
+`Integrity & Provenance Material`
+or more generally:
+`Proof Material`
+
+This tells the truth about what the carrier may possess without claiming what SEC will conclude.
+
+**PREP-C disposition:**
+`Trust / Seal` → **REJECT as formal envelope terminology.**
+Replace with:
+`Integrity / Provenance / Attestation Material`
+subject to future security profile design.
+
+### Version Collision
+Version itself is legitimate—but only if scoped.
+
+The zTouch Envelope may own:
+- `envelopeVersion`
+- `bindingVersion`
+
+For example:
+- zTouch envelope v1
+- zQR binding v1
+
+But it must not silently own or float:
+- ARM profile version
+- Z-PROF composition version
+- POL version
+- SEC state
+- ZPI protocol version
+- GS1 specification version
+- engine version
+
+The Z-PROF contract already requires explicit version binding and prohibits silently floating across incompatible constitutional artifacts.
+Similarly ZQE will separately have `zqe/1` for encoding reproducibility.
+
+Thus:
+```text
+zTouch Envelope version
+      ≠
+zQR binding version
+      ≠
+ZQE encoding profile
+      ≠
+payload protocol version
+      ≠
+domain composition version
+```
+This is now a PREP-C rule candidate.
+
+---
+
+## Envelope vs. Existing Constitutional Artifacts
+
+### zTouch Envelope vs. CompositionManifest
+This collision is now decisively resolved.
+They are not competing representations.
+
+Z-PROF's ratified `CompositionManifest` answers:
+> *"Which governed constitutional artifacts satisfy the requirements of this domain composition, and how are they bound?"*
+
+It can reference ARM Profiles, Epistemic Requirements, PRJ, RSN, Context requirements, POL, SEC, RI, version constraints, provenance, and successful Application resolution may produce a version-bound, provenance-preserving Bound Constitutional Payload which remains non-authoritative over its sources.
+
+A zTouch Envelope must do nothing remotely as broad.
+
+**Forbidden architecture:**
+```text
+Physical carrier
+      ↓
+zTouch Envelope
+      ↓
+contains full constitutional composition
+      ↓
+Runtime
+```
+That would create a second Z-PROF/application assembly system.
+
+**Correct architecture:**
+```text
+Physical carrier
+      ↓
+zTouch Envelope / standard payload
+      ↓
+technical decode
+      ↓
+resolution references + bounded claims/hints/proof
+      ↓
+Application
+      ↓
+Registry / Evidence / Z-PROF / POL / SEC
+      ↓
+CompositionManifest / governed assembly
+      ↓
+Bound Constitutional Payload
+      ↓
+RI
+```
+This matches the current physical Z-PROF topology, where physical carrier parsing precedes resolution, composition, Application assembly, EvaluationCoordinate, and RI.
+
+**PREP-C conclusion:**
+The zTouch Envelope is a carrier/bootstrap artifact, not a constitutional composition artifact.
+That boundary is now closed for PREP purposes.
+
+### zTouch Envelope vs. EvaluationCoordinate
+They are also fundamentally different.
+
+AMS-0860 treats evaluation identity as a deliberately bound construct involving semantic configuration, exact dependencies, explicit temporal coordinates, pinned semantic/assessment states, Evidence integrity and no ambient trust/time.
+
+The zTouch Envelope must never attempt to be:
+`portable EvaluationCoordinate`
+by embedding:
+- current policy
+- current trust
+- current authority
+- current state
+- ambient current location
+- ambient current time
+
+A carrier may provide an input later consumed when constructing an EvaluationCoordinate.
+It is not itself the EvaluationCoordinate.
+
+---
+
+## Minimal Envelope Architecture Emerging from PREP-C
+
+The original envelope was too semantically ambitious.
+A safer conceptual architecture is:
+
+```text
+zTouch Carrier Envelope
+│
+├── Envelope Metadata
+│     └── envelope/binding version
+│
+├── Resolution Reference
+│     └── ZPI / GS1 / URI / governed external reference
+│
+├── Optional Descriptive Assertions / References
+│     └── explicitly non-authoritative carrier-local material
+│
+├── Optional Interaction Hints
+│     └── governed vocabulary references, not actual Intent
+│
+└── Optional Integrity / Provenance Material
+      └── signature / issuer / attestation references / hashes
+```
+
+This is conceptual only.
+Not a schema.
+Not a JSON contract.
+Not a URI grammar.
+Not implementation authority.
+
+---
+
+## The Core Should Probably Be Much Smaller Than Originally Imagined
+
+PREP-C produces a further refinement:
+> **Not every zTOUCH should require a rich Envelope.**
+
+For many situations, the best zTOUCH may simply be:
+`standard interoperable resolution reference`
+
+Example:
+- GS1 Digital Link
+- eventually: ZPI address
+
+Then richer envelope features are optional where justified.
+
+I would therefore model zTOUCH conceptually as:
+
+```text
+zTOUCH
+│
+├── Baseline Binding
+│     └── interoperable resolution/access reference
+│
+└── Optional Extensions
+      ├── descriptive assertions
+      ├── interaction hints
+      └── integrity/provenance material
+```
+
+This has several advantages:
+- It keeps QR payloads short.
+- It preserves GS1.
+- It supports constrained NFC/RFID carriers.
+- It minimizes privacy exposure.
+- It avoids encoding stale Reality.
+- It makes zTOUCH usable even before every advanced semantic feature exists.
+
+---
+
+## Graceful Degradation Model Improvement
+
+The original proposal had:
+```text
+Generic Scanner
+      ↓
+zQR-aware Reader
+      ↓
+Trust-aware Reader
+      ↓
+Zyppi Resolution
+      ↓
+Reality / Intelligence
+```
+
+The collision audit suggests a more precise form:
+
+```text
+Level 1 — Carrier Native
+Standard reader obtains useful baseline payload
+            ↓
+Level 2 — zTOUCH Aware
+Reader understands envelope/binding structure,
+references and non-authoritative hints
+            ↓
+Level 3 — Proof Aware
+Reader can technically validate available
+integrity/provenance material
+            ↓
+Level 4 — Zyppi Resolved
+Zyppi resolves Identity, Reality, Context,
+Evidence, Policy and SEC state
+            ↓
+Level 5 — Governed Execution / Interpretation
+RI / PRJ / RSN / appropriate authorities
+```
+
+Notice the correction:
+> **"Trust-aware" becomes "Proof-aware."**
+> Actual Trust remains downstream.
+
+---
+
+## Relationship to External & Adjacent Systems
+
+### Relationship to GS1
+The original proposal correctly says zTOUCH should preserve external standards rather than replace them.
+PREP-C strengthens that.
+
+For GS1:
+`GS1 Digital Link`
+may already carry sufficient resolution semantics.
+
+Therefore zTOUCH must not insist on wrapping it in a proprietary semantic container simply because an envelope exists.
+
+**Possible lawful behavior:**
+```text
+GS1 Digital Link directly
+      ↓
+zQR binding behavior / Zyppi resolution
+```
+or, where standards permit and value justifies it:
+```text
+GS1-governed identifier/reference
+      +
+bounded zTOUCH extension
+```
+But GS1 semantics remain GS1's.
+The envelope does not "translate GS1 into Zyppi."
+That translation/application work remains in the proper domain/Z-PROF/application boundary.
+
+### Relationship to ZPI/zPIS
+The same result applies to future ZPI.
+The zTouch Envelope does not create physical identity addresses.
+It may carry:
+`zpi.to/...`
+or another ZPI address/reference.
+
+Therefore:
+- **ZPI** = addressing / resolution identity
+- **zTOUCH** = interaction semantics / carrier binding
+- **ZII** = technical carrier infrastructure
+- **ZQE** = QR mathematics
+
+These remain independently replaceable.
+
+### Relationship to ZyPub
+This audit also prevents another future collision.
+A zTouch Envelope and a ZyPub Capsule must not become the same artifact.
+
+The ZyPub proposal contemplates bounded publication containing identity material, state, Evidence, attestations, domain projections and potentially graph fragments.
+That is potentially much richer than a touchpoint bootstrap envelope.
+
+So:
+- `zTouch Envelope` = compact interaction/bootstrap representation
+- `ZyPub Capsule` = bounded published representation
+
+A ZyPub publication may use a zTOUCH/ZII carrier.
+It may even carry a resolution reference also used by zTOUCH.
+But it does not collapse into the zTouch Envelope.
+
+---
+
+## Golden Question Collision Test
+
+The envelope may carry information related to Golden Question dimensions, but it cannot manufacture them.
+
+| Golden Question | zTouch Envelope may | zTouch Envelope must not |
+| :--- | :--- | :--- |
+| **Who?** | carry Subject/issuer/reference | declare constitutional Subject authority |
+| **Did what?** | carry an assertion/event reference | create Event truth merely by serialization |
+| **To whom?** | carry Object/Identity/reference | redefine Referent/Identity |
+| **Where?** | carry Place/contextual claim/reference | infer current Place |
+| **When?** | carry valid-time/publication-time claim | treat scan time as Valid Time automatically |
+| **How do we know?** | carry proof/evidence references/material | declare Evidence verified or Trust established |
+
+This is the decisive boundary:
+> **The envelope carries representations relevant to the Golden Question. It does not answer the Golden Question by itself.**
+
+---
+
+## PREP-C Disappearance Test
+
+We should require:
+1. If zTOUCH disappeared tomorrow, would ZRM Identity, Touchpoint, GS1 identifiers, ZPI addresses, Context, Intent, SEC Trust, POL authorization, Z-PROF compositions and RI execution remain independently meaningful?
+   **Yes.**
+2. If the zTouch Envelope disappeared and a carrier exposed only an ordinary resolution reference, could Zyppi still function?
+   For the baseline architecture, the answer should also be: **Yes.**
+
+This is a powerful reason to make the rich envelope optional rather than universal.
+It matches Z-PROF's own disappearance principle: composition must not acquire ownership over the artifacts it references.
+
+---
+
+## PREP-C Prohibited Forms
+
+The audit rejects the following conceptual forms:
+
+```text
+identity = embedded constitutional Identity object
+context = current authoritative state
+intent = Verify                    (when no Subject/future-State relationship exists)
+capability = Claim                 (when it actually means authorization)
+trusted = true
+valid = true
+authorized = true
+warrantyActive = true              (as unqualified permanent carrier truth)
+compositionManifest = {...}        (inside the envelope as a replacement for Z-PROF/App assembly)
+evaluationCoordinate = {...}       (inside the carrier as a substitute for downstream deterministic binding)
+```
+
+These are now architecturally prohibited hypotheses for the future envelope design unless a governing authority explicitly introduces an independently justified mechanism.
+
+---
+
+## Candidate zTOUCH Invariants Emerging from PREP-C
+
+These remain PREP findings, not ratified ZII/zTOUCH law.
+
+| ID | Candidate invariant |
+| :--- | :--- |
+| **ZT-C01** | zTOUCH SHALL NOT redefine constitutional Touchpoint |
+| **ZT-C02** | Carrier Reference ≠ Identity |
+| **ZT-C03** | Descriptive Assertion ≠ current Context |
+| **ZT-C04** | Interaction Hint ≠ Intent |
+| **ZT-C05** | Interaction Hint ≠ Capability or authorization |
+| **ZT-C06** | Proof Material ≠ Trust |
+| **ZT-C07** | Signature Validity ≠ current constitutional standing |
+| **ZT-C08** | Envelope Version ≠ payload/domain/engine version |
+| **ZT-C09** | Envelope ≠ CompositionManifest |
+| **ZT-C10** | Envelope ≠ Bound Constitutional Payload |
+| **ZT-C11** | Envelope ≠ EvaluationCoordinate |
+| **ZT-C12** | External standards retain semantic authority |
+| **ZT-C13** | Rich envelope semantics SHALL remain optional where a simpler interoperable reference suffices |
+| **ZT-C14** | Removing zTOUCH SHALL NOT invalidate underlying constitutional artifacts |
+| **ZT-C15** | No carrier representation may make a claim stronger than its governing Reality/Evidence supports |
+
+*ZT-C15 directly follows the Z-PROF Naked Reality constraint that interpretation or representation must not make a claim stronger than the Reality and Evidence supporting it.*
+
+---
+
+## Final Field-by-Field Disposition
+
+| Original proposal | PREP-C outcome |
+| :--- | :--- |
+| Identity | **REFACTOR** → Resolution/Identity Reference |
+| Identity Class / Type | Only governed reference; no zTOUCH type system |
+| Context | **REFACTOR** → contextual references/descriptive assertions |
+| Intent Hints | **REFACTOR** → Interaction Hints; optional |
+| Trust / Seal | **REJECT terminology** → Integrity/Provenance/Attestation Material |
+| Version | **KEEP**, strictly scoped to envelope/binding |
+| Issuer | **KEEP** as reference, never inherent authority |
+| Signature | **OPTIONAL** proof material, not Trust |
+| Current State | **NOT** baseline carrier authority |
+| Policy/Authorization | **PROHIBITED** |
+| Composition | **PROHIBITED** as envelope-owned constitutional composition |
+| Evidence truth | **PROHIBITED** |
+| Carrier-specific serialization | Owned by zTOUCH binding/ZII implementation layer |
+
+---
+
+## PREP-C Closure Verdict
+
+**PREP-C PASSES WITH REFACTOR.**
+
+The most important result is that we do not need to abandon the zTouch Envelope idea.
+But we should stop thinking of it as:
+> *"a miniature packet containing Identity + Context + Intent + Trust."*
+
+That would indeed be a shadow constitution.
+
+The surviving model is:
+> **A zTouch Carrier Envelope is an optional, compact, carrier-facing representation for conveying a resolution reference plus bounded non-authoritative metadata, interaction hints, and integrity/provenance material. All constitutional meaning remains with the authorities that already own it.**
+
+In shortest architectural form:
+
+```text
+zTouch Envelope
+carries
+  REFERENCES
+  CLAIMS
+  HINTS
+  PROOF MATERIAL
+
+    but never carries
+CONSTITUTIONAL SOVEREIGNTY
+```
+
+With PREP-C closed, the next blocking phase is **PREP-D — CEngS Layer Eligibility & Monorepo Governance Audit**: determine exactly where ZII/ZQE packages may live, how their dependency roles are classified, how CAW-004 ceases to be the implicit global package authority, and how the repository validators become multi-program without weakening existing boundaries.
+
+---
+
+## Chair Review & Final Closure Amendments
+
+> *I agree with this review and would treat it as a PREP-C closure amendment, not as a reopening of the phase.*
+
+The reviewer's strongest contribution is that it finishes the semantic cleanup we started. The original proposal explicitly wanted zTOUCH to enrich the existing Touchpoint→Identity boundary without creating a new constitutional primitive, and it required ordinary QR interoperability rather than a proprietary symbology. The revised model now expresses that intent much more accurately.
+
+### PREP-C — Final Closure Amendments
+
+#### 1. Resolution Reference → Access Reference
+**Adopted.**
+Resolution Reference was safer than Identity, but still unnecessarily semantic. `Access Reference` describes what the carrier actually possesses without claiming either Identity or Resolution.
+
+The canonical working abstraction becomes:
+```text
+Access Reference
+│
+├── Identity Reference
+├── GS1 Identifier
+├── GS1 Digital Link
+├── ZPI Address
+├── URI
+├── External Identifier
+└── Opaque Access / Resolution Token
+```
+
+The governing distinction is:
+```text
+Access Reference
+      ↓
+resolution process
+      ↓
+   Identity
+```
+Therefore:
+> **An Access Reference may enable or participate in resolution. It is neither the resolved Identity nor the Resolution itself.**
+
+This is also closer to the original proposal's own idea of the QR as a durable access mechanism to persistent Identity.
+
+#### 2. Integrity / Provenance / Attestation Material → Integrity & Provenance Material
+**Adopted.**
+The reviewer is right that even the word *Attestation* already carries governed security meaning.
+SEC defines Trust through bounded, revocable attestation, capability, policy, context, and Runtime compliance; Trust is never self-declared or permanent.
+
+So the carrier-level neutral category becomes:
+`Integrity & Provenance Material`
+
+It may contain things such as:
+- signature
+- digest
+- issuer reference
+- key identifier
+- certificate reference
+- attestation reference
+- embedded externally governed attestation
+- proof commitment
+
+with the standing rule:
+> **Any governed artifact transported inside zTOUCH retains the authority, schema, lifecycle, interpretation, and validity rules of its original governing system.**
+
+Thus an SEC attestation inside a carrier remains an SEC attestation.
+zTOUCH does not wrap it and thereby become its owner.
+
+#### 3. The Four Carrier-Material Categories Are Now Formal PREP Terminology
+**Adopted:**
+1. **REFERENCES**
+2. **ASSERTIONS**
+3. **HINTS**
+4. **PROOF MATERIAL**
+
+This is much stronger than the original: *Identity, Context, Intent, Trust*.
+The four categories have deliberately different epistemic meanings.
+
+| Category | Example | Meaning |
+| :--- | :--- | :--- |
+| **Reference** | `placeRef = P123` | Look to governed/external object P123. It does not assert that P123 is currently applicable. |
+| **Assertion** | `productionPlace = P123` | Some identified source asserts that production occurred at P123. Its truth still depends on provenance, evidence, valid time, authority, etc. |
+| **Hint** | `Verify` | This interaction category may be relevant. It does not instantiate Intent and grants no Capability. |
+| **Proof Material** | `signature`, `digest`, `issuer key reference` | Material exists which may support technical or constitutional verification. It does not equal Trust. |
+
+*Note: Avoiding `Claim` as the generic category name because `Claim` already appears in the governed Intent vocabulary in the original zTOUCH exploration.*
+
+#### 4. Baseline Binding Becomes the Center of zTOUCH
+This is the most important architectural improvement.
+
+I would now replace the old conceptual model:
+```text
+zTouch Envelope
+├── Identity
+├── Context
+├── Intent Hints
+└── Trust
+```
+with:
+```text
+zTOUCH
+│
+├── Carrier Binding
+│     └── Access Reference
+│
+└── Optional Extensions
+      ├── References
+      ├── Assertions
+      ├── Hints
+      └── Proof Material
+```
+
+That means the envelope itself is no longer necessarily mandatory.
+In fact, the minimum valid zTOUCH interaction may contain no rich envelope at all.
+
+For GS1, for example:
+```text
+standard QR
+      ↓
+GS1 Digital Link
+      ↓
+Zyppi-aware provisioning / binding
+      ↓
+Zyppi resolution
+```
+may be completely sufficient.
+
+That is consistent with the earlier exploration, which explicitly wanted standards-compatible QR and raised the open question of whether a GS1 zQR might simply be a GS1 Digital Link plus Zyppi behavior.
+
+This is a better architecture because complexity becomes optional rather than compulsory.
+
+#### 5. This Changes the Likely Definition of zQR
+I agree that PREP-C should explicitly expose this question.
+
+The original proposal treated zQR as the first carrier implementation of zTOUCH and emphasized that it should remain an ordinary interoperable QR rather than a proprietary symbology.
+
+That suggests a strong possibility:
+> **zQR may be defined primarily by provisioning/binding and Zyppi behavior rather than by a proprietary payload syntax.**
+
+Conceptually:
+```text
+Standard QR
+   +
+zTOUCH-compatible binding/provisioning
+   +
+Zyppi-aware interaction behavior
+      ↓
+    zQR
+```
+
+This is strategically valuable.
+A QR containing a perfectly ordinary:
+`https://id.gs1.org/...`
+could potentially still be a zQR because of how the Touchpoint has been provisioned and behaves inside Zyppi.
+
+Therefore add:
+> **ZT-OQ-01 — zQR Conformance Identity**
+> Determine the minimum condition under which a standards-compliant QR is designated a zQR. Payload syntax alone SHALL NOT be presumed sufficient or necessary to establish zQR status.
+
+Potential answers to test later include:
+A. Payload-defined
+B. Provisioning-defined
+C. Binding/profile-defined
+D. Registry-defined
+E. Combination
+
+*PREP-C does not choose yet.*
+
+#### 6. The Golden Question Wording Is Amended
+I agree with the philosophical correction.
+
+Previously:
+> *The envelope carries representations relevant to the Golden Question. It does not answer the Golden Question by itself.*
+
+Replace with:
+> **A zTOUCH carrier may transport answers asserted by governed or external sources; carriage alone does not establish their constitutional truth, authority, standing, freshness, or current applicability.**
+
+That is much more exact.
+For example, a manufacturer may legitimately assert:
+```text
+batch = B2026
+manufacturedAt = 2026-08-14
+manufacturedPlace = P123
+```
+The mistake would be saying that the QR makes those facts Reality merely because it carries them.
+
+---
+
+## Final PREP-C Architecture
+
+The phase now closes on this model:
+
+```text
+EXISTING ZRM TOUCHPOINT
+      │
+      ▼
+zTOUCH
+interaction profile/family
+      │
+      ├── Carrier Binding
+      │       │
+      │       └── Access Reference
+      │
+      └── Optional Extensions
+              │
+              ├── References
+              ├── Assertions
+              ├── Hints
+              └── Proof Material
+      │
+      ▼
+technical carrier
+      │
+      ▼
+ZII
+encode / materialize
+capture / decode
+      │
+      ▼
+Application
+resolution / admission
+      │
+      ├── ZRM/Z-PROF
+      ├── SEC/POL
+      └── Evidence
+      │
+      ▼
+RI
+```
+
+The future ZRB proposal remains relevant only when physical observation/actuation requires constitutional admission. Its own exploratory document already separates technical device processing from constitutional meaning and says device success does not automatically prove physical Reality.
+
+---
+
+## Five PREP-C Axioms
+
+I would retain exactly the five concise rules the reviewer identified:
+
+1. **Reference ≠ Identity**
+2. **Assertion ≠ Reality**
+3. **Hint ≠ Intent**
+4. **Proof ≠ Trust**
+5. **Carrier ≠ Authority**
+
+They are an unusually good summary of the entire collision audit.
+
+I would add one structural rule beside them:
+6. **Binding ≠ Payload Syntax**
+
+because that protects the possibility that zQR/zNFC status can arise through provisioning or binding without forcing proprietary carrier syntax.
+
+---
+
+## Updated Disposition of the Original zTouch Envelope
+
+| Original element | Final PREP-C disposition |
+| :--- | :--- |
+| Identity | Replace with **Access Reference** |
+| Context | Split into **References** and **Assertions** |
+| Intent Hints | Replace with optional **Hints** |
+| Trust / Seal | Replace with **Proof Material / Integrity & Provenance Material** |
+| Envelope mandatory | **Rejected** |
+| Carrier Binding | **Promoted to baseline** |
+| Rich extensions | **Optional** |
+| Version | Keep, scoped to binding/envelope only |
+| zQR defined by proprietary syntax | **Not assumed; OPEN** |
+| zTOUCH as new constitutional primitive | **Rejected** |
+
+The original document explicitly said the zTouch Envelope was conceptual, not yet a schema, URI syntax, or binary specification. That gave us exactly the freedom PREP-C needed to refactor it without breaking any ratified contract.
+
+---
+
+## Final PREP-C Status
+
+**CLOSED — PASS WITH REFACTOR INCORPORATED.**
+
+The canonical PREP-C finding is now:
+
+> **zTOUCH is a non-sovereign interaction profile family built upon existing Touchpoints. Its baseline is a carrier binding to an Access Reference. Optional carrier material may consist of References, Assertions, Hints, and Proof Material. None of those categories acquires the constitutional authority of the concepts it references, asserts, hints toward, or helps verify.**
+
+And the minimal architecture is deliberately simple:
+
+```text
+zTOUCH
+  = Carrier Binding
+  + Access Reference
+  + optional portable information
+
+    NOT:
+  = miniature constitutional payload
+```
+
+That closes the semantic collision problem sufficiently for preparation.
+
+PREP-D — CEngS Layer Eligibility & Monorepo Governance Audit is now unblocked.
+
+---
+---
+
+
+# ZII-PREP-E — Sibling Standards Stress Test
+
+| Field | Value |
+| :--- | :--- |
+| **Status** | COMPLETE FOR PREP PURPOSES — PASS WITH GENERIC MODEL REFINEMENT |
+| **Implementation authority** | NONE |
+| **Purpose** | Test proposed ZII abstractions against technologies materially different from QR before ZQE is allowed to establish accidental universal assumptions. |
+
+The five stress siblings are:
+
+```text
+QR · Data Matrix · NFC/NDEF · RFID/EPC · Bluetooth LE
+```
+
+The result is significant:
+
+> **ZII survives the sibling test, but the generic architecture must sit one level above the current ZQE architecture.**
+>
+> `Payload → Symbol → Renderer` is a valid ZQE pattern.
+> It is **not** the universal ZII pattern.
+
+---
+
+## Standards Baseline Used for PREP-E
+
+We are testing against the current official standards landscape as of August 22, 2026.
+
+| Technology | Current architectural reference used |
+| :--- | :--- |
+| **QR** | ISO/IEC 18004:2024, Edition 4, covering encoding, symbol format, dimensions, error correction, decoding and application parameters. |
+| **Data Matrix** | ISO/IEC 16022:2024, Edition 3, covering encodation, symbol formats, dimensions, error correction and decoding. |
+| **NFC** | NFC Forum architecture including NDEF, tag types, Digital Protocol, Activities/Profiles, read/write and exchange protocols. NDEF was also adopted internationally as IEC 63652-2:2026. |
+| **RFID/EPC** | GS1 EPC Tag Data Standard 2.3.0, current since October 31, 2025; defines EPC representation and Gen2 RFID tag memory contents. |
+| **Bluetooth LE** | Bluetooth Core Specification 6.3, currently adopted; BLE advertising uses typed AD structures carried in advertising/scan-response data. |
+
+This is enough for an architectural stress test. It is not enough to implement NFC/RFID/BLE later; those engines will require their complete normative specifications and relevant conformance materials.
+
+---
+
+## Test 1 — Is `Payload → Symbol → Renderer` generic?
+
+### QR
+**Yes.**
+```text
+payload
+  ↓
+encoder
+  ↓
+QrSymbol
+  ↓
+SVG / PNG / print
+```
+QR is explicitly a matrix symbology with encoding, symbol format, dimensions and error correction.
+
+### Data Matrix
+**Also yes.**
+```text
+payload
+  ↓
+encoder
+  ↓
+DataMatrixSymbol
+  ↓
+vector / raster / print
+```
+Data Matrix is likewise a two-dimensional matrix symbology built from modules within a finder pattern.
+
+So QR and Data Matrix could tempt us into believing:
+```text
+Engine
+  ↓
+Symbol
+  ↓
+Renderer
+```
+is universal.
+
+**It is not.**
+
+### NFC
+NDEF defines a message/record data format, while separate tag specifications define how NDEF messages are detected, read and written on different NFC Forum tag types. NFC also supports device-to-device protocols and multiple operating modes.
+
+A more accurate shape is:
+```text
+application material
+  ↓
+NDEF construction
+  ↓
+NdefMessage
+  ↓
+tag/device-specific write protocol
+  ↓
+physical NFC tag/device
+```
+No renderer exists.
+
+### RFID/EPC
+GS1 TDS does two different things:
+
+```text
+identifier / GS1 data
+  ↓
+EPC encoding
+  ↓
+binary representation
+```
+
+and:
+
+```text
+encoded material
+  ↓
+defined RFID memory layout
+  ↓
+Gen2 tag
+```
+
+TDS covers EPC representation, User Memory, control information and tag-manufacture information.
+
+Again, no useful universal notion of "renderer."
+
+### BLE
+BLE advertising consists of typed Advertising Data structures, sent in advertising or periodic-advertising events. Actual broadcast is temporal radio behavior.
+
+Conceptually:
+```text
+application data
+  ↓
+AD structure construction
+  ↓
+Advertising Data
+  ↓
+controller/platform configuration
+  ↓
+repeated radio advertising events
+```
+A BLE advertisement is not a static rendered symbol.
+
+### PREP-E Finding
+**FAIL as generic abstraction.**
+
+Keep `Symbol` and `Renderer` inside optical-symbol engines such as ZQE/Data Matrix.
+
+**Do not promote them into ZII.**
+
+---
+
+## Test 2 — Does Canonical Technical Artifact survive?
+
+**Yes. Strongly.**
+
+But it must remain deliberately broad.
+
+| Technology | Plausible native technical artifact |
+| :--- | :--- |
+| QR | `QrSymbol` |
+| Data Matrix | `DataMatrixSymbol` |
+| NFC | `NdefMessage`, tag encoding representation |
+| RFID/EPC | EPC binary representation, memory-layout representation |
+| BLE | Advertising Data / typed AD structures |
+
+The artifact need not be visual.
+It need not even describe the whole physical interaction.
+
+For BLE, for example, the artifact can describe the bytes/structures to advertise while a separate adapter controls actual radio transmission.
+
+For NFC, the `NdefMessage` can remain an immutable technical artifact even though the physical tag it is eventually written to is mutable.
+
+### PREP-E Finding
+**PASS.**
+
+The generic term:
+> **Canonical Technical Artifact**
+
+survives.
+
+But:
+> *A Canonical Technical Artifact is the deterministic technical representation produced or consumed by an engine operation. It is not necessarily a symbol, file, physical medium, transmission, or constitutional Representation.*
+
+---
+
+## Test 3 — Can every ZII engine be a pure function?
+
+**Not completely.**
+
+The stronger distinction is:
+
+```text
+PURE TECHNICAL LOGIC
+      │
+      ▼
+canonical artifact
+      │
+      ▼
+I/O ADAPTER / PHYSICAL MECHANISM
+```
+
+- QR encoding can be pure.
+- Data Matrix encoding can be pure.
+- NDEF message construction can be pure.
+- EPC encoding can be pure.
+- BLE advertising-data construction can be pure.
+
+**But:**
+- write NFC tag
+- write RFID memory
+- broadcast BLE
+- capture RF signal
+- read physical tag
+- print QR label
+
+cannot be pure because they interact with physical/device state.
+
+NFC's own specifications deliberately separate data format from tag-type read/write behavior and communication protocols.
+
+### PREP-E Finding
+The earlier principle:
+> *"ZII engine core is pure."*
+
+is **too strong** as a universal statement.
+
+**Replace with:**
+> *ZII SHALL separate deterministic technical transformation from I/O and physical interaction wherever the technology permits such separation.*
+
+For ZQE, the stronger rule remains valid:
+```text
+qr-core = pure
+```
+But QR does not get to impose that exact internal decomposition on every future sibling.
+
+---
+
+## Test 4 — Does deterministic output survive?
+
+**Yes, but only when scoped to deterministic technical transformations.**
+
+For ZQE:
+```text
+same exact payload
+same zqe profile
+  →
+same QrSymbol
+```
+remains excellent.
+
+A deterministic NDEF serializer could similarly produce the same message bytes under the same explicit serialization profile.
+
+An EPC translator can deterministically produce a given standard representation under an explicit encoding scheme.
+
+**But:**
+```text
+same BLE broadcast request
+  ≠
+same physical radio observations
+```
+
+And:
+```text
+same NFC write request
+  ≠
+same physical outcome
+```
+because physical state, hardware, timing and environment are involved.
+
+### PREP-E Finding
+Refine ZII determinism to:
+
+> *Same technical input + same explicit engine profile/version → same canonical technical artifact, where the underlying standard and operation permit deterministic construction.*
+
+And separately:
+
+> *ZII SHALL NOT extend artifact determinism into claims of deterministic physical delivery, capture, or effect.*
+
+This aligns directly with PREP-B.
+
+---
+
+## Test 5 — Is there always one engine operation called `encode()`?
+
+**No.**
+
+This is another QR assumption.
+
+Across our siblings we encounter:
+
+| Technology | Natural operations |
+| :--- | :--- |
+| QR | `encode`; perhaps `decode` externally |
+| Data Matrix | `encode` / `decode` |
+| NFC | construct/serialize NDEF; read; write; exchange |
+| RFID | encode/decode; translate; read/write tag memory |
+| BLE | construct/parse advertising data; broadcast; scan; connect/exchange in broader profiles |
+
+NFC Forum itself separates NDEF data format, tag read/write specifications, SNEP exchange, TNEP and connection handover.
+
+### PREP-E Finding
+ZII should not define one universal `Engine.encode()` interface.
+
+Instead, an engine family should expose explicit technical operations appropriate to its standards and declare which operations it supports.
+
+This connects directly to PREP-B's proposed:
+> **Engine Support Manifest**
+
+rather than constitutional Capability.
+
+A future engine might support:
+```text
+CONSTRUCT
+PARSE
+ENCODE
+DECODE
+READ
+WRITE
+BROADCAST
+SCAN
+```
+Those names are illustrative, not yet a frozen ZII vocabulary.
+
+The important rule is:
+> *An engine advertises supported technical operations; ZII does not pretend all interaction technologies have the same operation surface.*
+
+---
+
+## Test 6 — Does the renderer abstraction survive?
+
+**No.**
+
+Renderer is an optical/display concern.
+
+What does survive is a broader distinction between:
+```text
+canonical artifact
+```
+and:
+```text
+environmental realization
+```
+
+For QR:
+```text
+QrSymbol
+  ↓
+SVG renderer
+```
+
+For NFC:
+```text
+NdefMessage
+  ↓
+tag writer
+```
+
+For RFID:
+```text
+memory representation
+  ↓
+RFID encoder/writer
+```
+
+For BLE:
+```text
+Advertising Data
+  ↓
+radio/platform broadcaster
+```
+
+The generic ZII term should therefore not be `Renderer`.
+
+Candidate umbrella:
+- `Output Adapter`
+- or perhaps: `Materialization Adapter`
+
+But PREP-E does not freeze the final name, because BLE broadcasting is arguably transmission rather than materialization.
+
+What we can freeze for PREP purposes is the conceptual distinction:
+
+```text
+Technical Artifact
+      ≠
+its delivery into an environment
+```
+
+---
+
+## Test 7 — Is there a symmetric input side?
+
+**Yes, and this is something QR-generation-first thinking was underweighting.**
+
+For every output path there may be an acquisition path:
+
+```text
+PHYSICAL / EXTERNAL MECHANISM
+      ↓
+acquisition adapter
+      ↓
+captured technical data
+      ↓
+parser / decoder
+      ↓
+Canonical Technical Artifact
+or decoded material
+```
+
+Examples:
+- camera → QR decode
+- NFC controller → NDEF read
+- RFID reader → EPC memory data
+- BLE scanner → Advertising Data
+
+This supports the original ZRB observation that Zyppi needs to think in both outward and inward directions, without moving constitutional Reality admission into ZII.
+
+### PREP-E Finding
+ZII is not merely a generation infrastructure.
+
+**It is an interaction infrastructure.**
+
+ZQE may initially implement only the construction side, but the umbrella must permit both.
+
+---
+
+## Test 8 — Can we assume one-shot interaction?
+
+**No.**
+
+QR and Data Matrix commonly behave as stable static symbols.
+
+NFC may involve read/write exchanges or bidirectional protocols; TNEP explicitly enables bidirectional NDEF exchange for relevant tag/device types.
+
+BLE is even clearer: advertising occurs through repeated advertising events, and Bluetooth encompasses many stateful connection and profile behaviors.
+
+Therefore:
+```text
+input → output
+```
+cannot be the only ZII interaction model.
+
+ZII must eventually accommodate:
+- one-shot construction
+- one-shot acquisition
+- repeated emission
+- repeated observation
+- stateful exchange
+
+without forcing them into one universal lifecycle.
+
+### PREP-E Finding
+ZII Engine ≠ necessarily one-shot codec.
+
+This does not mean ZQE needs stateful machinery.
+
+Quite the opposite: **keep ZQE simple because its standard permits it.**
+
+---
+
+## Test 9 — Does Profile survive?
+
+**Very strongly.**
+
+Each sibling demonstrates the need for explicit technical configuration/version boundaries.
+
+- QR has user-selectable application parameters.
+- NFC explicitly has Activities combined into Profiles, and separate profiles define particular communication use cases.
+- RFID/EPC has multiple EPC schemes and evolving TDS/TDT versions.
+- Bluetooth has a vast ecosystem of Core versions, services and profiles; Core 6.3 is currently adopted.
+
+But the word is overloaded inside Zyppi because Z-PROF also uses profile semantics.
+
+### PREP-E Finding
+ZII needs the concept, but it should qualify it:
+
+> **Technical Engine Profile**
+
+For example:
+```text
+ZQE Technical Engine Profile: zqe/1
+```
+
+This is fundamentally different from:
+- Z-PROF Domain Profile
+- Bluetooth Profile
+- NFC Forum Profile
+
+External standards retain their own nomenclature.
+
+---
+
+## Test 10 — Does conformance survive as a universal concern?
+
+**Yes. This is one of the strongest generic abstractions.**
+
+- ISO's QR and Data Matrix specifications define the relevant symbology rules.
+- NFC Forum maintains specifications covering digital protocols, data exchange, tag types and conformance-oriented interoperability.
+- GS1 exposes TDS/TDT standards and even machine-readable normative TDT artefacts for translation.
+- Bluetooth publishes the Core specification together with test suites, Implementation Conformance Statements and Test Case Reference Lists.
+
+### PREP-E Finding
+This survives almost unchanged:
+
+> *Every ZII engine family must declare its external standards authority, its supported technical profile/version, and the conformance evidence required to claim support.*
+
+This is a genuine ZII family rule.
+
+---
+
+## Test 11 — Does one canonical artifact per engine survive?
+
+**Not necessarily.**
+
+This needs refinement.
+
+ZQE may have one excellent artifact:
+```text
+QrSymbol
+```
+
+But an NFC implementation might naturally expose:
+```text
+NdefMessage
+TagEncodingPlan
+```
+
+An RFID implementation could expose:
+```text
+EpcEncoding
+TagMemoryLayout
+```
+
+BLE might expose:
+```text
+AdvertisingData
+AdvertisingConfiguration
+```
+
+Therefore:
+> *An engine family may define one or more canonical technical artifact types.*
+
+Do not force everything into:
+```text
+UniversalInteractionArtifact
+```
+That would recreate exactly the false abstraction PREP-E is meant to prevent.
+
+---
+
+## Test 12 — Is "carrier" itself universally correct?
+
+**Not quite.**
+
+QR/Data Matrix are naturally described as data carriers.
+
+NFC tags and RFID tags can also function as carriers.
+
+But BLE is a communication technology/protocol ecosystem, not merely a passive carrier; NFC itself spans reader/writer, card emulation, peer-to-peer, exchange protocols, and wireless charging.
+
+Therefore our decision to use:
+> **Zyppi Interaction Infrastructure**
+
+rather than:
+> **Carrier Infrastructure**
+
+is validated.
+
+### PREP-E Finding
+**PASS.**
+
+"Interaction" is broad enough to include:
+- static codes
+- tag memory
+- proximity exchange
+- radio broadcasting
+- future mechanisms
+
+without pretending all are equivalent.
+
+---
+
+## Sibling Comparison Matrix
+
+| Property | QR | Data Matrix | NFC/NDEF | RFID/EPC | BLE |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Pure construction possible | Yes | Yes | Yes for message construction | Yes for encoding | Yes for AD construction |
+| Native symbol | Yes | Yes | No | No | No |
+| Native structured artifact | Yes | Yes | Yes | Yes | Yes |
+| Renderer required | Often | Often | No | No | No |
+| Physical writer possible | Print/display | Print/mark | Yes | Yes | No tag writer equivalent for advertising |
+| Broadcast/transmit | No | No | Possible protocols | RF interrogation/response | Yes |
+| Capture/read operation | Camera/scanner | Camera/scanner | Yes | Yes | Scan |
+| Mutable physical medium | Printed generally no | Printed generally no | Often | Often | Not applicable in same sense |
+| Stateful exchange possible | No at symbol level | No at symbol level | Yes | Reader/tag protocol interactions | Yes |
+| Repeated emission intrinsic | No | No | Not baseline NDEF | Reader-dependent | Yes |
+| Standards profile/version important | Yes | Yes | Strongly | Strongly | Strongly |
+| Conformance/interoperability essential | Yes | Yes | Yes | Yes | Yes |
+
+That table is the reason the generic architecture must be broader than ZQE.
+
+---
+
+## The Generic ZII Model After PREP-E
+
+The earlier candidate:
+```text
+Input
+  ↓
+Engine
+  ↓
+Canonical Technical Artifact
+  ↓
+Materializer / Adapter
+```
+was close but still a little too linear.
+
+The sibling-safe model is now:
+
+```text
+ZII ENGINE FAMILY
+│
+├──────────────┼──────────────┐
+│              │              │
+▼              ▼              ▼
+Technical Logic   Artifact Types   Profiles
+│
+┌─────┴─────┐
+│           │
+construct     interpret
+encode        parse/decode
+│           │
+└─────┬─────┘
+      ▼
+Canonical Technical Artifacts
+│
+┌───────┴────────┐
+▼                ▼
+Output Adapters   Input Adapters
+render/write/     capture/read/
+broadcast/etc.    scan/etc.
+│                │
+└───────┬────────┘
+        ▼
+External / Physical Mechanism
+
+Cross-cutting:
+  Technical Engine Profiles
+  Conformance
+  Diagnostics
+  Interoperability
+  Benchmarks
+```
+
+This is conceptual, not yet a ZII interface specification.
+
+Most importantly:
+> *An engine family uses only the branches relevant to its technology.*
+
+- ZQE does not need a BLE-shaped API.
+- BLE does not need a Symbol.
+
+---
+
+## ZQE Remains Beautifully Simple
+
+Nothing in PREP-E weakens the ZQE architecture.
+
+It actually protects it.
+
+ZQE can remain:
+```text
+Exact payload
+  ↓
+ZQE QR Core
+  ↓
+QrSymbol
+  ↓
+SVG renderer
+```
+
+with:
+```text
+qr-core   = pure
+QrSymbol  = immutable canonical technical artifact
+qr-svg    = deterministic renderer
+```
+
+The difference is simply that ZII no longer declares those QR-specific properties universal.
+
+This is exactly what *"first implementation, no first-engine privilege"* was meant to achieve.
+
+---
+
+## What Data Matrix Teaches Us About Future Reuse
+
+Data Matrix is the closest sibling to ZQE.
+
+It suggests a future engine may reuse patterns developed by ZQE:
+- segmentation/encoding pipeline discipline
+- canonical module representation principles
+- vector renderer infrastructure
+- conformance harness patterns
+- property-based testing infrastructure
+
+But it must not simply reuse:
+- `QrSymbol`
+- QR mask logic
+- QR ECC assumptions
+- QR finder-pattern semantics
+- QR version semantics
+
+because ISO/IEC 16022 defines its own symbology rules.
+
+This is a useful distinction:
+> *ZII may standardize engineering patterns without standardizing technology semantics.*
+
+---
+
+## What NFC Teaches Us
+
+NFC is perhaps the most valuable sibling in this stress test because it breaks several QR assumptions simultaneously.
+
+NFC has:
+- a common NDEF data format;
+- standardized record types;
+- multiple tag types;
+- tag detection/read/write procedures;
+- device communication protocols;
+- profiles and activities;
+- bidirectional exchange possibilities;
+- handover to Bluetooth/Wi-Fi.
+
+It therefore proves that a future ZII engine may actually be a family of closely related technical components, rather than one encoder package.
+
+Potentially:
+```text
+nfc-ndef
+nfc-tag
+nfc-platform-adapter
+```
+rather than one giant `nfc-engine`.
+
+That is an important future lesson for package granularity.
+
+---
+
+## What RFID Teaches Us
+
+RFID/EPC proves that:
+```text
+semantic identifier representation
+```
+and:
+```text
+physical tag memory representation
+```
+can be different technical layers.
+
+GS1 TDS explicitly covers both EPC representation and memory contents of Gen2 RFID tags.
+
+It also reinforces PREP-B:
+> *ZII may perform technical translation/encoding under an external standard without thereby owning the domain semantics of the GS1 identifier.*
+
+This makes the ZQE rule:
+> *GS1-unaware QR engine*
+
+even more important.
+
+---
+
+## What BLE Teaches Us
+
+BLE is the strongest anti-QR stress case.
+
+It demonstrates:
+```text
+interaction
+  ≠
+static carrier
+```
+
+and:
+```text
+canonical technical artifact
+  ≠
+physical result
+```
+
+Advertising Data is structured into typed AD structures, but its physical realization is repeated radio events.
+
+Thus the engine might deterministically build:
+```text
+AdvertisingData
+```
+while the adapter performs:
+```text
+broadcast over time
+```
+and another adapter performs:
+```text
+scan
+```
+
+The physical observations remain environment-dependent.
+
+This confirms our PREP-B distinction between deterministic technical artifact generation and physical effects/observations.
+
+---
+
+## Generic Concepts That Survive PREP-E
+
+The stress test leaves a relatively small but strong common vocabulary:
+
+| Candidate ZII concept | Result |
+| :--- | :--- |
+| Interaction Engine Family | **SURVIVES** |
+| Technical Engine Profile | **SURVIVES** |
+| Canonical Technical Artifact | **SURVIVES**, plural allowed |
+| Pure technical transformation | SURVIVES where applicable, not mandatory universally |
+| Input Adapter | SURVIVES conceptually |
+| Output Adapter | SURVIVES conceptually |
+| Conformance | **STRONGLY SURVIVES** |
+| Interoperability | **STRONGLY SURVIVES** |
+| Diagnostics / inspectability | SURVIVES |
+| Technical Support Manifest | SURVIVES |
+| Symbol | ENGINE-SPECIFIC |
+| Renderer | ENGINE-SPECIFIC / optical family |
+| `encode()` universal method | **REJECTED** |
+| One canonical artifact only | **REJECTED** |
+| One-shot pipeline | **REJECTED** |
+| Universal pure engine | **REJECTED** |
+| Universal carrier model | **REJECTED** |
+
+This is the core output of PREP-E.
+
+---
+
+## Candidate ZII Invariants Produced by PREP-E
+
+These now deserve consideration for the eventual ZII foundation:
+
+| ID | Invariant |
+| :--- | :--- |
+| **ZII-E01** | **No First-Engine Privilege.** No QR-specific construct becomes generic merely because ZQE is first. |
+| **ZII-E02** | **Native Artifact Principle.** Every engine family defines the technically appropriate artifact type or types for its standards; ZII shall not impose a universal artifact schema. |
+| **ZII-E03** | **Operation Plurality.** Engine families expose only the technical operations their standards require; ZII shall not mandate a universal `encode()` lifecycle. |
+| **ZII-E04** | **Logic / Environment Separation.** Deterministic technical logic shall be separated from device/network/physical I/O where practicable. |
+| **ZII-E05** | **Scoped Determinism.** Determinism applies to canonical technical transformation, not automatically to delivery, capture, radio propagation, physical writing or observed effect. |
+| **ZII-E06** | **Adapter Symmetry.** ZII may support both outward realization and inward acquisition without assuming every engine requires both. |
+| **ZII-E07** | **Profile Explicitness.** Standards version, Technical Engine Profile and higher payload/domain protocol versions remain distinguishable. |
+| **ZII-E08** | **External Semantic Authority.** Implementing a standards-defined representation does not transfer ownership of that standard's domain meaning to ZII. |
+| **ZII-E09** | **Conformance First.** Standards and interoperability evidence are first-class requirements of every engine family. |
+| **ZII-E10** | **Interaction, Not Carrier.** ZII shall remain broad enough for static, writable, broadcast, bidirectional and future interaction technologies. |
+
+---
+
+## PREP-E Effect on Our Original ZII Wording
+
+Earlier we described ZII as infrastructure through which Zyppi:
+> *creates, encodes, renders, transmits, captures, inspects and validates interaction mechanisms.*
+
+That remains directionally good, but PREP-E suggests an even cleaner formulation:
+
+> *Zyppi Interaction Infrastructure is the standards-aware technical infrastructure through which Zyppi **constructs, represents, realizes, acquires, interprets, inspects and validates** interactions across present and future technical mechanisms.*
+
+**Why these verbs?**
+
+| Verb | Coverage |
+| :--- | :--- |
+| **construct** | covers QR encoding, NDEF construction, EPC encoding, BLE AD building |
+| **represent** | covers native technical artifacts |
+| **realize** | covers render/write/broadcast without pretending all are rendering |
+| **acquire** | covers scan/read/capture |
+| **interpret** | means technical parse/decode, not constitutional meaning |
+| **inspect / validate** | covers diagnostics and conformance |
+
+This is a PREP candidate, not yet the ratified ZII definition.
+
+### One Important Terminology Caution
+
+`interpret` must remain explicitly technical.
+
+PREP-B already established:
+> *Parsing is not semantic Translation.*
+
+Therefore future ZII wording should probably say:
+> **technical interpretation**
+
+whenever ambiguity exists.
+
+For example:
+```text
+BLE bytes → typed AD structures
+```
+is ZII technical interpretation.
+
+```text
+those structures mean that Subject X has constitutional Capability Y
+```
+is **not**.
+
+---
+
+## Research Limitation and Implementation Consequence
+
+PREP-E used official public summaries and current standards metadata. For QR and Data Matrix, ISO publicly exposes the scope but the normative standard text is commercially licensed. NFC Forum exposes extensive architecture summaries but many full technical specifications are similarly licensed.
+
+That is sufficient for today's abstraction stress test.
+
+It is **not** sufficient to implement an NFC, Data Matrix or future BLE engine.
+
+Each future engine must acquire/use its full normative source set before its own implementation specification is frozen.
+
+For ZQE specifically, the normative QR conformance baseline remains its own ZQE preparation responsibility.
+
+---
+
+## PREP-E Closure Verdict
+
+**PREP-E PASSES.**
+
+The Sibling Test has done what it was supposed to do: it found several QR-derived false abstractions before they entered ZII.
+
+The most important correction is:
+
+```text
+ZQE PATTERN
+Payload → Encoder → QrSymbol → Renderer
+
+is valid and should remain.
+
+But the ZII pattern is broader:
+
+ENGINE FAMILY
+      │
+      technical operations
+      │
+      ▼
+native technical artifacts
+      │
+      ┌──────────┴──────────┐
+      ▼                     ▼
+outward adapters       inward adapters
+render/write/broadcast    capture/read/scan
+      │                     │
+      └──────────┬──────────┘
+                 ▼
+      interaction environment
+
+cross-cut by:
+  Technical Engine Profiles
+  Standards Authority
+  Conformance
+  Interoperability
+  Diagnostics
+```
+
+That means ZQE is now structurally positioned exactly as intended:
+
+> *first implementation, first proving ground, but not the template that every future interaction technology must imitate.*
+
+---
+
+## Program Consequence
+
+With PREP-E closed, **PREP-F — ZQE Entry Contract** is now unblocked.
+
+It can consolidate PREP-A through PREP-E into the exact architectural and quality contract that must exist before:
+- the first ZQE implementation mandate, and
+- the Repository Governance Transition is executed.
+
+---
+---
+
+# ZII-PREP-F — ZQE Entry Contract
+
+| Field | Value |
+| :--- | :--- |
+| **Status** | COMPLETE FOR PREP PURPOSES — PASS WITH PRE-IMPLEMENTATION CONDITIONS |
+| **Implementation authority** | NONE |
+| **Purpose** | Define the exact architectural, standards, repository, quality, and evidence conditions that must be satisfied before the first ZQE implementation mandate may be issued. |
+| **Parent program** | ZII — Zyppi Interaction Infrastructure |
+| **First reference implementation** | ZQE — Zyppi QR Engine |
+
+---
+
+## Entry-Contract Decision
+
+PREP-A through PREP-E are now sufficiently coherent to define ZQE without letting QR redefine ZII.
+
+The resulting hierarchy is:
+
+```text
+Zyppi Constitutional / Engineering Authority
+│
+CEngS
+│
+▼
+ZII
+Zyppi Interaction Infrastructure
+│
+▼
+ZQE
+Zyppi QR Engine
+│
+┌────────┴────────┐
+▼                 ▼
+QR Core          SVG Renderer
+│
+▼
+QrSymbol
+```
+
+Critically:
+- `ZII ≠ ZQE`
+- `ZQE ≠ zQR`
+- `zQR ≠ QR standard`
+- `zTOUCH ≠ ZII`
+- `ZPI ≠ ZII`
+- `GS1 ≠ ZQE`
+
+ZQE's task is deliberately narrower:
+> **ZQE is a standards-conformant, deterministic, inspectable QR compilation engine that transforms explicitly supplied payload material into a canonical QR technical artifact and, through separate renderers, into delivery representations such as SVG.**
+>
+> It does not know what the payload means constitutionally.
+
+---
+
+## Constitutional Authority of ZQE
+
+PREP-B established that ZII requires no new constitutional sovereignty.
+
+ZQE therefore operates under this rule:
+> **ZQE owns QR mechanics. It owns no Reality, Identity, Referent, Intent, Trust, Policy, Evidence, Context, Resolution, Authority, Capability, or constitutional execution semantics.**
+
+The relevant ownership boundary is:
+
+| Concern | Authority |
+| :--- | :--- |
+| QR encoding mechanics | ZQE / ISO standard |
+| QrSymbol technical artifact | ZQE |
+| QR renderer behavior | ZQE renderer specification |
+| QR conformance | ZQE + external QR standard |
+| Engineering quality | CEngS |
+| Reality / Identity / Event / Evidence | ZRM / SIOS |
+| Trust / security standing | SEC |
+| Authorization / constitutional Capability | POL |
+| Domain composition | Z-PROF / Application |
+| Constitutional execution | RI |
+| GS1 meaning | GS1 + relevant Zyppi domain/profile layer |
+| zTOUCH meaning | Future zTOUCH specification |
+| ZPI/zPIS meaning | Future ZPI/zPIS authority |
+
+ZQE may carry bytes representing any of these things.
+It may not interpret their constitutional meaning.
+
+---
+
+## Golden Question Entry Boundary
+
+ZQE shall remain intentionally ignorant of most Golden Question dimensions.
+
+| Dimension | ZQE status |
+| :--- | :--- |
+| **Who?** | Unknown; never inferred |
+| **Did what?** | ZQE technically performed an encoding operation |
+| **To whom/what?** | Supplied payload only; no Referent inferred |
+| **Where?** | Unknown; never inferred |
+| **When?** | No implicit constitutional time |
+| **How do we know?** | Technical trace, deterministic regeneration, conformance evidence |
+
+Therefore ZQE's API must not silently introduce:
+- `actor`
+- `user`
+- `place`
+- `currentTime`
+- `identity`
+- `authority`
+- `policy`
+- `trust`
+- `evidence`
+
+merely because higher Zyppi systems may eventually need those concepts.
+
+This preserves the PREP-B principle:
+> **ZII may know HOW. It may carry WHAT. It must not decide WHAT IT MEANS.**
+
+---
+
+## Standards Authority
+
+The published normative baseline for ZQE is:
+> **ISO/IEC 18004:2024** — QR code bar code symbology specification, Edition 4, published August 2024.
+
+ISO identifies it as the current published International Standard covering encoding methods, symbol formats, dimensions, error correction, reference decoding and application parameters. ISO also shows Edition 5 as a working draft, not a published replacement.
+
+Therefore:
+```text
+Normative baseline:
+  ISO/IEC 18004:2024 Ed.4
+
+Non-normative future input:
+  ISO/IEC WD 18004 Ed.5
+```
+
+The draft must not silently alter `zqe/1`.
+If a later published edition warrants behavioral change:
+```text
+zqe/1
+```
+remains reproducible, and a future technical engine profile may introduce the new behavior explicitly.
+
+### Normative-Source Prerequisite
+Before implementation of standards-sensitive algorithms begins, the implementation mandate must identify the complete authorized normative source used by Jules/developers.
+
+ISO's public summary alone is enough for PREP architecture but not enough to reconstruct every normative encoding rule.
+
+**No implementation may fill normative gaps from memory or assumptions.**
+
+### Initial Standards Scope
+ZQE's first implementation should target a deliberately bounded subset:
+- **QR Code Model 2, Versions 1–40.**
+- Initial scope includes the standard error-correction levels: **L, M, Q, H**
+- And the relevant Model-2 encoding machinery necessary for standards-conformant symbols.
+
+Other QR-family symbologies or future standard additions are excluded unless explicitly added by a later mandate.
+
+> *That means ZQE-M01 does not automatically implement every symbology whose name contains "QR."*
+> This is a scope boundary, not a claim about what ISO/IEC 18004 contains in total.
+
+---
+
+## ZQE Package Boundary
+
+PREP-D established the initial topology:
+
+```text
+packages/
+├── qr-core/
+└── qr-svg/
+```
+
+with documentation under:
+```text
+DOCS/ZII/
+└── ZQE/
+```
+
+The initial production dependency graph is:
+```text
+@zyppi/qr-svg
+│
+▼
+@zyppi/qr-core
+```
+
+and:
+```text
+@zyppi/qr-core
+  ↓
+NOTHING
+```
+in production dependencies.
+
+ZQE must not initially depend upon:
+- `@zyppi/domain`
+- `@zyppi/contracts`
+- `@zyppi/runtime`
+- `@zyppi/shared`
+- `@zyppi/testing`
+- `apps/api`
+- CAW modules
+- Z-PROF modules
+- registry infrastructure
+- database infrastructure
+- network libraries
+
+Shared development tooling may be authorized separately where it does not enter production dependency surfaces.
+
+This implements the **Disappearance Test**:
+> *If CAW vanished, ZQE would still be a complete QR engine.*
+
+---
+
+## Repository Prerequisite
+
+Although PREP-F defines ZQE, the packages must not yet be created.
+
+PREP-D discovered that `pnpm-workspace.yaml` is already broad enough for new `packages/*` members, but the TypeScript root references and architecture validators remain explicitly enumerated and CAW-centric.
+
+The current dependency graph validator explicitly derives its authority from CAW-004 and hard-codes the present workspace graph.
+
+Therefore the **Repository Governance Transition** is a hard prerequisite to ZQE package creation.
+
+It must preserve all existing CAW behavior while establishing:
+```text
+CEngS platform authority
+      ↓
+single executable workspace policy
+      ↓
+┌────────────┼────────────┐
+▼            ▼            ▼
+CAW          ZII       future families
+```
+
+The live GitHub workflow also presently omits `boundary:all` and `graph:validate`, even though the root `ci` command includes both and AMS-0208 intended them as blocking gates.
+
+**That enforcement gap must be closed before ZQE enters.**
+
+---
+
+## Core Architecture Contract
+
+The ZQE core pipeline is:
+
+```text
+Payload
+  ↓
+Input normalization permitted by explicit API contract
+  ↓
+Segmentation / mode planning
+  ↓
+Bitstream construction
+  ↓
+Error-correction construction
+  ↓
+Version / capacity resolution
+  ↓
+Module placement
+  ↓
+Mask evaluation
+  ↓
+Format / version information
+  ↓
+Canonical QrSymbol
+```
+
+The core produces no image.
+
+The canonical public technical artifact is conceptually:
+
+```typescript
+interface QrSymbol {
+  readonly version: number;
+  readonly size: number;
+  readonly errorCorrection: ErrorCorrectionLevel;
+  readonly mask: number;
+  readonly modules: /* immutable matrix representation */;
+}
+```
+
+*Exact TypeScript syntax and internal storage representation are implementation-design matters.*
+
+The architectural contract is:
+> **The canonical result is the QR symbol state necessary to reproduce the standards-conformant matrix—not SVG, PNG, PDF, Canvas, or a browser object.**
+
+---
+
+## QrSymbol Constitutional Status
+
+PREP-B and PREP-E resolve this definitively:
+> **QrSymbol is a native technical artifact of ZQE.**
+
+It is **not**:
+- Reality
+- Identity
+- Evidence
+- constitutional Event
+- Execution Receipt
+- SEC artifact
+- Z-PROF artifact
+
+It is also **not** a universal ZII artifact.
+
+Future siblings may have:
+- `DataMatrixSymbol`
+- `NdefMessage`
+- `EpcEncoding`
+- `TagMemoryLayout`
+- `AdvertisingData`
+
+without conforming themselves to `QrSymbol`.
+
+Thus:
+> **ZQE owns QrSymbol; ZII owns the pattern that engine families may define technology-native canonical technical artifacts.**
+
+---
+
+## Encoding Interface Principle
+
+ZQE should expose explicit QR semantics, not Zyppi semantics.
+
+Conceptually:
+```typescript
+qr.encode(payload, options)
+```
+
+may accept:
+- `payload`
+- `error-correction preference`
+- `version constraint`
+- `mask constraint`
+- `technical engine profile`
+
+where appropriate.
+
+It should **not** accept:
+- `identity`
+- `intent`
+- `trust`
+- `user`
+- `campaign`
+- `GS1 product`
+- `place`
+- `authority`
+- `zTouch envelope`
+
+as QR-core concepts.
+
+A higher layer may construct a string or bytes representing any of those and pass the resulting payload to ZQE.
+
+---
+
+## Input Semantics
+
+ZQE must avoid "magic guessing."
+
+The core should distinguish explicit input representation from convenience APIs.
+
+At the lowest reliable boundary:
+> **exact input bytes / explicitly encoded text**
+must produce predictable encoding semantics.
+
+Convenience handling of JavaScript strings must define its character encoding behavior exactly.
+
+No silent:
+- locale-dependent conversion
+- platform-dependent encoding
+- implicit lossy conversion
+
+is permitted.
+
+If ECI or other standards-defined character-set signaling is supported, its semantics must be explicit and tested rather than inferred magically.
+
+---
+
+## Segmentation Excellence Requirement
+
+Automatic mode segmentation is not a cosmetic optimization.
+
+For supported modes, ZQE should seek:
+> **algorithmically optimal or explicitly bounded-optimal segmentation under the defined ZQE cost model.**
+
+The model must account for the actual QR bit cost of:
+- mode indicators
+- character-count fields
+- segment transitions
+- payload encoding
+- version-dependent count widths
+- applicable ECI costs
+
+where supported.
+
+A greedy heuristic cannot be branded "optimal."
+
+If ZQE claims global optimality, the algorithm and proof argument must make clear under which exact supported-mode/cost model that guarantee holds.
+
+*This is one of ZQE's intended differentiators over ordinary utility libraries.*
+
+---
+
+## Version Selection
+
+When no fixed version is supplied:
+> ZQE shall select the **smallest standards-valid QR version** that accommodates the encoded payload under the selected technical parameters.
+
+When a fixed version is supplied and capacity is insufficient:
+> **typed capacity failure** must occur.
+
+ZQE shall **not** silently:
+- truncate payload
+- change payload
+- lower requested ECC
+- change explicit semantic input
+
+to force success.
+
+Version boundaries—especially places where character-count widths or capacity behavior changes—must be explicitly tested.
+
+---
+
+## Error Correction
+
+Error-correction level must be:
+- **explicit**
+- or governed by an explicitly documented Technical Engine Profile default.
+
+The core must never hide an undocumented policy such as:
+> *"we chose Q because it seemed better"*
+from callers.
+
+If future convenience APIs offer automatic ECC boosting, that must be an explicit profile/API behavior and remain reproducible.
+
+---
+
+## Mask Selection
+
+When mask is not explicitly fixed, ZQE must evaluate all applicable QR masks according to the governing standard's penalty rules and choose deterministically.
+
+If the normative standard leaves a genuine tie that permits multiple valid choices, the active Technical Engine Profile must define a deterministic tie-break rule.
+
+For example, a profile may specify:
+> *lowest mask index among equal minimum scores,*
+
+but that becomes a ZQE profile decision only after confirming it does not contradict normative requirements.
+
+**The tie rule must never remain ambient implementation behavior.**
+
+---
+
+## Technical Engine Profile
+
+PREP-E established this as a generic ZII concept.
+
+ZQE's behavior must therefore be bounded by an explicit profile such as:
+```text
+zqe/1
+```
+
+This is separate from:
+- npm/package semver
+- QR version 1–40
+- payload protocol version
+- zTouch binding version
+- ZPI version
+- GS1 standard version
+- Z-PROF Domain Profile
+
+Conceptually:
+```text
+@zyppi/qr-core v7.2.1
+│
+├── supports zqe/1
+├── supports zqe/2
+└── ...
+```
+would be possible in the future.
+
+The package can evolve while continuing to regenerate old `zqe/1` artifacts.
+
+### Profile Purpose
+A Technical Engine Profile freezes all engine choices that could otherwise introduce multiple valid outputs, including where applicable:
+- automatic segmentation behavior
+- version selection behavior
+- mask tie behavior
+- default handling
+- serialization/canonicalization choices
+
+### Determinism Contract
+For deterministic core operations:
+> **Same exact input + same explicit technical parameters + same Technical Engine Profile shall produce the same canonical QrSymbol.**
+
+This should ultimately hold:
+- across runs
+- across machines
+- across supported environments
+
+subject to a clearly defined canonical representation.
+
+There must be **no dependence** on:
+- current time
+- randomness
+- process ID
+- filesystem ordering
+- locale
+- environment variables
+- network state
+- database state
+- machine-specific floating behavior
+
+unless a later specification explicitly permits it—which would require strong justification.
+
+---
+
+## Canonical Artifact Serialization
+
+To make cross-runtime reproducibility testable, ZQE should define a canonical serialization/hash model for `QrSymbol`.
+
+The exact byte format does not need to be chosen in PREP-F, but the eventual ZQE specification must permit:
+```text
+QrSymbol
+  ↓
+canonical serialization
+  ↓
+symbolHash
+```
+such that implementations in:
+- TypeScript
+- Rust
+- Go
+- WASM
+- future runtimes
+
+could prove artifact identity.
+
+The hash algorithm itself must be explicitly versioned/defined when this feature is specified.
+**No hash choice is ratified by PREP-F.**
+
+---
+
+## Compilation Diagnostics
+
+ZQE should be inspectable, not an opaque encoder.
+
+A diagnostic/compilation trace may expose technical information such as:
+- chosen segments
+- candidate segmentation costs
+- selected version
+- rejected lower versions
+- data codewords
+- ECC block structure
+- interleaving
+- mask scores
+- selected mask
+- format/version information
+- function-module map
+
+where practical.
+
+The trace:
+- is an optional technical diagnostic artifact.
+
+It is **not**:
+- constitutional reasoning
+- SEC evidence
+- Execution Receipt
+- AI explanation
+
+*This is particularly valuable for conformance, debugging, educational inspection and future cross-implementation verification.*
+
+---
+
+## Renderer Boundary
+
+The first renderer is:
+> **deterministic canonical SVG**
+
+Conceptually:
+```text
+QrSymbol
+  ↓
+qr-svg
+  ↓
+SVG text/bytes
+```
+
+The SVG renderer may own representation options such as:
+- quiet zone
+- module scale / dimensions
+- foreground/background representation
+- SVG structural choices
+
+within its specification.
+
+It may **not** alter QR semantics.
+
+The same `QrSymbol` should be renderable later as:
+- PNG
+- WebP
+- PDF
+- Canvas
+- printer-native data
+
+without recomputing QR encoding.
+
+*That separation is one of ZQE's core architectural commitments.*
+
+### Canonical SVG Requirement
+For the same:
+- `QrSymbol`
+- renderer options
+- renderer profile/version
+
+the reference SVG renderer should emit **byte-identical canonical output**.
+
+It must avoid accidental entropy such as:
+- timestamps
+- random IDs
+- nondeterministic attribute ordering
+- environment-specific formatting
+- tool metadata
+
+This enables:
+- SVG hash
+- reproducible artifacts
+- regression testing
+- historical reconstruction
+
+The canonical renderer should favor a compact standards-valid structure without making visual cleverness part of core correctness.
+
+### Quiet Zone and Visual Integrity
+The renderer must preserve the QR technical requirements applicable to symbol presentation, including quiet-zone handling as defined by the governing standard/profile.
+
+Decorative features such as:
+- logos
+- rounded modules
+- gradients
+- brand graphics
+- embedded artwork
+- frames
+
+are **not** part of the reference ZQE core/SVG contract.
+
+They may later exist in a styling or experience layer only if conformance and decode reliability remain explicitly governed.
+
+The first reference renderer should optimize for:
+- **correctness**
+- **clarity**
+- **determinism**
+- **interoperability**
+
+not decoration.
+
+---
+
+## Independent Decoding Requirement
+
+The initial ZQE product need not ship its own production decoder.
+
+Instead, conformance requires the inverse relationship to be tested independently:
+```text
+input payload
+  ↓
+ZQE
+  ↓
+QrSymbol / SVG
+  ↓
+independent decoder
+  ↓
+exact original payload
+```
+
+The independent decoder must **not** reuse ZQE's own encoding logic in a way that lets the same defect validate itself.
+
+Where practical, more than one independent decoder ecosystem should be used during high-confidence conformance testing.
+
+*A future ZQE decoder may be implemented later as a distinct scope.*
+
+---
+
+## Testing Contract
+
+CEngS already requires layered testing and property-based testing for critical algorithms. The ZQE implementation should apply that rigor to QR boundaries.
+
+The acceptance architecture should include:
+
+| Test class | Purpose |
+| :--- | :--- |
+| **Normative/conformance vectors** | Standard correctness |
+| **Unit tests** | Local algorithm correctness |
+| **Property-based tests** | Broad invariant exploration |
+| **Differential tests** | Compare against trusted independent implementations |
+| **Round-trip tests** | ZQE encode → external decode |
+| **Boundary tests** | Version/capacity/count-field transitions |
+| **Determinism tests** | Identical artifact across repeated runs |
+| **Renderer tests** | Canonical SVG identity and decodeability |
+| **Mutation/negative tests** | Reject invalid states/options explicitly |
+| **Performance benchmarks** | Detect pathological regressions |
+
+Particularly important pathological cases include:
+- minimum payload
+- exact capacity boundary
+- one unit above capacity
+- v9 → v10 transition
+- v26 → v27 transition
+- maximum supported v40
+- ECC block boundaries
+- mixed-mode transitions
+- Unicode/ECI boundaries where supported
+- mask ties
+- all eight masks
+
+*The exact test vector corpus belongs in the ZQE implementation plan/specification.*
+
+---
+
+## Conformance Contract
+
+A ZQE release may not call itself standards-conformant merely because third-party scanners happen to read a few samples.
+
+Conformance evidence must distinguish:
+- normative standards tests
+- independent decoder interoperability
+- differential implementation tests
+- internal deterministic invariants
+
+A competitor match alone is insufficient because two libraries can share the same mistake.
+
+Conversely, producing a different valid symbol from another library is not automatically an error; QR may permit multiple valid representations.
+
+*This is why `zqe/1` defines ZQE's reproducible choices independently of competitor output.*
+
+---
+
+## Competitive Excellence Contract
+
+PREP work established that basic QR architecture is table stakes.
+
+ZQE's aspirational position is:
+> **A reference-grade QR compiler: standards-conformant, algorithmically disciplined, deterministic, reproducible, inspectable, independently verifiable, and operationally efficient.**
+
+The initial excellence targets are therefore:
+
+| ID | Target |
+| :--- | :--- |
+| **E1** | Strong/optimal supported-mode segmentation |
+| **E2** | Complete declared QR Model-2 encoding semantics |
+| **E3** | Explainable compilation trace |
+| **E4** | Canonically serializable QrSymbol |
+| **E5** | Frozen Technical Engine Profiles |
+| **E6** | Cross-runtime reproducibility target |
+| **E7** | Independent-decoder interoperability |
+| **E8** | Exhaustive pathological/boundary testing |
+| **E9** | Deterministic canonical SVG |
+| **E10** | Competitive performance without sacrificing E1–E9 |
+
+These are **quality obligations, not marketing claims.**
+If a target has not been demonstrated, documentation must say so.
+
+---
+
+## Performance Contract
+
+ZQE should be efficient enough for production and bulk generation, but **performance cannot override correctness.**
+
+Benchmarks should eventually compare relevant operations against established QR libraries under equivalent workloads.
+
+Metrics should separate:
+- encoding throughput
+- latency
+- allocation/memory
+- SVG generation
+- large/version-40 cases
+- mixed segmentation
+- batch workloads
+
+No benchmark target should encourage:
+- dropping optimal segmentation
+- skipping mask evaluation
+- weakening validation
+- changing output nondeterministically
+
+to win throughput numbers.
+
+**Correctness remains the gate.**
+
+---
+
+## Dependency Principle
+
+The ZQE core should target:
+> **zero runtime external dependencies where practical.**
+
+For a foundational standards engine, that reduces:
+- supply-chain surface
+- version drift
+- hidden behavior
+- bundle size
+- cross-runtime variability
+
+But PREP-F does not turn "zero dependencies" into dogma for every future ZII engine.
+
+It is a strong ZQE-specific target because the QR algorithms are bounded and implementable without a runtime library dependency.
+
+*Development/test dependencies remain permitted where appropriately governed.*
+
+---
+
+## Error Model
+
+ZQE must fail explicitly and typefully for technical failures.
+
+Conceptual categories include:
+- unsupported input semantics
+- payload capacity exceeded
+- invalid version constraint
+- invalid ECC option
+- invalid mask
+- unsupported mode/feature
+- invalid renderer option
+- profile not supported
+- internal invariant violation
+
+*Exact class names are not fixed here.*
+
+What is fixed:
+> **ZQE must not silently coerce an invalid request into a different QR contract.**
+
+And:
+> **Errors describe technical QR failures, not business/domain failures.**
+
+There is no ZQE error named:
+- `IdentityNotFound`
+- `NotAuthorized`
+- `PolicyDenied`
+- `TrustInvalid`
+- `GS1InvalidProduct`
+
+unless some future separate integration layer defines those.
+
+---
+
+## Generation Record
+
+PREP brainstorming identified value in a technical generation record.
+
+A future ZQE API may expose something like:
+```text
+encoder/profile
+payload hash/reference
+QR version
+ECC
+mask
+symbol hash
+```
+
+This can support:
+- historical regeneration
+- diagnostics
+- audit of technical generation
+- reproducibility
+
+But PREP-F formally preserves the distinction:
+> **A ZQE Generation Record is not an RI Execution Receipt.**
+
+If a Zyppi application later wants constitutional evidence that an authorized Actor provisioned a physical QR, that belongs outside the pure QR engine.
+
+---
+
+## Explicit Initial Non-Scope
+
+The first ZQE implementation shall not implement the following merely because they are adjacent:
+
+| Excluded concern | Reason |
+| :--- | :--- |
+| zQR semantic profile | Separate zTOUCH/product concern |
+| zTouch Envelope | Separate future profile |
+| ZPI / zPIS | Addressing/resolution |
+| GS1 parsing/validation | Domain/standards application concern |
+| GS1 Digital Link construction | Higher layer |
+| CAW integration | Separate authorized integration |
+| Redirect/resolution service | Not QR mechanics |
+| QR analytics | Application/product concern |
+| Dynamic redirects | Resolution infrastructure |
+| Identity provisioning | ZRM/Application concern |
+| Database storage | Not core |
+| HTTP API | Gateway/Application concern |
+| MCP/SDK product surface | Later consumer |
+| Authentication/authorization | SEC/POL |
+| Cryptographic zTouch signing | Higher profile |
+| Physical anti-cloning | Future specialist/ZRB area |
+| Printer drivers | Future ZII adapter |
+| Physical printing | Infrastructure |
+| Camera scanning | Input-adapter future scope |
+| Production QR decoder | Not initial product requirement |
+| PNG/PDF renderer | Later renderer milestones |
+| Logo/styling engine | Presentation/product feature |
+| AI-generated QR design | Out of core |
+| ZyPub animated QR | Future consumer of ZQE |
+
+*This non-scope is as important as the implementation scope.*
+
+---
+
+## First ZQE Implementation Decomposition
+
+PREP-F does not yet create the milestone plan, but it establishes the logical construction order:
+
+```text
+Repository Governance Transition
+      ↓
+ZQE documentation/specification baseline
+      ↓
+@zyppi/qr-core scaffold
+      ↓
+QR normative primitives
+      ↓
+encoding pipeline
+      ↓
+QrSymbol
+      ↓
+conformance / diagnostics
+      ↓
+@zyppi/qr-svg
+      ↓
+independent interoperability
+      ↓
+benchmark / release gate
+```
+
+This prevents SVG or API convenience work from outrunning the encoding foundation.
+
+---
+
+## No First-Engine Privilege Test
+
+Every architectural decision made during ZQE implementation must answer:
+> *Does this belong specifically to QR, or is it being proposed as a ZII-wide rule?*
+
+If specifically QR:
+**ZQE owns it.**
+*Examples:* mask, ECC level, finder patterns, quiet zone, version 1–40, QrSymbol, SVG renderer.
+
+If proposed as generic ZII:
+**it must survive PREP-E's sibling evidence.**
+*Examples that survived:* Technical Engine Profile, native canonical technical artifact, conformance, diagnostics, explicit supported operations, input/output adapters, logic/I/O separation where applicable.
+
+ZQE implementers must not promote QR internals into the ZII framework by convenience.
+
+---
+
+## First-Engine Reference Duty
+
+Although ZQE receives no universal privilege, it does have a second responsibility:
+> **ZQE is the first implementation that proves whether the proposed ZII engineering discipline is practical.**
+
+Therefore ZQE should provide evidence for future engines around:
+- package metadata
+- engine profile declaration
+- canonical artifact contracts
+- diagnostic conventions
+- conformance organization
+- benchmark organization
+- version freezing
+- adapter separation
+- documentation shape
+- release evidence
+
+Future NFC/BLE/etc. implementations may reuse those engineering patterns only where appropriate.
+**They do not inherit QR semantics.**
+
+---
+
+## ZQE Entry Gate
+
+The first ZQE implementation mandate may be issued only when the following conditions are satisfied:
+
+| Gate | Required state |
+| :--- | :--- |
+| **F-G01 PREP-A** | Prior proposals reconciled |
+| **F-G02 PREP-B** | Constitutional ownership audit closed |
+| **F-G03 PREP-C** | zTOUCH collision audit closed with refactor |
+| **F-G04 PREP-D** | Layer/repository model resolved |
+| **F-G05 PREP-E** | Sibling stress test closed |
+| **F-G06 Repository transition** | Global workspace governance ready for ZII |
+| **F-G07 CI enforcement** | Architecture/boundary validation actually enforced in GitHub CI |
+| **F-G08 Normative QR source** | Full normative implementation source identified/available |
+| **F-G09 ZQE scope** | Model-2 initial scope and exclusions frozen |
+| **F-G10 Technical profile** | Initial `zqe/1` behavioral decisions defined before ambiguous implementation choices |
+| **F-G11 Conformance plan** | Independent verification strategy defined |
+| **F-G12 Implementation plan** | ZQE milestone/build order created before code mandates |
+
+PREP-A through PREP-E are conceptually satisfied by the work completed in this phase sequence.
+**F-G06 onward remain implementation-entry prerequisites.**
+
+---
+
+## What PREP-F Does Not Require Before Planning
+
+We should avoid turning the entry contract into waterfall paralysis.
+
+Before drafting the ZQE milestone roadmap, we do **not** need to have already:
+- implemented optimal segmentation
+- selected every future renderer
+- built NFC
+- finished zTOUCH
+- defined ZPI
+- completed CAW
+- implemented ZRB
+- solved physical anti-cloning
+- built ZyPub
+
+The point of PREP-F is to know what ZQE is before coding it, not to solve all future Interaction Infrastructure first.
+
+---
+
+## ZQE's Concise Constitutional Contract
+
+The entire PREP-F can be compressed into ten statements:
+
+1. ZQE is a QR engine, not a Zyppi semantic engine.
+2. ISO/IEC 18004:2024 Edition 4 is the initial normative QR authority.
+3. ZQE initially targets QR Code Model 2, Versions 1–40.
+4. `qr-core` transforms explicit payload input into canonical `QrSymbol`; it has no production dependency on Zyppi constitutional packages.
+5. `QrSymbol` is a QR-native technical artifact, not Reality or a universal ZII artifact.
+6. Rendering is separate; SVG is the first deterministic reference renderer.
+7. Same input + parameters + Technical Engine Profile must regenerate the same canonical technical artifact.
+8. Conformance, independent interoperability, diagnostics, boundary testing and reproducibility are release requirements, not optional polish.
+9. zQR, zTOUCH, GS1, ZPI, CAW, Trust, Identity and Policy remain outside the QR core.
+10. ZQE is ZII's first reference implementation but has no architectural privilege over future sibling engines.
+
+---
+
+## PREP-F Closure Result
+
+**PREP-F PASSES.**
+
+More importantly, the entire ZII-PREP investigation has now produced a coherent implementation boundary.
+
+The sequence is:
+```text
+PREP-A  Reconciliation
+      ↓
+PREP-B  Constitutional Ownership
+      ↓
+PREP-C  zTOUCH Collision Audit
+      ↓
+PREP-D  Layer / Repository Governance
+      ↓
+PREP-E  Sibling Standards Stress Test
+      ↓
+PREP-F  ZQE Entry Contract
+      ↓
+   COMPLETE
+```
+
+We are not yet authorized to start ZQE code, because PREP-D uncovered a real repository prerequisite.
+
+The immediate bridge from discovery to implementation should therefore be:
+```text
+ZII-PREP
+      ↓
+ZII Integrated Foundation / Architecture
+      ↓
+Repository Governance Transition
+      ↓
+ZII Roadmap
+      ↓
+ZQE Specification + Roadmap
+      ↓
+first AMS
+      ↓
+implementation
+```
+
+> **The important distinction is that the architecture discovery is now mature enough to stop asking what ZII/ZQE fundamentally are.**
+>
+> The next documentation should consolidate the findings into the permanent ZII foundation and then authorize the concrete repository transition and ZQE milestones—not reopen the foundational questions without new evidence.
+
+---
+---
+
+# What we did ?
+
+We have finished the **ZII discovery/reconciliation phase**. What remains is mostly consolidation, repository-governance transition, formal planning, and then implementation.
+ 
+## Where we started
+ 
+We had several strong but overlapping exploratory ideas:
+ 
+ 
+- **zTOUCH / zQR** — identity-native touchpoints.
+ 
+- **ZRB / ZPIF** — physical Reality boundary and device/interface ecosystem.
+ 
+- **ZyPub / Zync** — direct publication versus connected resolution.
+ 
+- **ZPI / zPIS** — persistent physical addressing/resolution.
+ 
+- A separate desire to build an exceptional **QR engine**.
+ 
+- CAW already handling QR/NFC/etc. as carriers but only within the Commerce wedge.
+ 
+
+ 
+The risk was that these could become overlapping architectural systems.
+ 
+We introduced **ZII — Zyppi Interaction Infrastructure** as the missing technical umbrella and then ran **ZII-PREP A→F** to test whether that umbrella was constitutionally and technically sound.
+  
+# What we have completed
+ 
+## PREP-A — Prior-work reconciliation
+ 
+**Complete.**
+ 
+We reconciled the previous proposals and assigned preliminary homes:
+ 
+  
+ 
+Concept
+ 
+Result
+ 
+   
+ 
+**ZII**
+ 
+Technical interaction-infrastructure umbrella
+ 
+ 
+ 
+**ZQE**
+ 
+First reference engine under ZII
+ 
+ 
+ 
+**zTOUCH**
+ 
+Preserved, but as higher interaction/profile concept
+ 
+ 
+ 
+**zQR**
+ 
+Preserved separately from ZQE
+ 
+ 
+ 
+**zTouch Envelope**
+ 
+Refactored heavily
+ 
+ 
+ 
+**ZPIF**
+ 
+Technical core largely absorbed into ZII
+ 
+ 
+ 
+**ZRB**
+ 
+Preserved as future constitutional Reality-boundary investigation
+ 
+ 
+ 
+**ZyPub**
+ 
+Adjacent publication capability using ZII
+ 
+ 
+ 
+**Zync**
+ 
+Connected/reference-resolution capability, outside ZII
+ 
+ 
+ 
+**ZPI / zPIS**
+ 
+Separate addressing/resolution infrastructure
+ 
+ 
+ 
+**Animated QR**
+ 
+Future ZyPub consumer of ZQE
+ 
+  
+ 
+The major separations established were:
+ `ZII ≠ zTOUCH  ZQE ≠ zQR  ZII ≠ ZRB  ZII ≠ ZPI  ZII ≠ ZyPub `  
+# PREP-B — Constitutional Ownership Audit
+ 
+**Complete — PASS.**
+ 
+We established that **ZII needs no new constitutional sovereignty**.
+ 
+Its legitimate responsibility is technical:
+ `construct encode decode represent render write broadcast capture read inspect validate technically ` 
+Existing authorities continue owning constitutional meaning:
+ `ZRM       Reality / Identity / Event / Evidence SIOS      information / semantic translation architecture SEC       Trust / Attestation / security POL       Policy / authorization / Capability Z-PROF    domain composition / binding RI        constitutional execution / receipts CEngS     engineering law CAW       Commerce-wedge application flow ` 
+The core conclusion was:
+ 
+ 
+**ZII may know HOW. It may carry WHAT. It must not decide WHAT IT MEANS.**
+ 
+ 
+We also distinguished:
+ `Representation transformation         ≠ technical I/O         ≠ constitutional claim about physical Reality ` 
+So, for example:
+ `NFC write succeeded technically ` 
+does not automatically mean:
+ `constitutional Event proven ` 
+That harder admission problem remains with a future ZRB-style boundary.
+  
+# PREP-C — zTOUCH / zTouch Envelope Collision Audit
+ 
+**Complete — PASS WITH REFACTOR.**
+ 
+This was one of the biggest improvements.
+ 
+The original concept:
+ `Identity Context Intent Hints Trust / Seal ` 
+was too close to creating a miniature semantic constitution inside a carrier.
+ 
+We replaced it with:
+ `zTOUCH │ ├── Carrier Binding │     └── Access Reference │ └── Optional Extensions       ├── References       ├── Assertions       ├── Hints       └── Proof Material ` 
+The five concise rules became:
+ 
+ 
+**Reference ≠ Identity** **Assertion ≠ Reality** **Hint ≠ Intent** **Proof ≠ Trust** **Carrier ≠ Authority**
+ 
+ 
+And another important rule:
+ 
+ 
+**Binding ≠ Payload Syntax**
+ 
+ 
+This means a future **zQR may not require proprietary bytes at all**.
+ 
+For example, a normal GS1 Digital Link QR could potentially qualify as zQR because of how it is provisioned/bound into Zyppi.
+ 
+That remains an explicit open question:
+ 
+### ZT-OQ-01 — zQR Conformance Identity
+ 
+What minimum condition makes an ordinary standards-compliant QR a **zQR**?
+ 
+Possibilities include:
+ `payload-defined provisioning-defined binding/profile-defined registry-defined combination ` 
+We intentionally did **not** decide that yet.
+  
+# PREP-D — CEngS Layer Eligibility & Monorepo Governance
+ 
+**Complete — PASS WITH REQUIRED GOVERNANCE TRANSITION.**
+ 
+This phase answered two large questions.
+ 
+## Repository decision
+ 
+**Keep ZII in the existing `aly-samy/zyppi.me` monorepo.**
+ 
+We rejected a separate repository.
+ 
+Initial layout:
+ `packages/ ├── qr-core/ └── qr-svg/  DOCS/ └── ZII/     └── ZQE/ ` 
+## But we found a real blocker
+ 
+The current repository governance is still **CAW-centric**.
+ 
+The existing graph validator hard-codes:
+ `packages/domain packages/shared packages/contracts packages/runtime packages/testing apps/api apps/web edge/worker infra ` 
+and derives authority from **CAW-004**.
+ 
+Therefore adding `@zyppi/qr-core` today would be constitutionally unrecognized.
+ 
+We decided the future hierarchy must become:
+ `CEngS    │    ▼ Global Workspace Governance    │    ├── CAW package family    ├── ZII package family    └── future package families ` 
+rather than:
+ `CAW-004 owns every package forever ` 
+or:
+ `CAW-004 global graph ZII-004 global graph DPP-004 global graph ... ` 
+which would create conflicting authorities.
+ 
+We also found that the current `zyppi.layer` vocabulary:
+ `foundation runtime contracts testing ` 
+is not the same thing as CEngS's architectural layers.
+ 
+So we established:
+ 
+ 
+**Package Role ≠ CEngS Layer**
+ 
+ 
+For example:
+ `qr-core role = engine-core ` 
+not:
+ `layer = Application ` 
+and:
+ `qr-svg role = renderer ` 
+not:
+ `layer = Presentation ` 
+Instead, we should govern **which layers may consume each package**.
+  
+# PREP-E — Sibling Standards Stress Test
+ 
+**Complete — PASS WITH GENERIC MODEL REFINEMENT.**
+ 
+We tested ZII against:
+ `QR Data Matrix NFC / NDEF RFID / EPC BLE ` 
+This successfully found several false QR assumptions.
+ 
+We rejected as universal ZII concepts:
+ `Engine → Symbol → Renderer one universal encode() one-shot pipeline one canonical artifact only all engines are pure everything is a carrier ` 
+Those work for QR but not universally.
+ 
+We retained stronger generic concepts:
+ `Interaction Engine Family Technical Engine Profile Native Canonical Technical Artifact(s) Input Adapter Output Adapter Technical Support Manifest Conformance Interoperability Diagnostics ` 
+The generic ZII architecture now looks roughly like:
+ `                 ENGINE FAMILY                        │               technical operations                        │                        ▼             native technical artifacts                        │               ┌────────┴────────┐               ▼                 ▼        outward adapters    inward adapters        render/write/       capture/read/        broadcast/etc.      scan/etc.               │                 │               └────────┬────────┘                        ▼              interaction environment ` 
+with:
+ `Technical Engine Profiles Standards Authority Conformance Interoperability Diagnostics ` 
+cross-cutting the family.
+ 
+Most importantly:
+ 
+ 
+**ZQE is first implementation, not universal template.**
+ 
+  
+# PREP-F — ZQE Entry Contract
+ 
+**Complete — PASS.**
+ 
+We now know exactly what ZQE is.
+ 
+## ZQE
+ 
+ 
+A standards-conformant, deterministic, inspectable QR compilation engine that transforms supplied payload material into a canonical QR technical artifact and separately renders it into delivery representations such as SVG.
+ 
+ 
+Initial target:
+ `ISO/IEC 18004:2024 Edition 4 QR Code Model 2 Versions 1–40 ECC L / M / Q / H ` 
+Edition 5 remains only draft material and cannot silently affect `zqe/1`.
+ 
+## Initial ZQE packages
+ `@zyppi/qr-core @zyppi/qr-svg ` 
+with:
+ `qr-svg → qr-core qr-core → no production dependencies ` 
+And no dependency on:
+ `CAW GS1 Z-PROF ZRM/domain Runtime Registry Database ZPI zTOUCH ` 
+## ZQE core output
+ `Payload    ↓ QR compiler    ↓ QrSymbol ` 
+`QrSymbol` is the canonical technical artifact.
+ 
+SVG is only the first renderer:
+ `QrSymbol    ↓ qr-svg    ↓ canonical SVG ` 
+## Quality requirements established
+ 
+ZQE aims for:
+ 
+ 
+- standards conformance;
+ 
+- deterministic output;
+ 
+- explicit technical engine profiles such as `zqe/1`;
+ 
+- strong/optimal segmentation under a declared cost model;
+ 
+- smallest valid version selection;
+ 
+- complete mask evaluation;
+ 
+- explicit ECC behavior;
+ 
+- canonical `QrSymbol`;
+ 
+- canonical deterministic SVG;
+ 
+- independent decoder verification;
+ 
+- boundary/property testing;
+ 
+- diagnostic compilation trace;
+ 
+- benchmark evidence;
+ 
+- eventual cross-runtime reproducibility.
+ 
+
+ 
+And we explicitly excluded:
+ `zQR semantics zTOUCH GS1 construction/parsing ZPI CAW integration redirects Identity Trust Policy database HTTP API physical printing camera scanning animated QR branding/styling ` 
+from the core initial ZQE scope.
+  
+# So where are we now?
+ 
+Conceptually:
+ `ZII-PREP │ ├── PREP-A Reconciliation           COMPLETE ├── PREP-B Ownership Audit          COMPLETE ├── PREP-C zTOUCH Collision         COMPLETE ├── PREP-D Repository / Layers      COMPLETE ├── PREP-E Sibling Stress Test      COMPLETE └── PREP-F ZQE Entry Contract       COMPLETE ` 
+So the **discovery phase itself is essentially complete**.
+ 
+We no longer need to keep debating:
+ `What is ZII? What is ZQE? Does zTOUCH equal ZII? Should QR own the architecture? Should ZII live in another repository? ` 
+Those questions are settled enough to move forward.
+  
+# What remains before implementation
+ 
+There are now **five major blocks**.
+ 
+## 1. Consolidate PREP into permanent ZII architecture
+ 
+We have findings spread across PREP-A→F.
+ 
+The next permanent artifact should consolidate them into the actual ZII architectural foundation.
+ 
+Likely:
+ `ZII-000 — Navigation / Program Index  ZII-001 — ZII Program Charter &           Integrated Architecture ` 
+Potentially followed by:
+ `ZII-002 — Interaction Infrastructure Architecture ZII-003 — Engine Family & Technical Artifact Model ZII-004 — ZII Repository Map ... ` 
+But we should **not blindly create fourteen CAW-like documents**.
+ 
+The PREP results should determine how many are genuinely needed.
+  
+# 2. Repository Governance Transition
+ 
+This is the most immediate technical blocker.
+ 
+Before `packages/qr-core` exists, we need to move from:
+ `CAW-004    ↓ global repository graph ` 
+to:
+ `CEngS / platform authority         ↓ single global workspace-policy mechanism         ↓ CAW ZII future programs ` 
+That transition must include:
+ 
+ 
+- clarify CEngS-002 global repository ownership;
+ 
+- narrow CAW-004 to CAW-specific package governance;
+ 
+- generalize workspace registration;
+ 
+- generalize `verify-dependency-graph.mjs`;
+ 
+- remove CAW/GS1-specific rules from the generic validator;
+ 
+- correct/generalize `verify-package-boundary.mjs`;
+ 
+- replace misleading `zyppi.layer` handling;
+ 
+- preserve all current CAW edges exactly;
+ 
+- ensure unknown packages still fail closed;
+ 
+- make GitHub CI actually execute `boundary:all` and `graph:validate`.
+ 
+
+ 
+This should be its **own carefully scoped implementation milestone**.
+ 
+Not mixed with QR work.
+  
+# 3. Finish ZII permanent roadmap
+ 
+After the integrated architecture is established, we need the formal implementation roadmap.
+ 
+Conceptually:
+ `ZII Foundation     ↓ Repository Governance Transition     ↓ ZQE     ↓ later interaction engines ` 
+But exact milestones and ITs are not yet drafted.
+ 
+That means we still need something analogous to:
+ `ZII-005 — Milestone Roadmap ZII-011 — Build Order ` 
+if those document names survive the final documentation design.
+  
+# 4. Formal ZQE specification and roadmap
+ 
+PREP-F is an **entry contract**, not the complete QR specification.
+ 
+We still need to formalize things such as:
+ `ZQE-001 — Scope & Standards Profile ZQE-002 — QR Encoder Architecture ZQE-003 — QrSymbol Contract ZQE-004 — zqe/1 Technical Engine Profile ZQE-005 — Canonical SVG Renderer ZQE-006 — Conformance / Benchmark Contract ` 
+or a smaller equivalent set.
+ 
+Then:
+ `ZQE-PLAN ` 
+with milestones and Implementation Tasks.
+ 
+Only after that do we issue individual Jules mandates.
+  
+# 5. Implementation
+ 
+Only after the above:
+ `AMS-ZQE-xxxx      ↓ Jules      ↓ code / tests / evidence ` 
+The first code should likely be:
+ `@zyppi/qr-core ` 
+after the repository governance transition.
+ 
+Not SVG first.
+ 
+Not API first.
+ 
+Not zQR first.
+ 
+Not GS1 first.
+  
+# Important open questions that remain intentionally open
+ 
+Not every unresolved question blocks ZQE.
+ 
+### zTOUCH
+ 
+Still open:
+ 
+ 
+**ZT-OQ-01 — What makes a standard QR a zQR?**
+ 
+ 
+That can wait until the zQR/zTOUCH profile work.
+ 
+### ZRB
+ 
+Still deferred:
+ 
+ 
+How do physical observations and physical effects become constitutionally admissible Reality/Evidence?
+ 
+ 
+Not needed for ZQE.
+ 
+### ZPIF
+ 
+Still deferred:
+ 
+ 
+Does the `ZPIF` name survive specifically for a future certified OEM/device ecosystem?
+ 
+ 
+Not needed now.
+ 
+### ZyPub / Zync
+ 
+Preserved but not formalized.
+ 
+Not needed for ZQE.
+ 
+### ZPI / zPIS
+ 
+Preserved as separate addressing/resolution architecture.
+ 
+ZQE must remain usable before ZPI exists.
+  
+# The overall architecture we have reached
+ `                         ZYPPI                            │                  Constitutional Core         ZRM · SEC · POL · RI · SIOS · etc.                            │                         CEngS                            │              ┌─────────────┴─────────────┐              │                           │             CAW                         ZII       Commerce Wedge          Interaction Infrastructure                                          │                               ┌──────────┴──────────┐                               ▼                     ▼                              ZQE                Future Engines                           QR Engine          NFC / RFID / BLE...                               │                        ┌──────┴──────┐                        ▼             ▼                    qr-core         qr-svg ` 
+Above/adjacent to ZII:
+ `zTOUCH ── uses ZII for interaction profiles ZyPub  ── uses ZII for publication carriers ZPI    ── may be encoded through ZII CAW    ── may consume ZII ` 
+And future constitutional boundary:
+ `ZRB ` 
+only if/when we need formal admission rules between physical Reality and Zyppi.
+  
+# Practical status
+ 
+If I compress everything into one program board:
+ 
+  
+ 
+Stage
+ 
+Status
+ 
+   
+ 
+ZII concept discovery
+ 
+**DONE**
+ 
+ 
+ 
+Prior proposal reconciliation
+ 
+**DONE**
+ 
+ 
+ 
+Constitutional ownership
+ 
+**DONE**
+ 
+ 
+ 
+zTOUCH semantic cleanup
+ 
+**DONE**
+ 
+ 
+ 
+Repository architecture decision
+ 
+**DONE**
+ 
+ 
+ 
+Sibling-engine stress test
+ 
+**DONE**
+ 
+ 
+ 
+ZQE entry definition
+ 
+**DONE**
+ 
+ 
+ 
+Permanent ZII foundation docs
+ 
+**NEXT**
+ 
+ 
+ 
+Repository Governance Transition design/mandate
+ 
+**NEXT**
+ 
+ 
+ 
+ZII implementation roadmap
+ 
+**PENDING**
+ 
+ 
+ 
+Formal ZQE specification
+ 
+**PENDING**
+ 
+ 
+ 
+ZQE roadmap
+ 
+**PENDING**
+ 
+ 
+ 
+ZQE code
+ 
+**NOT AUTHORIZED YET**
+ 
+ 
+ 
+zQR profile
+ 
+**LATER**
+ 
+ 
+ 
+NFC/RFID/BLE engines
+ 
+**LATER**
+ 
+ 
+ 
+ZRB/ZPIF
+ 
+**DEFERRED**
+ 
+ 
+ 
+ZyPub/Zync
+ 
+**DEFERRED**
+ 
+  
+ 
+The clean next move is therefore **not another PREP investigation**.
+ 
+It is to convert PREP-A→F into the first permanent ZII foundation—starting with **ZII-001 Integrated Architecture / Program Charter**—and, as part of that transition, formally define the **Repository Governance Transition** that must occur before ZQE code begins.
