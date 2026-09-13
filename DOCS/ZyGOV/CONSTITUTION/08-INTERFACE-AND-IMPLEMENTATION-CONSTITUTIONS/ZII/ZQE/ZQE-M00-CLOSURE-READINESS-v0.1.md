@@ -458,28 +458,28 @@ and record the downstream RGT gate for M01.
 
 # 13. Closure Readiness Board
 
-| Area | Result |
-|---|---|
-| M00 mission | PASS |
-| FQR profile | PASS |
-| ZQE authority boundary | PASS |
-| Mechanism / meaning separation | PASS |
-| Input / output contract | PASS |
-| QrSymbol contract | PASS |
-| Renderer boundary | PASS |
-| Error contract | PASS |
-| Fail-closed invariants | PASS |
-| Mask determinism | PASS |
-| Independent mask verification | PASS |
-| Strict structural verification | PASS |
-| Decoder interoperability contract | PASS |
-| Standard-Readiness Review | CLOSED — PASS |
-| CEngS-000 context route | PASS — LIVE ON MAIN |
-| Full licensed 2024 audit | DEFERRED — NON-BLOCKING |
-| RGT package admission | DOWNSTREAM M01 GATE |
-| ZQE-001 ratification | CHAIR ACTION OPEN |
-| ZQE-PLAN status normalization | CHAIR ACTION OPEN |
-| Canonical corpus publication | CLOSURE ACTION OPEN |
+| Area                              | Result                  |
+| --------------------------------- | ----------------------- |
+| M00 mission                       | PASS                    |
+| FQR profile                       | PASS                    |
+| ZQE authority boundary            | PASS                    |
+| Mechanism / meaning separation    | PASS                    |
+| Input / output contract           | PASS                    |
+| QrSymbol contract                 | PASS                    |
+| Renderer boundary                 | PASS                    |
+| Error contract                    | PASS                    |
+| Fail-closed invariants            | PASS                    |
+| Mask determinism                  | PASS                    |
+| Independent mask verification     | PASS                    |
+| Strict structural verification    | PASS                    |
+| Decoder interoperability contract | PASS                    |
+| Standard-Readiness Review         | CLOSED — PASS           |
+| CEngS-000 context route           | PASS — LIVE ON MAIN     |
+| Full licensed 2024 audit          | DEFERRED — NON-BLOCKING |
+| RGT package admission             | DOWNSTREAM M01 GATE     |
+| ZQE-001 ratification              | CHAIR ACTION OPEN       |
+| ZQE-PLAN status normalization     | CHAIR ACTION OPEN       |
+| Canonical corpus publication      | CLOSURE ACTION OPEN     |
 
 ---
 

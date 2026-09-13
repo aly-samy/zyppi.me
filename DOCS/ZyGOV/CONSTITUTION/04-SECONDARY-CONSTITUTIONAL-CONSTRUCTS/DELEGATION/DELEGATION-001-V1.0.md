@@ -2,21 +2,21 @@
 
 **Secondary Cross-Constitutional Constitutional Construct**
 
-| Field | Value |
-| :--- | :--- |
-| **Identifier** | `DELEGATION-001` |
-| **Version** | 1.0 |
-| **Classification** | Secondary Constitutional Construct |
-| **Nature** | Cross-Constitutional / Derived / Non-Sovereign |
-| **Parent Closure Program** | `CCP-RI-CLOSURE-01` — Agency & Delegation Contract Closure |
-| **Primary Authority Sources** | POL, WS, SEC, ZRM/Identity, RI |
-| **Implementation Authority** | NONE |
-| **Repository Mutation Authority** | NONE |
+| Field                                            | Value                                                                                |
+| :----------------------------------------------- | :----------------------------------------------------------------------------------- |
+| **Identifier**                                   | `DELEGATION-001`                                                                     |
+| **Version**                                      | 1.0                                                                                  |
+| **Classification**                               | Secondary Constitutional Construct                                                   |
+| **Nature**                                       | Cross-Constitutional / Derived / Non-Sovereign                                       |
+| **Parent Closure Program**                       | `CCP-RI-CLOSURE-01` — Agency & Delegation Contract Closure                           |
+| **Primary Authority Sources**                    | POL, WS, SEC, ZRM/Identity, RI                                                       |
+| **Implementation Authority**                     | NONE                                                                                 |
+| **Repository Mutation Authority**                | NONE                                                                                 |
 | **Supersedes (as normative drafting authority)** | Initial DELEGATION-001 working draft, PH5-A, PH5-B, PH5-C, PH5-D, PH5-E, and CORR-01 |
-| **Status** | FINAL — RATIFICATION CANDIDATE |
-| **Date** | 24 August 2026 |
+| **Status**                                       | FINAL — RATIFICATION CANDIDATE                                                       |
+| **Date**                                         | 24 August 2026                                                                       |
 
-> *Those packets (PH5-A through PH5-E and CORR-01) remain audit/provenance material.*
+> _Those packets (PH5-A through PH5-E and CORR-01) remain audit/provenance material._
 
 ---
 
@@ -74,23 +74,23 @@ It SHALL NOT redefine the meanings owned by POL, WS, SEC, RSN, ZRM, Identity, Ev
 
 ## 3. Canonical Ownership
 
-| Concern | Canonical owner |
-| :--- | :--- |
-| Subject / Reality | ZRM |
-| Identity | Identity / CL |
-| Authority | POL |
-| Delegation constitutional meaning | POL |
-| Permission / Authorization | POL |
-| Role Assignment / `ASSIGNED_ROLE` | WS |
-| Authority Anchor | WS / active CL reference model |
-| Generic Relationship governance | WS |
-| Trust / security | SEC |
-| Attestation framework | RSN-003 |
-| Evidence | Evidence constitution |
-| Execution participation | RI / V2 |
-| Requested Action | RI / REC action contract |
-| Agency composition | DELEGATION-001 |
-| Runtime execution | RI |
+| Concern                           | Canonical owner                |
+| :-------------------------------- | :----------------------------- |
+| Subject / Reality                 | ZRM                            |
+| Identity                          | Identity / CL                  |
+| Authority                         | POL                            |
+| Delegation constitutional meaning | POL                            |
+| Permission / Authorization        | POL                            |
+| Role Assignment / `ASSIGNED_ROLE` | WS                             |
+| Authority Anchor                  | WS / active CL reference model |
+| Generic Relationship governance   | WS                             |
+| Trust / security                  | SEC                            |
+| Attestation framework             | RSN-003                        |
+| Evidence                          | Evidence constitution          |
+| Execution participation           | RI / V2                        |
+| Requested Action                  | RI / REC action contract       |
+| Agency composition                | DELEGATION-001                 |
+| Runtime execution                 | RI                             |
 
 POL already defines Delegation as transfer of Authority, requires valid originating Authority, prohibits scope expansion and implicit delegation, requires provenance, independent revocation and temporal bounding, and makes child validity dependent on parent Authority.
 
@@ -389,20 +389,20 @@ RECEIVES_DELEGATED_AUTHORITY_FROM
 
 The intended WS Registry classification is:
 
-| Property | Final constitutional rule |
-| :--- | :--- |
-| **Tier** | Reified Relationship |
-| **Family** | Authority |
-| **Source** | Subject / Delegator |
-| **Target** | Subject / Delegate |
-| **Evidence** | Mandatory |
-| **Authority** | Required |
-| **Provenance** | Mandatory |
-| **Lifecycle** | Governed |
-| **Historical reconstruction** | Required |
-| **Role Type** | Not required |
-| **Governed Subject** | Not owned here |
-| **Requested Action** | Not owned here |
+| Property                      | Final constitutional rule |
+| :---------------------------- | :------------------------ |
+| **Tier**                      | Reified Relationship      |
+| **Family**                    | Authority                 |
+| **Source**                    | Subject / Delegator       |
+| **Target**                    | Subject / Delegate        |
+| **Evidence**                  | Mandatory                 |
+| **Authority**                 | Required                  |
+| **Provenance**                | Mandatory                 |
+| **Lifecycle**                 | Governed                  |
+| **Historical reconstruction** | Required                  |
+| **Role Type**                 | Not required              |
+| **Governed Subject**          | Not owned here            |
+| **Requested Action**          | Not owned here            |
 
 WS already requires relationship governance to define source, target, type, family, cardinality, temporal behavior, Evidence, Authority, Provenance, and inverse semantic direction, while individual predicates are admitted through the Relationship Registry.
 
@@ -562,11 +562,11 @@ Branching Delegation is distinct from WS supersession.
 
 WS supersession answers:
 
-> *Which Relationship replaced this Relationship?*
+> _Which Relationship replaced this Relationship?_
 
 Delegation parentage answers:
 
-> *From which Authority did this Delegation derive?*
+> _From which Authority did this Delegation derive?_
 
 Therefore:
 
@@ -971,7 +971,7 @@ Delegation Proof is not a new primitive.
 
 It means:
 
-> *the complete set of independently verifiable constitutional material necessary to establish the delegation-related claims relied upon by an Agency Binding.*
+> _the complete set of independently verifiable constitutional material necessary to establish the delegation-related claims relied upon by an Agency Binding._
 
 It may include:
 
@@ -1056,7 +1056,7 @@ They do not create a separate AI Delegation ontology.
 
 An AI Agent cannot prove:
 
-> *"I am authorized"*
+> _"I am authorized"_
 
 merely by signing its own assertion.
 
@@ -1324,38 +1324,38 @@ The following SHALL be constitutionally prohibited:
 
 The final permanent invariants of `DELEGATION-001` are:
 
-| ID | Invariant |
-| :--- | :--- |
-| **DLG-001 — Explicitness** | Delegation SHALL be explicit. |
-| **DLG-002 — Valid Origin** | Delegation SHALL derive from valid Authority. |
-| **DLG-003 — No Sovereignty Creation** | Delegation SHALL never create sovereignty. |
-| **DLG-004 — Attenuation** | Child Authority SHALL not exceed parent Authority. |
-| **DLG-005 — Provenance** | Authority lineage SHALL remain reconstructable. |
-| **DLG-006 — Temporal Bound** | Delegated Authority SHALL be temporally bounded. |
-| **DLG-007 — Revocability** | Delegation SHALL be revocable according to governing law. |
-| **DLG-008 — Cascade** | Parent invalidation SHALL invalidate dependent current Delegation. |
-| **DLG-009 — Sibling Independence** | Sibling Delegations remain independently revocable. |
-| **DLG-010 — Determinate Parentage** | Every derived Delegation SHALL possess exact parent basis. |
-| **DLG-011 — Derivation Acyclicity** | Authority derivation SHALL be acyclic. |
-| **DLG-012 — No Automatic Re-Parenting** | Delegation SHALL never migrate silently to another parent. |
-| **DLG-013 — Explicit Subdelegation** | Subdelegation SHALL require lawful onward-delegation authority. |
-| **DLG-014 — Role Precedence** | Mandatory specialized Role mechanisms SHALL outrank generic Direct Grants. |
-| **DLG-015 — Single Operative Grant** | One Authority transfer SHALL have one operative grant representation. |
-| **DLG-016 — Self-Execution Zero Case** | Self-execution SHALL not fabricate Delegation. |
-| **DLG-017 — Explicit Cross-Subject Agency** | Actor ≠ Governed Subject SHALL require governed Agency Binding where agency is claimed. |
-| **DLG-018 — Exact Actor Correspondence** | Terminal delegated Authority holder SHALL match the Actor. |
-| **DLG-019 — Explicit Governed-Subject Correspondence** | Agency relationship to Governed Subject SHALL not be inferred. |
-| **DLG-020 — Multi-Party Capability** | Execution SHALL support multiple Actors and Governed Subjects. |
-| **DLG-021 — Agency Is Not Authority** | Agency Binding SHALL not create constitutional Authority. |
-| **DLG-022 — Proof Is Not Authority** | Evidence and Attestation SHALL not create Authority. |
-| **DLG-023 — No Attestation Inflation** | New Attestations SHALL exist only where existing proof is insufficient. |
-| **DLG-024 — Current Validity Required** | Current execution SHALL not rely on stale Authority proof. |
-| **DLG-025 — Historical Fidelity** | Historical Delegation SHALL remain reconstructable without becoming current Authority. |
-| **DLG-026 — No Runtime Discovery** | RI SHALL not invent, discover, repair, or upgrade Delegation state. |
-| **DLG-027 — Exact Snapshot Binding** | All execution-affecting agency state SHALL belong to one coherent execution snapshot. |
-| **DLG-028 — No Contextual Inference** | Tenant, employer, Role name, profile, metadata, or business convention SHALL not manufacture agency. |
-| **DLG-029 — Recognition Is Not Grant** | Observed/recognized Authority SHALL not itself create delegated execution Authority. |
-| **DLG-030 — Human/AI Constitutional Continuity** | Humans and AI use the same constitutional Delegation law; security proof obligations may differ. |
+| ID                                                     | Invariant                                                                                            |
+| :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **DLG-001 — Explicitness**                             | Delegation SHALL be explicit.                                                                        |
+| **DLG-002 — Valid Origin**                             | Delegation SHALL derive from valid Authority.                                                        |
+| **DLG-003 — No Sovereignty Creation**                  | Delegation SHALL never create sovereignty.                                                           |
+| **DLG-004 — Attenuation**                              | Child Authority SHALL not exceed parent Authority.                                                   |
+| **DLG-005 — Provenance**                               | Authority lineage SHALL remain reconstructable.                                                      |
+| **DLG-006 — Temporal Bound**                           | Delegated Authority SHALL be temporally bounded.                                                     |
+| **DLG-007 — Revocability**                             | Delegation SHALL be revocable according to governing law.                                            |
+| **DLG-008 — Cascade**                                  | Parent invalidation SHALL invalidate dependent current Delegation.                                   |
+| **DLG-009 — Sibling Independence**                     | Sibling Delegations remain independently revocable.                                                  |
+| **DLG-010 — Determinate Parentage**                    | Every derived Delegation SHALL possess exact parent basis.                                           |
+| **DLG-011 — Derivation Acyclicity**                    | Authority derivation SHALL be acyclic.                                                               |
+| **DLG-012 — No Automatic Re-Parenting**                | Delegation SHALL never migrate silently to another parent.                                           |
+| **DLG-013 — Explicit Subdelegation**                   | Subdelegation SHALL require lawful onward-delegation authority.                                      |
+| **DLG-014 — Role Precedence**                          | Mandatory specialized Role mechanisms SHALL outrank generic Direct Grants.                           |
+| **DLG-015 — Single Operative Grant**                   | One Authority transfer SHALL have one operative grant representation.                                |
+| **DLG-016 — Self-Execution Zero Case**                 | Self-execution SHALL not fabricate Delegation.                                                       |
+| **DLG-017 — Explicit Cross-Subject Agency**            | Actor ≠ Governed Subject SHALL require governed Agency Binding where agency is claimed.              |
+| **DLG-018 — Exact Actor Correspondence**               | Terminal delegated Authority holder SHALL match the Actor.                                           |
+| **DLG-019 — Explicit Governed-Subject Correspondence** | Agency relationship to Governed Subject SHALL not be inferred.                                       |
+| **DLG-020 — Multi-Party Capability**                   | Execution SHALL support multiple Actors and Governed Subjects.                                       |
+| **DLG-021 — Agency Is Not Authority**                  | Agency Binding SHALL not create constitutional Authority.                                            |
+| **DLG-022 — Proof Is Not Authority**                   | Evidence and Attestation SHALL not create Authority.                                                 |
+| **DLG-023 — No Attestation Inflation**                 | New Attestations SHALL exist only where existing proof is insufficient.                              |
+| **DLG-024 — Current Validity Required**                | Current execution SHALL not rely on stale Authority proof.                                           |
+| **DLG-025 — Historical Fidelity**                      | Historical Delegation SHALL remain reconstructable without becoming current Authority.               |
+| **DLG-026 — No Runtime Discovery**                     | RI SHALL not invent, discover, repair, or upgrade Delegation state.                                  |
+| **DLG-027 — Exact Snapshot Binding**                   | All execution-affecting agency state SHALL belong to one coherent execution snapshot.                |
+| **DLG-028 — No Contextual Inference**                  | Tenant, employer, Role name, profile, metadata, or business convention SHALL not manufacture agency. |
+| **DLG-029 — Recognition Is Not Grant**                 | Observed/recognized Authority SHALL not itself create delegated execution Authority.                 |
+| **DLG-030 — Human/AI Constitutional Continuity**       | Humans and AI use the same constitutional Delegation law; security proof obligations may differ.     |
 
 ---
 
@@ -1476,18 +1476,18 @@ REC-01G previously identified the universal delegation/agency leaf contract as b
 
 `DELEGATION-001-FINAL` now closes the semantic architecture of that gap:
 
-| Concern | Status |
-| :--- | :--- |
-| Direct Grant | CLOSED |
-| Role-Based Delegation | CLOSED |
-| Lineage | CLOSED |
-| Attenuation | CLOSED |
-| Subdelegation | CLOSED |
-| Revocation Cascade | CLOSED |
-| Agency Binding | CLOSED |
+| Concern                         | Status |
+| :------------------------------ | :----- |
+| Direct Grant                    | CLOSED |
+| Role-Based Delegation           | CLOSED |
+| Lineage                         | CLOSED |
+| Attenuation                     | CLOSED |
+| Subdelegation                   | CLOSED |
+| Revocation Cascade              | CLOSED |
+| Agency Binding                  | CLOSED |
 | Governed Subject Correspondence | CLOSED |
-| Proof Requirements | CLOSED |
-| Role-Mandated Precedence | CLOSED |
+| Proof Requirements              | CLOSED |
+| Role-Mandated Precedence        | CLOSED |
 
 Therefore:
 
@@ -1502,23 +1502,29 @@ It remains physically dependent on downstream contract work.
 `DELEGATION-001` itself does not need reopening for these.
 
 ### A. CCP-RI-CLOSURE-02
+
 Must close authoritative current temporal Authority/revocation ownership at `T_e_input`.
 
 REC-01E already established that revocation must be evaluated against the temporal coordinate relevant to the constitutional question, while leaving exact authority ownership unresolved.
 
 ### B. V2 Physical Leaf Contract
+
 Must translate Agency Binding, parent basis, proof refs, and participation into exact physical contracts.
 
 ### C. G-L11 / Canonicalization
+
 Must establish deterministic V2 canonicalization and hash domain.
 
 ### D. G-L12 / Receipt Provenance
+
 Must ensure receipts identify contract generation and exact agency/proof state where material.
 
 ### E. RSN/SEC Attestation Registration
+
 Where the necessity test proves a new Delegation/Security Attestation type is required, that type must be registered through RSN governance. RSN reserves Identity and Security domains but prohibits unregistered Attestation types.
 
 ### F. WS Predicate Admission
+
 `DELEGATES_AUTHORITY_TO` must enter the Relationship Registry through the normal WS governance path.
 
 ---
@@ -1527,7 +1533,7 @@ Where the necessity test proves a new Delegation/Security Attestation type is re
 
 The question is:
 
-> *Would an implementation agent still need to invent Delegation semantics?*
+> _Would an implementation agent still need to invent Delegation semantics?_
 
 After this Constitution:
 

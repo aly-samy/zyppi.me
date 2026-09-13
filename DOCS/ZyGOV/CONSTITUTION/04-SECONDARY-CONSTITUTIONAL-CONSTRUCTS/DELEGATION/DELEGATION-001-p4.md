@@ -2,25 +2,22 @@ DELEGATION-001 — Constitutional Audit
 
 Phase 4 — SEC / RSN Delegation Proof & Attestation Closure
 
-Field	Determination
+Field Determination
 
-Phase	DELEGATION-001 / Audit Phase 4
-Scope	SEC-001 + RSN-003 + RI interaction boundary
-Question	How is lawful delegation proved to execution without turning proof into Authority?
-Implementation Authority	NONE
-New Attestation Framework	NOT REQUIRED
-New Attestation Type	NOT YET RATIFIED
-Fundamental Blocker	NONE
-Phase Result	PASS — PROOF ARCHITECTURE FOUND; NARROW TYPE/BINDING CLOSURE REMAINS
-
+Phase DELEGATION-001 / Audit Phase 4
+Scope SEC-001 + RSN-003 + RI interaction boundary
+Question How is lawful delegation proved to execution without turning proof into Authority?
+Implementation Authority NONE
+New Attestation Framework NOT REQUIRED
+New Attestation Type NOT YET RATIFIED
+Fundamental Blocker NONE
+Phase Result PASS — PROOF ARCHITECTURE FOUND; NARROW TYPE/BINDING CLOSURE REMAINS
 
 1. Executive finding
 
 Phase 4 produces an important simplification:
 
 > Zyppi already has the universal proof machinery required by Delegation.
-
-
 
 We do not need:
 
@@ -29,9 +26,9 @@ DelegationCryptoConstitution
 AgencyTrustSystem
 DelegationEvidenceSystem
 
-RSN-003 already establishes Attestation as the universal constitutional mechanism for cryptographic proof of constitutional-process compliance. It deliberately separates the universal framework from domain-specific Attestation Artifacts and requires every attestation type to be registered before use. 
+RSN-003 already establishes Attestation as the universal constitutional mechanism for cryptographic proof of constitutional-process compliance. It deliberately separates the universal framework from domain-specific Attestation Artifacts and requires every attestation type to be registered before use.
 
-SEC then supplies the security law that consumes that machinery: technical identities require security attestation, capability scope and a delegation chain; AI Agents require sponsoring authority and a cryptographically verifiable delegation chain; governed execution must fail securely when required attestation cannot be established. 
+SEC then supplies the security law that consumes that machinery: technical identities require security attestation, capability scope and a delegation chain; AI Agents require sponsoring authority and a cryptographically verifiable delegation chain; governed execution must fail securely when required attestation cannot be established.
 
 So the missing problem has narrowed from:
 
@@ -45,7 +42,6 @@ and which registered RSN Attestation
 type/domain carries those claims
 when an attestation is actually required?
 
-
 ---
 
 2. RSN-003 already owns the proof framework
@@ -54,12 +50,10 @@ RSN-003 defines an Attestation as:
 
 > cryptographic proof that a governed constitutional process complied with applicable constitutional requirements.
 
-
-
 And crucially:
 
 Attestation
-    ≠ source of truth
+≠ source of truth
 
 It never replaces:
 
@@ -69,26 +63,24 @@ Governance;
 
 Identity;
 
-Evidence. 
-
+Evidence.
 
 For DELEGATION-001, the permanent implication is:
 
 Delegation / Authority state
-        exists constitutionally
-              │
-              ▼
+exists constitutionally
+│
+▼
 Attestation
-        proves required compliance
+proves required compliance
 
 not:
 
 Attestation
-        ↓
+↓
 creates Delegation
 
 This aligns perfectly with the current draft.
-
 
 ---
 
@@ -98,24 +90,21 @@ SEC's Attestation Boundary is exceptionally clear:
 
 > Attestations transfer proof. They never transfer authority.
 
-
-
-Everything crossing that boundary must remain independently verifiable. 
+Everything crossing that boundary must remain independently verifiable.
 
 Therefore:
 
 Attested delegation
-    ≠
+≠
 Authority created by attestation
 
 and:
 
 valid signature
-    ≠
+≠
 POL Authorization
 
 This should become permanent DELEGATION law.
-
 
 ---
 
@@ -128,23 +117,20 @@ A. Delegation Chain
 This is an Authority lineage:
 
 Authority A0
-      ↓
+↓
 Delegation D1
-      ↓
+↓
 Authority A1
-      ↓
+↓
 Delegation D2
-      ↓
+↓
 Authority A2
-      ↓
+↓
 Actor
 
 It answers:
 
 > Where did this Actor's claimed delegated Authority come from?
-
-
-
 
 ---
 
@@ -154,21 +140,15 @@ This is a proof lineage establishing that constitutionally required facts were v
 
 For example:
 
-Identity proof
-      +
-Authority-source integrity proof
-      +
-delegation-lineage proof
-      +
-security/capability proof
-      +
+Identity proof +
+Authority-source integrity proof +
+delegation-lineage proof +
+security/capability proof +
 Runtime compliance proof
 
 It answers:
 
 > What verifiable proof supports the constitutional execution assumptions?
-
-
 
 These chains may correspond closely.
 
@@ -179,9 +159,6 @@ I would therefore add:
 DLG-INV-025 — Delegation Chain ≠ Attestation Chain
 
 > The Delegation Chain SHALL represent Authority derivation. The Attestation Chain SHALL represent proof/compliance lineage. Neither SHALL substitute for the other.
-
-
-
 
 ---
 
@@ -197,20 +174,19 @@ capability scope;
 
 delegation chain.
 
-
-Technical identities never possess inherent Authority; Authority originates through Human or Organizational delegation. 
+Technical identities never possess inherent Authority; Authority originates through Human or Organizational delegation.
 
 For AI Agents specifically:
 
 AI Agent
-   ↓
+↓
 Sponsor
-   ↓
+↓
 Organization
-   ↓
+↓
 Constitutional Authority
 
-must remain attributable, while the delegation chain remains cryptographically verifiable. 
+must remain attributable, while the delegation chain remains cryptographically verifiable.
 
 Therefore we can close another rule:
 
@@ -218,10 +194,7 @@ DLG-INV-026 — Technical-Subject Proof
 
 > A Technical Subject exercising delegated Authority SHALL carry whatever constitutional Identity, security attestation, capability and delegation-lineage proof SEC requires for that execution class.
 
-
-
 This does not create a special AI delegation ontology.
-
 
 ---
 
@@ -239,18 +212,16 @@ intrinsic cryptographic integrity;
 
 an existing constitutional governance mechanism.
 
-
-Creating another Attestation when one of those already proves the matter is prohibited as Attestation Inflation. 
+Creating another Attestation when one of those already proves the matter is prohibited as Attestation Inflation.
 
 Therefore the wrong rule would be:
 
 EVERY Delegation
-    ↓
+↓
 must have its own new
 DelegationAttestation
 
 That is too broad.
-
 
 ---
 
@@ -259,17 +230,17 @@ That is too broad.
 The better architecture is:
 
 Delegation constitutional state
-        │
-        ▼
+│
+▼
 Can required facts be independently proven?
-        │
-    ┌───┴────┐
-   YES       NO
-    │         │
-    ▼         ▼
-use existing   use registered
-governed /     Attestation
-cryptographic  Artifact
+│
+┌───┴────┐
+YES NO
+│ │
+▼ ▼
+use existing use registered
+governed / Attestation
+cryptographic Artifact
 proof
 
 So DELEGATION-001 should own a Proof Sufficiency rule, not mandate an Attestation artifact blindly.
@@ -278,12 +249,9 @@ For example, an immutable Authority-Anchored Role Assignment with independently 
 
 > “this Role Assignment exists.”
 
-
-
 But a Technical AI Agent crossing a security boundary may still require SEC security attestation proving the Agent's current capability/trust state.
 
 These are different proof questions.
-
 
 ---
 
@@ -301,7 +269,7 @@ status
 content_hash
 schema_version
 
-while domain-specific fields belong in domain extensions / registered types. 
+while domain-specific fields belong in domain extensions / registered types.
 
 That is exactly the architecture we want.
 
@@ -316,7 +284,6 @@ parentDelegation
 Those would be delegation-domain content.
 
 The universal RSN framework should remain unchanged.
-
 
 ---
 
@@ -334,18 +301,13 @@ and includes as a future example:
 ATT-I-001
 Organization Delegation
 
-
-
 This is strong architectural evidence that delegation proof was always expected to enter RSN through an extension/type rather than a new proof subsystem.
 
 However:
 
 > ATT-I-001 Organization Delegation is currently a future example, not a populated/registered active type.
 
-
-
 So we must not silently promote that example into the final universal contract.
-
 
 ---
 
@@ -378,7 +340,6 @@ as written.
 
 Instead, the existing reserved example is evidence about architectural placement, not final vocabulary.
 
-
 ---
 
 11. Identity domain versus Security domain
@@ -398,7 +359,7 @@ are naturally close to:
 
 ATT-I
 
-The RSN future example supports that direction. 
+The RSN future example supports that direction.
 
 Security-current-state proof
 
@@ -414,14 +375,13 @@ belong naturally under SEC and potentially:
 
 ATT-S
 
-RSN reserves that domain but has not yet populated it. 
+RSN reserves that domain but has not yet populated it.
 
 So a single giant:
 
 DelegationEverythingAttestation
 
 would likely be wrong.
-
 
 ---
 
@@ -430,31 +390,30 @@ would likely be wrong.
 The constitutional direction emerging is:
 
 DELEGATION / POL / WS
-      │
-      │ owns constitutional agency truth
-      ▼
+│
+│ owns constitutional agency truth
+▼
 Agency state
-      │
-      ├───────────────┐
-      │               │
-      ▼               ▼
-Identity/Agency     Security proof
-proof where needed  where needed
-      │               │
-      ▼               ▼
-   RSN ATT-I       RSN ATT-S / SEC
-      │               │
-      └───────┬───────┘
-              ▼
-       Proof composition
-              │
-              ▼
-             RI
+│
+├───────────────┐
+│ │
+▼ ▼
+Identity/Agency Security proof
+proof where needed where needed
+│ │
+▼ ▼
+RSN ATT-I RSN ATT-S / SEC
+│ │
+└───────┬───────┘
+▼
+Proof composition
+│
+▼
+RI
 
 This remains architectural direction.
 
 We are not yet assigning final Attestation type identifiers.
-
 
 ---
 
@@ -481,7 +440,6 @@ The Attestation does not necessarily carry every original artifact.
 
 It must bind to the authoritative artifacts/proofs sufficiently to establish the constitutional claim it certifies.
 
-
 ---
 
 14. Requested Action still cannot be proved away by Delegation
@@ -499,24 +457,18 @@ because Policy/Action/Target/Context still matter.
 So the proof chain must feed, not replace:
 
 POL
-Subject
-+
-Action
-+
-Target
-+
+Subject +
+Action +
+Target +
 Context
 
-REC-01D already established that Requested Action is indispensable. 
+REC-01D already established that Requested Action is indispensable.
 
 Thus:
 
 DLG-INV-027 — Proof Does Not Equal Authorization
 
 > Valid delegation proof SHALL establish the claimed agency facts only. It SHALL NOT itself constitute Action-specific Authorization.
-
-
-
 
 ---
 
@@ -526,11 +478,9 @@ SEC contains language such as:
 
 > “Only Active Trust may authorize execution.”
 
-
-
 Read literally, that could collide with POL's ownership of Authorization.
 
-But the wider SEC document itself says SEC excludes Policy evaluation, and its own boundary model requires Identity + Attestation + Capability + Context + Compliance + Policy. 
+But the wider SEC document itself says SEC excludes Policy evaluation, and its own boundary model requires Identity + Attestation + Capability + Context + Compliance + Policy.
 
 And our REC reconciliation already preserves:
 
@@ -541,6 +491,7 @@ Therefore the coherent interpretation is:
 
 Active SEC Trust
 =
+
 required security prerequisite
 
 NOT:
@@ -562,7 +513,6 @@ authorized
 
 unless referring to POL.
 
-
 ---
 
 16. Current execution requires current proof
@@ -581,8 +531,7 @@ Runtime compliance;
 
 Policy compatibility.
 
-
-Trust must not survive merely because it was valid previously. 
+Trust must not survive merely because it was valid previously.
 
 Therefore:
 
@@ -593,7 +542,6 @@ does not automatically establish:
 valid execution at T3.
 
 This directly intersects H-FIND-AGENCY-01.
-
 
 ---
 
@@ -619,16 +567,13 @@ historically valid
 
 yet completely insufficient to authorize current execution.
 
-SEC explicitly says revocation must override cached trust, invalidate delegated capabilities and preserve historical audit. 
+SEC explicitly says revocation must override cached trust, invalidate delegated capabilities and preserve historical audit.
 
 Therefore:
 
 DLG-INV-028 — Cryptographic Validity ≠ Current Validity
 
 > An authentic historical Attestation SHALL NOT establish current delegation validity after a constitutionally material revocation, expiry, suspension or parent invalidation.
-
-
-
 
 ---
 
@@ -637,7 +582,7 @@ DLG-INV-028 — Cryptographic Validity ≠ Current Validity
 Phase 4 cannot yet say:
 
 old signed attestation
-      =
+\=
 current delegation proof
 
 SEC requires continuous re-establishment of trust.
@@ -657,14 +602,13 @@ It does not reopen G.
 
 It belongs to CLOSURE-02.
 
-
 ---
 
 19. Revocation proof is not necessarily a separate Attestation every time
 
 We must be careful here too.
 
-SEC requires revocation to propagate immediately and override stale/cached trust. 
+SEC requires revocation to propagate immediately and override stale/cached trust.
 
 But RSN says do not create redundant attestations.
 
@@ -680,20 +624,15 @@ The rule is:
 
 > Current non-revocation must be provable.
 
-
-
 not:
 
 > Every execution must mint a bespoke non-revocation certificate.
-
-
-
 
 ---
 
 20. No-unattested-execution does not mean every fact receives its own Attestation
 
-SEC says every governed execution must possess a complete attestation chain and prohibits use of unattested Runtime/AI Agent state. 
+SEC says every governed execution must possess a complete attestation chain and prohibits use of unattested Runtime/AI Agent state.
 
 The correct interpretation with RSN's inflation rule is:
 
@@ -717,9 +656,7 @@ Evidence;
 
 registered Attestations where required.
 
-
 This is a much more scalable model.
-
 
 ---
 
@@ -729,16 +666,13 @@ DLG-INV-029 — Proof Sufficiency Without Inflation
 
 > Every execution-affecting delegation claim SHALL be independently provable to the degree required by its governing Constitution. A new Attestation SHALL be introduced only where existing deterministic, cryptographic or governed proof mechanisms are insufficient.
 
-
-
 This directly imports the RSN necessity rule into Delegation.
-
 
 ---
 
 22. Historical proof is clean
 
-SEC explicitly preserves expired/revoked trust historically while forbidding it from authorizing new execution. 
+SEC explicitly preserves expired/revoked trust historically while forbidding it from authorizing new execution.
 
 So:
 
@@ -763,14 +697,11 @@ DLG-INV-030 — Historical Proof Is Non-Authorizing
 
 > Historical verification of a formerly valid Delegation SHALL preserve its historical truth without conferring current execution Authority.
 
-
-
-
 ---
 
 23. RSN registry becomes important to DELEGATION-001
 
-RSN explicitly prohibits unregistered Attestation types. 
+RSN explicitly prohibits unregistered Attestation types.
 
 Therefore neither Jules nor a future implementation team may invent:
 
@@ -781,21 +712,20 @@ in code merely because DELEGATION-001 needs proof.
 If a new Attestation type is needed:
 
 DELEGATION-001
-      ↓
+↓
 defines required constitutional claim
 
 RSN / SEC governance
-      ↓
+↓
 select domain
-      ↓
+↓
 register Attestation Type
-      ↓
+↓
 define domain extension
-      ↓
+↓
 implementation
 
 That sequencing should be permanent.
-
 
 ---
 
@@ -822,7 +752,6 @@ and consumes SEC/POL outcomes
 
 This keeps RI pure.
 
-
 ---
 
 25. Execution Proof is downstream, not Agency Proof
@@ -841,8 +770,7 @@ Policies;
 
 Attestations;
 
-resulting outcome. 
-
+resulting outcome.
 
 This is downstream provenance.
 
@@ -851,40 +779,37 @@ It must not be confused with the upstream proof that the Actor possessed lawful 
 So:
 
 Agency proof
-       ↓
+↓
 execution eligibility
-       ↓
+↓
 RI execution
-       ↓
+↓
 Execution Proof / Receipt
 
 not:
 
 successful execution
-       ↓
+↓
 therefore agency must have been valid
-
 
 ---
 
 26. Phase-4 ownership matrix
 
-Question	Owner
+Question Owner
 
-What is Delegation?	POL / DELEGATION composition
-What is the authoritative agency state?	POL + governing source artifacts
-What is Role Assignment?	WS
-What does an Attestation mean?	RSN-003
-What security proof is required?	SEC
-Which Attestation domain/type is registered?	RSN governance
-Is current Trust/security state valid?	SEC
-Does an Attestation itself grant Authority?	NO
-Does RI mint delegation proof?	NO
-Does Application create delegation truth?	NO
-Does V2 carry exact bound proof state?	YES, eventually
-Does receipt preserve which attestations participated?	YES, required direction
-
-
+What is Delegation? POL / DELEGATION composition
+What is the authoritative agency state? POL + governing source artifacts
+What is Role Assignment? WS
+What does an Attestation mean? RSN-003
+What security proof is required? SEC
+Which Attestation domain/type is registered? RSN governance
+Is current Trust/security state valid? SEC
+Does an Attestation itself grant Authority? NO
+Does RI mint delegation proof? NO
+Does Application create delegation truth? NO
+Does V2 carry exact bound proof state? YES, eventually
+Does receipt preserve which attestations participated? YES, required direction
 
 ---
 
@@ -900,31 +825,30 @@ looked like a large missing mechanism.
 After the audit:
 
 Universal Attestation Framework
-      CLOSED
+CLOSED
 
 Universal Attestation Contract
-      CLOSED
+CLOSED
 
 Registry mechanism
-      CLOSED
+CLOSED
 
 Domain extension mechanism
-      CLOSED
+CLOSED
 
 Security requirement
-      CLOSED
+CLOSED
 
 Delegation-chain proof requirement
-      CLOSED
+CLOSED
 
 Delegation-specific registered type(s)
-      OPEN
+OPEN
 
 exact V2 proof binding
-      OPEN
+OPEN
 
 That is substantial progress.
-
 
 ---
 
@@ -941,7 +865,6 @@ V2SecurityAuthority
 RuntimeDelegationVerifier that discovers state
 
 None is justified.
-
 
 ---
 
@@ -966,34 +889,31 @@ Whether A belongs to ATT-I, B/C to ATT-S, or whether some conditions are proven 
 
 DELEGATION-001 should specify the claims that must be provable, not usurp RSN's type registry.
 
-
 ---
 
 30. Phase-4 closure ledger
 
-Matter	Result
+Matter Result
 
-Universal proof framework	CLOSED — RSN-003
-Attestation constitutional meaning	CLOSED
-Attestation as source of Authority	PROHIBITED
-Framework vs artifact separation	CLOSED
-Attestation registry requirement	CLOSED
-Universal contract	CLOSED
-ATT-I domain	RESERVED / AVAILABLE FOR GOVERNED EXPANSION
-ATT-S domain	RESERVED / AVAILABLE FOR GOVERNED EXPANSION
-ATT-I-001 Organization Delegation	FUTURE EXAMPLE — NOT UNIVERSALIZED
-Technical/AI delegation proof requirement	CLOSED — SEC
-Cryptographically verifiable delegation chain	REQUIRED
-Current trust revalidation	REQUIRED
-Revocation overriding stale trust	REQUIRED
-Historical proof after revocation	SUPPORTED
-Every delegation gets unique attestation	REJECTED
-Delegation-specific type registration	OPEN
-Exact Attestation domain allocation	OPEN
-V2 proof-state binding	OPEN
-T_e_input current authority determination	OPEN — CLOSURE-02
-
-
+Universal proof framework CLOSED — RSN-003
+Attestation constitutional meaning CLOSED
+Attestation as source of Authority PROHIBITED
+Framework vs artifact separation CLOSED
+Attestation registry requirement CLOSED
+Universal contract CLOSED
+ATT-I domain RESERVED / AVAILABLE FOR GOVERNED EXPANSION
+ATT-S domain RESERVED / AVAILABLE FOR GOVERNED EXPANSION
+ATT-I-001 Organization Delegation FUTURE EXAMPLE — NOT UNIVERSALIZED
+Technical/AI delegation proof requirement CLOSED — SEC
+Cryptographically verifiable delegation chain REQUIRED
+Current trust revalidation REQUIRED
+Revocation overriding stale trust REQUIRED
+Historical proof after revocation SUPPORTED
+Every delegation gets unique attestation REJECTED
+Delegation-specific type registration OPEN
+Exact Attestation domain allocation OPEN
+V2 proof-state binding OPEN
+T_e_input current authority determination OPEN — CLOSURE-02
 
 ---
 
@@ -1004,63 +924,63 @@ AUDIT PHASE 4
 SEC / RSN PROOF & ATTESTATION
 
 RESULT:
-  PASS
+PASS
 
 NEW PROOF FRAMEWORK:
-  NOT REQUIRED
+NOT REQUIRED
 
 RSN-003:
-  SUFFICIENT UNIVERSAL FRAMEWORK
+SUFFICIENT UNIVERSAL FRAMEWORK
 
 ATTESTATION:
-  PROOF ONLY
-  NEVER AUTHORITY
+PROOF ONLY
+NEVER AUTHORITY
 
 DELEGATION CHAIN:
-  AUTHORITY LINEAGE
+AUTHORITY LINEAGE
 
 ATTESTATION CHAIN:
-  PROOF LINEAGE
+PROOF LINEAGE
 
 THE TWO:
-  MUST REMAIN DISTINCT
+MUST REMAIN DISTINCT
 
 TECHNICAL / AI SUBJECT:
-  DELEGATION CHAIN REQUIRED
-  CRYPTOGRAPHIC VERIFIABILITY REQUIRED
-  SECURITY ATTESTATION REQUIRED
+DELEGATION CHAIN REQUIRED
+CRYPTOGRAPHIC VERIFIABILITY REQUIRED
+SECURITY ATTESTATION REQUIRED
 
 ALL DELEGATIONS REQUIRE
 UNIQUE DELEGATION ATTESTATION:
-  NO
+NO
 
 ATTESTATION INFLATION:
-  PROHIBITED
+PROHIBITED
 
 ATT-I / ATT-S:
-  EXIST AS RESERVED DOMAINS
+EXIST AS RESERVED DOMAINS
 
 ATT-I-001 ORGANIZATION DELEGATION:
-  EVIDENCE OF INTENDED DIRECTION
-  NOT YET UNIVERSAL CONTRACT
+EVIDENCE OF INTENDED DIRECTION
+NOT YET UNIVERSAL CONTRACT
 
 CURRENT REVOCATION:
-  MUST OVERRIDE STALE PROOF
+MUST OVERRIDE STALE PROOF
 
 HISTORICAL REVOKED STATE:
-  MAY REMAIN VERIFIABLE
-  CANNOT AUTHORIZE CURRENT EXECUTION
+MAY REMAIN VERIFIABLE
+CANNOT AUTHORIZE CURRENT EXECUTION
 
 DLG-GAP-03:
-  REDUCED TO
-  REGISTERED TYPE / DOMAIN +
-  V2 BINDING DETAIL
+REDUCED TO
+REGISTERED TYPE / DOMAIN +
+V2 BINDING DETAIL
 
 FUNDAMENTAL CONSTITUTIONAL BLOCKER:
-  NONE
+NONE
 
 IMPLEMENTATION AUTHORITY:
-  NONE
+NONE
 
 32. What remains after four audits
 

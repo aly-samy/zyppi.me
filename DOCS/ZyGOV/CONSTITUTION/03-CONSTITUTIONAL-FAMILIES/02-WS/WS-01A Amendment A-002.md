@@ -1,11 +1,17 @@
 # WS-01A Amendment A-002
+
 # Relationship Reality Principle (RP-000)
+
 ## Constitutional Status
+
 **FOUNDATIONAL CONSTITUTIONAL AMENDMENT**
+
 ## Purpose
+
 This amendment establishes the constitutional separation between Reality and Governance throughout the Zyppi Reality Graph.
 
 ## RP-000 — Relationship Reality Principle
+
 Reality and Governance are orthogonal constitutional dimensions.
 
 Reality describes what exists.
@@ -21,7 +27,9 @@ The constitutional nature of a relationship SHALL be determined exclusively by i
 When new governance obligations arise, the platform SHALL create new governed relationships rather than mutate existing topological relationships.
 
 ## Constitutional Consequences
+
 The following constitutional rules derive from RP-000:
+
 1. Structural Edges SHALL NOT be promoted into Reified Relationships.
 2. Governance requirements SHALL NOT alter the constitutional classification of an existing relationship.
 3. Lifecycle governance SHALL exist only on Reified Relationships.
@@ -36,4 +44,5 @@ A Product CONTAINS Ingredient relationship remains Structural even if future reg
 Such governance obligations SHALL be represented through additional Reified Relationships rather than by altering the original structural topology.
 
 ## Lock Status
+
 **LOCKED** — Constitutional Doctrine

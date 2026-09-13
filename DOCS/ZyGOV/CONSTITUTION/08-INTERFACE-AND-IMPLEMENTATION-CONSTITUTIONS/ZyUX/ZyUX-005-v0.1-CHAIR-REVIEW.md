@@ -196,59 +196,77 @@ It SHALL NOT strengthen, weaken, or reinterpret semantics.
 # 4. Primary ZyUX-005 Laws
 
 ## ZyUX-005-L01 — Integrate, Do Not Replace
+
 > **Zyppi SHOULD integrate with existing systems of record and systems of work rather than require replacement merely to deliver a governed capability.**
 
 ## ZyUX-005-L02 — One Capability Semantic Owner
+
 > **Every public Zyppi capability SHALL have one governed semantic owner beneath all host projections.**
 
 REST, SDK, MCP, Host-Native extensions, and future authorized interfaces adapt that capability. They SHALL NOT independently implement its business, epistemic, Trust, authorization, or error semantics.
 
 ## ZyUX-005-L03 — Host Context Is Input, Not Authority
+
 > **A host may provide context about what the user is viewing or doing. That context SHALL NOT itself establish Zyppi Authority, Standing, Trust, or truth.**
 
 ## ZyUX-005-L04 — Preserve Source Identity
+
 > **Host-derived information SHALL preserve its source identity and provenance where those semantics matter.**
 
 ## ZyUX-005-L05 — No Semantic Strengthening
+
 > **A host projection SHALL NOT strengthen a Zyppi result.**
 
 ## ZyUX-005-L06 — No Semantic Weakening
+
 > **A host projection SHALL NOT hide material uncertainty, conflict, limitation, or failure required to understand the result.**
 
 ## ZyUX-005-L07 — Systems of Record Remain Systems of Record
+
 > **Zyppi SHOULD reference, query, subscribe, verify, attest, or derive from legitimate systems of record rather than copy entire host datasets without need.**
 
 ## ZyUX-005-L08 — Writes Are Explicit and Authorized
+
 > **A Host-Native action SHALL NOT cause a host or Zyppi write merely because the user can see the data. Writes require applicable Authority, Standing, Policy, and explicit capability.**
 
 ## ZyUX-005-L09 — No Silent Cross-System Mutation
+
 > **If a Zyppi action will change state in an external system, the experience SHOULD make that consequence understandable before execution where material.**
 
 ## ZyUX-005-L10 — Context Should Be Reused, Not Re-entered
+
 > **Where the host already provides legitimate context, Zyppi SHOULD reuse it rather than force the user to select the same object, organization, or workflow again.**
 
 ## ZyUX-005-L11 — Existing IAM Coexists
+
 > **Host-Native participation SHOULD use the organization's legitimate authentication/SSO environment where appropriate rather than create unnecessary parallel credentials.**
 
 ## ZyUX-005-L12 — Host-Native Does Not Mean Host-Dependent Semantics
+
 > **The same governed capability SHALL remain meaningful if invoked outside the host through another authorized interface.**
 
 ## ZyUX-005-L13 — Degraded Host Experience Must Fail Honestly
+
 > **If host integration is unavailable or incomplete, the UX SHALL distinguish integration failure from domain uncertainty or Trust failure.**
 
 ## ZyUX-005-L14 — Deep Proof May Escape the Host
+
 > **A host surface MAY provide concise explanation and link to a deeper Zyppi proof/control surface where reproducing full depth inside the host would create poor UX or disclosure risk.**
 
 ## ZyUX-005-L15 — Minimal Workflow Displacement
+
 > **Zyppi SHOULD require the fewest new workflow steps necessary to preserve governance, clarity, and proof.**
 
 ## ZyUX-005-L16 — Host Is Not a New Domain
+
 > **Adding a new host SHALL NOT create new canonical domain semantics merely because the host uses different terminology or data structures.**
 
 ## ZyUX-005-L17 — Host and Interface Remain Distinct
+
 > **Host and Interface remain separate classification dimensions.**
 
 ## ZyUX-005-L18 — Host Absence Is Not Negative Evidence
+
 > **If connected host context is absent, Zyppi SHALL NOT present that absence as proof that a condition does or does not exist.**
 
 ---
@@ -457,17 +475,20 @@ may open a host panel or Zyppi proof surface depending on need.
 The ZyUX-003 taxonomy applies:
 
 ### Available
+
 ```text
 [Approve]
 ```
 
 ### Requestable
+
 ```text
 Approval required
 [Request]
 ```
 
 ### Non-Disclosable
+
 No UI artifact.
 
 The host SHOULD show only capabilities relevant to the current Subject, object, relationship, Authority, Standing, Policy, and context.
@@ -1048,18 +1069,23 @@ Review:
 # 45. Relationship to Other ZyUX Documents
 
 ## `ZyUX-001`
+
 Owns account, authentication, SSO entry, Identity continuity, and enterprise authentication coexistence.
 
 ## `ZyUX-002`
+
 Owns organizational relationship, delegation, scope, and external-party boundaries.
 
 ## `ZyUX-003`
+
 Owns contextual navigation, capability disclosure, search, deep links, and host context inheritance.
 
 ## `ZyUX-004`
+
 Owns reason, Trust, Evidence, uncertainty, and Receipt projection inside hosts.
 
 ## `ZyUX-006`
+
 Will own lifecycle, migration, revoked access, historical continuity, and deeper recovery behavior.
 
 `ZyUX-005` owns the **environmental projection of governed Zyppi capability into systems of work**.
@@ -1151,63 +1177,83 @@ Before ratification, Council should disposition:
 # 49. Proposed Acceptance Invariants
 
 ### AX-005-01 — Host Does Not Own Semantics
+
 The same capability preserves the same governed meaning across Host-Native and direct interfaces.
 
 ### AX-005-02 — Host Context Does Not Grant Authority
+
 Providing object/user context alone does not authorize action.
 
 ### AX-005-03 — Source Provenance Survives
+
 Host-derived data remains attributable to its source.
 
 ### AX-005-04 — No Semantic Strengthening
+
 Host labels cannot convert probable/unknown/limited results into stronger claims.
 
 ### AX-005-05 — No Semantic Weakening
+
 Material uncertainty/conflict cannot disappear in Host-Native projection.
 
 ### AX-005-06 — Existing IAM Works
+
 Enterprise users can authenticate through legitimate enterprise SSO without mandatory parallel passwords.
 
 ### AX-005-07 — Minimal Context Re-entry
+
 Host object and organization context are reused where legitimately available.
 
 ### AX-005-08 — Read Does Not Imply Write
+
 Visible host data does not grant mutation capability.
 
 ### AX-005-09 — Writes Are Explicitly Governed
+
 External writes require correct Authority, Standing, and Policy.
 
 ### AX-005-10 — Write Failure Is Honest
+
 A failed external write is not reported as successful execution.
 
 ### AX-005-11 — Host Failure Is Not Trust Failure
+
 Integration outage does not become a negative epistemic conclusion.
 
 ### AX-005-12 — Host Absence Is Not Negative Evidence
+
 Missing host context is not interpreted as nonexistence.
 
 ### AX-005-13 — Host Replacement Preserves Meaning
+
 Changing ERP/host does not require redefining capability semantics.
 
 ### AX-005-14 — Cross-Client Isolation Holds
+
 Agency/multi-org host access does not leak between clients.
 
 ### AX-005-15 — Stale Context Does Not Cross Objects
+
 Navigation from Host Object A to B updates Zyppi context correctly.
 
 ### AX-005-16 — Shared User Switch Is Safe
+
 A new authenticated host user cannot see the prior user's Zyppi context.
 
 ### AX-005-17 — Correct-at-Source Works
+
 Host-owned data corrections route to the host where appropriate.
 
 ### AX-005-18 — Deep Proof Preserves Context
+
 Opening Zyppi proof from the host retains object/organization/task context.
 
 ### AX-005-19 — Connection Revocation Stops Future Access
+
 Revoked host integration cannot continue reading/writing.
 
 ### AX-005-20 — Historical Proof Survives Host Removal
+
 Historical Zyppi Receipts remain according to governing retention even if the host extension is removed.
 
 ---

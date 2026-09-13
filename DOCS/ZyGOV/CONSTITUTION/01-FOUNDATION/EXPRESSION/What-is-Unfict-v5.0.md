@@ -1,12 +1,22 @@
-# What is Zyppi?
+# What is Unfict?
 
 ###### By: Aly A. Samy
 
-###### Version: 4.0 — Reality Sync
+###### Version: 5.0 — Reality Sync
 
-###### Council Synthesis Draft
+###### Ratified Edition
 
-###### Aligned with: NORTH STAR v7.0 — Reality Sync
+###### Aligned with: NORTH STAR v8.0 — Unfict — Reality Sync
+
+###### Status: RATIFIED — CLOSED
+
+###### Ratification Date: 13 September 2026
+
+###### Supersedes: What is Zyppi? v4.0
+
+###### Change Class: Brand Succession and Expression
+
+###### Change Summary: Adopts Unfict as the successor master brand and Unfict as the canonical human verb. The substantive product, Reality Sync, trust, architecture, commerce-wedge, and platform meaning of v4.0 is retained unchanged.
 
 # 1. The Shift Nobody Is Pricing In
 
@@ -48,7 +58,7 @@ The missing layer is the system that determines how digital understanding stays 
 
 That is the opportunity.
 
-**That is Zyppi.**
+**That is Unfict.**
 
 # 2. The Fundamental Problem
 
@@ -144,15 +154,15 @@ The problem is:
 
 > **How does software move from observation to Evidence, from Evidence to Verification, from Verification to Trust, and from Trust to safe Action?**
 
-That is the problem Zyppi exists to solve.
+That is the problem Unfict exists to solve.
 
-# 3. What Zyppi Is
+# 3. What Unfict Is
 
-**Zyppi is Reality Sync infrastructure.**
+**Unfict is Reality Sync infrastructure.**
 
 It keeps digital understanding accountable to what Reality can verifiably support.
 
-Zyppi does not attempt to copy Reality into a database.
+Unfict does not attempt to copy Reality into a database.
 
 It does not claim to manufacture truth.
 
@@ -172,7 +182,7 @@ At the constitutional execution level:
 
 At the human level:
 
-`**Zyppify.**`
+`**Unfict.**`
 
 # 4. Reality Sync
 
@@ -206,7 +216,7 @@ Events may leave Evidence.
 
 That Evidence may become observable through one or many carriers, sensors, credentials, systems, or human attestations.
 
-Zyppi enables digital systems to evaluate that Evidence and determine what can be trusted.
+Unfict enables digital systems to evaluate that Evidence and determine what can be trusted.
 
 This relationship is **Reality Sync**.
 
@@ -246,15 +256,15 @@ The principle does not.
 
 **Reality remains authoritative.**
 
-# 5. Zyppi Needs Senses
+# 5. Unfict Needs Senses
 
 Humans cannot reason about Reality without first perceiving it.
 
 Neither can software.
 
-Zyppi therefore interacts with Reality through what can be understood as **digital senses**.
+Unfict therefore interacts with Reality through what can be understood as **digital senses**.
 
-These are not Zyppi itself.
+These are not Unfict itself.
 
 They are the interfaces through which Reality becomes observable.
 
@@ -278,7 +288,7 @@ They are the interfaces through which Reality becomes observable.
 | Enterprise System  | Operational Evidence                            |
 | Satellite / Drone  | Large-scale Object, Place, or Event observation |
 
-Zyppi is therefore **carrier-agnostic and sensor-agnostic**.
+Unfict is therefore **carrier-agnostic and sensor-agnostic**.
 
 Today the relevant interface may be QR.
 
@@ -286,13 +296,13 @@ Tomorrow it may be NFC.
 
 Another domain may depend on RFID, biometrics, cameras, GPS, radar, or multiple sensors together.
 
-Zyppi's purpose does not change when the sensor changes.
+Unfict's purpose does not change when the sensor changes.
 
 # 6. From Sensing to Trust
 
 A sensor reports something.
 
-Zyppi must determine what that observation actually supports.
+Unfict must determine what that observation actually supports.
 
 The architecture is not:
 
@@ -338,7 +348,7 @@ A temperature sensor may establish environmental state.
 
 No single observation necessarily determines the whole truth.
 
-> Zyppi's job is to determine what can legitimately be trusted from the Evidence available.
+> Unfict's job is to determine what can legitimately be trusted from the Evidence available.
 
 # 7. Multiple Senses, Stronger Reality Sync
 
@@ -376,15 +386,15 @@ Traditional sensor fusion asks:
 
 > **What physical state probably exists?**
 
-Zyppi asks the higher-order question:
+Unfict asks the higher-order question:
 
 > **Given the available Evidence and authorities, what can this interaction legitimately trust and what may safely happen next?**
 
 This is where sensing becomes trust infrastructure.
 
-# 8. Zyppify
+# 8. Unfict
 
-> **To Zyppify is to bring something into, or update it within, a verifiable digital relationship with Reality so Trust can be computed and appropriate Action can safely follow.**
+> **To Unfict is to bring something into, or update it within, a verifiable digital relationship with Reality so Trust can be computed and appropriate Action can safely follow.**
 
 That something may be:
 
@@ -422,11 +432,11 @@ That something may be:
 
 - a future entity or interaction we have not yet anticipated.
 
-Zyppification does not mean making something trustworthy.
+Unficting does not mean making something trustworthy.
 
 It means making the basis on which Trust is determined computationally accessible and accountable.
 
-A Zyppified interaction may conclude:
+A Unficted interaction may conclude:
 
 - Evidence verified;
 
@@ -514,7 +524,7 @@ The same foundational problem:
 
 # 10. One Platform, Many Domain Profiles
 
-Zyppi does not need a different constitutional platform for healthcare, logistics, commerce, legal systems, agriculture, or transportation.
+Unfict does not need a different constitutional platform for healthcare, logistics, commerce, legal systems, agriculture, or transportation.
 
 The core stays universal.
 
@@ -545,7 +555,7 @@ Each domain can define:
 This creates a scalable architecture:
 
 ```
-                        ZYPPI
+                        UNFICT
                     REALITY SYNC
                        │
           ┌────────────┼────────────┐
@@ -567,17 +577,17 @@ This creates a scalable architecture:
                      ...
 ```
 
-Zyppi remains one platform.
+Unfict remains one platform.
 
 Domain Profiles determine how Reality Sync is expressed in each context.
 
-# 11. Where Zyppi Starts
+# 11. Where Unfict Starts
 
 A universal architecture still needs a focused entry point.
 
-Zyppi begins with **physical products and commerce**.
+Unfict begins with **physical products and commerce**.
 
-Not because products define Zyppi.
+Not because products define Unfict.
 
 Because products provide an unusually strong proving ground for Reality Sync.
 
@@ -613,7 +623,7 @@ GS1's Digital Link transition makes that opportunity even stronger.
 
 The first major question becomes:
 
-> **Can Zyppi successfully synchronize a physical product interaction with the digital systems that need to understand and act upon it?**
+> **Can Unfict successfully synchronize a physical product interaction with the digital systems that need to understand and act upon it?**
 
 That is the first wedge.
 
@@ -663,7 +673,7 @@ The same product may be accessed by:
 
 Each may require a different trusted outcome.
 
-That is where Zyppi's first commercial implementation begins.
+That is where Unfict's first commercial implementation begins.
 
 # 13. The Product Problem Is Fragmentation
 
@@ -711,17 +721,17 @@ The regulator must search manually.
 
 The product has a digital doorway but no intelligence behind it.
 
-That missing layer is the first Zyppi product.
+That missing layer is the first Unfict product.
 
 # 14. The First Commercial Expression
 
 For physical products:
 
-> **Zyppi is the persistent identity and contextual routing layer that connects each product interaction to the appropriate trusted destination or capability.**
+> **Unfict is the persistent identity and contextual routing layer that connects each product interaction to the appropriate trusted destination or capability.**
 
 Every product can possess a durable digital identity.
 
-When that identity is accessed — through QR, NFC, API, or another supported carrier — Zyppi evaluates the context available to the interaction.
+When that identity is accessed — through QR, NFC, API, or another supported carrier — Unfict evaluates the context available to the interaction.
 
 It determines what can be resolved and what destination or capability is appropriate.
 
@@ -791,7 +801,7 @@ Route or Action
 
 This is not a new constitutional pipeline.
 
-It is the product-domain manifestation of Zyppi's universal Reality Sync architecture.
+It is the product-domain manifestation of Unfict's universal Reality Sync architecture.
 
 # 16. Step 1 — Persistent Identity
 
@@ -817,7 +827,7 @@ The carrier is not the identity.
 
 The carrier is one way of observing or accessing it.
 
-This distinction protects Zyppi from being defined by whichever technology happens to dominate today.
+This distinction protects Unfict from being defined by whichever technology happens to dominate today.
 
 A future world may use entirely different interfaces.
 
@@ -843,9 +853,9 @@ The same product may be encountered:
 
 - with different Evidence available.
 
-Zyppi therefore evaluates the relevant declared and verifiable context.
+Unfict therefore evaluates the relevant declared and verifiable context.
 
-Where context cannot be established deterministically, Zyppi should not invent it.
+Where context cannot be established deterministically, Unfict should not invent it.
 
 **No guessing becomes authority.**
 
@@ -855,7 +865,7 @@ Routing is not simply:
 
 `URL A → URL B`.
 
-Zyppi's first product asks:
+Unfict's first product asks:
 
 > **Given this product, this interaction, this context, this authority, this Evidence, and this Intent, what destination or capability is appropriate?**
 
@@ -885,35 +895,35 @@ Reality contains Events.
 
 Events may leave Evidence.
 
-Zyppi observes available Evidence.
+Unfict observes available Evidence.
 
-Zyppi records what it observed, evaluated, decided, and executed.
+Unfict records what it observed, evaluated, decided, and executed.
 
-A record inside Zyppi does not make an external Event true.
+A record inside Unfict does not make an external Event true.
 
-Zyppi therefore **does not** claim:
+Unfict therefore **does not** claim:
 
 > “Our database proves Reality happened.”
 
 **Instead:**
 
-> **Zyppi produces an auditable record of how available Evidence was interpreted and how the resulting Action was reached.**
+> **Unfict produces an auditable record of how available Evidence was interpreted and how the resulting Action was reached.**
 
 That preserves the constitutional boundary between Reality and representation.
 
-# 20. What Zyppi Is Not
+# 20. What Unfict Is Not
 
 ## Not a QR Code Company
 
 QR is one digital sense.
 
-It is not Zyppi.
+It is not Unfict.
 
 ## Not an NFC Company
 
 NFC is another carrier.
 
-It is not Zyppi.
+It is not Unfict.
 
 ## Not an RFID Platform
 
@@ -925,19 +935,19 @@ It remains an observation technology.
 
 IoT systems can produce useful observations.
 
-Zyppi's purpose is not merely collecting sensor telemetry.
+Unfict's purpose is not merely collecting sensor telemetry.
 
 Its concern is what those observations mean for Trust and Action.
 
 ## Not a CMS
 
-Zyppi does not need to own every manual, video, image, or marketing page.
+Unfict does not need to own every manual, video, image, or marketing page.
 
 ## Not an ERP, CRM, PLM, or EHR Replacement
 
 Those systems retain their domain responsibilities.
 
-Zyppi may reference, interrogate, or route to them.
+Unfict may reference, interrogate, or route to them.
 
 It does not need to replace them.
 
@@ -945,11 +955,11 @@ It does not need to replace them.
 
 Digital Product Passports are one important product-domain application.
 
-They are not Zyppi's identity.
+They are not Unfict's identity.
 
 ## Not a Database of Truth
 
-Zyppi does not own Reality.
+Unfict does not own Reality.
 
 It does not create truth by writing records.
 
@@ -971,7 +981,7 @@ Some businesses do not yet have:
 
 - a structured public product page.
 
-If Zyppi required mature enterprise infrastructure before becoming useful, initial adoption would become unnecessarily difficult.
+If Unfict required mature enterprise infrastructure before becoming useful, initial adoption would become unnecessarily difficult.
 
 A constrained fallback destination solves this.
 
@@ -995,11 +1005,11 @@ It should not evolve into a general-purpose CMS.
 
 The principle is:
 
-> **Zyppi may provide the minimum destination required for useful Reality Sync without becoming the destination business itself.**
+> **Unfict may provide the minimum destination required for useful Reality Sync without becoming the destination business itself.**
 
-# 22. What Zyppi Stores
+# 22. What Unfict Stores
 
-Zyppi should persist only what its constitutional and product responsibilities require.
+Unfict should persist only what its constitutional and product responsibilities require.
 
 Depending on the application, this may include:
 
@@ -1029,7 +1039,7 @@ Depending on the application, this may include:
 
 It should not become a convenient warehouse for arbitrary customer data.
 
-Zyppi should not indiscriminately absorb:
+Unfict should not indiscriminately absorb:
 
 - marketing media;
 
@@ -1047,7 +1057,7 @@ Zyppi should not indiscriminately absorb:
 
 The governing question is:
 
-> **Does Zyppi own responsibility for this state, or does Zyppi merely need to reference, verify, or interact with it?**
+> **Does Unfict own responsibility for this state, or does Unfict merely need to reference, verify, or interact with it?**
 
 That boundary protects:
 
@@ -1063,7 +1073,7 @@ That boundary protects:
 
 # 23. The Flywheel
 
-People do not interact with products because Zyppi wants analytics.
+People do not interact with products because Unfict wants analytics.
 
 They interact because they want something.
 
@@ -1081,7 +1091,7 @@ A distributor wants inventory or trade data.
 
 The Intent already exists.
 
-Zyppi makes the interaction useful.
+Unfict makes the interaction useful.
 
 ```
 Persistent Identity
@@ -1107,7 +1117,7 @@ Platform Compounding
 
 The data exists because utility existed first.
 
-Zyppi should not manufacture unnecessary user behavior merely to generate analytics.
+Unfict should not manufacture unnecessary user behavior merely to generate analytics.
 
 # 24. The Compounding Asset
 
@@ -1153,7 +1163,7 @@ The accumulated **trusted operational context** around Reality is.
 
 # 25. The Moat
 
-The Zyppi moat remains:
+The Unfict moat remains:
 
 **Trusted Perception.**
 
@@ -1179,7 +1189,7 @@ Traditional routing asks:
 
 > **Where should this request go?**
 
-Zyppi can ask:
+Unfict can ask:
 
 > **Given what Reality can substantiate about this interaction, what destination or capability should this Subject or system be permitted to access?**
 
@@ -1187,7 +1197,7 @@ That difference is fundamental.
 
 # 26. AI and Reality Sync
 
-AI creates the strongest long-term case for Zyppi.
+AI creates the strongest long-term case for Unfict.
 
 AI systems can reason over enormous volumes of information.
 
@@ -1207,7 +1217,7 @@ Sensors provide perception.
 
 AI provides cognition.
 
-Zyppi provides Reality grounding and Trust.
+Unfict provides Reality grounding and Trust.
 
 The relationship can be understood as:
 
@@ -1233,13 +1243,13 @@ Capability
 Proof + Receipt
 ```
 
-Zyppi does not make AI omniscient.
+Unfict does not make AI omniscient.
 
 It limits AI Action to what Reality can verifiably support.
 
 # 27. Distribution
 
-The market does not need to understand the entire Reality Sync architecture before using Zyppi.
+The market does not need to understand the entire Reality Sync architecture before using Unfict.
 
 The first product should meet customers where their immediate problem already exists.
 
@@ -1343,7 +1353,7 @@ The underlying expansion logic should remain simple:
 
 - limited interaction history;
 
-- Zyppi branding.
+- Unfict branding.
 
 ## Starter
 
@@ -1405,11 +1415,11 @@ The economic progression is:
 
 For the current physical-product implementation:
 
-> **Zyppi is the persistent identity and contextual routing layer that connects each product interaction to the appropriate trusted destination or capability.**
+> **Unfict is the persistent identity and contextual routing layer that connects each product interaction to the appropriate trusted destination or capability.**
 
 This remains a powerful and useful product definition.
 
-But it is not the complete definition of Zyppi.
+But it is not the complete definition of Unfict.
 
 Routing is the first implementation.
 
@@ -1419,7 +1429,7 @@ Reality Sync is the platform.
 
 At the universal level:
 
-> **Zyppi is Reality Sync infrastructure — the constitutional trust execution layer that keeps digital systems accountable to verifiable Reality so Trust can be computed and appropriate Action can safely follow.**
+> **Unfict is Reality Sync infrastructure — the constitutional trust execution layer that keeps digital systems accountable to verifiable Reality so Trust can be computed and appropriate Action can safely follow.**
 
 This definition survives changes in:
 
@@ -1547,15 +1557,15 @@ Intent → Capability → AI Orchestration → Execution → Proof → Receipt
 
 ## Human Expression
 
-> **Zyppify**
+> **Unfict**
 
 ## Platform
 
-> **Zyppi**
+> **Unfict**
 
 ## Brand
 
-> # **Zyppi — Reality Sync**
+> # **Unfict — Reality Sync**
 
 # 34. The Core Idea
 
@@ -1565,15 +1575,15 @@ Digital systems use sensors and carriers.
 
 Sensors alone cannot create Trust.
 
-Zyppi turns observable Evidence into a governed basis for Trust and safe Action.
+Unfict turns observable Evidence into a governed basis for Trust and safe Action.
 
 Or more simply:
 
-> **Sensors let software encounter Reality. Zyppi lets software understand what it can trust about it.**
+> **Sensors let software encounter Reality. Unfict lets software understand what it can trust about it.**
 
 # 35. Final Statement
 
-Zyppi does not exist to put more information online.
+Unfict does not exist to put more information online.
 
 It does not exist to generate QR codes.
 
@@ -1585,7 +1595,7 @@ It does not exist merely to collect sensor data.
 
 It exists because the digital world increasingly acts upon a Reality it cannot directly know.
 
-Zyppi gives that digital world a governed path from:
+Unfict gives that digital world a governed path from:
 
 ```
 **Reality → Observation → Verification → Trust → Action.**
@@ -1599,31 +1609,31 @@ QR is one of the first senses.
 
 The platform is much larger.
 
-A product can be Zyppified.
+A product can be Unficted.
 
-A passport can be Zyppified.
+A passport can be Unficted.
 
-A shipment can be Zyppified.
+A shipment can be Unficted.
 
-A vehicle can be Zyppified.
+A vehicle can be Unficted.
 
-A credential can be Zyppified.
+A credential can be Unficted.
 
-An animal can be Zyppified.
+An animal can be Unficted.
 
-A Place can be Zyppified.
+A Place can be Unficted.
 
-An Event can participate in Zyppification.
+An Event can participate in Unficting.
 
 Any interaction with Reality that can produce meaningful Evidence can potentially participate in Reality Sync.
 
 The possibilities are wide because Reality itself is the domain.
 
-> **Zyppi does not define Reality.**
+> **Unfict does not define Reality.**
 >
-> **Zyppi keeps the digital world accountable to it.**
+> **Unfict keeps the digital world accountable to it.**
 
-> # **Zyppi — Reality Sync**
+> # **Unfict — Reality Sync**
 
 ## Current Commercial Expression
 
@@ -1631,10 +1641,15 @@ The possibilities are wide because Reality itself is the domain.
 
 ## Universal Expression
 
-> **Zyppify Reality. Trust what follows.**
+> **Unfict Reality. Trust what follows.**
 
 ---
 
 ```
-**Status:**         Draft — Council Review **Version:** 4.0 **Supersedes:**     What is Zyppi? v3.0 only upon ratification
+**Status:**         RATIFIED — CLOSED
+**Version:**        5.0
+**Ratification Date:** 13 September 2026
+**Supersedes:**     What is Zyppi? v4.0
+**Aligned with:**   NORTH STAR v8.0 — Unfict — Reality Sync
+**Locking Authority:** Chair
 ```

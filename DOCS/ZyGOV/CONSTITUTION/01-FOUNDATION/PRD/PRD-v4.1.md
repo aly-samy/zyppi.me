@@ -4,41 +4,41 @@
 
 ## Constitutional Metadata Header
 
-| Field | Value |
-|-------|-------|
-| Document ID | |
-| Constitutional URI | |
-| Canonical Name | ZYPPI_PRD_v4.1 |
-| Document Family | Zyppi Constitutional Corpus |
-| Title | Zyppi Product Requirements Document (PRD) |
-| Version | 4.1 |
-| Status | Draft — Proposed for Ratification |
-| Classification | Capability Constitution |
-| Normative Level | Normative |
-| Domain | Product Strategy |
-| Constitutional Tier | Needs Ratification |
-| Constitutional Role | Needs Ratification |
-| Lifecycle | Active |
-| Owner | Not Specified |
-| Steward | Not Specified |
-| Created | Not Specified |
-| Last Updated | 2026-07 |
-| Effective Date | Not Specified |
-| Parent Document | FOUNDING-PRINCIPLES-v5.0.md (nearest constitutional parent) |
-| Depends On | NORTH-STAR-v6.0.md, FOUNDING-PRINCIPLES-v5.0.md |
-| Required By | To Be Resolved During Repository Dependency Mapping |
-| Related Documents | To Be Resolved During Repository Dependency Mapping |
-| Supersedes | ZYPPI_PRD_v4.0 |
-| Superseded By | To Be Resolved During Repository Dependency Mapping |
-| Authority Scope | Needs Ratification |
-| Amendment Policy | Constitutional Amendment Required |
-| Compatibility | Not Specified |
-| Keywords | Product, Execution, Subject, Object, Place, Event, Evidence, Routing, Trust, Capabilities, Platform, Infrastructure, Strategy |
-| Defines | Product Thesis, Identity Layer, Routing Layer, Event Layer, Trust Layer, Capability Layer, Execution Layer, Acquisition Products, Retention Products, Expansion Products |
-| Amendment Class | Primitive Reconciliation — see 00-RECONCILIATION-NOTE.md §8 |
-| Change Log | Version 4.1: "Actor routing" retitled "Subject routing" to align with North Star v6.0's five Reality dimensions. No other substantive change from v4.0. |
-| Constitutional Hash | Reserved |
-| UUID | Reserved |
+| Field               | Value                                                                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Document ID         |                                                                                                                                                                          |
+| Constitutional URI  |                                                                                                                                                                          |
+| Canonical Name      | ZYPPI_PRD_v4.1                                                                                                                                                           |
+| Document Family     | Zyppi Constitutional Corpus                                                                                                                                              |
+| Title               | Zyppi Product Requirements Document (PRD)                                                                                                                                |
+| Version             | 4.1                                                                                                                                                                      |
+| Status              | Draft — Proposed for Ratification                                                                                                                                        |
+| Classification      | Capability Constitution                                                                                                                                                  |
+| Normative Level     | Normative                                                                                                                                                                |
+| Domain              | Product Strategy                                                                                                                                                         |
+| Constitutional Tier | Needs Ratification                                                                                                                                                       |
+| Constitutional Role | Needs Ratification                                                                                                                                                       |
+| Lifecycle           | Active                                                                                                                                                                   |
+| Owner               | Not Specified                                                                                                                                                            |
+| Steward             | Not Specified                                                                                                                                                            |
+| Created             | Not Specified                                                                                                                                                            |
+| Last Updated        | 2026-07                                                                                                                                                                  |
+| Effective Date      | Not Specified                                                                                                                                                            |
+| Parent Document     | FOUNDING-PRINCIPLES-v5.0.md (nearest constitutional parent)                                                                                                              |
+| Depends On          | NORTH-STAR-v6.0.md, FOUNDING-PRINCIPLES-v5.0.md                                                                                                                          |
+| Required By         | To Be Resolved During Repository Dependency Mapping                                                                                                                      |
+| Related Documents   | To Be Resolved During Repository Dependency Mapping                                                                                                                      |
+| Supersedes          | ZYPPI_PRD_v4.0                                                                                                                                                           |
+| Superseded By       | To Be Resolved During Repository Dependency Mapping                                                                                                                      |
+| Authority Scope     | Needs Ratification                                                                                                                                                       |
+| Amendment Policy    | Constitutional Amendment Required                                                                                                                                        |
+| Compatibility       | Not Specified                                                                                                                                                            |
+| Keywords            | Product, Execution, Subject, Object, Place, Event, Evidence, Routing, Trust, Capabilities, Platform, Infrastructure, Strategy                                            |
+| Defines             | Product Thesis, Identity Layer, Routing Layer, Event Layer, Trust Layer, Capability Layer, Execution Layer, Acquisition Products, Retention Products, Expansion Products |
+| Amendment Class     | Primitive Reconciliation — see 00-RECONCILIATION-NOTE.md §8                                                                                                              |
+| Change Log          | Version 4.1: "Actor routing" retitled "Subject routing" to align with North Star v6.0's five Reality dimensions. No other substantive change from v4.0.                  |
+| Constitutional Hash | Reserved                                                                                                                                                                 |
+| UUID                | Reserved                                                                                                                                                                 |
 
 ---
 
@@ -121,9 +121,11 @@ Deliver immediate value within minutes.
 - Product Landing Page
 
 **Goal:**
+
 ```
 Activation
 ```
+
 Time to First Value should be under five minutes.
 
 ---
@@ -142,9 +144,11 @@ Reveal intelligence created by usage.
 - Health Monitoring
 
 **Goal:**
+
 ```
 Retention
 ```
+
 Customers realize Zyppi is more than a QR generator.
 
 ---
@@ -164,9 +168,11 @@ Become embedded in enterprise operations.
 - Enterprise Workflows
 
 **Goal:**
+
 ```
 Dependency
 ```
+
 Removing Zyppi becomes operationally expensive.
 
 ---
@@ -547,11 +553,12 @@ Can every decision remain explainable and auditable?
 Does it avoid feature gravity?
 
 ---
->~ 
-> 
+
+> ~
+>
 > If the answer to every question is **No**, the proposal should be rejected.
 >
->~
+> ~
 
 ---
 

@@ -1,5 +1,7 @@
 # ZYPPI CONSTITUTIONAL STATE OF THE UNION (v1.1)
+
 ## The Authoritative Orientation & Onboarding Dossier for the AI Council
+
 **Status:** Canonical Baseline
 **Date:** June 2026
 **Scope:** Repository Baseline v1.0 (Execution Era)
@@ -9,19 +11,21 @@
 ## 1. Executive Summary
 
 ### 1.1 Mission: Intent Distribution Infrastructure
+
 Zyppi is the **Intent Distribution Infrastructure** for the physical internet (Ref: `NORTH-STAR.md`). It bridges the gap between physical interactions (**Touch**) and digital outcomes by preserving the **Asset Reality** across time, jurisdiction, and interface. Unlike legacy event-centric systems, Zyppi treats relationships as permanent and interactions as transient.
 
 ### 1.2 Constitution at a Glance (Repository Scale)
-| Metric | Value | Authority |
-| :--- | :--- | :--- |
-| **Ratified/Locked Constitutions** | 59 | `constitution/ratified/` |
-| **Constitutional Clusters** | 17 | `WS-03A.0` |
-| **Active Amendments** | 6 | `CA-001` to `CA-005`, `A-001` |
-| **Active Supersessions** | 15 | `SR-001` |
-| **Execution Specifications** | 6 | `RI-000` to `RI-005` |
-| **Compiler Stages** | 5 | `RI-000` Appendix B |
-| **Reserved Domains** | 5 | `RSN-003` |
-| **Overall Maturity** | 85% | Council Audit June 2026 |
+
+| Metric                            | Value | Authority                     |
+| :-------------------------------- | :---- | :---------------------------- |
+| **Ratified/Locked Constitutions** | 59    | `constitution/ratified/`      |
+| **Constitutional Clusters**       | 17    | `WS-03A.0`                    |
+| **Active Amendments**             | 6     | `CA-001` to `CA-005`, `A-001` |
+| **Active Supersessions**          | 15    | `SR-001`                      |
+| **Execution Specifications**      | 6     | `RI-000` to `RI-005`          |
+| **Compiler Stages**               | 5     | `RI-000` Appendix B           |
+| **Reserved Domains**              | 5     | `RSN-003`                     |
+| **Overall Maturity**              | 85%   | Council Audit June 2026       |
 
 ---
 
@@ -66,15 +70,15 @@ graph TD
 
 Reviewers should use this hierarchy to categorize all architectural inquiries.
 
-| Layer | Purpose | Primary Responsibility |
-| :--- | :--- | :--- |
-| **Philosophy** | Why Zyppi exists | North Star, Founding Principles |
-| **Reality** | What exists | Actors, Identities, Referents, Assets |
-| **Structure** | How reality is organized | 17 Clusters, Single-Parent Taxonomy |
-| **Governance** | Who controls reality | Authority Anchors, Trust Registry, Policy |
-| **Execution** | How truth becomes executable | Compiler (RI-001), ACV, Population Plan |
-| **Publication** | How truth is distributed | Registry Bundles, Merkle Proofs |
-| **Runtime** | How apps consume truth | SDKs, Resolution Engines, Federation |
+| Layer           | Purpose                      | Primary Responsibility                    |
+| :-------------- | :--------------------------- | :---------------------------------------- |
+| **Philosophy**  | Why Zyppi exists             | North Star, Founding Principles           |
+| **Reality**     | What exists                  | Actors, Identities, Referents, Assets     |
+| **Structure**   | How reality is organized     | 17 Clusters, Single-Parent Taxonomy       |
+| **Governance**  | Who controls reality         | Authority Anchors, Trust Registry, Policy |
+| **Execution**   | How truth becomes executable | Compiler (RI-001), ACV, Population Plan   |
+| **Publication** | How truth is distributed     | Registry Bundles, Merkle Proofs           |
+| **Runtime**     | How apps consume truth       | SDKs, Resolution Engines, Federation      |
 
 ---
 
@@ -82,20 +86,20 @@ Reviewers should use this hierarchy to categorize all architectural inquiries.
 
 Reviewers must focus effort on **DRAFT**, **IN PROGRESS**, or **GAP** areas. **LOCKED** areas are settled law.
 
-| Domain | Status | Stability | Authority |
-| :--- | :--- | :--- | :--- |
-| **Ontology** | **LOCKED** | **Immutable** | `WS-01`, `WS-03F` |
-| **Taxonomy** | **LOCKED** | **Stable** | `WS-03A.0`, `CA-001` |
-| **Relationship Model** | **LOCKED** | **Stable** | `WS-04A.1`, `ARM-001` |
-| **Authority Model** | **LOCKED** | **Stable** | `WS-03D`, `CA-004` |
-| **Trust Registry** | **LOCKED** | **Stable** | `CA-005` |
-| **Compiler / ACV** | **LOCKED** | **Stable** | `RI-000`, `RI-001` |
-| **Population Engine** | **LOCKED** | **Stable** | `RI-004`, `WS-05A-E` |
-| **Reasoning Framework** | **LOCKED** | **Stable** | `RSN-001`, `RSN-002` |
-| **Registry Publication** | **DRAFT** | **Evolving** | `RI-005` |
-| **Runtime SDK / API** | **IN PROGRESS**| **Experimental**| `ROADMAP.md` |
-| **Policy Engine** | **GAP** | **Experimental**| `PRJ-001` §11 |
-| **Federation** | **RESERVED** | **N/A** | `RSN-003` |
+| Domain                   | Status          | Stability        | Authority             |
+| :----------------------- | :-------------- | :--------------- | :-------------------- |
+| **Ontology**             | **LOCKED**      | **Immutable**    | `WS-01`, `WS-03F`     |
+| **Taxonomy**             | **LOCKED**      | **Stable**       | `WS-03A.0`, `CA-001`  |
+| **Relationship Model**   | **LOCKED**      | **Stable**       | `WS-04A.1`, `ARM-001` |
+| **Authority Model**      | **LOCKED**      | **Stable**       | `WS-03D`, `CA-004`    |
+| **Trust Registry**       | **LOCKED**      | **Stable**       | `CA-005`              |
+| **Compiler / ACV**       | **LOCKED**      | **Stable**       | `RI-000`, `RI-001`    |
+| **Population Engine**    | **LOCKED**      | **Stable**       | `RI-004`, `WS-05A-E`  |
+| **Reasoning Framework**  | **LOCKED**      | **Stable**       | `RSN-001`, `RSN-002`  |
+| **Registry Publication** | **DRAFT**       | **Evolving**     | `RI-005`              |
+| **Runtime SDK / API**    | **IN PROGRESS** | **Experimental** | `ROADMAP.md`          |
+| **Policy Engine**        | **GAP**         | **Experimental** | `PRJ-001` §11         |
+| **Federation**           | **RESERVED**    | **N/A**          | `RSN-003`             |
 
 ---
 
@@ -103,18 +107,19 @@ Reviewers must focus effort on **DRAFT**, **IN PROGRESS**, or **GAP** areas. **L
 
 Not all "Locked" documents possess the same evolutionary profile.
 
-| Level | Meaning | Council Constraint |
-| :--- | :--- | :--- |
-| **Immutable** | Never changes. Foundational axioms. | Modification triggers Phase 0 Reset. |
-| **Stable** | Changes only via Amendment. | High burden of proof for changes. |
-| **Evolving** | Expected to grow as implementation scales. | Amendments are expected and routine. |
-| **Experimental** | Prototype only. Not for production use. | Full redesign permitted without amendment. |
+| Level            | Meaning                                    | Council Constraint                         |
+| :--------------- | :----------------------------------------- | :----------------------------------------- |
+| **Immutable**    | Never changes. Foundational axioms.        | Modification triggers Phase 0 Reset.       |
+| **Stable**       | Changes only via Amendment.                | High burden of proof for changes.          |
+| **Evolving**     | Expected to grow as implementation scales. | Amendments are expected and routine.       |
+| **Experimental** | Prototype only. Not for production use.    | Full redesign permitted without amendment. |
 
 ---
 
 ## 6. The Immutable Principles
 
 ### 6.1 Constitutional Principles (Meaning & Truth)
+
 - **Reality Over Events:** Meaning compounds through relationships, not logs. (Ref: `ZRM v1.1`, §6.17)
 - **Single Ownership Rule:** No concept may be owned by more than one cluster. (Ref: `WS-03A.0`, §5, CR-001)
 - **Identity != Referent:** Digital representation (zID) is distinct from physical objects. (Ref: `WS-01`, §2)
@@ -122,6 +127,7 @@ Not all "Locked" documents possess the same evolutionary profile.
 - **Bitemporality:** Facts record both Occurrence and Assertion time. (Ref: `ZRM v1.1`, §3)
 
 ### 6.2 Technical Principles (Performance & Enforcement)
+
 - **Traffic Is Sacred:** Redirect performance is the primary path. (Ref: `TECH-ARCHITECTURE.md`, §2)
 - **Deterministic Compilation:** Identical inputs SHALL produce byte-identical artifacts. (Ref: `RI-000`, §85, Appx J)
 - **Dumb Executor:** Registry Materializers make zero constitutional decisions. (Ref: `RI-004`, §CMP-001)
@@ -172,22 +178,23 @@ Everything after publication—including **Runtime Execution Engines**, **SDK im
 
 Debates that **MUST NOT** be reopened without a formal Phase 0 Reset.
 
-| Decision Point | Adopted Result | Rejected Alternative | Authority |
-| :--- | :--- | :--- | :--- |
-| **Cluster Count** | **17 Clusters** | 15 Clusters | `CA-001`, §1 |
-| **Interaction Unit** | **Event** (CL-11) | Signal | `SR-007` |
-| **Campaign Status** | **Identity+Context**| Core Primitive | `CA-002` |
-| **Time Status** | **CL-13 Cluster** | Graph Metadata | `A-001` |
-| **Inheritance Rule** | **Single-Parent** | Multiple Inheritance | `WS-03A.0`, §8 |
-| **Context Model** | **Singular Anchor** | Composable Tags | `WS-03D` |
-| **Registry Role** | **Materializer** | Registry Builder | `RI-004` |
-| **Serialization** | **RFC 8785 JCS** | Standard JSON | `RI-001`, §28 |
+| Decision Point       | Adopted Result       | Rejected Alternative | Authority      |
+| :------------------- | :------------------- | :------------------- | :------------- |
+| **Cluster Count**    | **17 Clusters**      | 15 Clusters          | `CA-001`, §1   |
+| **Interaction Unit** | **Event** (CL-11)    | Signal               | `SR-007`       |
+| **Campaign Status**  | **Identity+Context** | Core Primitive       | `CA-002`       |
+| **Time Status**      | **CL-13 Cluster**    | Graph Metadata       | `A-001`        |
+| **Inheritance Rule** | **Single-Parent**    | Multiple Inheritance | `WS-03A.0`, §8 |
+| **Context Model**    | **Singular Anchor**  | Composable Tags      | `WS-03D`       |
+| **Registry Role**    | **Materializer**     | Registry Builder     | `RI-004`       |
+| **Serialization**    | **RFC 8785 JCS**     | Standard JSON        | `RI-001`, §28  |
 
 ---
 
 ## 11. Explicit "Do NOT Revisit" List (The Invariants)
 
 Reviewers are strictly prohibited from proposing innovation in:
+
 - **17-Cluster Taxonomy**
 - **Single Ownership Rule**
 - **Single-Parent Taxonomy**
@@ -203,11 +210,13 @@ Reviewers are strictly prohibited from proposing innovation in:
 ## 12. Debt & Risk Register
 
 ### 12.1 Constitutional Debt (Missing Specifications)
+
 - **POL-001 (Policy):** PRJ/EXP lack a formal evaluation logic spec (Rego/CEL). (**CRITICAL**)
 - **FED-001 (Federation):** No model for cross-tenant sharing. (**HIGH**)
 - **SDK-001 (Runtime):** No execution contract for SDK consumers. (**HIGH**)
 
 ### 12.2 Architectural Debt (Implementation Gaps)
+
 - **Blueprints:** Framework exists, but the Blueprint registry is empty.
 - **KRM Schema:** Knowledge Routing Matrix referenced in RSN-001 has no schema.
 - **Reference Compilers:** Go/Rust/Python implementations are "In Progress."
@@ -217,6 +226,7 @@ Reviewers are strictly prohibited from proposing innovation in:
 ## 13. Next Constitutional Documents (Roadmap)
 
 Expected sequence for extending the system beyond the Registry phase:
+
 1. **POL-001:** Policy Evaluation & Logic Constitution.
 2. **RI-006:** SDK Runtime Execution Contract.
 3. **FED-001:** Cross-Tenant Federation Protocol.
@@ -227,14 +237,14 @@ Expected sequence for extending the system beyond the Registry phase:
 
 ## 14. Constitutional Maturity & Confidence
 
-| Domain | Frozen | Proven | Implemented | Confidence |
-| :--- | :--- | :--- | :--- | :--- |
-| **Ontology** | ✓ | ✓ | ✓ | **Very High** |
-| **Taxonomy** | ✓ | ✓ | ✓ | **Very High** |
-| **Execution** | ✓ | ✓ | ✓ | **Very High** |
-| **Compiler** | ✓ | ✓ | In Progress | **High** |
-| **Publication** | ✗ | ✗ | ✗ | **Medium** |
-| **Runtime** | ✗ | ✗ | ✗ | **Low** |
+| Domain          | Frozen | Proven | Implemented | Confidence    |
+| :-------------- | :----- | :----- | :---------- | :------------ |
+| **Ontology**    | ✓      | ✓      | ✓           | **Very High** |
+| **Taxonomy**    | ✓      | ✓      | ✓           | **Very High** |
+| **Execution**   | ✓      | ✓      | ✓           | **Very High** |
+| **Compiler**    | ✓      | ✓      | In Progress | **High**      |
+| **Publication** | ✗      | ✗      | ✗           | **Medium**    |
+| **Runtime**     | ✗      | ✗      | ✗           | **Low**       |
 
 ---
 
@@ -242,20 +252,21 @@ Expected sequence for extending the system beyond the Registry phase:
 
 Every idea in Zyppi has exactly one owner (Ref: `WS-03A.0`, §5, CR-001).
 
-| Concept | Unique Owner (Cluster) | Referenced By | Authority |
-| :--- | :--- | :--- | :--- |
-| **Reality State** | CL-17 Graph Core | RI-004, RI-005 | `WS-03A.0`, §10 |
-| **Digital ID (zID)** | CL-04 Identity | All Layers | `WS-03A.2`, §1 |
-| **Fact Assertion** | CL-11 Event | RSN, PRJ | `WS-03A.8`, §1 |
-| **Inference/Risk** | CL-16 Intelligence | EXP, Decision Sys | `WS-03A.9`, §1 |
-| **Auth Context** | CL-04 Identity | CA-004, CA-005 | `SR-012`, `WS-03F` |
-| **Temporal Logic** | CL-13 Temporal | All Layers | `AMENDMENT A-001` |
+| Concept              | Unique Owner (Cluster) | Referenced By     | Authority          |
+| :------------------- | :--------------------- | :---------------- | :----------------- |
+| **Reality State**    | CL-17 Graph Core       | RI-004, RI-005    | `WS-03A.0`, §10    |
+| **Digital ID (zID)** | CL-04 Identity         | All Layers        | `WS-03A.2`, §1     |
+| **Fact Assertion**   | CL-11 Event            | RSN, PRJ          | `WS-03A.8`, §1     |
+| **Inference/Risk**   | CL-16 Intelligence     | EXP, Decision Sys | `WS-03A.9`, §1     |
+| **Auth Context**     | CL-04 Identity         | CA-004, CA-005    | `SR-012`, `WS-03F` |
+| **Temporal Logic**   | CL-13 Temporal         | All Layers        | `AMENDMENT A-001`  |
 
 ---
 
 ## 16. AI Council Mandate: The Reviewer's Purpose
 
 ### 16.1 The Council IS responsible for:
+
 - Detecting **contradictions** between constitutional layers.
 - Identifying **missing** constitutional coverage (Gaps).
 - Detecting **ambiguity** that prevents deterministic implementation.
@@ -263,6 +274,7 @@ Every idea in Zyppi has exactly one owner (Ref: `WS-03A.0`, §5, CR-001).
 - Reviewing **execution feasibility** of proposed amendments.
 
 ### 16.2 The Council IS NOT responsible for:
+
 - Product prioritization or business strategy.
 - UI/UX design or dashboard layout.
 - Performance optimization (unless it violates a Technical Principle).
@@ -273,6 +285,7 @@ Every idea in Zyppi has exactly one owner (Ref: `WS-03A.0`, §5, CR-001).
 ## 17. "How to Read the Constitution" (The Logic Sequence)
 
 Reviewers MUST follow this sequence to avoid implementation-first bias:
+
 1. **Goal:** `NORTH-STAR.md` -> `FOUNDING-PRINCIPLE.md`.
 2. **Logic:** `ZRM v1.1`.
 3. **Structure:** `WS-03A.0` (Cluster Ownership) -> `WS-03C` (Relationships).
@@ -286,14 +299,14 @@ Reviewers MUST follow this sequence to avoid implementation-first bias:
 
 AI Reviewers MUST NOT use or accept the following deprecated terms:
 
-| Deprecated Term | Canonical Term | Authority |
-| :--- | :--- | :--- |
-| **Signal** | **Event** (CL-11) | `SR-007` |
-| **Journey** | **Inference Pattern** (CL-16) | `SR-008` |
-| **Fact** | **Reality Claim** (CL-09) | `SR-009` |
-| **Snapshot** | **ACV** (Active Const. View)| `RI-000` |
-| **Builder** | **Materializer** | `RI-004` |
-| **Primitive Campaign**| **Campaign Identity** | `CA-002` |
+| Deprecated Term        | Canonical Term                | Authority |
+| :--------------------- | :---------------------------- | :-------- |
+| **Signal**             | **Event** (CL-11)             | `SR-007`  |
+| **Journey**            | **Inference Pattern** (CL-16) | `SR-008`  |
+| **Fact**               | **Reality Claim** (CL-09)     | `SR-009`  |
+| **Snapshot**           | **ACV** (Active Const. View)  | `RI-000`  |
+| **Builder**            | **Materializer**              | `RI-004`  |
+| **Primitive Campaign** | **Campaign Identity**         | `CA-002`  |
 
 ---
 
@@ -308,4 +321,5 @@ A fully implemented Zyppi system is one in which every **Reality Claim** can be 
 The Constitution is **internally deterministic**, **cryptographically reproducible**, **ontology-complete** for Reality, and **execution-complete** through Registry Publication. Future constitutional work extends the execution chain beyond publication without altering settled Reality, Ontology, Taxonomy, Authority, or Determinism.
 
 ---
-*Orientation Dossier v1.1 complete. Reconstructed from repository evidence by Jules.*
+
+_Orientation Dossier v1.1 complete. Reconstructed from repository evidence by Jules._

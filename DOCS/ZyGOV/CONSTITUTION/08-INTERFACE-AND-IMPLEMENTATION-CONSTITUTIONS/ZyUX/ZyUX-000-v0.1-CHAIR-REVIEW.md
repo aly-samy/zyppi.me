@@ -446,24 +446,31 @@ The series SHALL distinguish **horizontal experience doctrine** from **archetype
 ## 11.1 Foundational Documents
 
 ### `ZyUX-000 — Zyppi Experience Architecture & Master Doctrine`
+
 Defines universal experience laws, composition, profile governance, and series boundaries.
 
 ### `ZyUX-001 — Identity, Account & Entry Experience`
+
 Owns account vs Subject experience, authentication contexts, create/join/claim flows, identity-linking UX, context entry, credential changes, and recovery-experience boundaries.
 
 ### `ZyUX-002 — Organization, Relationship, Scope & Delegation Experience`
+
 Owns organizations of different shapes, relationship-scoped visibility, delegation UX, re-delegation, organization membership, cross-organization relationships, and organization change.
 
 ### `ZyUX-003 — Contextual Navigation & Capability Disclosure`
+
 Owns object/context-first UX, no-deep-menu doctrine, contextual actions, visibility rules, progressive control disclosure, and context switching.
 
 ### `ZyUX-004 — Explanation, Evidence, Trust & Receipt Experience`
+
 Owns Answer → Reason → Basis → Proof, Trust presentation, Evidence references, uncertainty, unresolved/conflicting states, Receipt presentation, and audit comprehension.
 
 ### `ZyUX-005 — Host-Native Experience`
+
 Owns environmental nativeness, host-native surfaces, host vs Zyppi control plane, mapping UX, source provenance presentation, and minimal workflow displacement.
 
 ### `ZyUX-006 — Lifecycle, Offboarding, Recovery & Historical Experience`
+
 Owns termination, revoked Standing, historical attribution, credential loss, recovery, organization dissolution, succession-facing UX boundaries, and life-state experience boundaries.
 
 ---
@@ -638,15 +645,19 @@ Current GTM remains governed by the active strategy.
 Deepest immediate ZyUX work should focus on:
 
 ### `ZyUX-DEVELOPER-001`
+
 Because M09 / ZYAPI depends on excellent developer and agent access.
 
 ### `ZyUX-ORG-ADMIN-001`
+
 Because even the first production integrations require simple organization/access/delegation administration.
 
 ### `ZyUX-PUBLIC-OBSERVER-001`
+
 Because the GS1 wedge culminates in a real public product-resolution experience.
 
 ### `ZyUX-CUSTOMER-001`
+
 Only to the depth required to distinguish public observer from authenticated purchaser/owner journeys.
 
 ## GROW

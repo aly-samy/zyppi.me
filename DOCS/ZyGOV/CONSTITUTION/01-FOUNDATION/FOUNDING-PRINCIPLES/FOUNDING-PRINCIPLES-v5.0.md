@@ -257,6 +257,7 @@ Before introducing any new capability, product, architecture, partnership, or st
 If the answer to any of these questions is **No**, the proposal should be reconsidered.
 
 ---
+
 ```
 **Status:**             Draft — Proposed for Ratification
 **Locking Authority:**  Chair (Aly A. Samy)

@@ -8,7 +8,7 @@ developed during the brainstorming discussion.\
 **Authority:** None. This document is not ratified, normative, or an
 implementation mandate.
 
-------------------------------------------------------------------------
+---
 
 ## 1. Proposal Context
 
@@ -24,11 +24,11 @@ The discussion produced a broader proposition:
 
 The emerging working brands are:
 
--   **Zync** --- proposed name for Zyppi's connected/online
-    communication and access capability.
--   **ZyPub** --- proposed name for Zyppi's self-contained publication
-    capability, especially useful where network connectivity is absent,
-    unavailable, undesirable, or insufficient.
+- **Zync** --- proposed name for Zyppi's connected/online
+  communication and access capability.
+- **ZyPub** --- proposed name for Zyppi's self-contained publication
+  capability, especially useful where network connectivity is absent,
+  unavailable, undesirable, or insufficient.
 
 The central insight is that these should not represent two different
 semantic systems. They should expose the same underlying Zyppi
@@ -42,7 +42,7 @@ A concise working formulation is:
 
 This remains a proposal rather than a ratified architectural rule.
 
-------------------------------------------------------------------------
+---
 
 ## 2. Starting Point: Optical Data Transfer
 
@@ -55,12 +55,12 @@ and protocol metadata are considered.
 For practical animated optical transfer using ordinary displays and
 smartphone cameras, the discussion used approximately:
 
--   1--2.5 KB useful payload per frame as an exploratory range;
--   roughly 8--15 reliably decodable frames per second for practical
-    consumer hardware;
--   approximately 10--40 KB/s as a plausible practical range depending
-    on conditions;
--   approximately 0.6--2.4 MB/minute as an indicative range.
+- 1--2.5 KB useful payload per frame as an exploratory range;
+- roughly 8--15 reliably decodable frames per second for practical
+  consumer hardware;
+- approximately 10--40 KB/s as a plausible practical range depending
+  on conditions;
+- approximately 0.6--2.4 MB/minute as an indicative range.
 
 These are engineering estimates, not benchmarked Zyppi requirements.
 
@@ -75,7 +75,7 @@ Therefore:
 > semantic communication when ordinary network resolution is unavailable
 > or inappropriate.
 
-------------------------------------------------------------------------
+---
 
 ## 3. Optical Is a Carrier, Not the Architecture
 
@@ -88,16 +88,16 @@ NFC, Bluetooth, USB, sound, or any other carrier.
 
 Potential carriers include:
 
--   animated QR;
--   future visual matrices;
--   NFC;
--   BLE;
--   Wi-Fi Direct;
--   LiFi;
--   audio or ultrasonic communication;
--   USB or removable media;
--   e-ink;
--   future physical communication technologies.
+- animated QR;
+- future visual matrices;
+- NFC;
+- BLE;
+- Wi-Fi Direct;
+- LiFi;
+- audio or ultrasonic communication;
+- USB or removable media;
+- e-ink;
+- future physical communication technologies.
 
 The semantic system should remain independent of all of them.
 
@@ -107,7 +107,7 @@ The proposed architectural principle is:
 > but should not change the meaning of the constitutional information
 > being observed.**
 
-------------------------------------------------------------------------
+---
 
 ## 4. Two Complementary Communication Conditions
 
@@ -121,7 +121,7 @@ of reality.
 
 Conceptually:
 
-``` text
+```text
 Reality
    │
    ▼
@@ -136,15 +136,15 @@ Current resolvable constitutional view
 
 Potential characteristics include:
 
--   effectively large/unbounded remote payloads;
--   graph traversal;
--   live resolution;
--   current standing and authority checks;
--   synchronization;
--   API/SDK/MCP access;
--   server-side intelligence;
--   current evidence retrieval;
--   network-based policy and trust computation.
+- effectively large/unbounded remote payloads;
+- graph traversal;
+- live resolution;
+- current standing and authority checks;
+- synchronization;
+- API/SDK/MCP access;
+- server-side intelligence;
+- current evidence retrieval;
+- network-based policy and trust computation.
 
 The existing Zyppi URL can remain an implementation mechanism within
 this connected model without needing to become the product's conceptual
@@ -165,7 +165,7 @@ publication.
 
 Conceptually:
 
-``` text
+```text
 Reality
    │
    ▼
@@ -183,17 +183,17 @@ Observer
 
 ZyPub could therefore operate when:
 
--   there is no Internet connection;
--   Internet exists but cannot be trusted;
--   systems are deliberately air-gapped;
--   organizations have no shared API;
--   networks are restricted;
--   infrastructure has failed;
--   a device should expose state locally without a server round-trip.
+- there is no Internet connection;
+- Internet exists but cannot be trusted;
+- systems are deliberately air-gapped;
+- organizations have no shared API;
+- networks are restricted;
+- infrastructure has failed;
+- a device should expose state locally without a server round-trip.
 
 This creates a useful symmetry:
 
-``` text
+```text
                  Reality
                     │
           ┌─────────┴─────────┐
@@ -207,7 +207,7 @@ This creates a useful symmetry:
       remotely           materialized slice
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 5. ZyPub Is Not Necessarily an Animated QR Code
 
@@ -222,7 +222,7 @@ publication architecture should remain carrier-neutral.
 
 Possible structure:
 
-``` text
+```text
 ZyPub
 │
 ├── Publication semantics
@@ -243,7 +243,7 @@ ZyPub
 The optical implementation can still have its own product-facing name
 later if useful.
 
-------------------------------------------------------------------------
+---
 
 ## 6. Display-Bearing Physical Assets
 
@@ -259,12 +259,12 @@ The discussion identified a useful distinction.
 
 May continue using:
 
--   GS1 QR;
--   barcode;
--   NFC;
--   RFID;
--   printed identifiers;
--   static labels.
+- GS1 QR;
+- barcode;
+- NFC;
+- RFID;
+- printed identifiers;
+- static labels.
 
 ### Interactive Physical Assets
 
@@ -273,27 +273,27 @@ optical publication.
 
 Examples include:
 
--   phones;
--   tablets;
--   laptops;
--   POS terminals;
--   ATMs;
--   vending machines;
--   EV chargers;
--   parking meters;
--   industrial machines;
--   medical equipment;
--   smart appliances;
--   robots;
--   kiosks;
--   vehicle displays;
--   digital signage;
--   e-ink logistics displays.
+- phones;
+- tablets;
+- laptops;
+- POS terminals;
+- ATMs;
+- vending machines;
+- EV chargers;
+- parking meters;
+- industrial machines;
+- medical equipment;
+- smart appliances;
+- robots;
+- kiosks;
+- vehicle displays;
+- digital signage;
+- e-ink logistics displays.
 
 For such assets, the display can become an observable data surface
 rather than merely showing a URL.
 
-------------------------------------------------------------------------
+---
 
 ## 7. Static Identity, Connected Resolution, and Dynamic Publication
 
@@ -303,7 +303,7 @@ A possible three-level model emerged.
 
 The object exposes a stable identifier.
 
-``` text
+```text
 Object
   ↓
 QR / barcode / NFC / RFID
@@ -319,7 +319,7 @@ Primary question:
 
 The identifier resolves through Zync.
 
-``` text
+```text
 Object
   ↓
 Reference
@@ -339,7 +339,7 @@ Primary capability:
 
 A display-bearing asset locally publishes richer state through ZyPub.
 
-``` text
+```text
 Device
   ↓
 Dynamic publication
@@ -356,7 +356,7 @@ Primary capability:
 These levels are complementary rather than mutually exclusive. A single
 device may support all three.
 
-------------------------------------------------------------------------
+---
 
 ## 8. Publication Rather Than File Transfer
 
@@ -364,13 +364,13 @@ A major conceptual shift was from **transfer** to **publication**.
 
 Traditional networking assumes:
 
-``` text
+```text
 Sender → Transport → Receiver
 ```
 
 The proposed ZyPub model can instead support:
 
-``` text
+```text
 Entity
    ↓
 Publishes observable state
@@ -385,11 +385,11 @@ will observe it.
 
 Examples:
 
--   an EV charger publishes availability and fault state;
--   a machine publishes diagnostics;
--   a container publishes selected logistics evidence;
--   a kiosk publishes its capabilities;
--   emergency infrastructure publishes capacity and status.
+- an EV charger publishes availability and fault state;
+- a machine publishes diagnostics;
+- a container publishes selected logistics evidence;
+- a kiosk publishes its capabilities;
+- emergency infrastructure publishes capacity and status.
 
 This one-to-many model was described during the discussion as
 **Constitutional Broadcasting**.
@@ -397,7 +397,7 @@ This one-to-many model was described during the discussion as
 The term is useful conceptually even if it does not become formal
 nomenclature.
 
-------------------------------------------------------------------------
+---
 
 ## 9. Observable Constitutional State
 
@@ -409,7 +409,7 @@ entity can legitimately expose for observation at a given point in time.
 
 A possible flow is:
 
-``` text
+```text
 Reality
    ↓
 Observable state
@@ -433,7 +433,7 @@ A signed publication can prove properties about its origin and
 integrity. It cannot automatically prove that every claim remains
 globally current.
 
-------------------------------------------------------------------------
+---
 
 ## 10. Trust Is Computed, Not Transported
 
@@ -443,20 +443,20 @@ Moving a signed object does not automatically establish current trust.
 
 Disconnected operation introduces questions such as:
 
--   Has the issuer been revoked?
--   Has standing changed?
--   Has ownership already changed elsewhere?
--   Is this publication a replay?
--   How old is the evidence?
--   Does the observer possess the necessary authority keys?
--   Is the publication still within an acceptable freshness window?
+- Has the issuer been revoked?
+- Has standing changed?
+- Has ownership already changed elsewhere?
+- Is this publication a replay?
+- How old is the evidence?
+- Does the observer possess the necessary authority keys?
+- Is the publication still within an acceptable freshness window?
 
 Therefore ZyPub should communicate **evidence and attestations**, not
 magically transport "trust."
 
 Potential evaluation states discussed included:
 
-``` text
+```text
 Observed
    ↓
 Authenticated
@@ -472,18 +472,18 @@ These labels remain exploratory.
 
 A useful distinction is:
 
--   **Observed** --- information has been captured.
--   **Authenticated** --- cryptographic origin/integrity can be
-    established using available keys.
--   **Verified/Resolved** --- broader authority, standing, policy, and
-    current-state checks have been performed.
--   **Settled** --- any required state-changing execution has completed
-    according to applicable rules.
+- **Observed** --- information has been captured.
+- **Authenticated** --- cryptographic origin/integrity can be
+  established using available keys.
+- **Verified/Resolved** --- broader authority, standing, policy, and
+  current-state checks have been performed.
+- **Settled** --- any required state-changing execution has completed
+  according to applicable rules.
 
 An offline observer may not always be able to advance through every
 state.
 
-------------------------------------------------------------------------
+---
 
 ## 11. The Offline Revocation and Double-Spend Problem
 
@@ -492,9 +492,9 @@ This is the primary trust challenge.
 Suppose an offline device receives a signed ownership-transfer intent.
 The receiver may be unable to determine whether:
 
--   the sender's standing was revoked minutes earlier;
--   another conflicting transfer already occurred;
--   the authority chain has changed.
+- the sender's standing was revoked minutes earlier;
+- another conflicting transfer already occurred;
+- the authority chain has changed.
 
 The proposed direction is **not** to pretend this uncertainty does not
 exist.
@@ -513,7 +513,7 @@ A useful principle is:
 
 > **Offline uncertainty should be represented, not hidden.**
 
-------------------------------------------------------------------------
+---
 
 ## 12. Freshness and Replay Resistance
 
@@ -522,17 +522,17 @@ from recorded/replayed ones.
 
 Candidate mechanisms discussed include:
 
--   publication sequence number;
--   signed timestamp;
--   expiry;
--   authority epoch;
--   previous-publication hash;
--   monotonic counters;
--   hash-chain ratchets.
+- publication sequence number;
+- signed timestamp;
+- expiry;
+- authority epoch;
+- previous-publication hash;
+- monotonic counters;
+- hash-chain ratchets.
 
 Conceptually:
 
-``` text
+```text
 Publication 31827
        │
        ▼
@@ -549,7 +549,7 @@ Publication 31829
 This does not by itself solve global revocation, but it can make
 freshness and replay properties much more explicit.
 
-------------------------------------------------------------------------
+---
 
 ## 13. Local Trust Anchors
 
@@ -558,12 +558,12 @@ sufficient trust material.
 
 Possible approaches include:
 
--   cached authority public keys;
--   periodically synchronized authority bundles;
--   compressed trust-root structures;
--   enterprise/government provisioned trust stores;
--   localized trust anchors;
--   Merkle-root-based synchronization approaches.
+- cached authority public keys;
+- periodically synchronized authority bundles;
+- compressed trust-root structures;
+- enterprise/government provisioned trust stores;
+- localized trust anchors;
+- Merkle-root-based synchronization approaches.
 
 A working concept proposed during the discussion was a **Local Trust
 Anchor Registry (LTAR)**.
@@ -575,7 +575,7 @@ Consumer devices may have weaker offline verification capability than
 provisioned industrial, enterprise, customs, medical, or government
 equipment.
 
-------------------------------------------------------------------------
+---
 
 ## 14. Progressive Publication
 
@@ -594,53 +594,53 @@ Illustrative layers:
 
 Possible contents:
 
--   identity;
--   protocol version;
--   capabilities;
--   publication manifest;
--   transfer estimate;
--   integrity metadata.
+- identity;
+- protocol version;
+- capabilities;
+- publication manifest;
+- transfer estimate;
+- integrity metadata.
 
 ### Layer 1 --- Current State
 
 Possible contents:
 
--   status;
--   availability;
--   current operating state;
--   essential attributes.
+- status;
+- availability;
+- current operating state;
+- essential attributes.
 
 ### Layer 2 --- Evidence
 
 Possible contents:
 
--   attestations;
--   certificates;
--   selected signatures;
--   essential provenance.
+- attestations;
+- certificates;
+- selected signatures;
+- essential provenance.
 
 ### Layer 3 --- Rich Domain Material
 
 Possible contents:
 
--   Digital Product Passport;
--   warranty;
--   provenance;
--   GS1-related data;
--   chain-of-custody material.
+- Digital Product Passport;
+- warranty;
+- provenance;
+- GS1-related data;
+- chain-of-custody material.
 
 ### Layer 4+ --- Deep State
 
 Possible contents:
 
--   diagnostics;
--   maintenance history;
--   logs;
--   richer graph fragments.
+- diagnostics;
+- maintenance history;
+- logs;
+- richer graph fragments.
 
 This allows the observer to obtain the most valuable information first.
 
-------------------------------------------------------------------------
+---
 
 ## 15. Partial Capture Must Not Become Partial Trust
 
@@ -659,7 +659,7 @@ layers are intended to be independently consumed.
 
 For example:
 
-``` text
+```text
 Layer 0
   └── Signed manifest
 
@@ -676,7 +676,7 @@ Layer 3
 This could reconcile progressive disclosure with the requirement that
 the Runtime never infer trust from incomplete transport fragments.
 
-------------------------------------------------------------------------
+---
 
 ## 16. Keyframes, Delta Frames, and Cold-Start Scanning
 
@@ -687,17 +687,17 @@ stream. It cannot assume it captured frame zero.
 
 Therefore an optical ZyPub renderer may benefit from:
 
--   **keyframes** --- periodically repeated self-contained bootstrap
-    information;
--   **delta/data frames** --- additional material between keyframes;
--   forward error correction;
--   fountain coding;
--   redundant fragments;
--   cyclic publication.
+- **keyframes** --- periodically repeated self-contained bootstrap
+  information;
+- **delta/data frames** --- additional material between keyframes;
+- forward error correction;
+- fountain coding;
+- redundant fragments;
+- cyclic publication.
 
 Illustrative sequence:
 
-``` text
+```text
 [K] [D] [D] [D] [K] [D] [D] [D] [K]
 ```
 
@@ -707,7 +707,7 @@ long cycle.
 The terminology belongs primarily to the transport/encoding layer rather
 than the constitutional Runtime.
 
-------------------------------------------------------------------------
+---
 
 ## 17. Epochs and Channels
 
@@ -716,7 +716,7 @@ separate publication **epochs** or **channels**.
 
 For example:
 
-``` text
+```text
 Identity Channel
 Status Channel
 Safety Channel
@@ -744,7 +744,7 @@ channel.
 The frequency and ordering of publications may itself communicate what
 the publisher considers currently important.
 
-------------------------------------------------------------------------
+---
 
 ## 18. Publication Profiles
 
@@ -756,10 +756,10 @@ Very small, frequently repeated publication.
 
 Suitable for:
 
--   identity;
--   status;
--   heartbeat;
--   capabilities.
+- identity;
+- status;
+- heartbeat;
+- capabilities.
 
 ### Snapshot
 
@@ -780,7 +780,7 @@ Larger evidence/history package intended for longer capture sessions.
 
 These names remain proposals.
 
-------------------------------------------------------------------------
+---
 
 ## 19. Publication Versus Directed Exchange
 
@@ -794,28 +794,28 @@ carrier.
 
 One-way:
 
-``` text
+```text
 Publisher → Observer
 ```
 
 Suitable for:
 
--   identity;
--   status;
--   evidence;
--   capabilities;
--   provenance;
--   diagnostics.
+- identity;
+- status;
+- evidence;
+- capabilities;
+- provenance;
+- diagnostics.
 
 ### Directed interaction
 
 Some activities inherently require another party to respond:
 
--   authentication challenges;
--   ownership-transfer acceptance;
--   payment;
--   authorization;
--   negotiation.
+- authentication challenges;
+- ownership-transfer acceptance;
+- payment;
+- authorization;
+- negotiation.
 
 The proposal should not require the optical publication itself to become
 bidirectional.
@@ -825,18 +825,18 @@ separate interaction.
 
 Possible backchannels include:
 
--   Zync/Internet;
--   BLE;
--   NFC;
--   Wi-Fi Direct;
--   UWB;
--   another optical channel;
--   another future carrier.
+- Zync/Internet;
+- BLE;
+- NFC;
+- Wi-Fi Direct;
+- UWB;
+- another optical channel;
+- another future carrier.
 
 The constitutional semantics should remain independent of which
 backchannel is used.
 
-------------------------------------------------------------------------
+---
 
 ## 20. Observation and Execution Must Remain Distinct
 
@@ -845,7 +845,7 @@ observation and execution.
 
 A safer conceptual sequence is:
 
-``` text
+```text
 Publication
    ↓
 Observation
@@ -869,7 +869,7 @@ because it was received.
 This preserves the broader Zyppi distinction between evidence, trust,
 policy, and execution.
 
-------------------------------------------------------------------------
+---
 
 ## 21. Potential Real-World Use Cases
 
@@ -880,80 +880,80 @@ as opportunity hypotheses requiring validation.
 
 A machine could publish:
 
--   identity;
--   current fault;
--   operating status;
--   calibration state;
--   maintenance history;
--   spare-part information;
--   safety certificates.
+- identity;
+- current fault;
+- operating status;
+- calibration state;
+- maintenance history;
+- spare-part information;
+- safety certificates.
 
 ### EV charging
 
 A charger could publish:
 
--   identity;
--   availability;
--   current price;
--   power capability;
--   fault state;
--   payment capabilities;
--   inspection/certification information.
+- identity;
+- availability;
+- current price;
+- power capability;
+- fault state;
+- payment capabilities;
+- inspection/certification information.
 
 ### Logistics and customs
 
 Potential publications include:
 
--   product identities;
--   manifests;
--   origin evidence;
--   certificates;
--   chain-of-custody evidence;
--   handling history.
+- product identities;
+- manifests;
+- origin evidence;
+- certificates;
+- chain-of-custody evidence;
+- handling history.
 
 ### Air-gapped and RF-restricted environments
 
 Potentially relevant to:
 
--   secure facilities;
--   industrial networks;
--   maritime environments;
--   restricted operational technology networks.
+- secure facilities;
+- industrial networks;
+- maritime environments;
+- restricted operational technology networks.
 
 ### Disaster response
 
 Potential publication of:
 
--   shelter capacity;
--   supply inventories;
--   water availability;
--   medical capabilities;
--   emergency instructions.
+- shelter capacity;
+- supply inventories;
+- water availability;
+- medical capabilities;
+- emergency instructions.
 
 ### Kiosks and infrastructure
 
 Examples:
 
--   vending machines;
--   parking meters;
--   public kiosks;
--   ticketing equipment;
--   smart infrastructure.
+- vending machines;
+- parking meters;
+- public kiosks;
+- ticketing equipment;
+- smart infrastructure.
 
 ### Medical and laboratory equipment
 
 Potentially useful for:
 
--   device identity;
--   calibration;
--   maintenance;
--   certification;
--   locally available operational information.
+- device identity;
+- calibration;
+- maintenance;
+- certification;
+- locally available operational information.
 
 Sensitive medical or personal information would require substantially
 stronger privacy and authorization design.
 
-------------------------------------------------------------------------
+---
 
 ## 22. Where Optical Publication Is Probably Not the Best Choice
 
@@ -962,7 +962,7 @@ transfer as a universal replacement for existing technologies.
 
 For ordinary connected retail:
 
-``` text
+```text
 Static GS1 QR
       ↓
 Zync
@@ -975,16 +975,16 @@ an animated stream.
 
 Optical ZyPub is more compelling where:
 
--   connectivity is unavailable;
--   local state is more useful than remote state;
--   a display already exists;
--   RF communication is prohibited or unreliable;
--   cross-system integration is unavailable;
--   evidence must travel with the physical interaction.
+- connectivity is unavailable;
+- local state is more useful than remote state;
+- a display already exists;
+- RF communication is prohibited or unreliable;
+- cross-system integration is unavailable;
+- evidence must travel with the physical interaction.
 
 The economic case should drive carrier selection.
 
-------------------------------------------------------------------------
+---
 
 ## 23. Security Considerations
 
@@ -996,11 +996,11 @@ Visible optical publication can be captured by unintended cameras.
 
 Possible responses:
 
--   publish only public information;
--   encrypt sensitive payloads;
--   use recipient-bound encrypted capsules;
--   restrict publication channels by sensitivity;
--   require authorization before exposing sensitive layers.
+- publish only public information;
+- encrypt sensitive payloads;
+- use recipient-bound encrypted capsules;
+- restrict publication channels by sensitivity;
+- require authorization before exposing sensitive layers.
 
 ### Replay
 
@@ -1026,7 +1026,7 @@ suitable fresh trust material exists.
 PII, proprietary pricing, medical information, delegable capabilities,
 and sensitive operational data should not be casually broadcast.
 
-------------------------------------------------------------------------
+---
 
 ## 24. Proposed Capsule Concept
 
@@ -1036,7 +1036,7 @@ friendlier product-family name.
 
 A capsule could potentially include:
 
-``` text
+```text
 Header
 ├── protocol version
 ├── publication ID
@@ -1072,7 +1072,7 @@ This is conceptual and requires alignment with existing ZRM, runtime,
 security, canonical serialization, and projection contracts before
 adoption.
 
-------------------------------------------------------------------------
+---
 
 ## 25. Runtime and Gateway Separation
 
@@ -1081,7 +1081,7 @@ mechanics outside the pure constitutional Runtime.
 
 For an optical implementation:
 
-``` text
+```text
 Camera
    ↓
 Optical decoder
@@ -1101,19 +1101,19 @@ Zyppi Runtime
 
 The Runtime should not need to understand:
 
--   QR frames;
--   camera timing;
--   RGB channels;
--   screen refresh;
--   fountain coding;
--   BLE packets.
+- QR frames;
+- camera timing;
+- RGB channels;
+- screen refresh;
+- fountain coding;
+- BLE packets.
 
 Those belong to adapters/gateways.
 
 The Runtime should receive canonical constitutional inputs after
 transport normalization.
 
-------------------------------------------------------------------------
+---
 
 ## 26. Proposed Relationship Between Zync and ZyPub
 
@@ -1124,7 +1124,7 @@ They should converge on the same canonical representation.
 
 Conceptually:
 
-``` text
+```text
                     ZRM / Canonical Reality Model
                                │
                     ┌──────────┴──────────┐
@@ -1146,7 +1146,7 @@ ZyPub rather than Zync.
 
 A possible long-term SDK abstraction might resemble:
 
-``` typescript
+```typescript
 const result = await zyppi.observe(source);
 ```
 
@@ -1155,45 +1155,48 @@ acquired publication.
 
 The exact API remains to be designed.
 
-------------------------------------------------------------------------
+---
 
 ## 27. Proposed Product Vocabulary
 
 Current brainstorming vocabulary:
 
-  -----------------------------------------------------------------------
-  Working Name                        Proposed Meaning
-  ----------------------------------- -----------------------------------
-  **Zync**                            Connected access/communication with
-                                      living Zyppi reality
+---
 
-  **ZyPub**                           Self-contained publication of Zyppi
-                                      reality
+Working Name Proposed Meaning
 
-  **ZyPub Capsule (ZPC)**             Canonical bounded publication
-                                      payload
+---
 
-  **ZyPub Beacon**                    Small frequent publication
+**Zync** Connected access/communication with
+living Zyppi reality
 
-  **ZyPub Snapshot**                  Self-contained current-state
-                                      publication
+**ZyPub** Self-contained publication of Zyppi
+reality
 
-  **ZyPub Progressive**               Layered publication
+**ZyPub Capsule (ZPC)** Canonical bounded publication
+payload
 
-  **ZyPub Stream**                    Continuous changing publication
+**ZyPub Beacon** Small frequent publication
 
-  **ZyPub Exchange**                  Possible interaction/bootstrap
-                                      capability; requires further
-                                      definition
+**ZyPub Snapshot** Self-contained current-state
+publication
 
-  **ZyPub Optical**                   Optical carrier/renderer family
+**ZyPub Progressive** Layered publication
 
-  **Animated QR**                     Candidate first optical renderer
-  -----------------------------------------------------------------------
+**ZyPub Stream** Continuous changing publication
+
+**ZyPub Exchange** Possible interaction/bootstrap
+capability; requires further
+definition
+
+**ZyPub Optical** Optical carrier/renderer family
+
+**Animated QR** Candidate first optical renderer
+-----------------------------------------------------------------------
 
 These are proposed names only.
 
-------------------------------------------------------------------------
+---
 
 ## 28. Working Brand Language
 
@@ -1223,7 +1226,7 @@ A more technically accurate version may eventually avoid defining ZyPub
 exclusively as "offline," because a self-contained publication can also
 be valuable while online.
 
-------------------------------------------------------------------------
+---
 
 ## 29. Important Strategic Correction: ZyPub Is Not Only Offline
 
@@ -1233,11 +1236,11 @@ ultimately be useful in connected environments as well.
 For example, a machine could publish local state directly even when both
 devices have Internet access because:
 
--   local state may be fresher;
--   cloud round-trips may be unnecessary;
--   privacy may favor local disclosure;
--   the observer may need deterministic local evidence;
--   the asset may intentionally expose only a bounded view.
+- local state may be fresher;
+- cloud round-trips may be unnecessary;
+- privacy may favor local disclosure;
+- the observer may need deterministic local evidence;
+- the asset may intentionally expose only a bounded view.
 
 Therefore a stronger distinction may be:
 
@@ -1249,18 +1252,18 @@ formal semantic boundary.
 
 This should be investigated before the terminology is frozen.
 
-------------------------------------------------------------------------
+---
 
 ## 30. Strategic Position
 
 ZyPub should not be presented as:
 
--   a QR replacement;
--   a file-transfer product;
--   an offline blockchain;
--   an alternative Internet;
--   a universal replacement for NFC/BLE;
--   a new proprietary barcode merely for branding.
+- a QR replacement;
+- a file-transfer product;
+- an offline blockchain;
+- an alternative Internet;
+- a universal replacement for NFC/BLE;
+- a new proprietary barcode merely for branding.
 
 Its potential strategic position is:
 
@@ -1271,7 +1274,7 @@ Its potential strategic position is:
 The optical implementation is valuable because modern screens and
 cameras already provide ubiquitous compatible hardware.
 
-------------------------------------------------------------------------
+---
 
 ## 31. Potential Wedge
 
@@ -1294,7 +1297,7 @@ GS1 could provide useful prototype data because Zyppi's current
 development already has GS1 context, but ZyPub itself should not become
 GS1-specific.
 
-------------------------------------------------------------------------
+---
 
 ## 32. Suggested Prototype Direction
 
@@ -1311,44 +1314,44 @@ connectivity.
 
 For example:
 
--   GS1 identifier;
--   asset identity;
--   current status;
--   timestamp;
--   publication sequence;
--   small evidence record;
--   issuer signature;
--   manifest.
+- GS1 identifier;
+- asset identity;
+- current status;
+- timestamp;
+- publication sequence;
+- small evidence record;
+- issuer signature;
+- manifest.
 
 ### Candidate optical implementation
 
--   standard animated QR;
--   approximately 5--10 fps initially;
--   conservative payload size;
--   redundant fragments;
--   periodic bootstrap/keyframes;
--   local signature verification.
+- standard animated QR;
+- approximately 5--10 fps initially;
+- conservative payload size;
+- redundant fragments;
+- periodic bootstrap/keyframes;
+- local signature verification.
 
 ### Questions to measure
 
--   acquisition time;
--   cold-start time;
--   successful decode rate;
--   distance;
--   viewing angle;
--   sunlight/glare performance;
--   low-end camera performance;
--   interrupted scan recovery;
--   payload size;
--   error-correction overhead;
--   battery/CPU cost;
--   replay detection;
--   user tolerance.
+- acquisition time;
+- cold-start time;
+- successful decode rate;
+- distance;
+- viewing angle;
+- sunlight/glare performance;
+- low-end camera performance;
+- interrupted scan recovery;
+- payload size;
+- error-correction overhead;
+- battery/CPU cost;
+- replay detection;
+- user tolerance.
 
 The prototype should validate the physics before Zyppi commits to a
 bespoke optical encoder.
 
-------------------------------------------------------------------------
+---
 
 ## 33. Questions Still Open
 
@@ -1357,57 +1360,57 @@ require investigation.
 
 ### Semantic
 
--   Is "Observable Constitutional State" necessary, or can existing ZRM
-    concepts express everything?
--   Is a ZyPub Capsule a new object, a projection, an envelope, or
-    merely serialization?
--   What constitutes an independently valid progressive layer?
--   How should uncertainty and freshness be represented using existing
-    Zyppi semantics?
+- Is "Observable Constitutional State" necessary, or can existing ZRM
+  concepts express everything?
+- Is a ZyPub Capsule a new object, a projection, an envelope, or
+  merely serialization?
+- What constitutes an independently valid progressive layer?
+- How should uncertainty and freshness be represented using existing
+  Zyppi semantics?
 
 ### Trust
 
--   How are offline trust roots provisioned?
--   How is revocation represented?
--   What operations can safely occur under bounded offline standing?
--   How are conflicting offline intents reconciled?
--   What freshness guarantees are actually achievable?
+- How are offline trust roots provisioned?
+- How is revocation represented?
+- What operations can safely occur under bounded offline standing?
+- How are conflicting offline intents reconciled?
+- What freshness guarantees are actually achievable?
 
 ### Transport
 
--   What practical throughput is achievable on commodity phones?
--   Is animated QR sufficient?
--   Are fountain codes necessary?
--   How frequently should bootstrap frames repeat?
--   Is RGB encoding worth its reliability cost?
--   How should different display refresh rates be handled?
+- What practical throughput is achievable on commodity phones?
+- Is animated QR sufficient?
+- Are fountain codes necessary?
+- How frequently should bootstrap frames repeat?
+- Is RGB encoding worth its reliability cost?
+- How should different display refresh rates be handled?
 
 ### Security
 
--   Which publications are public?
--   Which require encryption?
--   How does recipient-specific disclosure work?
--   How are replay and truncation attacks detected?
--   What metadata itself may leak sensitive information?
+- Which publications are public?
+- Which require encryption?
+- How does recipient-specific disclosure work?
+- How are replay and truncation attacks detected?
+- What metadata itself may leak sensitive information?
 
 ### Product
 
--   Which use case has enough pain to justify ZyPub?
--   Is "Zync" globally defensible as a brand?
--   Should ZyPub be marketed as offline capability or direct
-    publication?
--   Does the optical renderer need a separate consumer-facing name?
+- Which use case has enough pain to justify ZyPub?
+- Is "Zync" globally defensible as a brand?
+- Should ZyPub be marketed as offline capability or direct
+  publication?
+- Does the optical renderer need a separate consumer-facing name?
 
 ### Governance
 
--   Where should this concept live in the existing Zyppi corpus?
--   Does it require any constitutional change at all?
--   Which parts are architecture, runtime specification, gateway
-    implementation, and product branding?
--   How can the proposal avoid creating a shadow architecture alongside
-    existing ZRM/RI/CAW structures?
+- Where should this concept live in the existing Zyppi corpus?
+- Does it require any constitutional change at all?
+- Which parts are architecture, runtime specification, gateway
+  implementation, and product branding?
+- How can the proposal avoid creating a shadow architecture alongside
+  existing ZRM/RI/CAW structures?
 
-------------------------------------------------------------------------
+---
 
 ## 34. Proposed Principles for Further Exploration
 
@@ -1462,11 +1465,11 @@ rather than depending on a proprietary visual matrix.
 Interrupted or low-quality observation should produce an explicit,
 bounded result rather than ambiguous success.
 
-------------------------------------------------------------------------
+---
 
 ## 35. Proposed Conceptual Architecture
 
-``` text
+```text
                            REALITY
                               │
                               ▼
@@ -1504,7 +1507,7 @@ bounded result rather than ambiguous success.
 
 This is an exploratory architecture diagram, not an approved stack.
 
-------------------------------------------------------------------------
+---
 
 ## 36. The Central Proposition
 
@@ -1518,7 +1521,7 @@ The entire brainstorming session can be reduced to one proposition:
 
 This would allow Zyppi to operate across a continuum:
 
-``` text
+```text
 Fully Connected
       │
       │ Zync
@@ -1538,7 +1541,7 @@ The architectural value is not merely offline support.
 
 It is **communication independence**.
 
-------------------------------------------------------------------------
+---
 
 ## 37. Closing Proposal
 
@@ -1568,7 +1571,7 @@ The transport can change.
 
 The semantics should not.
 
-------------------------------------------------------------------------
+---
 
 ## 38. Status and Next Step
 
@@ -1577,14 +1580,14 @@ suggested directions only**.
 
 It does **not**:
 
--   ratify ZyPub or Zync;
--   create constitutional primitives;
--   amend ZRM, SIOS, CAW, RI, SEC, POL, or other governing series;
--   authorize implementation;
--   establish milestone scope;
--   select a market wedge;
--   mandate an optical protocol;
--   declare the proposed vocabulary final.
+- ratify ZyPub or Zync;
+- create constitutional primitives;
+- amend ZRM, SIOS, CAW, RI, SEC, POL, or other governing series;
+- authorize implementation;
+- establish milestone scope;
+- select a market wedge;
+- mandate an optical protocol;
+- declare the proposed vocabulary final.
 
 A sensible next step would be to subject the concept to two independent
 investigations:

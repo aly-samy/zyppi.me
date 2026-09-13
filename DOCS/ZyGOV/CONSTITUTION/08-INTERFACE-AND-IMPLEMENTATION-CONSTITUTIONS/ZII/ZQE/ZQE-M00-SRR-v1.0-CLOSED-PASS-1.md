@@ -367,19 +367,19 @@ No correction required.
 
 # 14. Consolidated SRR Board
 
-| NVR | Result |
-|---|---|
-| NVR-001 | PASS — DIRECT 2024 |
-| NVR-002 | PASS — STANDARD-READY |
-| NVR-003 | PASS — STANDARD-READY |
-| NVR-004 | PASS — STANDARD-READY |
-| NVR-005 | PASS — STANDARD-READY |
-| NVR-006 | PASS — STANDARD-READY |
-| NVR-007 | PASS — STANDARD-READY |
+| NVR     | Result                               |
+| ------- | ------------------------------------ |
+| NVR-001 | PASS — DIRECT 2024                   |
+| NVR-002 | PASS — STANDARD-READY                |
+| NVR-003 | PASS — STANDARD-READY                |
+| NVR-004 | PASS — STANDARD-READY                |
+| NVR-005 | PASS — STANDARD-READY                |
+| NVR-006 | PASS — STANDARD-READY                |
+| NVR-007 | PASS — STANDARD-READY                |
 | NVR-008 | PASS — STANDARD-READY / ZQE DECISION |
-| NVR-009 | PASS — CORRECTED |
-| NVR-010 | PASS — STANDARD-READY |
-| NVR-011 | PASS — STANDARD-READY |
+| NVR-009 | PASS — CORRECTED                     |
+| NVR-010 | PASS — STANDARD-READY                |
+| NVR-011 | PASS — STANDARD-READY                |
 
 ---
 
@@ -472,7 +472,6 @@ WRITE FINAL FORMAT INFORMATION
 ```
 
 That correction has now been applied. The Chair accepts this SRR. The FQR profile is suitable for **STANDARD-READY** status.
-
 
 ---
 

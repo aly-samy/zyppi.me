@@ -1,4 +1,5 @@
 # ZRM-003B — Reality Mathematics
+
 ```
 **Document ID:** ZRM-003B
 **Version:** 1.0 (Draft)
@@ -7,6 +8,7 @@
 **Classification:** Tier 2 — Mathematical Constitution
 **Numbering note:** Theorem/definition IDs below use a provisional family-prefix scheme (e.g. `ID-T01`). ZRM-007's Constitutional ID/Registry Numbering Policy does not yet exist; expect renumbering once it does. Legacy TH-xxx numbers from the mined source material are not preserved anywhere in this document, per Rule 3.2.
 ```
+
 ---
 
 ## 1. Purpose
@@ -27,8 +29,9 @@ Depends on ZRM-003A in full. Excludes Event and Evidence mathematics (ZRM-004), 
 
 **Status: ✅ Ratified** (mined from legacy corpus; TH-003 and TH-030 final registry, batch 1)
 
-### **ID-T01 — Identity Immutability & Uniqueness** 
-*(ratified; formerly legacy TH-003)*
+### **ID-T01 — Identity Immutability & Uniqueness**
+
+_(ratified; formerly legacy TH-003)_
 
 Let `𝓘` be the set of all constitutional Identity relationships (ZRM-002 §5.1). For every constitutional constituent `x`:
 
@@ -38,22 +41,25 @@ Let `𝓘` be the set of all constitutional Identity relationships (ZRM-002 §5.
 
 No two distinct constituents share an Identity: `∀ x, y : i(x) = i(y) → x = y`.
 
-> *Derived from: ZRM-002 §5.1 ID-1 through ID-6 (Identity as Structural Construct), formalized.*
+> _Derived from: ZRM-002 §5.1 ID-1 through ID-6 (Identity as Structural Construct), formalized._
 
-### **ID-T02 — Identity Atomicity** 
-*(ratified; formerly legacy TH-030)*
+### **ID-T02 — Identity Atomicity**
+
+_(ratified; formerly legacy TH-030)_
 
 An Identity relationship cannot be partially held or partially transferred. For any constituent `x`, `i(x)` is a single indivisible relation — there is no mathematical operation that splits, merges, or fractionally assigns an Identity relationship across constituents.
 
-### **ID-C01 — Identity Non-Transferability** 
-*(stated as a corollary, not an independent theorem — formerly legacy TH-018)*
+### **ID-C01 — Identity Non-Transferability**
+
+_(stated as a corollary, not an independent theorem — formerly legacy TH-018)_
 
 Follows directly from ID-T01 (uniqueness, immutability) and ID-T02 (atomicity): if `i(x)` were transferred to `y`, ID-T01's invariance would be violated for `x`. Not proven independently; stated here as a named consequence because downstream documents will want to cite it directly.
 
 > **Discarded during mining** — two theorem candidates (legacy TH-031 "Identity Independence," TH-034 "Representation Independence") were found to duplicate content already covered by ZRM-003A AX-003 (Structural Identity) and ZRM-002's own representation-independence invariants. Not restated here; cite the originals.
 
-### **ID-T03 — Identity–Temporal Consistency** 
-> — *open, not yet proven*
+### **ID-T03 — Identity–Temporal Consistency**
+
+> — _open, not yet proven_
 
 Legacy TH-009 was deferred pending a formalized Temporal Mathematics. That now exists (§8 below). This theorem is **not** proven in this draft — doing so here would be inventing a proof rather than recovering or deriving one. Flagging it as the first item for S6-003 or a future revision to formally attempt, now that the prerequisite (§8) is in place.
 
@@ -65,13 +71,15 @@ Legacy TH-009 was deferred pending a formalized Temporal Mathematics. That now e
 
 Let `𝓐` be the set of Attributes. Each `a ∈ 𝓐` is a partial function `a : Construct → Value` describing exactly one construct (ZRM-002 ATR-2).
 
-### **AT-C01 — Attribute Independence from Identity** 
-*(candidate, unproven)*
+### **AT-C01 — Attribute Independence from Identity**
+
+_(candidate, unproven)_
 
 `∀ a ∈ 𝓐, ∀ x : a(x)` changing over time does not change `i(x)` — i.e., attribute mutation and identity are independent functions. Formalizes ATR-3/ATR-6.
 
-### **AT-C02 — Attribute Non-Distinguishing** 
-*(candidate, unproven)*
+### **AT-C02 — Attribute Non-Distinguishing**
+
+_(candidate, unproven)_
 
 Two constituents may share identical attribute values while remaining distinct under Identity: `∃ x ≠ y : ∀ a ∈ 𝓐, a(x) = a(y)`. Formalizes ATR-3.
 
@@ -85,13 +93,15 @@ Two constituents may share identical attribute values while remaining distinct u
 
 A Relationship `r ∈ 𝓡` connects two or more constituents: `r ⊆ V × V` (using the Reality Graph vertex set defined in §6).
 
-### **RL-C01 — Relationship Identity Preservation** 
-*(candidate, unproven)*
+### **RL-C01 — Relationship Identity Preservation**
+
+_(candidate, unproven)_
 
 `∀ r(x, y) : ` the existence of `r` does not alter `i(x)` or `i(y)`. Formalizes REL-2.
 
-### **RL-C02 — Relationship Non-Creation of Primitives** 
-*(candidate, unproven)*
+### **RL-C02 — Relationship Non-Creation of Primitives**
+
+_(candidate, unproven)_
 
 No composition of Relationships produces a new constitutional primitive: `∀ R' ⊆ 𝓡 : compose(R')` yields a Structural Construct, never a Primitive. Formalizes REL-3.
 
@@ -113,15 +123,16 @@ Not ratified. First candidates for whichever future mining batch or fresh proof 
 
 `E ⊆ V × V`, the set of Structural Relationships (ZRM-002 §5.2) and Reified Relationships between vertices.
 
-This is a definition, not a theorem — it requires no proof, only internal consistency with ZRM-002. Any theorem *about* `G` (e.g., "G is always connected," "G has no dangling edges") is a separate claim requiring its own proof, and none is asserted here.
+This is a definition, not a theorem — it requires no proof, only internal consistency with ZRM-002. Any theorem _about_ `G` (e.g., "G is always connected," "G has no dangling edges") is a separate claim requiring its own proof, and none is asserted here.
 
-**Boundary note:** `G` as defined here is the *general* Reality Graph. ZRM-005's "Materialized Reality Graph" is a downstream, application-specific projection of `G` (via §10's Projection Function) — not a redefinition of it.
+**Boundary note:** `G` as defined here is the _general_ Reality Graph. ZRM-005's "Materialized Reality Graph" is a downstream, application-specific projection of `G` (via §10's Projection Function) — not a redefinition of it.
 
 ## 7. Graph Topology
 
 **Status: ⏳ Named, not mined.** Hierarchy, containment, connectivity, and reachability are named as topics in the legacy family taxonomy but no ratified theorem was found for any of them.
 
 ### **Definition TP-D01 — Reachability**
+
 `x` is reachable from `y` in `G` if `∃` a finite sequence of edges `e₁, …, eₙ ∈ E` connecting `y` to `x`. This is a definition only.
 
 No theorem about reachability, hierarchy, or connectivity is asserted in this draft. Recommend this section stay a placeholder until either more legacy material surfaces or it's fresh-derived deliberately as its own work item — don't let a plausible-sounding but unproven claim (e.g. "reachability is transitive," which is true in ordinary graph theory but hasn't been checked against this constitutional model specifically) slip in here uncited.
@@ -134,57 +145,66 @@ No theorem about reachability, hierarchy, or connectivity is asserted in this dr
 
 **Status: ✅ Ratified** (mined from legacy corpus; final Registry Freeze, batch 2)
 
-### **TM-T01 — Logical Time Ordering** 
-*(ratified)*
+### **TM-T01 — Logical Time Ordering**
+
+_(ratified)_
 
 Constitutional time is a total or partial function ordering Events independent of any physical clock: `∀ e₁, e₂ ∈ Event : order(e₁, e₂)` is determined by constitutional logical time, not `ObservationTime`.
 
-**TM-T02 — Concurrency** *(ratified)*
+**TM-T02 — Concurrency** _(ratified)_
 Constitutional time permits two Events to hold no ordering relation to each other: `∃ e₁, e₂ : ¬order(e₁, e₂) ∧ ¬order(e₂, e₁)` — they are concurrent.
 
-### **TM-T03 — Partial Ordering** 
-*(ratified)*
+### **TM-T03 — Partial Ordering**
+
+_(ratified)_
 
 Logical time forms a strict partial order over Events: irreflexive, asymmetric, and transitive. It is not required to be total (per TM-T02).
 
-### **TM-T04 — Temporal Topology** 
-*(ratified)*
+### **TM-T04 — Temporal Topology**
+
+_(ratified)_
 
 Logical time possesses a mathematical topology — it is not merely a linear sequence but admits structure (branching, concurrency classes) consistent with TM-T02/TM-T03.
 
-### **TM-T05 — Temporal Irreversibility** 
-*(ratified)*
+### **TM-T05 — Temporal Irreversibility**
+
+_(ratified)_
 
 Logical time has an irreversible direction: `∀ e₁, e₂ : order(e₁, e₂) → ¬order(e₂, e₁)`, and this direction is never reversed by any valid mathematical transition (§4.5 of ZRM-003A).
 
-*Scope note carried from mining: these theorems are explicitly clock/UTC/timestamp/duration/scheduling-independent. Runtime scheduling belongs to RI-006, not here.*
+_Scope note carried from mining: these theorems are explicitly clock/UTC/timestamp/duration/scheduling-independent. Runtime scheduling belongs to RI-006, not here._
 
 ## 9. State Mathematics
 
 **Status: ✅ Ratified** (mined from legacy corpus; final Registry Freeze, batch 2)
 
-### **ST-T01 — State Derivation** 
-*(ratified)*
+### **ST-T01 — State Derivation**
+
+_(ratified)_
 
 For any constituent `x`, `State(x, t)` is a mathematical consequence of `x`'s Identity, its ordered Events (per TM-T01), and Time — and **only** these three. No Relationship or Graph dependency is asserted or required by this theorem.
 
-### **ST-T02 — State Equivalence** 
-*(ratified)*
+### **ST-T02 — State Equivalence**
+
+_(ratified)_
 
 Two States are equivalent iff no constitutional observation distinguishes them: `State(x, t₁) ≡ State(y, t₂) ⇔ ∀` observable properties, the two agree.
 
-### **ST-T03 — State Composition** 
-*(ratified)*
+### **ST-T03 — State Composition**
+
+_(ratified)_
 
 Compatible States compose into a larger State, and composition preserves the truth of each component: `compose(State(x, t), State(y, t))` is valid whenever `x` and `y` do not conflict, and the result entails everything both components entailed.
 
-### **ST-T04 — State Identity Preservation** 
-*(ratified)*
+### **ST-T04 — State Identity Preservation**
+
+_(ratified)_
 
 State evolution never changes the Identity it derives from: `∀ t₁, t₂ : State(x, t₁) → State(x, t₂)` implies `i(x, t₁) = i(x, t₂)` — directly consistent with ID-T01.
 
-### **ST-T05 — State Independence** 
-*(ratified)*
+### **ST-T05 — State Independence**
+
+_(ratified)_
 
 Independent States evolve independently unless an Event establishes dependency between them: `¬∃ e : e` relates `x` and `y` `→ State(x, t)` and `State(y, t)` vary independently.
 
@@ -197,6 +217,7 @@ Independent States evolve independently unless an Event establishes dependency b
 **Status: 🆕 Fresh definition.** Kept here per the resolution reached during TOC review — this is the general mathematical machinery; ZRM-005 consumes it to derive specific semantic constructs (Touchpoint, Intent, etc.) but does not redefine it.
 
 ### **Definition PJ-D01 — Projection Function**
+
 A Projection is a function `π : G → G'` where `G'` is a mathematical space preserving a defined subset of `G`'s properties while intentionally discarding others (per ZRM-003A §4.10). A projection is **valid** iff every property it claims to preserve is actually preserved — i.e., correctness is defined relative to the specific properties named, not universally.
 
 No theorem about specific projections is stated here. ZRM-005 §3–4 will specialize this definition; it must not redefine it.
@@ -206,6 +227,7 @@ No theorem about specific projections is stated here. ZRM-005 §3–4 will speci
 **Status: ⏳ Named, not mined.** Merge, Split, Reduction, Expansion, Normalization, Canonicalization are named in the legacy taxonomy (Stage 5) with no surviving ratified content.
 
 ### **Definition TR-D01 — Transformation, general form**
+
 A Mathematical Transformation is any function `f : G → G` (or `G → G'`) satisfying ZRM-003A §5.2 (no new primitives) and preserving whatever invariants apply to its specific case. Merge, Split, Reduction, Expansion, Normalization, and Canonicalization are all instances of this general form, distinguished by which invariants each must preserve — none of which have been individually specified yet.
 
 This is a placeholder scaffold, not a proven set of transformations. Treat §11 as open.
@@ -215,6 +237,7 @@ This is a placeholder scaffold, not a proven set of transformations. Treat §11 
 **Status: ⏳ Named, not mined.** Per the split agreed during mining: only Consistency/Integrity/Validity belong here; Permission/Policy constraints were routed to POL-001 lineage and do not appear in this document at all.
 
 ### **Definition CN-D01 — Constraint**
+
 A Constraint is a predicate `c : G → {true, false}` that every valid state of `G` must satisfy (per ZRM-003A §4.6). No specific constraint (e.g. a formal Consistency or Integrity predicate) has been mined or derived yet — this section names the category without populating it.
 
 ---
@@ -225,8 +248,9 @@ A Constraint is a predicate `c : G → {true, false}` that every valid state of 
 
 **Status: partial.** One genuine cross-cutting corollary follows directly from what's already ratified above, rather than being independently mined:
 
-### **RM-G01 — Identity Permanence Under Evolution** 
-*(corollary, follows from ID-T01 + ST-T04)*
+### **RM-G01 — Identity Permanence Under Evolution**
+
+_(corollary, follows from ID-T01 + ST-T04)_
 
 Since Identity is invariant across time (ID-T01) and State evolution preserves the Identity it derives from (ST-T04), no sequence of valid State transitions can ever change what a constituent's Identity is — Identity is permanent not just by its own theorem, but as an emergent property of the entire State evolution system. This is stated as a corollary, not a new independent theorem, since it adds no content beyond what ID-T01 and ST-T04 already established together.
 
@@ -255,11 +279,13 @@ This document SHALL NOT define:
 ---
 
 ## 16. Dependencies
+
 ```
 **Authority:**      Tier 1 + ZRM-003A
 **Depends on:**     ZRM-003A (all sections), ZRM-002 §4–5 (primitives and structural constructs)
 **Enables:**        ZRM-004, ZRM-005, ZRM-006
 ```
+
 ## 17. Completion Criteria
 
 This document is **not** complete. Before it can proceed to S6-003:

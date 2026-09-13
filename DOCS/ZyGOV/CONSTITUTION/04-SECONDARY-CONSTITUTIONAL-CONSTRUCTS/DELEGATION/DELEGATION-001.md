@@ -2,19 +2,19 @@
 
 **Secondary Cross-Constitutional Constitutional Construct**
 
-| Field | Value |
-| :--- | :--- |
-| **Identifier** | `DELEGATION-001` |
-| **Title** | Universal Delegation & Agency Constitution |
-| **Constitutional Class** | Secondary Constitutional Construct |
-| **Architectural Nature** | Cross-Constitutional / Derived / Non-Sovereign |
-| **Parent Closure Program** | `CCP-RI-CLOSURE-01` — Agency & Delegation Contract Closure |
-| **Primary Authority Sources** | POL, WS, SEC, ZRM/Identity, RI |
-| **Implementation Authority** | NONE |
-| **Repository Mutation Authority** | NONE |
-| **New ZRM Primitive Authority** | NONE |
-| **Status** | DRAFT — CONSTITUTIONAL CONSTRUCTION |
-| **Purpose** | Establish one canonical constitutional composition model for lawful delegation and agency across all Zyppi domains |
+| Field                             | Value                                                                                                              |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| **Identifier**                    | `DELEGATION-001`                                                                                                   |
+| **Title**                         | Universal Delegation & Agency Constitution                                                                         |
+| **Constitutional Class**          | Secondary Constitutional Construct                                                                                 |
+| **Architectural Nature**          | Cross-Constitutional / Derived / Non-Sovereign                                                                     |
+| **Parent Closure Program**        | `CCP-RI-CLOSURE-01` — Agency & Delegation Contract Closure                                                         |
+| **Primary Authority Sources**     | POL, WS, SEC, ZRM/Identity, RI                                                                                     |
+| **Implementation Authority**      | NONE                                                                                                               |
+| **Repository Mutation Authority** | NONE                                                                                                               |
+| **New ZRM Primitive Authority**   | NONE                                                                                                               |
+| **Status**                        | DRAFT — CONSTITUTIONAL CONSTRUCTION                                                                                |
+| **Purpose**                       | Establish one canonical constitutional composition model for lawful delegation and agency across all Zyppi domains |
 
 ---
 
@@ -40,7 +40,7 @@ What is missing is not the idea of Delegation.
 
 What is missing is one constitutional location that answers:
 
-> *How do the existing Zyppi constitutional systems compose into one complete, explicit, bounded, attributable, revocable, temporally valid and execution-usable delegation?*
+> _How do the existing Zyppi constitutional systems compose into one complete, explicit, bounded, attributable, revocable, temporally valid and execution-usable delegation?_
 
 `DELEGATION-001` exists to close that composition.
 
@@ -96,7 +96,7 @@ It receives meaning from primary constitutional owners and establishes the lawfu
 
 `DELEGATION-001` **SHALL** possess authority only over:
 
-> *The composition, lineage, binding and execution-readiness of constitutional Delegation and Agency.*
+> _The composition, lineage, binding and execution-readiness of constitutional Delegation and Agency._
 
 It **SHALL NOT** redefine concepts canonically owned elsewhere.
 
@@ -106,28 +106,28 @@ Where this document conflicts with a primary constitutional owner, the primary o
 
 ## 4. Sovereign Ownership Boundaries
 
-| Constitutional concern | Canonical owner |
-| :--- | :--- |
-| Subject / Reality | ZRM |
-| Identity | CL / Identity Constitution |
-| generic structural Relationship | ZRM / WS |
-| Reified Relationship | WS |
-| Role Type | CL-01 Actor, under active WS supersession |
-| Role Assignment / `ASSIGNED_ROLE` | WS |
-| Authority Anchor reference mechanism | WS / CL-04 Identity |
-| Authority | POL |
-| Delegated Authority | POL |
-| Delegation constitutional meaning | POL |
-| Permission / Authorization | POL |
-| Standing | governing constitutional authority |
-| Capability | governing Capability constitution |
-| Trust | SEC |
-| attestation security | SEC / applicable Attestation constitution |
-| security revocation consequences | SEC |
-| Evidence | Evidence Constitution |
-| execution participation | RI |
-| execution-envelope compatibility | RI |
-| historical execution binding | RI + governing source constitutions |
+| Constitutional concern               | Canonical owner                           |
+| :----------------------------------- | :---------------------------------------- |
+| Subject / Reality                    | ZRM                                       |
+| Identity                             | CL / Identity Constitution                |
+| generic structural Relationship      | ZRM / WS                                  |
+| Reified Relationship                 | WS                                        |
+| Role Type                            | CL-01 Actor, under active WS supersession |
+| Role Assignment / `ASSIGNED_ROLE`    | WS                                        |
+| Authority Anchor reference mechanism | WS / CL-04 Identity                       |
+| Authority                            | POL                                       |
+| Delegated Authority                  | POL                                       |
+| Delegation constitutional meaning    | POL                                       |
+| Permission / Authorization           | POL                                       |
+| Standing                             | governing constitutional authority        |
+| Capability                           | governing Capability constitution         |
+| Trust                                | SEC                                       |
+| attestation security                 | SEC / applicable Attestation constitution |
+| security revocation consequences     | SEC                                       |
+| Evidence                             | Evidence Constitution                     |
+| execution participation              | RI                                        |
+| execution-envelope compatibility     | RI                                        |
+| historical execution binding         | RI + governing source constitutions       |
 
 `DELEGATION-001` **SHALL NOT** duplicate these authorities.
 
@@ -137,7 +137,7 @@ Where this document conflicts with a primary constitutional owner, the primary o
 
 Delegation is:
 
-> *The explicit constitutional transfer or derivation of bounded Authority from a Subject possessing valid Authority to another Subject, while preserving the Authority's origin, provenance, scope, temporal validity and constitutional constraints.*
+> _The explicit constitutional transfer or derivation of bounded Authority from a Subject possessing valid Authority to another Subject, while preserving the Authority's origin, provenance, scope, temporal validity and constitutional constraints._
 
 Delegation:
 
@@ -234,11 +234,11 @@ may substitute for constitutional Delegation.
 
 Capability answers:
 
-> *What governed ability may potentially be exercised?*
+> _What governed ability may potentially be exercised?_
 
 Delegation answers:
 
-> *In relation to whose constitutional Authority or governed state may this Subject exercise it?*
+> _In relation to whose constitutional Authority or governed state may this Subject exercise it?_
 
 Therefore:
 
@@ -531,7 +531,7 @@ Agency Binding is not itself a new sovereign source of Authority.
 
 It is the deterministic binding that establishes:
 
-> *These exact existing constitutional artifacts constitute the agency basis claimed for this execution.*
+> _These exact existing constitutional artifacts constitute the agency basis claimed for this execution._
 
 Conceptually:
 
@@ -687,10 +687,10 @@ SEC Trust / Attestation status
 
 They answer different questions.
 
-| Question | Answered by |
-| :--- | :--- |
-| Does the governed Role Assignment or agency relationship exist and remain applicable? | Relationship status |
-| Does its constitutional Authority source currently possess force? | Authority status |
+| Question                                                                                            | Answered by                |
+| :-------------------------------------------------------------------------------------------------- | :------------------------- |
+| Does the governed Role Assignment or agency relationship exist and remain applicable?               | Relationship status        |
+| Does its constitutional Authority source currently possess force?                                   | Authority status           |
 | Can the required security, Identity, Capability and delegation chain be trusted for this execution? | Trust / Attestation status |
 
 Any execution-affecting dimension required by the requested Action **SHALL** be bound explicitly.
@@ -1219,12 +1219,12 @@ The Constitution still requires closure of the exact attestation contract/type u
 
 The architecture distinguishes:
 
-| Concern | Owner |
-| :--- | :--- |
-| Constitutional validity of Authority and Delegation | POL |
-| Security/trust/attestation validity and revocation consequences | SEC |
-| Material retrieval and exact upstream assembly | Application |
-| Consumption, coherence validation and execution | RI |
+| Concern                                                         | Owner       |
+| :-------------------------------------------------------------- | :---------- |
+| Constitutional validity of Authority and Delegation             | POL         |
+| Security/trust/attestation validity and revocation consequences | SEC         |
+| Material retrieval and exact upstream assembly                  | Application |
+| Consumption, coherence validation and execution                 | RI          |
 
 The precise authoritative procedure by which the Agency state applicable at `T_e_input` is resolved must still be frozen.
 
@@ -1236,28 +1236,28 @@ The precise authoritative procedure by which the Agency state applicable at `T_e
 
 The following **SHALL** remain permanently true:
 
-| ID | Invariant |
-| :--- | :--- |
-| **DLG-INV-001** — Explicitness | Delegation is explicit. |
-| **DLG-INV-002** — Authority Origin | Delegation requires valid originating Authority. |
-| **DLG-INV-003** — No Sovereignty Creation | Delegation never creates sovereignty. |
-| **DLG-INV-004** — Attenuation | Delegation never exceeds its origin. |
-| **DLG-INV-005** — Provenance | Delegation preserves complete Authority lineage. |
-| **DLG-INV-006** — Temporal Bound | Delegation is temporally bounded. |
-| **DLG-INV-007** — Revocability | Delegation is revocable according to governing constitutional law. |
-| **DLG-INV-008** — Cascade | Loss of parent Authority invalidates dependent Delegations for current execution. |
-| **DLG-INV-009** — Subject Integrity | Actor and Governed Subject remain explicit Subjects. |
-| **DLG-INV-010** — No Identity Substitution | Identity does not imply Delegation. |
-| **DLG-INV-011** — No Trust Substitution | Trust does not imply Delegation. |
-| **DLG-INV-012** — No Capability Substitution | Capability does not imply Delegation. |
-| **DLG-INV-013** — No Evidence Substitution | Evidence does not itself become Delegation. |
-| **DLG-INV-014** — No Structural-Relationship Substitution | Structural Relationship does not imply Delegation. |
-| **DLG-INV-015** — Action Binding | Delegation shall be evaluated against the exact requested Action where constitutionally relevant. |
-| **DLG-INV-016** — Target Binding | Target substitution shall not preserve authorization where Target is material. |
-| **DLG-INV-017** — Snapshot Binding | Execution-affecting Delegation state belongs to the exact execution snapshot. |
-| **DLG-INV-018** — No Runtime Discovery | RI does not discover or manufacture Delegation. |
-| **DLG-INV-019** — Human / AI Constitutional Parity | Human and AI Subjects use the same delegation constitution, subject to lawful security requirements. |
-| **DLG-INV-020** — Historical Fidelity | Historical Delegation state remains reconstructable without becoming current Authority. |
+| ID                                                        | Invariant                                                                                            |
+| :-------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **DLG-INV-001** — Explicitness                            | Delegation is explicit.                                                                              |
+| **DLG-INV-002** — Authority Origin                        | Delegation requires valid originating Authority.                                                     |
+| **DLG-INV-003** — No Sovereignty Creation                 | Delegation never creates sovereignty.                                                                |
+| **DLG-INV-004** — Attenuation                             | Delegation never exceeds its origin.                                                                 |
+| **DLG-INV-005** — Provenance                              | Delegation preserves complete Authority lineage.                                                     |
+| **DLG-INV-006** — Temporal Bound                          | Delegation is temporally bounded.                                                                    |
+| **DLG-INV-007** — Revocability                            | Delegation is revocable according to governing constitutional law.                                   |
+| **DLG-INV-008** — Cascade                                 | Loss of parent Authority invalidates dependent Delegations for current execution.                    |
+| **DLG-INV-009** — Subject Integrity                       | Actor and Governed Subject remain explicit Subjects.                                                 |
+| **DLG-INV-010** — No Identity Substitution                | Identity does not imply Delegation.                                                                  |
+| **DLG-INV-011** — No Trust Substitution                   | Trust does not imply Delegation.                                                                     |
+| **DLG-INV-012** — No Capability Substitution              | Capability does not imply Delegation.                                                                |
+| **DLG-INV-013** — No Evidence Substitution                | Evidence does not itself become Delegation.                                                          |
+| **DLG-INV-014** — No Structural-Relationship Substitution | Structural Relationship does not imply Delegation.                                                   |
+| **DLG-INV-015** — Action Binding                          | Delegation shall be evaluated against the exact requested Action where constitutionally relevant.    |
+| **DLG-INV-016** — Target Binding                          | Target substitution shall not preserve authorization where Target is material.                       |
+| **DLG-INV-017** — Snapshot Binding                        | Execution-affecting Delegation state belongs to the exact execution snapshot.                        |
+| **DLG-INV-018** — No Runtime Discovery                    | RI does not discover or manufacture Delegation.                                                      |
+| **DLG-INV-019** — Human / AI Constitutional Parity        | Human and AI Subjects use the same delegation constitution, subject to lawful security requirements. |
+| **DLG-INV-020** — Historical Fidelity                     | Historical Delegation state remains reconstructable without becoming current Authority.              |
 
 ---
 
@@ -1338,7 +1338,7 @@ The Delegation Constitution **SHALL** still remain coherent.
 
 It must support any lawful future domain in which:
 
-> *one Subject may exercise bounded Authority in relation to another Subject or governed constitutional state*
+> _one Subject may exercise bounded Authority in relation to another Subject or governed constitutional state_
 
 without changing RI's core constitutional semantics.
 
@@ -1411,32 +1411,32 @@ CCP-RI-05 may eventually reopen
 
 ## 60. Current Closure Ledger
 
-| Matter | Status |
-| :--- | :--- |
-| Delegation constitutional meaning | **CLOSED** — POL derived |
-| Delegated Authority semantics | **CLOSED** — POL derived |
-| explicit delegation | **CLOSED** |
-| provenance | **CLOSED** |
-| attenuation | **CLOSED** |
-| temporal bounding | **CLOSED** |
-| independent revocation principle | **CLOSED** |
-| parent cascade principle | **CLOSED** |
-| AI Authority derivation | **CLOSED** |
-| role-based delegation | **CLOSED** — WS mechanism |
-| Authority Anchor ownership/model | **CLOSED** — WS active supersession |
-| Role Type ownership | **CLOSED** — CL-01 under active supersession |
-| Evidence separation | **CLOSED** |
-| Trust separation | **CLOSED** |
-| Capability separation | **CLOSED** |
-| Actor/Governed Subject requirement | **CLOSED** — REC |
-| execution snapshot requirement | **CLOSED** — REC |
-| direct non-role delegation representation | **OPEN** |
-| one-time mandate representation | **OPEN** |
-| universal chain representation | **OPEN** |
-| Governed Subject correspondence rule | **OPEN** |
-| delegation-chain attestation contract | **OPEN** |
-| `T_e_input` authority-resolution ownership | **OPEN** — CLOSURE-02 |
-| V2 physical Agency Binding | **OPEN** — dependent on above |
+| Matter                                     | Status                                       |
+| :----------------------------------------- | :------------------------------------------- |
+| Delegation constitutional meaning          | **CLOSED** — POL derived                     |
+| Delegated Authority semantics              | **CLOSED** — POL derived                     |
+| explicit delegation                        | **CLOSED**                                   |
+| provenance                                 | **CLOSED**                                   |
+| attenuation                                | **CLOSED**                                   |
+| temporal bounding                          | **CLOSED**                                   |
+| independent revocation principle           | **CLOSED**                                   |
+| parent cascade principle                   | **CLOSED**                                   |
+| AI Authority derivation                    | **CLOSED**                                   |
+| role-based delegation                      | **CLOSED** — WS mechanism                    |
+| Authority Anchor ownership/model           | **CLOSED** — WS active supersession          |
+| Role Type ownership                        | **CLOSED** — CL-01 under active supersession |
+| Evidence separation                        | **CLOSED**                                   |
+| Trust separation                           | **CLOSED**                                   |
+| Capability separation                      | **CLOSED**                                   |
+| Actor/Governed Subject requirement         | **CLOSED** — REC                             |
+| execution snapshot requirement             | **CLOSED** — REC                             |
+| direct non-role delegation representation  | **OPEN**                                     |
+| one-time mandate representation            | **OPEN**                                     |
+| universal chain representation             | **OPEN**                                     |
+| Governed Subject correspondence rule       | **OPEN**                                     |
+| delegation-chain attestation contract      | **OPEN**                                     |
+| `T_e_input` authority-resolution ownership | **OPEN** — CLOSURE-02                        |
+| V2 physical Agency Binding                 | **OPEN** — dependent on above                |
 
 ---
 

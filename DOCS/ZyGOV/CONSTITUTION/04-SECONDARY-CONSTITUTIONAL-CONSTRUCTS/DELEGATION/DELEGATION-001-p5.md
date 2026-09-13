@@ -2,20 +2,19 @@ DELEGATION-001 — Phase 5
 
 Universal Delegation Contract Synthesis & Gap Closure
 
-Field	Determination
+Field Determination
 
-Phase	DELEGATION-001 Phase 5
-Mode	Constitutional contract synthesis
-Inputs	Audit Phases 1–4 + POL + WS + RSN + REC
-Implementation Authority	NONE
-Repository Mutation Authority	NONE
-New ZRM Primitive	NO
-New Authority System	NO
-Generic DelegationRecord	REJECTED
-New WS relationship specialization	REQUIRED for direct/non-role delegation
-V2 Agency Binding	REQUIRED, derived/non-authoritative
-Phase Status	OPEN — SYNTHESIS FINDINGS ESTABLISHED
-
+Phase DELEGATION-001 Phase 5
+Mode Constitutional contract synthesis
+Inputs Audit Phases 1–4 + POL + WS + RSN + REC
+Implementation Authority NONE
+Repository Mutation Authority NONE
+New ZRM Primitive NO
+New Authority System NO
+Generic DelegationRecord REJECTED
+New WS relationship specialization REQUIRED for direct/non-role delegation
+V2 Agency Binding REQUIRED, derived/non-authoritative
+Phase Status OPEN — SYNTHESIS FINDINGS ESTABLISHED
 
 1. Decisive Phase-5 finding
 
@@ -39,10 +38,7 @@ The key architectural decision is:
 
 > Only the first is authoritative constitutional state. The second is a derived lineage. The third is an execution binding.
 
-
-
 That separation prevents a second delegation ontology from appearing inside RI.
-
 
 ---
 
@@ -52,9 +48,7 @@ POL already defines Delegation itself:
 
 > Delegation is the constitutional transfer of Authority from one authorized Actor to another.
 
-
-
-It further requires explicit grant, bounded Authority, permanent provenance, independent revocability, temporal validity and parent-dependent validity. 
+It further requires explicit grant, bounded Authority, permanent provenance, independent revocability, temporal validity and parent-dependent validity.
 
 So creating:
 
@@ -76,7 +70,6 @@ PH5-DEC-01 — No Parallel Delegation Ontology
 
 DELEGATION-001 SHALL specialize and compose existing constitutional mechanisms rather than establish a second source of Authority truth.
 
-
 ---
 
 3. But direct Delegation genuinely needs a persistent governed artifact
@@ -86,16 +79,16 @@ There is one place where composition alone is insufficient.
 Role-based Delegation already has:
 
 Authority Anchor
-      ↓
+↓
 ASSIGNED_ROLE
-      ↓
+↓
 Role Assignment
 
-WS explicitly defines Role Assignment as a Reified Relationship that carries delegated Authority without originating it, and requires every assignment to reference one Authority Anchor. 
+WS explicitly defines Role Assignment as a Reified Relationship that carries delegated Authority without originating it, and requires every assignment to reference one Authority Anchor.
 
 But POL's Delegation law is broader.
 
-Delegation occurs through an explicit constitutional grant; it does not say every grant must create a Role. 
+Delegation occurs through an explicit constitutional grant; it does not say every grant must create a Role.
 
 REC-01C explicitly identifies valid candidates such as:
 
@@ -109,8 +102,7 @@ service agreement;
 
 device authorization;
 
-direct B2B delegation. 
-
+direct B2B delegation.
 
 There is no equivalent normalized persistent artifact in the audited corpus for:
 
@@ -124,14 +116,13 @@ without inventing a synthetic Role Type.
 
 That is a genuine representation gap.
 
-
 ---
 
 4. The existing WS extension mechanism can close it
 
 This is the decisive synthesis.
 
-WS-03C already establishes the universal relationship governance machinery and explicitly delegates individual predicate definitions to the WS-04B Relationship Registry. Its governed relationships already support source, target, type, family, temporal behavior, and conditional Evidence, Authority and Provenance. 
+WS-03C already establishes the universal relationship governance machinery and explicitly delegates individual predicate definitions to the WS-04B Relationship Registry. Its governed relationships already support source, target, type, family, temporal behavior, and conditional Evidence, Authority and Provenance.
 
 Therefore the correct Phase-5 direction is not:
 
@@ -140,7 +131,7 @@ new DelegationRecord class
 It is:
 
 existing WS Reified Relationship framework
-            ↓
+↓
 registered delegation-grant relationship specialization
 
 The exact registry predicate name is not yet frozen.
@@ -151,7 +142,6 @@ Delegation Grant
 
 but this does not require the physical relationship predicate literally to be named DELEGATION_GRANT.
 
-
 ---
 
 5. Proposed constitutional definition — Delegation Grant
@@ -160,12 +150,9 @@ Council synthesis derived from POL + WS:
 
 > A Delegation Grant is the persistent governed constitutional relationship representing one explicit transfer of bounded Authority from a lawful delegator to a delegate, anchored in an authoritative constitutional source and preserving the information necessary to establish provenance, scope, time and derivation.
 
-
-
 It is:
 
-a specialization of governed relationship mechanics
-+
+a specialization of governed relationship mechanics +
 a materialization of POL Delegation semantics
 
 It is not:
@@ -175,7 +162,6 @@ new Authority primitive
 new Trust object
 new Evidence object
 new Identity system
-
 
 ---
 
@@ -191,14 +177,14 @@ DELEGATION FORM
 │
 ├── ROLE-BASED
 │
-│      Authority Anchor
-│             ↓
-│      Role Assignment / ASSIGNED_ROLE
+│ Authority Anchor
+│ ↓
+│ Role Assignment / ASSIGNED_ROLE
 │
 └── DIRECT / MANDATE
-       Authority source / governing instrument
-              ↓
-       Delegation Grant relationship
+Authority source / governing instrument
+↓
+Delegation Grant relationship
 
 Topology
 
@@ -218,7 +204,6 @@ PH5-DEC-02 — Chaining Is Not a Delegation Form
 
 CHAINED SHALL describe derivation topology, not a third competing type of grant.
 
-
 ---
 
 7. Role-based Delegation remains untouched
@@ -233,7 +218,7 @@ actor_id
 role_type_ref
 authority_anchor_id
 
-and makes scope belong to the Authority Anchor rather than the Role Type or Role Assignment itself. 
+and makes scope belong to the Authority Anchor rather than the Role Type or Role Assignment itself.
 
 Thus:
 
@@ -244,7 +229,6 @@ Where delegated Authority is genuinely role-based, DELEGATION-001 SHALL reuse AS
 No new Delegation Grant relationship SHALL be created merely to duplicate the same constitutional grant.
 
 That would create two authorities for one fact.
-
 
 ---
 
@@ -259,9 +243,9 @@ shall not be fabricated.
 Instead:
 
 Delegator Subject
-       │
-       │ explicit bounded Authority transfer
-       ▼
+│
+│ explicit bounded Authority transfer
+▼
 Delegate Subject
 
 is represented through the dedicated governed Delegation Grant relationship.
@@ -269,7 +253,6 @@ is represented through the dedicated governed Delegation Grant relationship.
 This closes DLG-GAP-01 at the architectural level.
 
 The exact physical schema remains later contract work.
-
 
 ---
 
@@ -306,7 +289,6 @@ Some may be governed references.
 
 This is a semantic contract, not permission to design a TypeScript interface.
 
-
 ---
 
 10. Authority source versus Delegation Grant
@@ -322,13 +304,13 @@ may be the governing Authority source.
 The constitutional relationship created from that source may be:
 
 Company
-   ↓ delegates bounded approval authority
+↓ delegates bounded approval authority
 Alice
 
 Therefore:
 
 Governing Instrument
-      ≠
+≠
 Delegation Grant
 
 The instrument supplies the constitutional Authority basis.
@@ -338,9 +320,8 @@ The Delegation Grant records the resulting explicit transfer relationship.
 This preserves the same pattern WS already uses for Role Assignment:
 
 Authority Anchor
-      ≠
+≠
 Role Assignment
-
 
 ---
 
@@ -349,47 +330,46 @@ Role Assignment
 The universal pattern becomes:
 
 POL Authority Origin
-        │
-        ▼
+│
+▼
 Governing Instrument
- / Authority Source
-        │
-        ▼
+/ Authority Source
+│
+▼
 DELEGATION GRANT
-        │
-        ├── delegator
-        ├── delegate
-        ├── bounded authority
-        ├── scope
-        ├── time
-        └── provenance
-        │
-        ▼
+│
+├── delegator
+├── delegate
+├── bounded authority
+├── scope
+├── time
+└── provenance
+│
+▼
 Delegated Authority
 
 For role-based Delegation:
 
 POL Authority Origin
-        │
-        ▼
+│
+▼
 Authority Anchor
-        │
-        ▼
+│
+▼
 ASSIGNED_ROLE
-        │
-        ▼
+│
+▼
 Delegated Authority
 
 Different representation.
 
 Same POL law.
 
-
 ---
 
 12. Delegation Lineage does not need to become another canonical record
 
-POL already requires every Delegation to preserve lineage back to its originating Authority, and says dependent delegations become invalid when their parent Authority loses validity. 
+POL already requires every Delegation to preserve lineage back to its originating Authority, and says dependent delegations become invalid when their parent Authority loses validity.
 
 This means each grant must identify its immediate derivation basis.
 
@@ -398,13 +378,13 @@ From that, the full lineage is deterministically reconstructable.
 Example:
 
 Authority A0
-      ↓
+↓
 Grant D1
-      ↓
+↓
 Authority A1
-      ↓
+↓
 Grant D2
-      ↓
+↓
 Authority A2
 
 If D2 knows:
@@ -431,7 +411,6 @@ Lineage SHALL be deterministically derived from the bound parent relationships o
 
 A materialized lineage may exist for performance, proof or transport, but it SHALL identify its source grants and SHALL NOT become a competing source of Authority.
 
-
 ---
 
 13. The minimum lineage rule
@@ -450,17 +429,13 @@ provenance reconstruction;
 
 historical replay.
 
-
 Thus:
 
 DLG-INV-031 — Immediate Parent Binding
 
 > Every non-origin Delegation Grant SHALL identify its immediate constitutional parent Authority or parent Delegation from which its delegated Authority derives.
 
-
-
 This closes the conceptual heart of DLG-GAP-02.
-
 
 ---
 
@@ -485,12 +460,9 @@ DLG-INV-032 — Determinate Derivation
 
 > Every Delegation hop SHALL possess a determinate constitutional derivation path. Multiple authority inputs may participate only where a governing constitutional composition explicitly defines how they combine.
 
-
-
 This does not prohibit joint Authority.
 
 It prohibits implementation-defined blending.
-
 
 ---
 
@@ -501,16 +473,14 @@ POL already gives:
 delegated Authority
 shall never exceed origin
 
-
-
 The chain consequence is:
 
 scope(Dn)
-    ⊆
+⊆
 scope(Dn-1)
-    ⊆
+⊆
 ...
-    ⊆
+⊆
 scope(origin)
 
 The same applies to:
@@ -527,7 +497,6 @@ Therefore a chain verifier need not compare only the final Actor with the sovere
 
 It must prove every hop.
 
-
 ---
 
 16. Subdelegation permission must live in the grant's authority conditions
@@ -537,7 +506,7 @@ POL permits Delegation but does not make subdelegation automatic.
 Our earlier law survives:
 
 Delegation
-    ≠
+≠
 permission to redelegate
 
 Therefore the authoritative grant must make subdelegation determinable.
@@ -552,15 +521,11 @@ Policy;
 
 another canonical restriction.
 
-
 It must not be guessed.
 
 DLG-INV-033 — Explicit Subdelegation Basis
 
 > A delegate SHALL create a child Delegation only when the parent Authority explicitly permits or constitutionally entails subdelegation.
-
-
-
 
 ---
 
@@ -585,7 +550,7 @@ Those concepts often coincide.
 
 They do not necessarily always coincide.
 
-REC-01C explicitly requires multi-party scenarios where Actor, Governed Subject, Authority Issuer, Target Subject and Beneficiary may all be different Subjects. 
+REC-01C explicitly requires multi-party scenarios where Actor, Governed Subject, Authority Issuer, Target Subject and Beneficiary may all be different Subjects.
 
 Therefore we should not deform Delegation Grant into a fixed:
 
@@ -594,7 +559,6 @@ delegate
 principal
 
 triple.
-
 
 ---
 
@@ -633,7 +597,6 @@ AGENCY BINDING
 
 This avoids contaminating the authority-transfer artifact with execution-specific semantics.
 
-
 ---
 
 19. Formal Agency Binding definition
@@ -641,8 +604,6 @@ This avoids contaminating the authority-transfer artifact with execution-specifi
 Council synthesis:
 
 > An Agency Binding is a derived execution-bound constitutional composition establishing that the exact Actor participating in an execution is relying upon specified authoritative delegation state to act in relation to one or more exact Governed Subjects under the exact execution snapshot.
-
-
 
 Agency Binding:
 
@@ -652,7 +613,6 @@ does not create Trust
 does not authorize the Action
 
 It establishes the claimed constitutional correspondence.
-
 
 ---
 
@@ -670,14 +630,13 @@ ExecutionRequest V2
 
 not a new permanent Reality entity.
 
-REC-01C already concluded that execution needs role bindings among existing Subjects rather than parallel Actor/Principal identity systems. 
+REC-01C already concluded that execution needs role bindings among existing Subjects rather than parallel Actor/Principal identity systems.
 
 Thus:
 
 PH5-DEC-05 — Agency Binding Is Derived Execution State
 
 It SHALL NOT become an independent source of constitutional Authority.
-
 
 ---
 
@@ -690,9 +649,9 @@ Actor participant reference
 Governed Subject reference(s)
 
 Agency basis:
-    Role Assignment
-    OR
-    Direct Delegation Grant
+Role Assignment
+OR
+Direct Delegation Grant
 
 Delegation lineage identity
 or exact grant sequence
@@ -708,7 +667,6 @@ Action and Target are already first-class V2 coordinates and therefore need not 
 
 Instead Agency Binding must be cryptographically/canonically bound to the same whole execution request.
 
-
 ---
 
 22. Many Agency Bindings may exist in one execution
@@ -716,18 +674,18 @@ Instead Agency Binding must be cryptographically/canonically bound to the same w
 Because participation is many-to-many capable, this must be legal:
 
 Actor A
-    acts for
+acts for
 Governed Subject B
 
 Actor A
-    also acts for
+also acts for
 Governed Subject C
 
 or:
 
 Actor A
 Actor D
-    jointly act for
+jointly act for
 Governed Subject B
 
 provided the required constitutional basis exists.
@@ -747,7 +705,6 @@ semantically.
 Self-execution naturally uses:
 
 0
-
 
 ---
 
@@ -769,14 +726,13 @@ Alice delegates to Alice
 
 is allowed merely to satisfy schema uniformity.
 
-This preserves REC-01C's zero-delegation law. 
-
+This preserves REC-01C's zero-delegation law.
 
 ---
 
 24. Attestation integrates by reference
 
-Phase 4 established that RSN-003 already owns the universal Attestation framework and prohibits Attestation Inflation. New types must be registered, while reserved domains such as ATT-I and ATT-S provide governed extension space. 
+Phase 4 established that RSN-003 already owns the universal Attestation framework and prohibits Attestation Inflation. New types must be registered, while reserved domains such as ATT-I and ATT-S provide governed extension space.
 
 Therefore Agency Binding SHALL NOT inline a second security system.
 
@@ -789,7 +745,6 @@ proof artifacts
 where required.
 
 The authoritative Attestation semantics remain RSN/SEC-owned.
-
 
 ---
 
@@ -807,12 +762,9 @@ cryptographically verifiable;
 
 temporally governed.
 
-
 Creating another Attestation saying:
 
 > “this Role Assignment exists”
-
-
 
 could be unconstitutional Attestation Inflation.
 
@@ -822,8 +774,7 @@ proof required
 ≠
 new attestation always required
 
-RSN explicitly reserves Attestations for cases where deterministic, intrinsic cryptographic or existing constitutional governance cannot independently establish compliance. 
-
+RSN explicitly reserves Attestations for cases where deterministic, intrinsic cryptographic or existing constitutional governance cannot independently establish compliance.
 
 ---
 
@@ -833,16 +784,11 @@ DLG-GAP-03 becomes:
 
 > Determine which specific delegation/security claims require registered Attestation types because they cannot already be independently established.
 
-
-
 Not:
 
 > invent a universal Delegation Certificate.
 
-
-
 This can be delegated to the eventual SEC/RSN closure after DELEGATION-001 specifies the claims.
-
 
 ---
 
@@ -851,75 +797,72 @@ This can be delegated to the eventual SEC/RSN closure after DELEGATION-001 speci
 The complete model now becomes:
 
 AUTHORITY ORIGIN
-                           │
-                           ▼
-                  Governing Authority
-                           │
-                ┌──────────┴──────────┐
-                │                     │
-                ▼                     ▼
-       ROLE-BASED GRANT          DIRECT GRANT
-                │                     │
-        Authority Anchor       Governing Instrument
-                │                     │
-        ASSIGNED_ROLE          Delegation Grant
-                │                     │
-                └──────────┬──────────┘
-                           ▼
-                   Delegated Authority
-                           │
-                   optional lawful
-                    subdelegation
-                           │
-                           ▼
-                grant-by-grant lineage
-                           │
-                           ▼
-                   authoritative state
-                           │
-             ┌─────────────┴─────────────┐
-             ▼                           ▼
-        proof / attestation          participation
-             │                           │
-             └─────────────┬─────────────┘
-                           ▼
-                     AGENCY BINDING
-                           │
-                Actor ↔ Governed Subject
-                           │
-                           ▼
-                 ExecutionRequest V2
-                           │
-                     Action / Target
-                           │
-                    Policy + SEC
-                           │
-                           ▼
-                          RI
+│
+▼
+Governing Authority
+│
+┌──────────┴──────────┐
+│ │
+▼ ▼
+ROLE-BASED GRANT DIRECT GRANT
+│ │
+Authority Anchor Governing Instrument
+│ │
+ASSIGNED_ROLE Delegation Grant
+│ │
+└──────────┬──────────┘
+▼
+Delegated Authority
+│
+optional lawful
+subdelegation
+│
+▼
+grant-by-grant lineage
+│
+▼
+authoritative state
+│
+┌─────────────┴─────────────┐
+▼ ▼
+proof / attestation participation
+│ │
+└─────────────┬─────────────┘
+▼
+AGENCY BINDING
+│
+Actor ↔ Governed Subject
+│
+▼
+ExecutionRequest V2
+│
+Action / Target
+│
+Policy + SEC
+│
+▼
+RI
 
 This is now internally coherent across POL, WS, RSN and REC.
-
 
 ---
 
 28. Which pieces are authoritative?
 
-Construct	Nature	Authoritative?
+Construct Nature Authoritative?
 
-Authority source	constitutional state	YES
-Authority Anchor	reference to source	YES as governed reference
-Role Assignment	governed relationship	YES
-Delegation Grant	governed relationship specialization	YES
-Delegated Authority	constitutional Authority state	YES
-Delegation Lineage	deterministic derivation	NO separate authority
-Attestation Artifact	proof of compliance	NO Authority creation
-Agency Binding	execution composition	NO Authority creation
-V2 Snapshot identity	binding/coherence	NO Authority creation
-PolicyDecision	execution result	NO reusable Authority
-
+Authority source constitutional state YES
+Authority Anchor reference to source YES as governed reference
+Role Assignment governed relationship YES
+Delegation Grant governed relationship specialization YES
+Delegated Authority constitutional Authority state YES
+Delegation Lineage deterministic derivation NO separate authority
+Attestation Artifact proof of compliance NO Authority creation
+Agency Binding execution composition NO Authority creation
+V2 Snapshot identity binding/coherence NO Authority creation
+PolicyDecision execution result NO reusable Authority
 
 This table is the core of Phase 5.
-
 
 ---
 
@@ -951,7 +894,6 @@ YES
 
 That is the minimum change.
 
-
 ---
 
 30. Why this is constitutionally cleaner than using AuthorityRecord
@@ -976,29 +918,25 @@ subdelegation;
 
 governed Subject correspondence.
 
-
-REC-01C explicitly identified that incompleteness. 
+REC-01C explicitly identified that incompleteness.
 
 So extending AuthorityRecord with dozens of delegation fields would make the same mistake as enlarging V1 ExecutionRequest.
 
 The better decomposition is:
 
-Authority
-+
-Delegation Grant relation
-+
+Authority +
+Delegation Grant relation +
 Agency Binding
 
 Each answers one question.
-
 
 ---
 
 31. Why this is cleaner than forcing everything into ASSIGNED_ROLE
 
-POL says Delegation is any explicit transfer of Authority between authorized Actors. 
+POL says Delegation is any explicit transfer of Authority between authorized Actors.
 
-WS says Role Assignment is one specific mechanism linking Actor + Role Type + Authority Anchor. 
+WS says Role Assignment is one specific mechanism linking Actor + Role Type + Authority Anchor.
 
 Therefore:
 
@@ -1015,7 +953,6 @@ Creating fake Roles for transaction-specific mandates would distort the existing
 So:
 
 PH5-DEC-06 — Role Non-Fabrication Ratified for DELEGATION-001
-
 
 ---
 
@@ -1034,8 +971,6 @@ Disposition:
 
 > Direct/non-role Delegation SHALL use a registered governed Reified Relationship specialization implementing DELEGATION-001's Delegation Grant semantics.
 
-
-
 Still open:
 
 exact predicate identifier;
@@ -1044,9 +979,7 @@ exact schema/registry card;
 
 physical TypeScript representation.
 
-
 Those are contract detail, not architecture.
-
 
 ---
 
@@ -1065,8 +998,6 @@ Disposition:
 
 > Every derived grant binds its immediate constitutional parent. Full Delegation Lineage is deterministically derived from the authoritative grant graph and SHALL NOT become a separate Authority source.
 
-
-
 Still open:
 
 exact parent reference mechanics;
@@ -1075,9 +1006,7 @@ canonical lineage serialization;
 
 cycle detection and deterministic traversal rules.
 
-
 These become leaf-contract details.
-
 
 ---
 
@@ -1097,7 +1026,6 @@ EXECUTION REQUIRES AN UNDEFINED
 ATTESTATION TYPE
 
 That is much narrower than before.
-
 
 ---
 
@@ -1127,9 +1055,7 @@ proof references;
 
 snapshot/canonicalization participation.
 
-
 This should be completed as part of the V2 leaf-contract closure.
-
 
 ---
 
@@ -1169,33 +1095,30 @@ DLG-INV-038 — Agency Binding Multiplicity
 
 One execution may contain zero or more Agency Bindings; universal execution shall not assume exactly one Actor/Governed-Subject pair.
 
-
 ---
 
 37. Phase-5 stress check
 
 The synthesized architecture handles the required cases cleanly.
 
-Case	Representation
+Case Representation
 
-Alice acts for Alice	no Agency Binding / no Delegation
-Employee for company	ASSIGNED_ROLE + Anchor → Agency Binding
-Director for corporation	ASSIGNED_ROLE + Anchor → Agency Binding
-Inspector by appointment	ASSIGNED_ROLE + Appointment Anchor
-AI Agent for company	Role Assignment or Direct Grant + SEC proof
-Logistics provider for manufacturer	Direct Grant or role-based grant as constitutionally appropriate
-One-time signer	Direct Delegation Grant
-Power of attorney	Direct Delegation Grant
-API one-action mandate	Direct Delegation Grant
-Manufacturer → 3PL → AI Agent	grant chain + derived lineage
-Parent revoked	child lineage invalid current execution
-Historical replay	historical grant graph preserved
-Two governed subjects	multiple Agency Bindings
-Multiple actors	multiple participation/Agency Bindings
-
+Alice acts for Alice no Agency Binding / no Delegation
+Employee for company ASSIGNED_ROLE + Anchor → Agency Binding
+Director for corporation ASSIGNED_ROLE + Anchor → Agency Binding
+Inspector by appointment ASSIGNED_ROLE + Appointment Anchor
+AI Agent for company Role Assignment or Direct Grant + SEC proof
+Logistics provider for manufacturer Direct Grant or role-based grant as constitutionally appropriate
+One-time signer Direct Delegation Grant
+Power of attorney Direct Delegation Grant
+API one-action mandate Direct Delegation Grant
+Manufacturer → 3PL → AI Agent grant chain + derived lineage
+Parent revoked child lineage invalid current execution
+Historical replay historical grant graph preserved
+Two governed subjects multiple Agency Bindings
+Multiple actors multiple participation/Agency Bindings
 
 Nothing here requires a new ZRM primitive or Runtime branch.
-
 
 ---
 
@@ -1236,11 +1159,9 @@ lifecycle;
 
 permitted constitutional clusters.
 
-
-WS requires relationship types to define semantic directionality/inverse predicates and complete governance metadata. 
+WS requires relationship types to define semantic directionality/inverse predicates and complete governance metadata.
 
 So naming belongs to the next leaf-contract step, not this synthesis decision.
-
 
 ---
 
@@ -1251,73 +1172,74 @@ PHASE 5
 UNIVERSAL DELEGATION CONTRACT SYNTHESIS
 
 RESULT:
-  PASS — ARCHITECTURAL SYNTHESIS ACHIEVED
+PASS — ARCHITECTURAL SYNTHESIS ACHIEVED
 
 DELEGATION MEANING:
-  POL
+POL
 
 ROLE-BASED GRANT:
-  WS ASSIGNED_ROLE
-  + AUTHORITY ANCHOR
+WS ASSIGNED_ROLE
+
+- AUTHORITY ANCHOR
 
 DIRECT / NON-ROLE GRANT:
-  GOVERNED REIFIED RELATIONSHIP
-  SPECIALIZATION REQUIRED
+GOVERNED REIFIED RELATIONSHIP
+SPECIALIZATION REQUIRED
 
 GENERIC DelegationRecord:
-  REJECTED
+REJECTED
 
 DELEGATION GRANT:
-  ACCEPTED AS SECONDARY
-  CONSTITUTIONAL SEMANTIC CONSTRUCT
+ACCEPTED AS SECONDARY
+CONSTITUTIONAL SEMANTIC CONSTRUCT
 
 NEW ZRM PRIMITIVE:
-  NO
+NO
 
 NEW RELATIONSHIP FRAMEWORK:
-  NO
+NO
 
 NEW WS RELATIONSHIP SPECIALIZATION:
-  YES
+YES
 
 DELEGATION LINEAGE:
-  DERIVED
-  NOT INDEPENDENT AUTHORITY
+DERIVED
+NOT INDEPENDENT AUTHORITY
 
 PARENT BINDING:
-  REQUIRED
+REQUIRED
 
 SUBDELEGATION:
-  EXPLICITLY GOVERNED
+EXPLICITLY GOVERNED
 
 GOVERNED SUBJECT:
-  EXECUTION ROLE
-  NOT FIXED INTO GRANT ONTOLOGY
+EXECUTION ROLE
+NOT FIXED INTO GRANT ONTOLOGY
 
 AGENCY BINDING:
-  REQUIRED
-  DERIVED / EXECUTION-SPECIFIC
-  NOT AUTHORITY
+REQUIRED
+DERIVED / EXECUTION-SPECIFIC
+NOT AUTHORITY
 
 ATTESTATION:
-  EXISTING RSN FRAMEWORK
-  NO SECOND PROOF SYSTEM
+EXISTING RSN FRAMEWORK
+NO SECOND PROOF SYSTEM
 
 DLG-GAP-01:
-  ARCHITECTURALLY CLOSED
+ARCHITECTURALLY CLOSED
 
 DLG-GAP-02:
-  ARCHITECTURALLY CLOSED
+ARCHITECTURALLY CLOSED
 
 DLG-GAP-03:
-  REDUCED TO TYPE REGISTRATION
-  WHERE REQUIRED
+REDUCED TO TYPE REGISTRATION
+WHERE REQUIRED
 
 NEW DLG-GAP-04:
-  V2 AGENCY BINDING LEAF CONTRACT
+V2 AGENCY BINDING LEAF CONTRACT
 
 IMPLEMENTATION AUTHORITY:
-  NONE
+NONE
 
 40. What Phase 5 should do next
 
@@ -1325,19 +1247,19 @@ Phase 5 should now move from architecture synthesis to contract leaf constructio
 
 PH5-A
 Delegation Grant Relationship Card
-        ↓
+↓
 PH5-B
 Delegation Parent / Lineage Contract
-        ↓
+↓
 PH5-C
 Agency Binding Contract
-        ↓
+↓
 PH5-D
 Delegation Proof Requirements Card
-        ↓
+↓
 PH5-E
 Adversarial Contract Simulation
-        ↓
+↓
 DELEGATION-001 closure determination
 
 The architecture is now sufficiently clean that these should be concrete, bounded specifications rather than another broad constitutional investigation.

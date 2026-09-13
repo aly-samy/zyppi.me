@@ -1,4 +1,5 @@
 # Zyppi Routing North Star
+
 ## Reality Addressing & Resolution Infrastructure
 
 **Document ID:** `ZRR-NS-001`  
@@ -206,28 +207,28 @@ It shall not silently acquire semantic sovereignty.
 
 Conceptually:
 
-| Concern | Resolution Infrastructure Position |
-|---|---|
-| Public address mechanics | May own |
-| Host/path/token parsing | May own |
-| Namespace registration | May own, subject to governance |
-| Route/record lookup | May own |
-| Record versioning | May own |
-| Resolution policy mechanics | May own only where explicitly technical |
-| Custom-domain binding | May own technically |
-| Delegation mechanics | May represent/execute technical delegation; constitutional Authority remains elsewhere |
-| Identity meaning | Must not redefine |
-| Referent meaning | Must not redefine |
-| Reality | Must not decide |
-| Evidence meaning | Must not decide |
-| Trust | Must not compute unless explicitly delegated to SEC-owned machinery |
-| Policy / Authorization | Must not invent |
-| Constitutional Capability | Must not invent |
-| Domain semantics | Must not invent |
-| Runtime execution | Must not replace RI |
-| GS1 semantics | Must remain GS1/domain-owned |
-| ZII carrier semantics | Must remain ZII-owned where technical |
-| Projection semantics | Must remain with the proper projection/domain authority |
+| Concern                     | Resolution Infrastructure Position                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------- |
+| Public address mechanics    | May own                                                                                |
+| Host/path/token parsing     | May own                                                                                |
+| Namespace registration      | May own, subject to governance                                                         |
+| Route/record lookup         | May own                                                                                |
+| Record versioning           | May own                                                                                |
+| Resolution policy mechanics | May own only where explicitly technical                                                |
+| Custom-domain binding       | May own technically                                                                    |
+| Delegation mechanics        | May represent/execute technical delegation; constitutional Authority remains elsewhere |
+| Identity meaning            | Must not redefine                                                                      |
+| Referent meaning            | Must not redefine                                                                      |
+| Reality                     | Must not decide                                                                        |
+| Evidence meaning            | Must not decide                                                                        |
+| Trust                       | Must not compute unless explicitly delegated to SEC-owned machinery                    |
+| Policy / Authorization      | Must not invent                                                                        |
+| Constitutional Capability   | Must not invent                                                                        |
+| Domain semantics            | Must not invent                                                                        |
+| Runtime execution           | Must not replace RI                                                                    |
+| GS1 semantics               | Must remain GS1/domain-owned                                                           |
+| ZII carrier semantics       | Must remain ZII-owned where technical                                                  |
+| Projection semantics        | Must remain with the proper projection/domain authority                                |
 
 The governing doctrine is:
 

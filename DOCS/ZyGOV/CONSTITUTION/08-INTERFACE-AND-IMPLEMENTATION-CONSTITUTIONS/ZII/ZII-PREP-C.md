@@ -1,10 +1,10 @@
 # ZII-PREP-C — zTOUCH / zTouch Envelope Constitutional Collision Audit
 
-| Field | Value |
-| :--- | :--- |
-| **Status** | COMPLETE FOR PREP PURPOSES — PASS WITH REQUIRED REFACTOR |
-| **Implementation authority** | NONE |
-| **Primary question** | Can zTOUCH and the proposed zTouch Envelope survive without creating parallel Identity, Context, Intent, Trust, Policy, Evidence, Profile, or Runtime semantics? |
+| Field                        | Value                                                                                                                                                            |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**                   | COMPLETE FOR PREP PURPOSES — PASS WITH REQUIRED REFACTOR                                                                                                         |
+| **Implementation authority** | NONE                                                                                                                                                             |
+| **Primary question**         | Can zTOUCH and the proposed zTouch Envelope survive without creating parallel Identity, Context, Intent, Trust, Policy, Evidence, Profile, or Runtime semantics? |
 
 ---
 
@@ -13,28 +13,31 @@
 **Yes, zTOUCH can survive. Yes, an envelope concept can survive.** But the original envelope model must be narrowed and renamed semantically.
 
 The original proposal described the envelope as:
+
 ```text
 Identity
 Context
 Intent Hints
 Trust / Seal
 ```
+
 while explicitly warning that it should not create a parallel constitution.
 
 That warning was correct, because the four labels collide directly with already-governed Zyppi concepts.
 
 The constitutional-safe formulation is instead:
+
 > **A zTouch Envelope is a bounded, carrier-facing representation that may transport references, descriptive assertions, interaction hints, and integrity/provenance material. It does not own or determine the constitutional meaning of anything it carries.**
 
 The core correction is:
 
-| Old conceptual language | PREP-C safe language |
-| :--- | :--- |
-| Identity | → **Resolution / Identity Reference** |
-| Context | → **Contextual Reference / Descriptive Assertion** |
-| Intent Hints | → **Interaction Hints referencing governed vocabulary** |
-| Trust / Seal | → **Integrity / Provenance / Attestation Material** |
-| Version | → **Envelope/Binding Version only** |
+| Old conceptual language | PREP-C safe language                                    |
+| :---------------------- | :------------------------------------------------------ |
+| Identity                | → **Resolution / Identity Reference**                   |
+| Context                 | → **Contextual Reference / Descriptive Assertion**      |
+| Intent Hints            | → **Interaction Hints referencing governed vocabulary** |
+| Trust / Seal            | → **Integrity / Provenance / Attestation Material**     |
+| Version                 | → **Envelope/Binding Version only**                     |
 
 This is not cosmetic. It changes the constitutional ownership model.
 
@@ -46,13 +49,16 @@ ZRM already defines **Touchpoint**.
 A Touchpoint is an Object playing the structural role of an access mechanism into identity resolution; Touchpoint, resolved Identity, and Referent remain distinct.
 
 Therefore zTOUCH must not mean:
+
 - a new kind of constitutional Touchpoint
 - a new Identity system
 
 The surviving meaning is:
+
 > **zTOUCH is a Zyppi interaction/protocol initiative for creating richer interoperable uses of already-governed Touchpoints.**
 
 Conceptually:
+
 ```text
 ZRM
 │
@@ -64,10 +70,12 @@ zTOUCH protocol/product family
       ├── zQR
       └── zNFC ...
 ```
+
 zTOUCH is therefore subordinate to the existing Touchpoint meaning.
 
 **PREP-C disposition:**
 `zTOUCH: SURVIVES — ADAPT`
+
 - Not a primitive.
 - Not a new ontology.
 - Not a ZII engine framework.
@@ -91,6 +99,7 @@ ZII
 ```
 
 This preserves:
+
 - `zQR ≠ ZQE`
 - `zTOUCH ≠ ZII`
 
@@ -103,12 +112,15 @@ That remains one of the strongest architectural separations produced by PREP.
 ## Field Collisions & Refactoring
 
 ### Identity Field Collision
+
 The exploratory envelope asks:
-> *"Who am I?"*
+
+> _"Who am I?"_
 
 and suggests identity reference, identity class/type reference, envelope version, and issuer reference.
 
 There are two problems.
+
 1. The carrier is not the Identity.
 2. The value carried by a QR/NFC/etc. may not even be a canonical Zyppi Identity. It could be:
    - GS1 identifier
@@ -119,6 +131,7 @@ There are two problems.
    - other governed access path
 
 ZRM already defines Touchpoint resolution as:
+
 ```text
 AccessPath
       ↓
@@ -126,16 +139,20 @@ AccessPath
       ↓
    Identity
 ```
+
 So the envelope should not conceptually say:
+
 ```typescript
 identity: ...
 ```
+
 as though it contains constitutional Identity.
 
 **Safer concept:**
 `Resolution Reference` or, where exact semantics justify it, `Identity Reference`
 
 With one critical invariant:
+
 > **The reference never becomes the Identity merely because it is carried by the envelope.**
 
 **Identity type/class:**
@@ -144,45 +161,50 @@ Something like `type = product` could collide with ARM/domain/profile semantics.
 Therefore an envelope may only carry a governed external or constitutional classification reference where one already exists.
 It shall not invent its own type system.
 
-| Candidate content | Disposition |
-| :--- | :--- |
-| Identity object | **PROHIBITED** |
-| Resolution reference | **SURVIVES** |
-| Existing Identity reference | **SURVIVES as reference** |
-| External identifier | **SURVIVES under external authority** |
-| Free-form identity type | **PROHIBITED** |
-| Governed profile/class reference | **OPTIONAL REFERENCE** |
-| Issuer reference | **SURVIVES, but creates no authority by itself** |
+| Candidate content                | Disposition                                      |
+| :------------------------------- | :----------------------------------------------- |
+| Identity object                  | **PROHIBITED**                                   |
+| Resolution reference             | **SURVIVES**                                     |
+| Existing Identity reference      | **SURVIVES as reference**                        |
+| External identifier              | **SURVIVES under external authority**            |
+| Free-form identity type          | **PROHIBITED**                                   |
+| Governed profile/class reference | **OPTIONAL REFERENCE**                           |
+| Issuer reference                 | **SURVIVES, but creates no authority by itself** |
 
 ### Context Field Collision
+
 The original proposal was already cautious: it suggested carrying only stable information and warned that printed context can become stale.
 
 The newer Z-PROF architecture makes the boundary stronger.
 The ratified Z-PROF contract explicitly distinguishes:
+
 ```text
 Context Requirement
       ≠
 Context Interpretation
 ```
+
 and permits Z-PROF to route or require Context without acquiring authority to interpret it.
 
 Z-PROF's Domain Template architecture also explicitly treats Time, Place, Jurisdiction, Actor, Intent, Transaction Context, etc. as governed dimensions rather than arbitrary metadata.
 
 Therefore a zTouch Envelope cannot introduce:
+
 ```text
 context = current truth
 location = authoritative current Place
 warrantyActive = true
 ```
+
 as an unqualified constitutional fact.
 
 **Three different things must be separated:**
 
-| Category | Description | Examples |
-| :--- | :--- | :--- |
-| **A. Envelope metadata** | Describes the envelope itself | envelope version, carrier binding version, encoding identifier |
+| Category                                   | Description                                               | Examples                                                                                 |
+| :----------------------------------------- | :-------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| **A. Envelope metadata**                   | Describes the envelope itself                             | envelope version, carrier binding version, encoding identifier                           |
 | **B. Descriptive assertions / references** | Claims or references (non-authoritative unless validated) | batch reference, location reference, product-class reference, issuer-supplied descriptor |
-| **C. Evaluation Context** | Belongs downstream | Z-PROF/AMS-0860 explicit version/context/evidence/evaluation bindings |
+| **C. Evaluation Context**                  | Belongs downstream                                        | Z-PROF/AMS-0860 explicit version/context/evidence/evaluation bindings                    |
 
 **PREP-C disposition:**
 The top-level envelope field named simply:
@@ -194,31 +216,37 @@ Replace conceptually with:
 and treat all such content as non-authoritative unless separately validated under its governing source.
 
 ### Intent Hints Collision
+
 This is subtler.
 The original proposal correctly says Intent Hints are not capabilities or permissions and proposes reusing Zyppi's governed closed Intent vocabulary.
 
 But ZRM defines Intent more precisely:
-> *Intent is a Relationship between a Subject and a desired candidate future State.*
+
+> _Intent is a Relationship between a Subject and a desired candidate future State._
 
 It also preserves the closed vocabulary such as Discover, Access, Verify, Authenticate, Register, Claim, Purchase, Transfer, Return, Support, Subscribe and Trigger.
 
 Therefore:
+
 ```text
 QR says "Verify"
 ```
+
 does not itself instantiate:
+
 ```text
 intent(subject, object, futureState)
 ```
+
 There may not even be an identified Subject yet.
 That means calling the carrier field `Intent` would be constitutionally wrong.
 Calling it `Intent Hint` is better, but still close enough to create confusion.
 
 **PREP-C distinction:**
 
-| Concept | Structure |
-| :--- | :--- |
-| **Actual Intent** | Subject → desires → future State |
+| Concept                      | Structure                                                           |
+| :--------------------------- | :------------------------------------------------------------------ |
+| **Actual Intent**            | Subject → desires → future State                                    |
 | **Carrier Interaction Hint** | "This touchpoint commonly supports interactions of category Verify" |
 
 The second is discoverability metadata, not an Intent Relationship.
@@ -227,20 +255,25 @@ The second is discoverability metadata, not an Intent Relationship.
 `Interaction Hints`
 
 These may reference the governed Intent vocabulary:
+
 ```yaml
 interactionHints:
   - Verify
   - Register
   - Support
 ```
+
 but the semantics are explicitly:
-> *"These interaction categories may be relevant."*
+
+> _"These interaction categories may be relevant."_
 
 not:
-> *"An Actor has expressed these Intents."*
+
+> _"An Actor has expressed these Intents."_
 
 and certainly not:
-> *"These actions are authorized."*
+
+> _"These actions are authorized."_
 
 **Important consequence:**
 Interaction Hints should be moved out of the mandatory envelope core.
@@ -249,6 +282,7 @@ They should be an optional zTOUCH extension.
 
 **PREP-C disposition:**
 `Intent Hints` → **ADAPT to Interaction Hints.**
+
 - reference governed labels;
 - never instantiate constitutional Intent;
 - never imply authorization;
@@ -256,21 +290,25 @@ They should be an optional zTOUCH extension.
 - optional extension only.
 
 ### Trust / Seal Collision
+
 This is the clearest collision.
 
 SEC defines Trust as a governed lifecycle involving Identity, attestation, capability, policy satisfaction and Runtime compliance. Only active Trust may authorize execution.
 
 Z-PROF independently reinforces the boundary:
-> *Z-PROF consumes SEC-governed security/trust mechanisms and cannot create alternative trust, attestation, or cryptographic authority.*
+
+> _Z-PROF consumes SEC-governed security/trust mechanisms and cannot create alternative trust, attestation, or cryptographic authority._
 
 And the ZyPub exploration reached the same insight:
-> *Trust is computed, not transported.*
+
+> _Trust is computed, not transported._
 
 Therefore:
 `Trust / Seal`
 must be removed from the zTouch Envelope vocabulary.
 
 A carrier can contain:
+
 - signature
 - issuer reference
 - certificate reference
@@ -280,13 +318,17 @@ A carrier can contain:
 - proof material
 
 A technical reader can potentially conclude:
+
 ```text
 signature cryptographically valid
 ```
+
 It cannot conclude:
+
 ```text
 constitutionally trusted
 ```
+
 without SEC/POL/standing/current-state evaluation.
 
 **Replacement concept:**
@@ -303,17 +345,21 @@ Replace with:
 subject to future security profile design.
 
 ### Version Collision
+
 Version itself is legitimate—but only if scoped.
 
 The zTouch Envelope may own:
+
 - `envelopeVersion`
 - `bindingVersion`
 
 For example:
+
 - zTouch envelope v1
 - zQR binding v1
 
 But it must not silently own or float:
+
 - ARM profile version
 - Z-PROF composition version
 - POL version
@@ -326,6 +372,7 @@ The Z-PROF contract already requires explicit version binding and prohibits sile
 Similarly ZQE will separately have `zqe/1` for encoding reproducibility.
 
 Thus:
+
 ```text
 zTouch Envelope version
       ≠
@@ -337,6 +384,7 @@ payload protocol version
       ≠
 domain composition version
 ```
+
 This is now a PREP-C rule candidate.
 
 ---
@@ -344,17 +392,20 @@ This is now a PREP-C rule candidate.
 ## Envelope vs. Existing Constitutional Artifacts
 
 ### zTouch Envelope vs. CompositionManifest
+
 This collision is now decisively resolved.
 They are not competing representations.
 
 Z-PROF's ratified `CompositionManifest` answers:
-> *"Which governed constitutional artifacts satisfy the requirements of this domain composition, and how are they bound?"*
+
+> _"Which governed constitutional artifacts satisfy the requirements of this domain composition, and how are they bound?"_
 
 It can reference ARM Profiles, Epistemic Requirements, PRJ, RSN, Context requirements, POL, SEC, RI, version constraints, provenance, and successful Application resolution may produce a version-bound, provenance-preserving Bound Constitutional Payload which remains non-authoritative over its sources.
 
 A zTouch Envelope must do nothing remotely as broad.
 
 **Forbidden architecture:**
+
 ```text
 Physical carrier
       ↓
@@ -364,9 +415,11 @@ contains full constitutional composition
       ↓
 Runtime
 ```
+
 That would create a second Z-PROF/application assembly system.
 
 **Correct architecture:**
+
 ```text
 Physical carrier
       ↓
@@ -386,6 +439,7 @@ Bound Constitutional Payload
       ↓
 RI
 ```
+
 This matches the current physical Z-PROF topology, where physical carrier parsing precedes resolution, composition, Application assembly, EvaluationCoordinate, and RI.
 
 **PREP-C conclusion:**
@@ -393,6 +447,7 @@ The zTouch Envelope is a carrier/bootstrap artifact, not a constitutional compos
 That boundary is now closed for PREP purposes.
 
 ### zTouch Envelope vs. EvaluationCoordinate
+
 They are also fundamentally different.
 
 AMS-0860 treats evaluation identity as a deliberately bound construct involving semantic configuration, exact dependencies, explicit temporal coordinates, pinned semantic/assessment states, Evidence integrity and no ambient trust/time.
@@ -400,6 +455,7 @@ AMS-0860 treats evaluation identity as a deliberately bound construct involving 
 The zTouch Envelope must never attempt to be:
 `portable EvaluationCoordinate`
 by embedding:
+
 - current policy
 - current trust
 - current authority
@@ -447,12 +503,14 @@ Not implementation authority.
 ## The Core Should Probably Be Much Smaller Than Originally Imagined
 
 PREP-C produces a further refinement:
+
 > **Not every zTOUCH should require a rich Envelope.**
 
 For many situations, the best zTOUCH may simply be:
 `standard interoperable resolution reference`
 
 Example:
+
 - GS1 Digital Link
 - eventually: ZPI address
 
@@ -473,6 +531,7 @@ zTOUCH
 ```
 
 This has several advantages:
+
 - It keeps QR payloads short.
 - It preserves GS1.
 - It supports constrained NFC/RFID carriers.
@@ -485,6 +544,7 @@ This has several advantages:
 ## Graceful Degradation Model Improvement
 
 The original proposal had:
+
 ```text
 Generic Scanner
       ↓
@@ -520,6 +580,7 @@ RI / PRJ / RSN / appropriate authorities
 ```
 
 Notice the correction:
+
 > **"Trust-aware" becomes "Proof-aware."**
 > Actual Trust remains downstream.
 
@@ -528,6 +589,7 @@ Notice the correction:
 ## Relationship to External & Adjacent Systems
 
 ### Relationship to GS1
+
 The original proposal correctly says zTOUCH should preserve external standards rather than replace them.
 PREP-C strengthens that.
 
@@ -538,22 +600,27 @@ may already carry sufficient resolution semantics.
 Therefore zTOUCH must not insist on wrapping it in a proprietary semantic container simply because an envelope exists.
 
 **Possible lawful behavior:**
+
 ```text
 GS1 Digital Link directly
       ↓
 zQR binding behavior / Zyppi resolution
 ```
+
 or, where standards permit and value justifies it:
+
 ```text
 GS1-governed identifier/reference
       +
 bounded zTOUCH extension
 ```
+
 But GS1 semantics remain GS1's.
 The envelope does not "translate GS1 into Zyppi."
 That translation/application work remains in the proper domain/Z-PROF/application boundary.
 
 ### Relationship to ZPI/zPIS
+
 The same result applies to future ZPI.
 The zTouch Envelope does not create physical identity addresses.
 It may carry:
@@ -561,6 +628,7 @@ It may carry:
 or another ZPI address/reference.
 
 Therefore:
+
 - **ZPI** = addressing / resolution identity
 - **zTOUCH** = interaction semantics / carrier binding
 - **ZII** = technical carrier infrastructure
@@ -569,6 +637,7 @@ Therefore:
 These remain independently replaceable.
 
 ### Relationship to ZyPub
+
 This audit also prevents another future collision.
 A zTouch Envelope and a ZyPub Capsule must not become the same artifact.
 
@@ -576,6 +645,7 @@ The ZyPub proposal contemplates bounded publication containing identity material
 That is potentially much richer than a touchpoint bootstrap envelope.
 
 So:
+
 - `zTouch Envelope` = compact interaction/bootstrap representation
 - `ZyPub Capsule` = bounded published representation
 
@@ -589,16 +659,17 @@ But it does not collapse into the zTouch Envelope.
 
 The envelope may carry information related to Golden Question dimensions, but it cannot manufacture them.
 
-| Golden Question | zTouch Envelope may | zTouch Envelope must not |
-| :--- | :--- | :--- |
-| **Who?** | carry Subject/issuer/reference | declare constitutional Subject authority |
-| **Did what?** | carry an assertion/event reference | create Event truth merely by serialization |
-| **To whom?** | carry Object/Identity/reference | redefine Referent/Identity |
-| **Where?** | carry Place/contextual claim/reference | infer current Place |
-| **When?** | carry valid-time/publication-time claim | treat scan time as Valid Time automatically |
+| Golden Question     | zTouch Envelope may                      | zTouch Envelope must not                       |
+| :------------------ | :--------------------------------------- | :--------------------------------------------- |
+| **Who?**            | carry Subject/issuer/reference           | declare constitutional Subject authority       |
+| **Did what?**       | carry an assertion/event reference       | create Event truth merely by serialization     |
+| **To whom?**        | carry Object/Identity/reference          | redefine Referent/Identity                     |
+| **Where?**          | carry Place/contextual claim/reference   | infer current Place                            |
+| **When?**           | carry valid-time/publication-time claim  | treat scan time as Valid Time automatically    |
 | **How do we know?** | carry proof/evidence references/material | declare Evidence verified or Trust established |
 
 This is the decisive boundary:
+
 > **The envelope carries representations relevant to the Golden Question. It does not answer the Golden Question by itself.**
 
 ---
@@ -606,6 +677,7 @@ This is the decisive boundary:
 ## PREP-C Disappearance Test
 
 We should require:
+
 1. If zTOUCH disappeared tomorrow, would ZRM Identity, Touchpoint, GS1 identifiers, ZPI addresses, Context, Intent, SEC Trust, POL authorization, Z-PROF compositions and RI execution remain independently meaningful?
    **Yes.**
 2. If the zTouch Envelope disappeared and a carrier exposed only an ordinary resolution reference, could Zyppi still function?
@@ -641,45 +713,45 @@ These are now architecturally prohibited hypotheses for the future envelope desi
 
 These remain PREP findings, not ratified ZII/zTOUCH law.
 
-| ID | Candidate invariant |
-| :--- | :--- |
-| **ZT-C01** | zTOUCH SHALL NOT redefine constitutional Touchpoint |
-| **ZT-C02** | Carrier Reference ≠ Identity |
-| **ZT-C03** | Descriptive Assertion ≠ current Context |
-| **ZT-C04** | Interaction Hint ≠ Intent |
-| **ZT-C05** | Interaction Hint ≠ Capability or authorization |
-| **ZT-C06** | Proof Material ≠ Trust |
-| **ZT-C07** | Signature Validity ≠ current constitutional standing |
-| **ZT-C08** | Envelope Version ≠ payload/domain/engine version |
-| **ZT-C09** | Envelope ≠ CompositionManifest |
-| **ZT-C10** | Envelope ≠ Bound Constitutional Payload |
-| **ZT-C11** | Envelope ≠ EvaluationCoordinate |
-| **ZT-C12** | External standards retain semantic authority |
-| **ZT-C13** | Rich envelope semantics SHALL remain optional where a simpler interoperable reference suffices |
-| **ZT-C14** | Removing zTOUCH SHALL NOT invalidate underlying constitutional artifacts |
+| ID         | Candidate invariant                                                                              |
+| :--------- | :----------------------------------------------------------------------------------------------- |
+| **ZT-C01** | zTOUCH SHALL NOT redefine constitutional Touchpoint                                              |
+| **ZT-C02** | Carrier Reference ≠ Identity                                                                     |
+| **ZT-C03** | Descriptive Assertion ≠ current Context                                                          |
+| **ZT-C04** | Interaction Hint ≠ Intent                                                                        |
+| **ZT-C05** | Interaction Hint ≠ Capability or authorization                                                   |
+| **ZT-C06** | Proof Material ≠ Trust                                                                           |
+| **ZT-C07** | Signature Validity ≠ current constitutional standing                                             |
+| **ZT-C08** | Envelope Version ≠ payload/domain/engine version                                                 |
+| **ZT-C09** | Envelope ≠ CompositionManifest                                                                   |
+| **ZT-C10** | Envelope ≠ Bound Constitutional Payload                                                          |
+| **ZT-C11** | Envelope ≠ EvaluationCoordinate                                                                  |
+| **ZT-C12** | External standards retain semantic authority                                                     |
+| **ZT-C13** | Rich envelope semantics SHALL remain optional where a simpler interoperable reference suffices   |
+| **ZT-C14** | Removing zTOUCH SHALL NOT invalidate underlying constitutional artifacts                         |
 | **ZT-C15** | No carrier representation may make a claim stronger than its governing Reality/Evidence supports |
 
-*ZT-C15 directly follows the Z-PROF Naked Reality constraint that interpretation or representation must not make a claim stronger than the Reality and Evidence supporting it.*
+_ZT-C15 directly follows the Z-PROF Naked Reality constraint that interpretation or representation must not make a claim stronger than the Reality and Evidence supporting it._
 
 ---
 
 ## Final Field-by-Field Disposition
 
-| Original proposal | PREP-C outcome |
-| :--- | :--- |
-| Identity | **REFACTOR** → Resolution/Identity Reference |
-| Identity Class / Type | Only governed reference; no zTOUCH type system |
-| Context | **REFACTOR** → contextual references/descriptive assertions |
-| Intent Hints | **REFACTOR** → Interaction Hints; optional |
-| Trust / Seal | **REJECT terminology** → Integrity/Provenance/Attestation Material |
-| Version | **KEEP**, strictly scoped to envelope/binding |
-| Issuer | **KEEP** as reference, never inherent authority |
-| Signature | **OPTIONAL** proof material, not Trust |
-| Current State | **NOT** baseline carrier authority |
-| Policy/Authorization | **PROHIBITED** |
-| Composition | **PROHIBITED** as envelope-owned constitutional composition |
-| Evidence truth | **PROHIBITED** |
-| Carrier-specific serialization | Owned by zTOUCH binding/ZII implementation layer |
+| Original proposal              | PREP-C outcome                                                     |
+| :----------------------------- | :----------------------------------------------------------------- |
+| Identity                       | **REFACTOR** → Resolution/Identity Reference                       |
+| Identity Class / Type          | Only governed reference; no zTOUCH type system                     |
+| Context                        | **REFACTOR** → contextual references/descriptive assertions        |
+| Intent Hints                   | **REFACTOR** → Interaction Hints; optional                         |
+| Trust / Seal                   | **REJECT terminology** → Integrity/Provenance/Attestation Material |
+| Version                        | **KEEP**, strictly scoped to envelope/binding                      |
+| Issuer                         | **KEEP** as reference, never inherent authority                    |
+| Signature                      | **OPTIONAL** proof material, not Trust                             |
+| Current State                  | **NOT** baseline carrier authority                                 |
+| Policy/Authorization           | **PROHIBITED**                                                     |
+| Composition                    | **PROHIBITED** as envelope-owned constitutional composition        |
+| Evidence truth                 | **PROHIBITED**                                                     |
+| Carrier-specific serialization | Owned by zTOUCH binding/ZII implementation layer                   |
 
 ---
 
@@ -689,11 +761,13 @@ These remain PREP findings, not ratified ZII/zTOUCH law.
 
 The most important result is that we do not need to abandon the zTouch Envelope idea.
 But we should stop thinking of it as:
-> *"a miniature packet containing Identity + Context + Intent + Trust."*
+
+> _"a miniature packet containing Identity + Context + Intent + Trust."_
 
 That would indeed be a shadow constitution.
 
 The surviving model is:
+
 > **A zTouch Carrier Envelope is an optional, compact, carrier-facing representation for conveying a resolution reference plus bounded non-authoritative metadata, interaction hints, and integrity/provenance material. All constitutional meaning remains with the authorities that already own it.**
 
 In shortest architectural form:
@@ -716,17 +790,19 @@ With PREP-C closed, the next blocking phase is **PREP-D — CEngS Layer Eligibil
 
 ## Chair Review & Final Closure Amendments
 
-> *I agree with this review and would treat it as a PREP-C closure amendment, not as a reopening of the phase.*
+> _I agree with this review and would treat it as a PREP-C closure amendment, not as a reopening of the phase._
 
 The reviewer's strongest contribution is that it finishes the semantic cleanup we started. The original proposal explicitly wanted zTOUCH to enrich the existing Touchpoint→Identity boundary without creating a new constitutional primitive, and it required ordinary QR interoperability rather than a proprietary symbology. The revised model now expresses that intent much more accurately.
 
 ### PREP-C — Final Closure Amendments
 
 #### 1. Resolution Reference → Access Reference
+
 **Adopted.**
 Resolution Reference was safer than Identity, but still unnecessarily semantic. `Access Reference` describes what the carrier actually possesses without claiming either Identity or Resolution.
 
 The canonical working abstraction becomes:
+
 ```text
 Access Reference
 │
@@ -740,6 +816,7 @@ Access Reference
 ```
 
 The governing distinction is:
+
 ```text
 Access Reference
       ↓
@@ -747,20 +824,24 @@ resolution process
       ↓
    Identity
 ```
+
 Therefore:
+
 > **An Access Reference may enable or participate in resolution. It is neither the resolved Identity nor the Resolution itself.**
 
 This is also closer to the original proposal's own idea of the QR as a durable access mechanism to persistent Identity.
 
 #### 2. Integrity / Provenance / Attestation Material → Integrity & Provenance Material
+
 **Adopted.**
-The reviewer is right that even the word *Attestation* already carries governed security meaning.
+The reviewer is right that even the word _Attestation_ already carries governed security meaning.
 SEC defines Trust through bounded, revocable attestation, capability, policy, context, and Runtime compliance; Trust is never self-declared or permanent.
 
 So the carrier-level neutral category becomes:
 `Integrity & Provenance Material`
 
 It may contain things such as:
+
 - signature
 - digest
 - issuer reference
@@ -771,34 +852,39 @@ It may contain things such as:
 - proof commitment
 
 with the standing rule:
+
 > **Any governed artifact transported inside zTOUCH retains the authority, schema, lifecycle, interpretation, and validity rules of its original governing system.**
 
 Thus an SEC attestation inside a carrier remains an SEC attestation.
 zTOUCH does not wrap it and thereby become its owner.
 
 #### 3. The Four Carrier-Material Categories Are Now Formal PREP Terminology
+
 **Adopted:**
+
 1. **REFERENCES**
 2. **ASSERTIONS**
 3. **HINTS**
 4. **PROOF MATERIAL**
 
-This is much stronger than the original: *Identity, Context, Intent, Trust*.
+This is much stronger than the original: _Identity, Context, Intent, Trust_.
 The four categories have deliberately different epistemic meanings.
 
-| Category | Example | Meaning |
-| :--- | :--- | :--- |
-| **Reference** | `placeRef = P123` | Look to governed/external object P123. It does not assert that P123 is currently applicable. |
-| **Assertion** | `productionPlace = P123` | Some identified source asserts that production occurred at P123. Its truth still depends on provenance, evidence, valid time, authority, etc. |
-| **Hint** | `Verify` | This interaction category may be relevant. It does not instantiate Intent and grants no Capability. |
-| **Proof Material** | `signature`, `digest`, `issuer key reference` | Material exists which may support technical or constitutional verification. It does not equal Trust. |
+| Category           | Example                                       | Meaning                                                                                                                                       |
+| :----------------- | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Reference**      | `placeRef = P123`                             | Look to governed/external object P123. It does not assert that P123 is currently applicable.                                                  |
+| **Assertion**      | `productionPlace = P123`                      | Some identified source asserts that production occurred at P123. Its truth still depends on provenance, evidence, valid time, authority, etc. |
+| **Hint**           | `Verify`                                      | This interaction category may be relevant. It does not instantiate Intent and grants no Capability.                                           |
+| **Proof Material** | `signature`, `digest`, `issuer key reference` | Material exists which may support technical or constitutional verification. It does not equal Trust.                                          |
 
-*Note: Avoiding `Claim` as the generic category name because `Claim` already appears in the governed Intent vocabulary in the original zTOUCH exploration.*
+_Note: Avoiding `Claim` as the generic category name because `Claim` already appears in the governed Intent vocabulary in the original zTOUCH exploration._
 
 #### 4. Baseline Binding Becomes the Center of zTOUCH
+
 This is the most important architectural improvement.
 
 I would now replace the old conceptual model:
+
 ```text
 zTouch Envelope
 ├── Identity
@@ -806,7 +892,9 @@ zTouch Envelope
 ├── Intent Hints
 └── Trust
 ```
+
 with:
+
 ```text
 zTOUCH
 │
@@ -824,6 +912,7 @@ That means the envelope itself is no longer necessarily mandatory.
 In fact, the minimum valid zTOUCH interaction may contain no rich envelope at all.
 
 For GS1, for example:
+
 ```text
 standard QR
       ↓
@@ -833,6 +922,7 @@ Zyppi-aware provisioning / binding
       ↓
 Zyppi resolution
 ```
+
 may be completely sufficient.
 
 That is consistent with the earlier exploration, which explicitly wanted standards-compatible QR and raised the open question of whether a GS1 zQR might simply be a GS1 Digital Link plus Zyppi behavior.
@@ -840,14 +930,17 @@ That is consistent with the earlier exploration, which explicitly wanted standar
 This is a better architecture because complexity becomes optional rather than compulsory.
 
 #### 5. This Changes the Likely Definition of zQR
+
 I agree that PREP-C should explicitly expose this question.
 
 The original proposal treated zQR as the first carrier implementation of zTOUCH and emphasized that it should remain an ordinary interoperable QR rather than a proprietary symbology.
 
 That suggests a strong possibility:
+
 > **zQR may be defined primarily by provisioning/binding and Zyppi behavior rather than by a proprietary payload syntax.**
 
 Conceptually:
+
 ```text
 Standard QR
    +
@@ -864,6 +957,7 @@ A QR containing a perfectly ordinary:
 could potentially still be a zQR because of how the Touchpoint has been provisioned and behaves inside Zyppi.
 
 Therefore add:
+
 > **ZT-OQ-01 — zQR Conformance Identity**
 > Determine the minimum condition under which a standards-compliant QR is designated a zQR. Payload syntax alone SHALL NOT be presumed sufficient or necessary to establish zQR status.
 
@@ -874,24 +968,29 @@ C. Binding/profile-defined
 D. Registry-defined
 E. Combination
 
-*PREP-C does not choose yet.*
+_PREP-C does not choose yet._
 
 #### 6. The Golden Question Wording Is Amended
+
 I agree with the philosophical correction.
 
 Previously:
-> *The envelope carries representations relevant to the Golden Question. It does not answer the Golden Question by itself.*
+
+> _The envelope carries representations relevant to the Golden Question. It does not answer the Golden Question by itself._
 
 Replace with:
+
 > **A zTOUCH carrier may transport answers asserted by governed or external sources; carriage alone does not establish their constitutional truth, authority, standing, freshness, or current applicability.**
 
 That is much more exact.
 For example, a manufacturer may legitimately assert:
+
 ```text
 batch = B2026
 manufacturedAt = 2026-08-14
 manufacturedPlace = P123
 ```
+
 The mistake would be saying that the QR makes those facts Reality merely because it carries them.
 
 ---
@@ -954,8 +1053,7 @@ I would retain exactly the five concise rules the reviewer identified:
 
 They are an unusually good summary of the entire collision audit.
 
-I would add one structural rule beside them:
-6. **Binding ≠ Payload Syntax**
+I would add one structural rule beside them: 6. **Binding ≠ Payload Syntax**
 
 because that protects the possibility that zQR/zNFC status can arise through provisioning or binding without forcing proprietary carrier syntax.
 
@@ -963,18 +1061,18 @@ because that protects the possibility that zQR/zNFC status can arise through pro
 
 ## Updated Disposition of the Original zTouch Envelope
 
-| Original element | Final PREP-C disposition |
-| :--- | :--- |
-| Identity | Replace with **Access Reference** |
-| Context | Split into **References** and **Assertions** |
-| Intent Hints | Replace with optional **Hints** |
-| Trust / Seal | Replace with **Proof Material / Integrity & Provenance Material** |
-| Envelope mandatory | **Rejected** |
-| Carrier Binding | **Promoted to baseline** |
-| Rich extensions | **Optional** |
-| Version | Keep, scoped to binding/envelope only |
-| zQR defined by proprietary syntax | **Not assumed; OPEN** |
-| zTOUCH as new constitutional primitive | **Rejected** |
+| Original element                       | Final PREP-C disposition                                          |
+| :------------------------------------- | :---------------------------------------------------------------- |
+| Identity                               | Replace with **Access Reference**                                 |
+| Context                                | Split into **References** and **Assertions**                      |
+| Intent Hints                           | Replace with optional **Hints**                                   |
+| Trust / Seal                           | Replace with **Proof Material / Integrity & Provenance Material** |
+| Envelope mandatory                     | **Rejected**                                                      |
+| Carrier Binding                        | **Promoted to baseline**                                          |
+| Rich extensions                        | **Optional**                                                      |
+| Version                                | Keep, scoped to binding/envelope only                             |
+| zQR defined by proprietary syntax      | **Not assumed; OPEN**                                             |
+| zTOUCH as new constitutional primitive | **Rejected**                                                      |
 
 The original document explicitly said the zTouch Envelope was conceptual, not yet a schema, URI syntax, or binary specification. That gave us exactly the freedom PREP-C needed to refactor it without breaking any ratified contract.
 

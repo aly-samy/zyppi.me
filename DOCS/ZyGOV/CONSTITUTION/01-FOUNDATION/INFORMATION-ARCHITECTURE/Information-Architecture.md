@@ -1,7 +1,8 @@
 # Zyppi Information Architecture Bible
+
 ```
-**Version:** 1.0  
-**Status:** Living Document  
+**Version:** 1.0
+**Status:** Living Document
 **Last Updated:** July 2026
 
 **Depends On**
@@ -11,6 +12,7 @@
 - `/PRD.md`
 - `/TECHNICAL_ARCHITECTURE_BIBLE.md`
 ```
+
 ---
 
 # Purpose
@@ -709,6 +711,7 @@ Capabilities
     ↓
 Autonomous Execution
 ```
+
 ---
 
 > Every new capability should strengthen this information architecture without compromising its constitutional principles.
@@ -719,4 +722,4 @@ Autonomous Execution
 >
 > **AI may evolve**.
 >
-> ... The **constitutional information model** *must* **remain stable**.
+> ... The **constitutional information model** _must_ **remain stable**.

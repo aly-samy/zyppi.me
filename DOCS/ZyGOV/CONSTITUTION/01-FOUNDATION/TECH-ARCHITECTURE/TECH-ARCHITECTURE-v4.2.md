@@ -4,41 +4,41 @@
 
 ## Constitutional Metadata Header
 
-| Field | Value |
-|-------|-------|
-| Document ID | |
-| Constitutional URI | |
-| Canonical Name | ZYPPI_TECHNICAL_ARCHITECTURE_BIBLE_v4.2 |
-| Document Family | Zyppi Constitutional Corpus |
-| Title | Zyppi Technical Architecture Bible |
-| Version | 4.2 |
-| Status | Draft — Proposed for Ratification |
-| Classification | Runtime Constitution |
-| Normative Level | Normative |
-| Domain | System Architecture |
-| Constitutional Tier | Needs Ratification |
-| Constitutional Role | Needs Ratification |
-| Lifecycle | Active |
-| Owner | Not Specified |
-| Steward | Not Specified |
-| Created | Not Specified |
-| Last Updated | 2026-07 |
-| Effective Date | Not Specified |
-| Parent Document | FOUNDING-PRINCIPLES-v5.0.md (nearest constitutional parent) |
-| Depends On | NORTH-STAR-v6.0.md, FOUNDING-PRINCIPLES-v5.0.md, PRD-v4.1.md |
-| Required By | To Be Resolved During Repository Dependency Mapping |
-| Related Documents | To Be Resolved During Repository Dependency Mapping |
-| Supersedes | ZYPPI_TECHNICAL_ARCHITECTURE_BIBLE_v4.1 |
-| Superseded By | To Be Resolved During Repository Dependency Mapping |
-| Authority Scope | Needs Ratification |
-| Amendment Policy | Constitutional Amendment Required |
-| Compatibility | Not Specified |
-| Keywords | Architecture, Subject, Object, Place, Event, Evidence, Context, Routing, Trust, Execution, Decision Engine, Event Ledger, Capabilities |
-| Defines | Identity Layer, Context Layer, Decision Engine, Routing Layer, Event Ledger, Routing Intelligence, Enterprise Capabilities, Execution Layer, ADRs, Universal Execution Pipeline |
-| Amendment Class | Primitive Reconciliation — see 00-RECONCILIATION-NOTE.md §8 |
-| Change Log | Version 4.2: "Actor" context/input dimension retitled "Subject" throughout; Identity Layer's "Human identities" / "Organization identities" consolidated under "Subject identities" per North Star v6.0; one clarifying cross-reference added in §3 tying this document's engineering-level pipeline to North Star's vision-level Universal Execution Pipeline. No other substantive change from v4.1. |
-| Constitutional Hash | Reserved |
-| UUID | Reserved |
+| Field               | Value                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Document ID         |                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Constitutional URI  |                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Canonical Name      | ZYPPI_TECHNICAL_ARCHITECTURE_BIBLE_v4.2                                                                                                                                                                                                                                                                                                                                                                |
+| Document Family     | Zyppi Constitutional Corpus                                                                                                                                                                                                                                                                                                                                                                            |
+| Title               | Zyppi Technical Architecture Bible                                                                                                                                                                                                                                                                                                                                                                     |
+| Version             | 4.2                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Status              | Draft — Proposed for Ratification                                                                                                                                                                                                                                                                                                                                                                      |
+| Classification      | Runtime Constitution                                                                                                                                                                                                                                                                                                                                                                                   |
+| Normative Level     | Normative                                                                                                                                                                                                                                                                                                                                                                                              |
+| Domain              | System Architecture                                                                                                                                                                                                                                                                                                                                                                                    |
+| Constitutional Tier | Needs Ratification                                                                                                                                                                                                                                                                                                                                                                                     |
+| Constitutional Role | Needs Ratification                                                                                                                                                                                                                                                                                                                                                                                     |
+| Lifecycle           | Active                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Owner               | Not Specified                                                                                                                                                                                                                                                                                                                                                                                          |
+| Steward             | Not Specified                                                                                                                                                                                                                                                                                                                                                                                          |
+| Created             | Not Specified                                                                                                                                                                                                                                                                                                                                                                                          |
+| Last Updated        | 2026-07                                                                                                                                                                                                                                                                                                                                                                                                |
+| Effective Date      | Not Specified                                                                                                                                                                                                                                                                                                                                                                                          |
+| Parent Document     | FOUNDING-PRINCIPLES-v5.0.md (nearest constitutional parent)                                                                                                                                                                                                                                                                                                                                            |
+| Depends On          | NORTH-STAR-v6.0.md, FOUNDING-PRINCIPLES-v5.0.md, PRD-v4.1.md                                                                                                                                                                                                                                                                                                                                           |
+| Required By         | To Be Resolved During Repository Dependency Mapping                                                                                                                                                                                                                                                                                                                                                    |
+| Related Documents   | To Be Resolved During Repository Dependency Mapping                                                                                                                                                                                                                                                                                                                                                    |
+| Supersedes          | ZYPPI_TECHNICAL_ARCHITECTURE_BIBLE_v4.1                                                                                                                                                                                                                                                                                                                                                                |
+| Superseded By       | To Be Resolved During Repository Dependency Mapping                                                                                                                                                                                                                                                                                                                                                    |
+| Authority Scope     | Needs Ratification                                                                                                                                                                                                                                                                                                                                                                                     |
+| Amendment Policy    | Constitutional Amendment Required                                                                                                                                                                                                                                                                                                                                                                      |
+| Compatibility       | Not Specified                                                                                                                                                                                                                                                                                                                                                                                          |
+| Keywords            | Architecture, Subject, Object, Place, Event, Evidence, Context, Routing, Trust, Execution, Decision Engine, Event Ledger, Capabilities                                                                                                                                                                                                                                                                 |
+| Defines             | Identity Layer, Context Layer, Decision Engine, Routing Layer, Event Ledger, Routing Intelligence, Enterprise Capabilities, Execution Layer, ADRs, Universal Execution Pipeline                                                                                                                                                                                                                        |
+| Amendment Class     | Primitive Reconciliation — see 00-RECONCILIATION-NOTE.md §8                                                                                                                                                                                                                                                                                                                                            |
+| Change Log          | Version 4.2: "Actor" context/input dimension retitled "Subject" throughout; Identity Layer's "Human identities" / "Organization identities" consolidated under "Subject identities" per North Star v6.0; one clarifying cross-reference added in §3 tying this document's engineering-level pipeline to North Star's vision-level Universal Execution Pipeline. No other substantive change from v4.1. |
+| Constitutional Hash | Reserved                                                                                                                                                                                                                                                                                                                                                                                               |
+| UUID                | Reserved                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ---
 
@@ -100,9 +100,11 @@ Every architectural decision should strengthen one or more of:
 # 2. Constitutional Engineering Principles
 
 ## Principle 1 — Identity Before Everything
+
 ```
 Every interaction begins with a permanent identity.
 ```
+
 Without identity there is:
 
 - no routing
@@ -115,11 +117,13 @@ Without identity there is:
 ---
 
 ## Principle 2 — Context Creates Meaning
+
 ```
 Identity alone is insufficient.
 
 Every routing decision depends on context.
 ```
+
 Context may include:
 
 - Subject
@@ -138,11 +142,13 @@ Context may include:
 ---
 
 ## Principle 3 — Routing Is Sacred
+
 ```
 Routing is Zyppi's primary workload.
 
 Nothing should unnecessarily delay or interfere with a routing decision.
 ```
+
 A dashboard may be slow.
 
 Analytics may lag.
@@ -154,9 +160,11 @@ Integrations may fail.
 ---
 
 ## Principle 4 — Events Are Immutable Facts
+
 ```
 Every meaningful interaction produces an immutable event.
 ```
+
 Events are evidence.
 
 They are never modified.

@@ -2,16 +2,16 @@
 
 **Milestone Freeze Record**
 
-| Field | Value |
-| :--- | :--- |
-| **Version** | `0.1` — WORKING FREEZE RECORD |
-| **Status** | ACTIVE — IN PROGRESS |
-| **Program** | `ZII — Zyppi Interaction Infrastructure` |
-| **Engine** | `ZQE — Zyppi QR Engine` |
-| **Milestone** | `ZQE-M00 — FQR Entry Freeze` |
-| **Roadmap Authority** | `ZQE-PLAN v0.2` |
+| Field                        | Value                                                                |
+| :--------------------------- | :------------------------------------------------------------------- |
+| **Version**                  | `0.1` — WORKING FREEZE RECORD                                        |
+| **Status**                   | ACTIVE — IN PROGRESS                                                 |
+| **Program**                  | `ZII — Zyppi Interaction Infrastructure`                             |
+| **Engine**                   | `ZQE — Zyppi QR Engine`                                              |
+| **Milestone**                | `ZQE-M00 — FQR Entry Freeze`                                         |
+| **Roadmap Authority**        | `ZQE-PLAN v0.2`                                                      |
 | **Implementation Authority** | SPECIFICATION / INVESTIGATION ONLY — no canonical `qr-core` code yet |
-| **Date** | 25 August 2026 |
+| **Date**                     | 25 August 2026                                                       |
 
 ---
 
@@ -20,6 +20,7 @@
 ZQE-M00 exists to eliminate ambiguity before canonical ZQE implementation begins.
 
 M00 must establish:
+
 - Exactly what FQR-1 is building
 - What technical contract ZQE exposes
 - What standards choices are frozen
@@ -34,13 +35,13 @@ It does not design the complete future QR engine.
 
 ## 2. M00 Work Breakdown
 
-| Workstream | Purpose | Current State |
-| :--- | :--- | :--- |
-| **M00-A** — FQR Profile Freeze | Model, Version, ECC, mode, capacity, fixtures | CANDIDATE FREEZE COMPLETE |
-| **M00-B** — Engine Boundary Freeze | Callable interface, QrSymbol, errors | CANDIDATE FREEZE COMPLETE |
-| **M00-C** — Verification Freeze | Strict verifier, external decoders, SVG determinism | CANDIDATE FREEZE COMPLETE |
-| **M00-D** — Governance Entry | CEngS context loading + RGT receipt | PARTIAL |
-| **M00-E** — Normative Verification & Closure | Human ISO verification + final ZQE-001 | OPEN |
+| Workstream                                   | Purpose                                             | Current State             |
+| :------------------------------------------- | :-------------------------------------------------- | :------------------------ |
+| **M00-A** — FQR Profile Freeze               | Model, Version, ECC, mode, capacity, fixtures       | CANDIDATE FREEZE COMPLETE |
+| **M00-B** — Engine Boundary Freeze           | Callable interface, QrSymbol, errors                | CANDIDATE FREEZE COMPLETE |
+| **M00-C** — Verification Freeze              | Strict verifier, external decoders, SVG determinism | CANDIDATE FREEZE COMPLETE |
+| **M00-D** — Governance Entry                 | CEngS context loading + RGT receipt                 | PARTIAL                   |
+| **M00-E** — Normative Verification & Closure | Human ISO verification + final ZQE-001              | OPEN                      |
 
 ---
 
@@ -76,6 +77,7 @@ Version 3
 This is deliberately fixed rather than auto-selected.
 
 **Why Version 3:**
+
 - small enough to keep FQR implementation narrow;
 - large enough for the 36-byte GS1 showcase payload;
 - gives a useful capacity boundary;
@@ -105,9 +107,11 @@ Byte mode only
 FQR-1 does not optimize eligible content into Numeric or Alphanumeric mode.
 
 Even:
+
 ```text
 HELLO ZYPPI
 ```
+
 is processed through the frozen Byte-mode path.
 
 This prevents early segmentation/optimization complexity from entering the proof slice.
@@ -145,18 +149,18 @@ That behavior would destroy the usefulness of the capacity-boundary test.
 
 The first FQR corpus is now concretely defined.
 
-| ID | Payload | Bytes | Expected |
-| :--- | :--- | :---: | :--- |
-| **A** | `HELLO ZYPPI` | 11 | ACCEPT |
-| **B** | `https://id.gs1.org/01/09520123456788` | 36 | ACCEPT |
-| **C** | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001` | 42 | ACCEPT |
-| **D** | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001X` | 43 | REJECT |
-| **E** | `ZYPPI-FQR1-INTERIOR-TEST-2026` | 29 | ACCEPT |
+| ID    | Payload                                       | Bytes | Expected |
+| :---- | :-------------------------------------------- | :---: | :------- |
+| **A** | `HELLO ZYPPI`                                 |  11   | ACCEPT   |
+| **B** | `https://id.gs1.org/01/09520123456788`        |  36   | ACCEPT   |
+| **C** | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001`  |  42   | ACCEPT   |
+| **D** | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001X` |  43   | REJECT   |
+| **E** | `ZYPPI-FQR1-INTERIOR-TEST-2026`               |  29   | ACCEPT   |
 
 The SHA-256 fixture identities are:
 
-| ID | SHA-256 |
-| :--- | :--- |
+| ID    | SHA-256                                                            |
+| :---- | :----------------------------------------------------------------- |
 | **A** | `bd68ab3476a08c12c26492389e317096619c54a3fb7e61d13e1047ee2502e843` |
 | **B** | `6eba966218ef0703cf47ee9079e4a3903bd315c4aa0c1544b5b64954ee5bccbd` |
 | **C** | `50c21a65588849150446e953cf26a67ea7a80296ea15b944dbf2803df414eac6` |
@@ -182,7 +186,7 @@ compileQr({
 This is preferable to making the engine fundamentally:
 
 ```typescript
-compileQr("some string")
+compileQr("some string");
 ```
 
 because the latter silently introduces a text-encoding responsibility.
@@ -296,19 +300,20 @@ QrSymbol
 
 For FQR-1:
 
-| Field | Value |
-| :--- | :--- |
-| `model` | QR Model 2 |
-| `version` | 3 |
-| `size` | 29 |
-| `errorCorrection` | M |
-| `selectedMask` | 0..7 |
-| `modules` | complete 29 × 29 binary grid |
+| Field             | Value                        |
+| :---------------- | :--------------------------- |
+| `model`           | QR Model 2                   |
+| `version`         | 3                            |
+| `size`            | 29                           |
+| `errorCorrection` | M                            |
+| `selectedMask`    | 0..7                         |
+| `modules`         | complete 29 × 29 binary grid |
 
 The public contract SHALL make mutation impossible through supported public operations.
 
 The exact in-memory representation remains implementation detail.
 We should not prematurely constitutionalize whether the matrix is:
+
 - flattened;
 - row arrays;
 - bit-packed;
@@ -333,6 +338,7 @@ SVG
 ```
 
 `qr-svg` SHALL NOT:
+
 - encode payload bytes;
 - calculate ECC;
 - perform matrix placement;
@@ -358,6 +364,7 @@ SVG
 ```
 
 with:
+
 - NO deep imports
 - NO compiler-private imports
 - NO QR semantic reconstruction in renderer
@@ -369,6 +376,7 @@ Public REST exposure remains outside FQR-1.
 ### 4.5 M00 Error Contract
 
 CEngS-001 states that every failure must include:
+
 - Error Code;
 - Reason;
 - Execution Stage;
@@ -378,13 +386,13 @@ CEngS-001 states that every failure must include:
 ZQE therefore SHALL NOT throw ambiguous errors such as:
 
 ```typescript
-Error("invalid")
+Error("invalid");
 ```
 
 or:
 
 ```typescript
-Error("QR failed")
+Error("QR failed");
 ```
 
 #### 4.5.1 Candidate ZQE Error Shape
@@ -458,6 +466,7 @@ A remaining question exists only for an exact score tie.
 > If multiple masks have the identical minimum penalty, select the lowest numerical mask index.
 
 This has desirable properties:
+
 - deterministic;
 - no hidden state;
 - simple;
@@ -466,6 +475,7 @@ This has desirable properties:
 But this rule is **NOT YET FROZEN.**
 
 Before M00 closes, human normative review SHALL determine:
+
 - whether ISO/IEC 18004:2024 explicitly governs tie behavior;
 - if not, whether the proposed lowest-index rule is a standards-permitted implementation choice.
 
@@ -500,6 +510,7 @@ It SHALL be logically independent from the encoder.
 It SHALL NOT simply invoke encoder helpers to verify encoder output.
 
 For the frozen profile it should inspect, where applicable:
+
 - 29×29 matrix dimensions;
 - required function regions;
 - reserved modules;
@@ -519,6 +530,7 @@ It is not a production QR decoder.
 > ZXing-C++ — test only
 
 The official project:
+
 - reads QR Code Model 2;
 - has WebAssembly bindings;
 - is Apache-2.0 licensed;
@@ -526,12 +538,12 @@ The official project:
 
 **Candidate classification:**
 
-| Property | Value |
-| :--- | :--- |
-| Dependency role | TEST ONLY |
-| Production `qr-core` dependency | PROHIBITED |
-| Purpose | Independent interoperability verification |
-| License candidate | Apache-2.0 |
+| Property                        | Value                                     |
+| :------------------------------ | :---------------------------------------- |
+| Dependency role                 | TEST ONLY                                 |
+| Production `qr-core` dependency | PROHIBITED                                |
+| Purpose                         | Independent interoperability verification |
+| License candidate               | Apache-2.0                                |
 
 M05 still requires the repository's formal dependency/license review before adoption.
 
@@ -574,6 +586,7 @@ A damaged but recoverable QR is not an appropriate required-failure fixture beca
 ### 5.5 SVG Determinism Freeze
 
 The FQR SVG contract SHALL use:
+
 - integer module geometry
 - integer quiet-zone geometry
 - integer viewBox
@@ -627,8 +640,8 @@ M00 therefore requires a narrow amendment.
 
 Add conceptually to the Task → Document table:
 
-| Task | Load |
-| :--- | :--- |
+| Task                     | Load                                                                                                         |
+| :----------------------- | :----------------------------------------------------------------------------------------------------------- |
 | ZII / ZQE implementation | Core + `ZII-001` + relevant ACTIVE ZII authority + relevant ZQE specification + exact implementation mandate |
 
 And clarify:
@@ -673,6 +686,7 @@ DRI:
 ```
 
 This does not block:
+
 - ZQE-001 drafting;
 - standards reconciliation;
 - mathematical probes;
@@ -689,20 +703,21 @@ We should not reproduce the licensed ISO text into the repository or AI context.
 
 Instead M00 establishes the following verification register.
 
-| NVR | Question | Status |
-| :--- | :--- | :--- |
-| NVR-001 | ISO/IEC 18004:2024 Ed.4 is correct normative baseline | PUBLICLY CONFIRMED |
-| NVR-002 | Version 3-M Byte capacity = 42 bytes | HUMAN VERIFY REQUIRED |
-| NVR-003 | Byte-mode header/count/termination/padding behavior | HUMAN VERIFY REQUIRED |
-| NVR-004 | Version 3-M block/ECC/interleave parameters | HUMAN VERIFY REQUIRED |
+| NVR     | Question                                               | Status                |
+| :------ | :----------------------------------------------------- | :-------------------- |
+| NVR-001 | ISO/IEC 18004:2024 Ed.4 is correct normative baseline  | PUBLICLY CONFIRMED    |
+| NVR-002 | Version 3-M Byte capacity = 42 bytes                   | HUMAN VERIFY REQUIRED |
+| NVR-003 | Byte-mode header/count/termination/padding behavior    | HUMAN VERIFY REQUIRED |
+| NVR-004 | Version 3-M block/ECC/interleave parameters            | HUMAN VERIFY REQUIRED |
 | NVR-005 | QR function/reserved-module placement applicable to V3 | HUMAN VERIFY REQUIRED |
-| NVR-006 | Data traversal + remainder behavior | HUMAN VERIFY REQUIRED |
-| NVR-007 | Eight mask formulas + penalty rules | HUMAN VERIFY REQUIRED |
-| NVR-008 | Tie behavior prescribed or unspecified | HUMAN VERIFY REQUIRED |
-| NVR-009 | Format-information generation rules | HUMAN VERIFY REQUIRED |
-| NVR-010 | Four-module quiet-zone requirement | HUMAN VERIFY REQUIRED |
+| NVR-006 | Data traversal + remainder behavior                    | HUMAN VERIFY REQUIRED |
+| NVR-007 | Eight mask formulas + penalty rules                    | HUMAN VERIFY REQUIRED |
+| NVR-008 | Tie behavior prescribed or unspecified                 | HUMAN VERIFY REQUIRED |
+| NVR-009 | Format-information generation rules                    | HUMAN VERIFY REQUIRED |
+| NVR-010 | Four-module quiet-zone requirement                     | HUMAN VERIFY REQUIRED |
 
 The authorized human reviewer records only:
+
 - decision
 - normative reference location
 - PASS / FAIL
@@ -788,13 +803,13 @@ ZQE-M00 is now formally STARTED.
 
 **Current disposition:**
 
-| Workstream | Status |
-| :--- | :--- |
-| M00-A — Profile Freeze | CANDIDATE COMPLETE |
-| M00-B — Engine Boundary | CANDIDATE COMPLETE |
+| Workstream                        | Status             |
+| :-------------------------------- | :----------------- |
+| M00-A — Profile Freeze            | CANDIDATE COMPLETE |
+| M00-B — Engine Boundary           | CANDIDATE COMPLETE |
 | M00-C — Verification Architecture | CANDIDATE COMPLETE |
-| M00-D — Governance Entry | PARTIAL |
-| M00-E — Normative Verification | OPEN |
+| M00-D — Governance Entry          | PARTIAL            |
+| M00-E — Normative Verification    | OPEN               |
 
 ---
 

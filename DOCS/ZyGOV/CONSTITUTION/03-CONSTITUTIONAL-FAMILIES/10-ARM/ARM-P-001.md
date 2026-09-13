@@ -90,7 +90,7 @@ Relationships to constituent Product Realities.
 
 Relationships to predecessor or successor Product Realities.
 
-----
+---
 
 **No other facets are constitutionally required.**
 

@@ -6,12 +6,12 @@
 
 ## Finding Classification
 
-| Severity | Meaning |
-|---|---|
+| Severity | Meaning                      |
+| -------- | ---------------------------- |
 | Critical | Constitutional contradiction |
-| High | Behavioral ambiguity |
-| Medium | Architectural improvement |
-| Low | Editorial improvement |
+| High     | Behavioral ambiguity         |
+| Medium   | Architectural improvement    |
+| Low      | Editorial improvement        |
 
 ---
 
@@ -44,7 +44,6 @@ Decouple the terms. Use "Certified SDK" to refer to the conformance status and "
 
 Ecosystem confusion where users may trust "Official" SDKs that are not currently "Certified".
 
-
 ---
 
 ### Finding 1.2 — Implementation Prescription in "Out-of-Process" Requirement
@@ -68,12 +67,11 @@ Mandating a specific architectural pattern (out-of-process) violates the "Implem
 
 **Recommended fix**
 
-Update Section 11.4 to mandate the *outcome* (Strict Operational Isolation) rather than the *technique* (out-of-process). For example: "Tier 1 Production Extensions SHALL utilize isolation mechanisms that guarantee no shared memory corruption and independent failure domains."
+Update Section 11.4 to mandate the _outcome_ (Strict Operational Isolation) rather than the _technique_ (out-of-process). For example: "Tier 1 Production Extensions SHALL utilize isolation mechanisms that guarantee no shared memory corruption and independent failure domains."
 
 **Impact if ignored**
 
 Loss of hardware and language neutrality. SDKs for embedded systems or high-performance environments may be unable to achieve Tier 1 certification despite having equivalent isolation guarantees.
-
 
 ---
 
@@ -103,7 +101,6 @@ Perform a terminology normalization pass. Explicitly use "Constitutional Certifi
 
 Legal and technical ambiguity regarding whether an SDK that passes behavioral tests but fails performance benchmarks is "Certified".
 
-
 ---
 
 ### Finding 1.4 — Runtime Authority vs Extension Isolation Bypass
@@ -125,29 +122,29 @@ If an Extension attempts to bypass isolation, the SDK is taking an "admission" d
 
 **Recommended fix**
 
-Clarify that the SDK's reaction to isolation bypass is an *enforcement* of local security policy, and that the "observability event" MUST be reported to the Runtime as a `COMPLIANCE_ERROR` or `SECURITY_EVENT` for final constitutional determination.
+Clarify that the SDK's reaction to isolation bypass is an _enforcement_ of local security policy, and that the "observability event" MUST be reported to the Runtime as a `COMPLIANCE_ERROR` or `SECURITY_EVENT` for final constitutional determination.
 
 **Impact if ignored**
 
 Potential for an compromised SDK to suppress isolation bypass events or handle them in a non-deterministic way.
 
-
 ---
 
 # Pass 2 — Cross-Reference Integrity Audit
 
-| Source | Reference | Status | Fix |
-|---|---|---|---|
-| Section 16.4.1 | Section 16.5 | Valid | N/A |
-| Section 15.10 | Section 16.11 | **BROKEN** | Update to Section 16.11 (v2 renumbering artifact) |
-| Section 15.12 | Section 16.13 | **BROKEN** | Update to Section 16.13 (v2 renumbering artifact) |
-| Section 20.15.1 | Section 20.10 | Valid | N/A |
-| Section 20.15.2 | Section 20.9 | Valid | N/A |
-| Section 21.2.6 | Section 8.12 | Valid | N/A |
-| Section 21.2.6 | Section 8.12 | Valid | N/A |
-| Section 20.13 | §18.8 | **BROKEN** | Update to Section 20.8 (v2 renumbering artifact) |
+| Source          | Reference     | Status     | Fix                                               |
+| --------------- | ------------- | ---------- | ------------------------------------------------- |
+| Section 16.4.1  | Section 16.5  | Valid      | N/A                                               |
+| Section 15.10   | Section 16.11 | **BROKEN** | Update to Section 16.11 (v2 renumbering artifact) |
+| Section 15.12   | Section 16.13 | **BROKEN** | Update to Section 16.13 (v2 renumbering artifact) |
+| Section 20.15.1 | Section 20.10 | Valid      | N/A                                               |
+| Section 20.15.2 | Section 20.9  | Valid      | N/A                                               |
+| Section 21.2.6  | Section 8.12  | Valid      | N/A                                               |
+| Section 21.2.6  | Section 8.12  | Valid      | N/A                                               |
+| Section 20.13   | §18.8         | **BROKEN** | Update to Section 20.8 (v2 renumbering artifact)  |
 
 ---
+
 # Pass 3 — Behavioral Completeness Audit
 
 ### Finding 3.1 — Undefined SDK Behavior for "Partial Admission"
@@ -175,7 +172,6 @@ Introduce a "Batch Operation Contract" in Section 8 (Behavioral Contract) that m
 
 Non-deterministic error handling in batch operations across different languages.
 
-
 ---
 
 ### Finding 3.2 — Missing SHALL for SDK Clock Drift
@@ -202,7 +198,6 @@ In Section 13 (Offline Contract), add a requirement: "SDKs SHALL attempt to sync
 **Impact if ignored**
 
 Semantic ambiguity in the timeline of Reality Claims submitted from different devices.
-
 
 ---
 
@@ -259,7 +254,6 @@ Reserve "Extension" (capitalized) strictly for the pluggable components defined 
 
 Technical misunderstanding of security boundaries.
 
-
 ---
 
 ### Finding 4.2 — Recursive definition of "SDK"
@@ -285,7 +279,6 @@ Redefine SDK in Section 2.1 based on its functional role. For example: "**SDK**:
 **Impact if ignored**
 
 Weak formal foundation for the specification's most important term.
-
 
 ---
 
@@ -330,7 +323,7 @@ Section 23.1 (Non-goals) uses "MAY" which can be misinterpreted as a normative p
 
 **Why it matters**
 
-"MAY" is a normative keyword (optional). Using it in a "Non-goals" section (which defines what the spec *doesn't* do) creates confusion. It suggests this specification is granting permission for other specs to exist, which is not its role.
+"MAY" is a normative keyword (optional). Using it in a "Non-goals" section (which defines what the spec _doesn't_ do) creates confusion. It suggests this specification is granting permission for other specs to exist, which is not its role.
 
 **Recommended fix**
 
@@ -339,7 +332,6 @@ Use "might" or "are" (informative). For example: "These concerns are governed by
 **Impact if ignored**
 
 Minor normative ambiguity.
-
 
 ---
 
@@ -367,7 +359,6 @@ Replace "SHALL NOT" and "SHALL NEVER" with "MUST NOT" in all sections defining s
 **Impact if ignored**
 
 Non-standard normative language in critical security paths.
-
 
 ---
 
@@ -422,7 +413,6 @@ Introduce a "Signed Attestation Model" for Extensions. Extensions should carry a
 
 Extensions may continue to run after revocation in offline/air-gapped environments, creating a security and compliance hole.
 
-
 ---
 
 ### Finding 6.2 — Potential for "Bloat" in Section 23 (Closure)
@@ -450,7 +440,6 @@ Move Section 23.1 (Non-goals) to Section 5 (Scope). Move Section 23.3 (Relations
 **Impact if ignored**
 
 Reduced specification navigability and logical grouping.
-
 
 ---
 
@@ -504,7 +493,6 @@ Introduce an "Emergency Constitutional Amendment" process. Allow for "Out-of-Ban
 
 Protracted exposure to critical security risks due to rigid constitutional timelines.
 
-
 ---
 
 ### Finding 7.2 — Ambiguity in "Certified Ecosystem Model" (Federation)
@@ -531,7 +519,6 @@ Define "Certification Portability". State that Certification on a Delegated Regi
 
 Fragmentation of the trust ecosystem where "Certified" has different meanings in different registries.
 
-
 ---
 
 ### Finding 7.3 — Missing SLA for Certification Registry Availability
@@ -548,7 +535,7 @@ The specification mandates that SDKs verify certification (implicitly or explici
 
 **Why it matters**
 
-If an enterprise CI/CD pipeline depends on the Registry for deployment-time validation, a Registry outage becomes a deployment blocker. While Section 21.5 (Performance) says SDK-SPEC doesn't define SLAs, the Registry is a core *constitutional* artifact, not just an implementation detail.
+If an enterprise CI/CD pipeline depends on the Registry for deployment-time validation, a Registry outage becomes a deployment blocker. While Section 21.5 (Performance) says SDK-SPEC doesn't define SLAs, the Registry is a core _constitutional_ artifact, not just an implementation detail.
 
 **Recommended fix**
 
@@ -584,7 +571,6 @@ Consolidate Batch 12 content under a single "Batch 12" header or use a less obtr
 
 Poor document navigation and visual clutter.
 
-
 ---
 
 ### Finding 8.2 — Inconsistent use of Horizontal Rules
@@ -611,7 +597,6 @@ Standardize on using a horizontal rule before every `# SDK-SPEC-001 — Batch X`
 **Impact if ignored**
 
 Reduced professional presentation.
-
 
 ---
 

@@ -1,4 +1,5 @@
 # ZQE QR Engineering Manual v0.3
+
 ## Clean-Room Implementation Edition — QR Code Model 2 / TypeScript
 
 **Status:** Engineering Companion  
@@ -49,10 +50,12 @@ The intended engineering claim is narrower and practical:
 The manual uses this hierarchy.
 
 ## Tier 1 — Normative identity
+
 - ISO/IEC 18004:2024 Edition 4 — governing standard identity.
 - Licensed standard — human verification only; not copied into this manual.
 
 ## Tier 2 — Symbology-owner public material
+
 - DENSO WAVE QR Code technical pages:
   - Versions 1–40.
   - Symbol sizes 21×21 through 177×177.
@@ -61,12 +64,14 @@ The manual uses this hierarchy.
   - Structured append up to 16 symbols.
 
 ## Tier 3 — Mature permissively licensed reference implementations
+
 - Project Nayuki `QR-Code-generator` — MIT License.
 - ZXing / ZXing-C++ — Apache 2.0.
 
 Tier 3 is used to make implementation mechanics exact without reproducing ISO text.
 
 ## Research-only
+
 Tutorials, blogs, forum posts and AI-generated explanations may be used only to discover questions. They are never the source of a ZQE normative claim.
 
 ---
@@ -138,13 +143,13 @@ before calling `qr-core`.
 
 All FQR string fixtures are ASCII and therefore one byte per character.
 
-| ID | Payload | Bytes | Expected |
-|---|---|---:|---|
-| A | `HELLO ZYPPI` | 11 | ACCEPT |
-| B | `https://id.gs1.org/01/09520123456788` | 36 | ACCEPT |
-| C | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001` | 42 | ACCEPT |
-| D | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001X` | 43 | REJECT |
-| E | `ZYPPI-FQR1-INTERIOR-TEST-2026` | 29 | ACCEPT |
+| ID  | Payload                                       | Bytes | Expected |
+| --- | --------------------------------------------- | ----: | -------- |
+| A   | `HELLO ZYPPI`                                 |    11 | ACCEPT   |
+| B   | `https://id.gs1.org/01/09520123456788`        |    36 | ACCEPT   |
+| C   | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001`  |    42 | ACCEPT   |
+| D   | `ZYPPI-FQR1-CAPACITY-BOUNDARY-0000000000001X` |    43 | REJECT   |
+| E   | `ZYPPI-FQR1-INTERIOR-TEST-2026`               |    29 | ACCEPT   |
 
 SHA-256 identities:
 
@@ -209,7 +214,7 @@ Recommended internal representation:
 ```ts
 interface WorkingMatrix {
   readonly size: number;
-  readonly modules: boolean[][];   // false=light, true=dark
+  readonly modules: boolean[][]; // false=light, true=dark
   readonly isFunction: boolean[][]; // true => never data-mask this cell
 }
 ```
@@ -362,17 +367,17 @@ Therefore FQR-1 must reject 43 bytes.
 
 [FUTURE ZQE] general Model-2 segment support.
 
-| Mode | 4-bit indicator | Count bits V1–9 | V10–26 | V27–40 |
-|---|---:|---:|---:|---:|
-| Terminator | `0000` | — | — | — |
-| Numeric | `0001` | 10 | 12 | 14 |
-| Alphanumeric | `0010` | 9 | 11 | 13 |
-| Structured Append | `0011` | — | — | — |
-| Byte | `0100` | 8 | 16 | 16 |
-| FNC1 first position | `0101` | — | — | — |
-| ECI | `0111` | — | — | — |
-| Kanji | `1000` | 8 | 10 | 12 |
-| FNC1 second position | `1001` | — | — | — |
+| Mode                 | 4-bit indicator | Count bits V1–9 | V10–26 | V27–40 |
+| -------------------- | --------------: | --------------: | -----: | -----: |
+| Terminator           |          `0000` |               — |      — |      — |
+| Numeric              |          `0001` |              10 |     12 |     14 |
+| Alphanumeric         |          `0010` |               9 |     11 |     13 |
+| Structured Append    |          `0011` |               — |      — |      — |
+| Byte                 |          `0100` |               8 |     16 |     16 |
+| FNC1 first position  |          `0101` |               — |      — |      — |
+| ECI                  |          `0111` |               — |      — |      — |
+| Kanji                |          `1000` |               8 |     10 |     12 |
+| FNC1 second position |          `1001` |               — |      — |      — |
 
 FQR-1 uses only:
 
@@ -456,7 +461,7 @@ function buildFqrDataCodewords(data: Uint8Array): Uint8Array {
       `Input contains ${data.length} bytes; zqe/fqr1 supports at most 42 bytes.`,
       "input_validation",
       "ZQE-001/FQR-CAPACITY",
-      "Provide 42 bytes or fewer."
+      "Provide 42 bytes or fewer.",
     );
   }
 
@@ -477,10 +482,10 @@ function buildFqrDataCodewords(data: Uint8Array): Uint8Array {
     bb.append(0, 1);
   }
 
-  let nextPad = 0xEC;
+  let nextPad = 0xec;
   while (bb.length < capacityBits) {
     bb.append(nextPad, 8);
-    nextPad = nextPad === 0xEC ? 0x11 : 0xEC;
+    nextPad = nextPad === 0xec ? 0x11 : 0xec;
   }
 
   if (bb.length !== capacityBits) {
@@ -586,18 +591,18 @@ Use an exact bitwise algorithm to avoid initialization tables:
 
 ```ts
 function gfMultiply(x: number, y: number): number {
-  if ((x & ~0xFF) !== 0 || (y & ~0xFF) !== 0) {
+  if ((x & ~0xff) !== 0 || (y & ~0xff) !== 0) {
     throw new RangeError("GF operand outside byte range");
   }
 
   let z = 0;
 
   for (let i = 7; i >= 0; i--) {
-    z = (z << 1) ^ (((z >>> 7) & 1) * 0x11D);
+    z = (z << 1) ^ (((z >>> 7) & 1) * 0x11d);
     z ^= ((y >>> i) & 1) * x;
   }
 
-  return z & 0xFF;
+  return z & 0xff;
 }
 ```
 
@@ -650,10 +655,7 @@ function rsGenerator(degree: number): Uint8Array {
 ## 11.3 Remainder computation
 
 ```ts
-function rsRemainder(
-  data: Uint8Array,
-  divisor: Uint8Array
-): Uint8Array {
+function rsRemainder(data: Uint8Array, divisor: Uint8Array): Uint8Array {
   const result = new Uint8Array(divisor.length);
 
   for (const byte of data) {
@@ -701,10 +703,26 @@ L, M, Q, H
 
 ```ts
 const ECC_CODEWORDS_PER_BLOCK: readonly (readonly number[])[] = [
-  [-1, 7,10,15,20,26,18,20,24,30,18,20,24,26,30,22,24,28,30,28,28,28,28,30,30,26,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30], // L
-  [-1,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28], // M
-  [-1,13,22,18,26,18,24,18,22,20,24,28,26,24,20,30,24,28,28,26,30,28,30,30,30,30,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30], // Q
-  [-1,17,28,22,16,22,28,26,26,24,28,24,28,22,24,24,30,28,28,26,28,30,24,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30], // H
+  [
+    -1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30,
+    28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+    30, 30, 30,
+  ], // L
+  [
+    -1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26,
+    26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+    28, 28, 28,
+  ], // M
+  [
+    -1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28,
+    26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+    30, 30, 30,
+  ], // Q
+  [
+    -1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28,
+    26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+    30, 30, 30,
+  ], // H
 ] as const;
 ```
 
@@ -712,10 +730,23 @@ const ECC_CODEWORDS_PER_BLOCK: readonly (readonly number[])[] = [
 
 ```ts
 const NUM_ERROR_CORRECTION_BLOCKS: readonly (readonly number[])[] = [
-  [-1,1,1,1,1,1,2,2,2,2,4,4,4,4,4,6,6,6,6,7,8,8,9,9,10,12,12,12,13,14,15,16,17,18,19,19,20,21,22,24,25], // L
-  [-1,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49], // M
-  [-1,1,1,2,2,4,4,6,6,8,8,8,10,12,16,12,17,16,18,21,20,23,23,25,27,29,34,34,35,38,40,43,45,48,51,53,56,59,62,65,68], // Q
-  [-1,1,1,2,4,4,4,5,6,8,8,11,11,16,16,18,16,19,21,25,25,25,34,30,32,35,37,40,42,45,48,51,54,57,60,63,66,70,74,77,81], // H
+  [
+    -1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10,
+    12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25,
+  ], // L
+  [
+    -1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17,
+    17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49,
+  ], // M
+  [
+    -1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23,
+    23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68,
+  ], // Q
+  [
+    -1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25,
+    25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77,
+    81,
+  ], // H
 ] as const;
 ```
 
@@ -802,7 +833,7 @@ interface Block {
 function addEccAndInterleave(
   data: Uint8Array,
   version: number,
-  ecc: QrEcc
+  ecc: QrEcc,
 ): Uint8Array {
   const row = ECC_TABLE_INDEX[ecc];
   const numBlocks = NUM_ERROR_CORRECTION_BLOCKS[row][version];
@@ -833,7 +864,7 @@ function addEccAndInterleave(
 
   const result: number[] = [];
 
-  const maxDataLen = Math.max(...blocks.map(b => b.data.length));
+  const maxDataLen = Math.max(...blocks.map((b) => b.data.length));
 
   for (let i = 0; i < maxDataLen; i++) {
     for (const block of blocks) {
@@ -890,7 +921,7 @@ function setFunction(
   m: WorkingMatrix,
   x: number,
   y: number,
-  dark: boolean
+  dark: boolean,
 ): void {
   m.modules[y][x] = dark;
   m.isFunction[y][x] = true;
@@ -954,8 +985,7 @@ function alignmentPositions(version: number): number[] {
 
   const size = sizeForVersion(version);
   const count = Math.floor(version / 7) + 2;
-  const step =
-    Math.floor((version * 8 + count * 3 + 5) / (count * 4 - 4)) * 2;
+  const step = Math.floor((version * 8 + count * 3 + 5) / (count * 4 - 4)) * 2;
 
   const descending: number[] = [];
 
@@ -1064,11 +1094,7 @@ function getBit(value: number, index: number): boolean {
 ## 16.1 Exact placement
 
 ```ts
-function drawFormatBits(
-  m: WorkingMatrix,
-  ecc: QrEcc,
-  mask: number
-): void {
+function drawFormatBits(m: WorkingMatrix, ecc: QrEcc, mask: number): void {
   const bits = formatBits(ecc, mask);
   const size = m.size;
 
@@ -1125,7 +1151,7 @@ function versionBits(version: number): number {
   let rem = version;
 
   for (let i = 0; i < 12; i++) {
-    rem = (rem << 1) ^ (((rem >>> 11) & 1) * 0x1F25);
+    rem = (rem << 1) ^ (((rem >>> 11) & 1) * 0x1f25);
   }
 
   return (version << 12) | rem;
@@ -1168,12 +1194,9 @@ Skip timing column 6.
 Within each band alternate upward/downward travel.
 
 ```ts
-function drawCodewords(
-  m: WorkingMatrix,
-  codewords: Uint8Array
-): void {
+function drawCodewords(m: WorkingMatrix, codewords: Uint8Array): void {
   const expectedCodewords = Math.floor(
-    numRawDataModules((m.size - 17) / 4) / 8
+    numRawDataModules((m.size - 17) / 4) / 8,
   );
 
   if (codewords.length !== expectedCodewords) {
@@ -1185,7 +1208,7 @@ function drawCodewords(
   for (let right = m.size - 1; right >= 1; right -= 2) {
     if (right === 6) right = 5;
 
-    const upward = (((right + 1) & 2) === 0);
+    const upward = ((right + 1) & 2) === 0;
 
     for (let vert = 0; vert < m.size; vert++) {
       const y = upward ? m.size - 1 - vert : vert;
@@ -1218,7 +1241,7 @@ function drawCodewords(
 
   if (dataCellCount !== expectedBits) {
     throw new Error(
-      `Data-region invariant failed: cells=${dataCellCount}, expected=${expectedBits}`
+      `Data-region invariant failed: cells=${dataCellCount}, expected=${expectedBits}`,
     );
   }
 }
@@ -1241,15 +1264,24 @@ For each `(x,y)`:
 ```ts
 function maskMatches(mask: number, x: number, y: number): boolean {
   switch (mask) {
-    case 0: return (x + y) % 2 === 0;
-    case 1: return y % 2 === 0;
-    case 2: return x % 3 === 0;
-    case 3: return (x + y) % 3 === 0;
-    case 4: return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
-    case 5: return ((x * y) % 2) + ((x * y) % 3) === 0;
-    case 6: return ((((x * y) % 2) + ((x * y) % 3)) % 2) === 0;
-    case 7: return ((((x + y) % 2) + ((x * y) % 3)) % 2) === 0;
-    default: throw new RangeError("Mask outside 0..7");
+    case 0:
+      return (x + y) % 2 === 0;
+    case 1:
+      return y % 2 === 0;
+    case 2:
+      return x % 3 === 0;
+    case 3:
+      return (x + y) % 3 === 0;
+    case 4:
+      return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+    case 5:
+      return ((x * y) % 2) + ((x * y) % 3) === 0;
+    case 6:
+      return (((x * y) % 2) + ((x * y) % 3)) % 2 === 0;
+    case 7:
+      return (((x + y) % 2) + ((x * y) % 3)) % 2 === 0;
+    default:
+      throw new RangeError("Mask outside 0..7");
   }
 }
 ```
@@ -1369,8 +1401,7 @@ T = total modules = size²
 Use:
 
 ```ts
-const k =
-  Math.ceil(Math.abs(D * 20 - T * 10) / T) - 1;
+const k = Math.ceil(Math.abs(D * 20 - T * 10) / T) - 1;
 
 const penalty = Math.max(0, k) * 10;
 ```
@@ -1467,7 +1498,7 @@ function compileFqr1(input: Uint8Array): QrSymbol {
       `Input contains ${data.length} bytes; maximum is 42.`,
       "input_validation",
       "ZQE-001/FQR-CAPACITY",
-      "Provide 42 bytes or fewer."
+      "Provide 42 bytes or fewer.",
     );
   }
 
@@ -1477,11 +1508,7 @@ function compileFqr1(input: Uint8Array): QrSymbol {
     throw new Error("Expected 44 data codewords");
   }
 
-  const allCodewords = addEccAndInterleave(
-    dataCodewords,
-    3,
-    "M"
-  );
+  const allCodewords = addEccAndInterleave(dataCodewords, 3, "M");
 
   if (allCodewords.length !== 70) {
     throw new Error("Expected 70 total codewords");
@@ -1535,9 +1562,9 @@ function finalizeSymbol(
   m: WorkingMatrix,
   version: number,
   ecc: QrEcc,
-  mask: number
+  mask: number,
 ): QrSymbol {
-  const snapshot = m.modules.map(row => row.slice());
+  const snapshot = m.modules.map((row) => row.slice());
 
   return {
     model: "QR_MODEL_2",
@@ -1939,54 +1966,54 @@ Before implementing Structured Append or either FNC1 mode, create a dedicated re
 
 # 37. Requirement Ledger — FQR-1
 
-| ID | Requirement | Module | Test |
-|---|---|---|---|
-| QR-REQ-FQR-001 | profile fixed to V3-M Byte | profile | T-FQR-PROFILE |
-| QR-REQ-FQR-002 | max payload 42 bytes | input | T-FQR-CAP |
-| QR-REQ-BIT-001 | Byte mode indicator `0100` | encoding | T-BIT-MODE |
-| QR-REQ-BIT-002 | V3 Byte count width 8 | encoding | T-BIT-COUNT |
-| QR-REQ-BIT-003 | terminator up to 4 zero bits | encoding | T-BIT-TERM |
-| QR-REQ-BIT-004 | byte alignment with zeros | encoding | T-BIT-ALIGN |
-| QR-REQ-BIT-005 | pad alternates EC/11 | encoding | T-BIT-PAD |
-| QR-REQ-RS-001 | GF modulus 0x11D | ecc | T-RS-GF |
-| QR-REQ-RS-002 | V3-M ECC degree 26 | ecc | T-RS-DEG |
-| QR-REQ-BLK-001 | V3-M 1 block | blocks | T-BLK-V3M |
-| QR-REQ-BLK-002 | 44 data + 26 ECC | blocks | T-BLK-LEN |
-| QR-REQ-GEO-001 | size = 17+4v | matrix | T-GEO-SIZE |
-| QR-REQ-GEO-002 | V3 = 29×29 | matrix | T-GEO-V3 |
-| QR-REQ-FUNC-001 | 3 finder patterns | matrix | T-FUNC-FINDER |
-| QR-REQ-FUNC-002 | timing row/col 6 | matrix | T-FUNC-TIMING |
-| QR-REQ-FUNC-003 | V3 alignment center 22,22 | matrix | T-FUNC-ALIGN |
-| QR-REQ-FUNC-004 | dark module 8,21 | matrix | T-FUNC-DARK |
-| QR-REQ-PLC-001 | right-to-left 2-col zig-zag | placement | T-PLC-ORDER |
-| QR-REQ-PLC-002 | skip function cells | placement | T-PLC-SKIP |
-| QR-REQ-PLC-003 | V3 has 7 remainder bits | placement | T-PLC-REM |
-| QR-REQ-MSK-001 | evaluate all 8 masks | mask | T-MSK-ALL |
-| QR-REQ-MSK-002 | mask only non-function cells | mask | T-MSK-SCOPE |
-| QR-REQ-MSK-003 | deterministic lowest-score selection | mask | T-MSK-SELECT |
-| QR-REQ-MSK-004 | tie => lowest numerical mask | mask | T-MSK-TIE |
-| QR-REQ-FMT-001 | BCH generator 0x537 | format | T-FMT-BCH |
-| QR-REQ-FMT-002 | XOR mask 0x5412 | format | T-FMT-XOR |
-| QR-REQ-REN-001 | QrSymbol excludes quiet zone | symbol | T-REN-BOUNDARY |
-| QR-REQ-REN-002 | SVG adds 4-module quiet zone | svg | T-REN-QZ |
-| QR-REQ-REN-003 | canonical SVG integer-only | svg | T-REN-DETERMINISM |
+| ID              | Requirement                          | Module    | Test              |
+| --------------- | ------------------------------------ | --------- | ----------------- |
+| QR-REQ-FQR-001  | profile fixed to V3-M Byte           | profile   | T-FQR-PROFILE     |
+| QR-REQ-FQR-002  | max payload 42 bytes                 | input     | T-FQR-CAP         |
+| QR-REQ-BIT-001  | Byte mode indicator `0100`           | encoding  | T-BIT-MODE        |
+| QR-REQ-BIT-002  | V3 Byte count width 8                | encoding  | T-BIT-COUNT       |
+| QR-REQ-BIT-003  | terminator up to 4 zero bits         | encoding  | T-BIT-TERM        |
+| QR-REQ-BIT-004  | byte alignment with zeros            | encoding  | T-BIT-ALIGN       |
+| QR-REQ-BIT-005  | pad alternates EC/11                 | encoding  | T-BIT-PAD         |
+| QR-REQ-RS-001   | GF modulus 0x11D                     | ecc       | T-RS-GF           |
+| QR-REQ-RS-002   | V3-M ECC degree 26                   | ecc       | T-RS-DEG          |
+| QR-REQ-BLK-001  | V3-M 1 block                         | blocks    | T-BLK-V3M         |
+| QR-REQ-BLK-002  | 44 data + 26 ECC                     | blocks    | T-BLK-LEN         |
+| QR-REQ-GEO-001  | size = 17+4v                         | matrix    | T-GEO-SIZE        |
+| QR-REQ-GEO-002  | V3 = 29×29                           | matrix    | T-GEO-V3          |
+| QR-REQ-FUNC-001 | 3 finder patterns                    | matrix    | T-FUNC-FINDER     |
+| QR-REQ-FUNC-002 | timing row/col 6                     | matrix    | T-FUNC-TIMING     |
+| QR-REQ-FUNC-003 | V3 alignment center 22,22            | matrix    | T-FUNC-ALIGN      |
+| QR-REQ-FUNC-004 | dark module 8,21                     | matrix    | T-FUNC-DARK       |
+| QR-REQ-PLC-001  | right-to-left 2-col zig-zag          | placement | T-PLC-ORDER       |
+| QR-REQ-PLC-002  | skip function cells                  | placement | T-PLC-SKIP        |
+| QR-REQ-PLC-003  | V3 has 7 remainder bits              | placement | T-PLC-REM         |
+| QR-REQ-MSK-001  | evaluate all 8 masks                 | mask      | T-MSK-ALL         |
+| QR-REQ-MSK-002  | mask only non-function cells         | mask      | T-MSK-SCOPE       |
+| QR-REQ-MSK-003  | deterministic lowest-score selection | mask      | T-MSK-SELECT      |
+| QR-REQ-MSK-004  | tie => lowest numerical mask         | mask      | T-MSK-TIE         |
+| QR-REQ-FMT-001  | BCH generator 0x537                  | format    | T-FMT-BCH         |
+| QR-REQ-FMT-002  | XOR mask 0x5412                      | format    | T-FMT-XOR         |
+| QR-REQ-REN-001  | QrSymbol excludes quiet zone         | symbol    | T-REN-BOUNDARY    |
+| QR-REQ-REN-002  | SVG adds 4-module quiet zone         | svg       | T-REN-QZ          |
+| QR-REQ-REN-003  | canonical SVG integer-only           | svg       | T-REN-DETERMINISM |
 
 ---
 
 # 38. ZQE Decision Register
 
-| ID | Decision | Rationale |
-|---|---|---|
-| ZQE-DEC-001 | Core input is bytes, not string | no hidden text encoding |
-| ZQE-DEC-002 | Caller input is defensively copied | caller cannot mutate internal state |
-| ZQE-DEC-003 | Public QrSymbol exposes no mutable matrix | immutable artifact boundary |
-| ZQE-DEC-004 | FQR fixed to V3-M Byte | scope discipline |
-| ZQE-DEC-005 | FQR overflow fails instead of promoting version | deterministic profile |
-| ZQE-DEC-006 | Two-grid working matrix: color + function-role | no ambiguous module state |
-| ZQE-DEC-007 | Candidate format bits participate in mask scoring | chosen reference behavior |
-| ZQE-DEC-008 | Equal mask scores choose lowest mask ID | deterministic tie |
-| ZQE-DEC-009 | Quiet zone belongs to renderer | QrSymbol stays native matrix |
-| ZQE-DEC-010 | Canonical SVG uses integer geometry | byte reproducibility |
+| ID          | Decision                                          | Rationale                           |
+| ----------- | ------------------------------------------------- | ----------------------------------- |
+| ZQE-DEC-001 | Core input is bytes, not string                   | no hidden text encoding             |
+| ZQE-DEC-002 | Caller input is defensively copied                | caller cannot mutate internal state |
+| ZQE-DEC-003 | Public QrSymbol exposes no mutable matrix         | immutable artifact boundary         |
+| ZQE-DEC-004 | FQR fixed to V3-M Byte                            | scope discipline                    |
+| ZQE-DEC-005 | FQR overflow fails instead of promoting version   | deterministic profile               |
+| ZQE-DEC-006 | Two-grid working matrix: color + function-role    | no ambiguous module state           |
+| ZQE-DEC-007 | Candidate format bits participate in mask scoring | chosen reference behavior           |
+| ZQE-DEC-008 | Equal mask scores choose lowest mask ID           | deterministic tie                   |
+| ZQE-DEC-009 | Quiet zone belongs to renderer                    | QrSymbol stays native matrix        |
+| ZQE-DEC-010 | Canonical SVG uses integer geometry               | byte reproducibility                |
 
 ---
 
@@ -2049,19 +2076,19 @@ This manual deliberately separates "implementation-ready engineering fact" from 
 
 For FQR-1, the human reviewer should confirm at least:
 
-| NVR | Subject |
-|---|---|
-| NVR-001 | ISO/IEC 18004:2024 Ed.4 is active baseline |
-| NVR-002 | V3-M 44 data / 26 ECC / 1 block |
-| NVR-003 | Byte-mode indicator and V3 count width |
-| NVR-004 | terminator, byte alignment, EC/11 pad behavior |
-| NVR-005 | GF(256) field and RS generator semantics |
-| NVR-006 | function-pattern geometry |
-| NVR-007 | V3 remainder-bit count |
-| NVR-008 | eight mask predicates |
+| NVR     | Subject                                          |
+| ------- | ------------------------------------------------ |
+| NVR-001 | ISO/IEC 18004:2024 Ed.4 is active baseline       |
+| NVR-002 | V3-M 44 data / 26 ECC / 1 block                  |
+| NVR-003 | Byte-mode indicator and V3 count width           |
+| NVR-004 | terminator, byte alignment, EC/11 pad behavior   |
+| NVR-005 | GF(256) field and RS generator semantics         |
+| NVR-006 | function-pattern geometry                        |
+| NVR-007 | V3 remainder-bit count                           |
+| NVR-008 | eight mask predicates                            |
 | NVR-009 | penalty rules and candidate-evaluation semantics |
-| NVR-010 | format BCH and placement |
-| NVR-011 | four-module quiet zone |
+| NVR-010 | format BCH and placement                         |
+| NVR-011 | four-module quiet zone                           |
 
 Formal status labels such as `NORMATIVE VERIFIED` must not be applied until a named human reviewer records the result.
 

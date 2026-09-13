@@ -1,12 +1,12 @@
-# NORTH STAR v7.0
+# NORTH STAR v8.0
 
-## Zyppi — The Universal Trust Execution Platform
+## Unfict — The Universal Trust Execution Platform
 
-**Brand Expression:** **Zyppi — Reality Sync**
+**Brand Expression:** **Unfict — Reality Sync**
 
-**Version:** 7.0 **Status:** **RATIFIED — CLOSED** **Ratification Date:** 25 August 2026 **Supersedes:** NORTH STAR v6.0 **Classification:** Foundation **Normative Level:** Vision **Amendment Class:** Clarification and Expression **Locking Authority:** Chair
+**Version:** 8.0 **Status:** **RATIFIED — CLOSED** **Ratification Date:** 13 September 2026 **Supersedes:** NORTH STAR v7.0 **Classification:** Foundation **Normative Level:** Vision **Amendment Class:** Brand Succession and Expression **Locking Authority:** Chair
 
-**Change Summary:** Introduces **Reality Sync** as the North Star abstraction for the verifiable relationship Zyppi establishes between Reality and the digital world, and **Zyppify** as its human expression. This revision clarifies and polishes the existing North Star without changing Zyppi’s constitutional Reality model, Universal Execution Pipeline, Trust model, Moat, AI Native principle, or Platform Principles.
+**Change Summary:** Adopts **Unfict** as the master brand and **Unfict** as the canonical human expression of Reality Sync. This revision changes brand identity and expression only. It does not change the constitutional Reality model, Universal Execution Pipeline, Trust model, Moat, AI Native principle, Platform Principles, or the substantive meaning ratified in NORTH STAR v7.0.
 
 # Vision
 
@@ -16,7 +16,7 @@ Software cannot know whether a Subject is genuine, whether an Object is authenti
 
 AI cannot safely act without trusted Evidence.
 
-**Zyppi exists to bridge this gap.**
+**Unfict exists to bridge this gap.**
 
 We enable software and AI to perceive reality, verify trust, and transform trusted interactions into secure, intelligent, and auditable actions.
 
@@ -64,7 +64,7 @@ It will be built on **verifiable trust.**
 
 # Reality Sync
 
-**Zyppi synchronizes digital understanding with verifiable Reality.**
+**Unfict synchronizes digital understanding with verifiable Reality.**
 
 Reality changes through Events.
 
@@ -102,13 +102,13 @@ Its purpose is simple:
 
 **Keep digital understanding accountable to what Reality can verifiably support.**
 
-# Zyppify
+# Unfict
 
-**To Zyppify is to bring something into, or update it within, a verifiable digital relationship with Reality so Trust can be computed and appropriate Action can safely follow.**
+**To Unfict is to bring something into, or update it within, a verifiable digital relationship with Reality so Trust can be computed and appropriate Action can safely follow.**
 
-**Zyppification** is the human expression of the Reality Sync transformation Zyppi exists to enable.
+**Unficting** is the human expression of the Reality Sync transformation Unfict exists to enable.
 
-Zyppification does not replace any constitutional primitive, lifecycle stage, semantic construct, policy boundary, or technical contract.
+Unficting does not replace any constitutional primitive, lifecycle stage, semantic construct, policy boundary, or technical contract.
 
 It is not itself an execution step.
 
@@ -136,39 +136,39 @@ It does not mean merely to:
 
 - invoke a particular API operation.
 
-Any of those activities may participate in a Zyppi-governed interaction, but none alone defines Zyppification.
+Any of those activities may participate in a Unfict-governed interaction, but none alone defines Unficting.
 
-Zyppification does not mean making something true or trustworthy.
+Unficting does not mean making something true or trustworthy.
 
-A Zyppi-governed interaction may conclude that Evidence is insufficient, a claim is false, an authority is invalid, standing is absent, or an intended Action must be denied.
+An Unfict-governed interaction may conclude that Evidence is insufficient, a claim is false, an authority is invalid, standing is absent, or an intended Action must be denied.
 
 Such an outcome does not represent failure of Reality Sync.
 
 It represents Reality Sync functioning correctly.
 
-**Reality Sync and Zyppify create no new runtime stage, data model, API operation, persistence entity, or implementation requirement.**
+**Reality Sync and Unfict create no new runtime stage, data model, API operation, persistence entity, or implementation requirement.**
 
 They express the purpose of the constitutional machinery that already exists.
 
-# What Zyppi Really Is
+# What Unfict Really Is
 
-Zyppi is **not** a QR platform. Zyppi is **not** an NFC platform. Zyppi is **not** an identity platform. Zyppi is **not** an AI platform.
+Unfict is **not** a QR platform. Unfict is **not** an NFC platform. Unfict is **not** an identity platform. Unfict is **not** an AI platform.
 
-Zyppi is the constitutional execution layer that connects:
+Unfict is the constitutional execution layer that connects:
 
 **Reality → Trust → Intent → Action**
 
 Reality Sync describes the foundational relationship that makes this progression possible.
 
-# The Zyppi Moat
+# The Unfict Moat
 
 Most platforms help software process information.
 
-Zyppi helps software understand reality.
+Unfict helps software understand reality.
 
 Most platforms automate workflows.
 
-Zyppi enables software to determine whether a workflow should be allowed to exist in the first place.
+Unfict enables software to determine whether a workflow should be allowed to exist in the first place.
 
 Our competitive advantage is not better automation.
 
@@ -176,7 +176,7 @@ Our competitive advantage is **trusted perception.**
 
 Trusted perception enables Reality Sync.
 
-Zyppi enables the digital world to answer questions it could never answer before:
+Unfict enables the digital world to answer questions it could never answer before:
 
 - Is this Subject real?
 
@@ -192,7 +192,7 @@ Only after those questions are answered can AI safely execute.
 
 # Universal Reality Model
 
-Every interaction Zyppi perceives exists within **five constitutional dimensions.**
+Every interaction Unfict perceives exists within **five constitutional dimensions.**
 
 ## Subject
 
@@ -212,7 +212,7 @@ Includes:
 
 Every Human is a Subject. Not every Subject is a Human.
 
-This broadening is intentional: Zyppi's AI Native principle already assumes AI Agents carry standing and authority comparable to humans within constitutional bounds — Subject is the name for the category both belong to.
+This broadening is intentional: Unfict's AI Native principle already assumes AI Agents carry standing and authority comparable to humans within constitutional bounds — Subject is the name for the category both belong to.
 
 Concerned with:
 
@@ -322,7 +322,7 @@ Evidence may originate from:
 
 - Future trust technologies
 
-Zyppi is carrier-agnostic.
+Unfict is carrier-agnostic.
 
 Any trusted Evidence becomes a constitutional input.
 
@@ -376,7 +376,7 @@ Trust is never assumed.
 
 Trust is computed from Evidence.
 
-Zyppi is carrier-agnostic.
+Unfict is carrier-agnostic.
 
 Any trusted Evidence becomes a constitutional input, regardless of which Subject, Object, or Place it concerns.
 
@@ -432,9 +432,9 @@ It clarifies the shared direction of the principles already established:
 
 # Strategic Expression
 
-Reality Sync is a strategic abstraction, not a substitute for Zyppi's constitutional, governance, product, engineering, or economic decision frameworks.
+Reality Sync is a strategic abstraction, not a substitute for Unfict's constitutional, governance, product, engineering, or economic decision frameworks.
 
-As a shorthand, any major Zyppi initiative should be explainable by how it strengthens, extends, enables, distributes, or reduces the friction of Reality Sync.
+As a shorthand, any major Unfict initiative should be explainable by how it strengthens, extends, enables, distributes, or reduces the friction of Reality Sync.
 
 This shorthand does not replace constitutional acceptance criteria, governance rules, milestone verification, domain-specific requirements, or downstream strategic frameworks.
 
@@ -456,7 +456,7 @@ The North Star may be expressed at four levels without creating four different m
 
 ### Human Expression
 
-**Zyppify**
+**Unfict**
 
 These expressions operate at different levels of abstraction.
 
@@ -464,13 +464,13 @@ They describe one North Star.
 
 # Brand Expression
 
-## Zyppi — Reality Sync
+## Unfict — Reality Sync
 
-**Reality Sync** expresses the fundamental gap Zyppi exists to bridge:
+**Reality Sync** expresses the fundamental gap Unfict exists to bridge:
 
 The digital world is not inherently synchronized with verifiable Reality.
 
-Zyppi enables digital systems and AI to remain accountable to what Reality can substantiate through Evidence.
+Unfict enables digital systems and AI to remain accountable to what Reality can substantiate through Evidence.
 
 The phrase is a Brand expression of the North Star.
 
@@ -484,11 +484,11 @@ It communicates their shared purpose.
 
 # Long-Term Vision
 
-Today, Zyppi connects the physical world to software.
+Today, Unfict connects the physical world to software.
 
-Tomorrow, Zyppi becomes the **trust layer of the global economy**.
+Tomorrow, Unfict becomes the **trust layer of the global economy**.
 
-Not because every interaction uses Zyppi.
+Not because every interaction uses Unfict.
 
 But because every trusted interaction can.
 
@@ -498,8 +498,8 @@ It should be capable of remaining accountable to Reality.
 
 That is **Reality Sync**.
 
-That is what it means to **Zyppify**.
+That is what it means to **Unfict**.
 
-**Status:** **RATIFIED — CLOSED** **Version:** **7.0** **Ratification Date:** **25 August 2026** **Locking Authority:** **Chair** **Supersedes:** **NORTH STAR v6.0**
+**Status:** **RATIFIED — CLOSED** **Version:** **8.0** **Ratification Date:** **13 September 2026** **Locking Authority:** **Chair** **Supersedes:** **NORTH STAR v7.0**
 
-**Disposition:** North Star v7.0 is the active and authoritative North Star of Zyppi.
+**Disposition:** North Star v8.0 is the active and authoritative North Star of Unfict.

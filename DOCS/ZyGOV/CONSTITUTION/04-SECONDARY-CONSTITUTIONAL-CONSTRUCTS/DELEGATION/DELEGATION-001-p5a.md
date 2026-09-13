@@ -1,27 +1,24 @@
 DELEGATION-001-PH5-A — Delegation Grant Relationship Contract
 
-Field	Determination
+Field Determination
 
-Parent Constitution	DELEGATION-001 — Universal Delegation & Agency Constitution
-Phase	PH5-A
-Purpose	Close the constitutional relationship contract for direct/non-role Delegation
-Classification	SECONDARY CONSTITUTIONAL / RELATIONSHIP CONTRACT
-Canonical Relationship Framework	WS-03C / WS-04B
-Constitutional Meaning Owner	POL
-Registry Owner	CL-17 Graph Core
-Implementation Authority	NONE
-Repository Mutation Authority	NONE
-Predicate Admission	NOT YET AUTHORIZED
-Status	OPEN — CONTRACT SYNTHESIS EXECUTED
-
+Parent Constitution DELEGATION-001 — Universal Delegation & Agency Constitution
+Phase PH5-A
+Purpose Close the constitutional relationship contract for direct/non-role Delegation
+Classification SECONDARY CONSTITUTIONAL / RELATIONSHIP CONTRACT
+Canonical Relationship Framework WS-03C / WS-04B
+Constitutional Meaning Owner POL
+Registry Owner CL-17 Graph Core
+Implementation Authority NONE
+Repository Mutation Authority NONE
+Predicate Admission NOT YET AUTHORIZED
+Status OPEN — CONTRACT SYNTHESIS EXECUTED
 
 1. Governing question
 
 PH5-A answers:
 
 > What exact governed Relationship represents one explicit direct transfer of bounded Authority from one Subject to another when that transfer is not naturally represented by an ASSIGNED_ROLE Role Assignment?
-
-
 
 This packet does not design:
 
@@ -37,9 +34,7 @@ TypeScript;
 
 SQL.
 
-
 Those belong downstream.
-
 
 ---
 
@@ -65,12 +60,11 @@ is independently revocable;
 
 is temporally bounded;
 
-becomes invalid when its parent Authority loses constitutional validity. 
-
+becomes invalid when its parent Authority loses constitutional validity.
 
 WS already supplies the correct persistence framework.
 
-A Tier-2 Reified Relationship possesses immutable identity, lifecycle, supersession, governance, evidence support and auditability. The Governance Layer—not its traversal projection—is authoritative. 
+A Tier-2 Reified Relationship possesses immutable identity, lifecycle, supersession, governance, evidence support and auditability. The Governance Layer—not its traversal projection—is authoritative.
 
 Therefore:
 
@@ -85,7 +79,6 @@ DELEGATION-001
 binds the two
 
 No new relationship framework is required.
-
 
 ---
 
@@ -119,15 +112,13 @@ independent referential value;
 
 lifecycle behavior.
 
-
-WS requires these characteristics to use Reified Relationship architecture. 
+WS requires these characteristics to use Reified Relationship architecture.
 
 Therefore:
 
 Delegation Grant
-        ≠
+≠
 Structural Edge
-
 
 ---
 
@@ -141,7 +132,7 @@ Ownership
 Identity
 ...
 
-New families require constitutional amendment. 
+New families require constitutional amendment.
 
 Delegation is defined by POL as transfer of Authority.
 
@@ -160,32 +151,27 @@ PH5-A-02 — Authority-Family Classification
 
 > Every direct Delegation Grant SHALL belong to the existing Authority Relationship Family.
 
-
-
 No new Delegation Relationship Family is justified.
-
 
 ---
 
 5. Semantic domain and range
 
-The active Foundation model defines Subject as the autonomous Reality constituent capable of initiating, holding Standing and acting with Intent, including Human, Organization, AI Agent and Autonomous System. 
+The active Foundation model defines Subject as the autonomous Reality constituent capable of initiating, holding Standing and acting with Intent, including Human, Organization, AI Agent and Autonomous System.
 
-REC-01C further closes Actor as an execution role played by a Subject, not another Reality primitive. 
+REC-01C further closes Actor as an execution role played by a Subject, not another Reality primitive.
 
 Therefore the semantic relationship is:
 
 Subject
-   │
-   │ delegates bounded Authority to
-   ▼
+│
+│ delegates bounded Authority to
+▼
 Subject
 
 PH5-A-03 — Subject-to-Subject Law
 
 > The domain and range of the universal Delegation Grant SHALL be Subject → Subject.
-
-
 
 Legacy WS/RI compiler vocabulary that physically refers to CL-01.Entity.Actor SHALL NOT cause DELEGATION-001 to re-ratify Actor as a peer Reality primitive.
 
@@ -196,18 +182,15 @@ Semantically:
 SOURCE = Delegator Subject
 TARGET = Delegate Subject
 
-
 ---
 
 6. Predicate direction
 
-WS requires every relationship to possess immutable semantic direction, and every relationship type to define an inverse semantic predicate. The inverse supports traversal; it does not create a second Relationship. 
+WS requires every relationship to possess immutable semantic direction, and every relationship type to define an inverse semantic predicate. The inverse supports traversal; it does not create a second Relationship.
 
 The direct grant needs to answer unambiguously:
 
 > Who transferred Authority to whom?
-
-
 
 After comparing the possible forms, the cleanest predicate is:
 
@@ -220,16 +203,15 @@ RECEIVES_DELEGATED_AUTHORITY_FROM
 Conceptually:
 
 Subject A
-   │
-   │ DELEGATES_AUTHORITY_TO
-   ▼
+│
+│ DELEGATES_AUTHORITY_TO
+▼
 Subject B
 
-
 Subject B
-   │
-   │ RECEIVES_DELEGATED_AUTHORITY_FROM
-   ▼
+│
+│ RECEIVES_DELEGATED_AUTHORITY_FROM
+▼
 Subject A
 
 Why not GRANTS_AUTHORITY_TO?
@@ -242,8 +224,7 @@ Sovereign Authority;
 
 Institutional Authority;
 
-Delegated Authority. 
-
+Delegated Authority.
 
 GRANTS_AUTHORITY_TO would therefore be semantically broader than this contract.
 
@@ -264,7 +245,6 @@ Inverse:
 RECEIVES_DELEGATED_AUTHORITY_FROM
 
 Disposition: accepted as the PH5-A canonical candidate, subject to PH5-E adversarial simulation before Registry admission.
-
 
 ---
 
@@ -288,7 +268,7 @@ B = Actor in every future execution
 
 The same grant may later support different executions.
 
-REC-01C explicitly requires a composable model where Actor, Governed Subject, Authority Issuer, Target Subject and Beneficiary may be different Subjects. 
+REC-01C explicitly requires a composable model where Actor, Governed Subject, Authority Issuer, Target Subject and Beneficiary may be different Subjects.
 
 Therefore:
 
@@ -296,10 +276,7 @@ PH5-A-05 — Grant Endpoints Are Not Execution Roles
 
 > Source and Target of a Delegation Grant SHALL express Authority transfer only. They SHALL NOT implicitly become ACTOR or GOVERNED_SUBJECT roles in a later execution.
 
-
-
 Those roles are bound by Agency Binding.
-
 
 ---
 
@@ -307,43 +284,39 @@ Those roles are bound by Agency Binding.
 
 The proposed relationship card is now:
 
-Property	PH5-A determination
+Property PH5-A determination
 
-Semantic Construct	Delegation Grant
-Tier	REIFIED
-Family	AUTHORITY
-Forward Predicate	DELEGATES_AUTHORITY_TO
-Inverse Predicate	RECEIVES_DELEGATED_AUTHORITY_FROM
-Source Semantic Type	Subject
-Target Semantic Type	Subject
-Source Role	Delegator
-Target Role	Delegate
-Authority Required	YES
-Evidence Required	MANDATORY
-Provenance Required	MANDATORY
-Temporal	MANDATORY / BOUNDED
-Independent Lifecycle	YES
-Supersession	YES
-Historical Queryability	YES
-Confidence Field	PROHIBITED
-Governed Subject Field	NO
-Role Type Field	NO
-Action Field	NO
-Capability-as-proof	NO
-
-
+Semantic Construct Delegation Grant
+Tier REIFIED
+Family AUTHORITY
+Forward Predicate DELEGATES_AUTHORITY_TO
+Inverse Predicate RECEIVES_DELEGATED_AUTHORITY_FROM
+Source Semantic Type Subject
+Target Semantic Type Subject
+Source Role Delegator
+Target Role Delegate
+Authority Required YES
+Evidence Required MANDATORY
+Provenance Required MANDATORY
+Temporal MANDATORY / BOUNDED
+Independent Lifecycle YES
+Supersession YES
+Historical Queryability YES
+Confidence Field PROHIBITED
+Governed Subject Field NO
+Role Type Field NO
+Action Field NO
+Capability-as-proof NO
 
 ---
 
 9. Authority requirement
 
-WS states that relationships requiring Authority must validate it before relationship activation; failure prevents creation. 
+WS states that relationships requiring Authority must validate it before relationship activation; failure prevents creation.
 
 POL is even stronger:
 
-> only an Actor possessing valid Authority may delegate Authority. 
-
-
+> only an Actor possessing valid Authority may delegate Authority.
 
 Therefore:
 
@@ -363,7 +336,6 @@ The relationship may never bootstrap its own authority requirement.
 
 That would be circular.
 
-
 ---
 
 10. Authority reference semantics
@@ -372,13 +344,9 @@ The WS Reified Relationship schema already contains:
 
 authority_reference
 
-
-
 PH5-A assigns the following meaning for Delegation Grant:
 
 > authority_reference SHALL identify or resolve the constitutional Authority basis under which the Delegator possesses the right to make this grant.
-
-
 
 It SHALL NOT mean:
 
@@ -388,7 +356,6 @@ unless the governing constitution expressly establishes such an origin.
 
 The Delegation Grant remains subordinate Authority.
 
-
 ---
 
 11. Authority Anchor relationship
@@ -396,10 +363,10 @@ The Delegation Grant remains subordinate Authority.
 Role Assignment has a stronger specialized law:
 
 ASSIGNED_ROLE
-    ↓
+↓
 exactly one Authority Anchor
 
-and scope belongs to that Anchor. 
+and scope belongs to that Anchor.
 
 PH5-A SHALL NOT silently universalize that Role-Assignment-specific physical rule into:
 
@@ -419,8 +386,7 @@ Service Agreement;
 
 Trust Instrument;
 
-
-may serve as the authoritative source material. WS already recognizes these instruments in its Authority Anchor vocabulary. 
+may serve as the authoritative source material. WS already recognizes these instruments in its Authority Anchor vocabulary.
 
 But:
 
@@ -432,7 +398,6 @@ authority_reference on Direct Delegation Grant
 
 remain distinct until a later constitutional amendment explicitly unifies them.
 
-
 ---
 
 12. Evidence requirement
@@ -443,9 +408,9 @@ NONE
 RECOMMENDED
 MANDATORY
 
-and does not allow a required-evidence relationship to become active until its evidence requirement is satisfied. 
+and does not allow a required-evidence relationship to become active until its evidence requirement is satisfied.
 
-POL requires Delegation to occur through an explicit constitutional grant. 
+POL requires Delegation to occur through an explicit constitutional grant.
 
 Therefore:
 
@@ -467,7 +432,6 @@ Evidence supports the grant.
 
 Evidence does not become the Authority.
 
-
 ---
 
 13. Evidence types
@@ -484,8 +448,7 @@ Certificate;
 
 External Credential;
 
-Human Expert Rationale. 
-
+Human Expert Rationale.
 
 PH5-A does not create a second evidence taxonomy.
 
@@ -497,25 +460,22 @@ A Human Expert Rationale by itself SHALL NOT create Delegated Authority merely b
 
 POL still requires:
 
-valid Authority
-+
+valid Authority +
 explicit constitutional grant
 
 The Evidence mode does not override Authority law.
-
 
 ---
 
 14. Provenance
 
-WS requires every Relationship to maintain provenance and declares a Relationship without origin constitutionally incomplete. 
+WS requires every Relationship to maintain provenance and declares a Relationship without origin constitutionally incomplete.
 
-POL independently requires every Delegation to preserve constitutional lineage to the originating Authority. 
+POL independently requires every Delegation to preserve constitutional lineage to the originating Authority.
 
 Therefore Delegation Grant has two compatible provenance duties:
 
-Relationship provenance
-+
+Relationship provenance +
 Authority provenance
 
 They are not interchangeable.
@@ -524,16 +484,11 @@ Relationship provenance asks
 
 > What Transaction/Event/imported constitutional process established this Relationship?
 
-
-
 Authority provenance asks
 
 > From which constitutional Authority does the Delegated Authority derive?
 
-
-
 Both SHALL remain reconstructable.
-
 
 ---
 
@@ -543,7 +498,7 @@ WS-04B requires every Reified Relationship to receive:
 
 relationship_id : UUIDv7
 
-globally unique, immutable, permanently assigned, never reused, and not content-derived. 
+globally unique, immutable, permanently assigned, never reused, and not content-derived.
 
 Delegation Grant SHALL inherit this unchanged.
 
@@ -556,27 +511,24 @@ identity system is necessary.
 Conceptually:
 
 delegationGrantId
-    =
+\=
 existing relationship_id
 
 at the semantic level.
 
 The exact implementation symbol remains outside this packet.
 
-
 ---
 
 16. Temporal classification
 
-POL makes temporal boundedness mandatory for Delegation. 
+POL makes temporal boundedness mandatory for Delegation.
 
 WS permits three Relationship temporal types:
 
 Permanent
 Effective-Dated
 Event-Bound
-
-
 
 Permanent cannot be the universal Delegation Grant temporal type because POL explicitly prohibits constitutionally unbounded Delegated Authority.
 
@@ -606,7 +558,6 @@ Every instance SHALL explicitly identify its temporal type.
 
 No default-to-permanent behavior is permitted.
 
-
 ---
 
 17. Expiry is not deletion
@@ -624,7 +575,7 @@ REC-01E explicitly preserves the distinction:
 old ≠ invalid
 historically valid ≠ currently authorized
 
-and requires exact temporal state rather than silent current/latest substitution. 
+and requires exact temporal state rather than silent current/latest substitution.
 
 Therefore expiration:
 
@@ -634,12 +585,11 @@ but does not erase:
 
 historical Delegation Grant
 
-
 ---
 
 18. Cardinality
 
-Every Reified Relationship must declare cardinality. WS requires point-in-time and lifetime cardinality for temporal relationships. 
+Every Reified Relationship must declare cardinality. WS requires point-in-time and lifetime cardinality for temporal relationships.
 
 The universal Delegation Grant must allow:
 
@@ -679,7 +629,6 @@ Each individual Relationship instance, however, still has exactly:
 one source
 one target
 
-
 ---
 
 19. One grant is atomic
@@ -687,8 +636,6 @@ one target
 A single Delegation Grant SHALL mean:
 
 > one Delegator transferring one constitutionally coherent bounded Authority grant to one Delegate.
-
-
 
 It SHALL NOT be:
 
@@ -702,7 +649,6 @@ Where multiple grants exist, separate Relationship instances are required unless
 
 This protects lineage and revocation determinism.
 
-
 ---
 
 20. Relationship lifecycle
@@ -715,16 +661,13 @@ SUSPENDED
 DISPUTED
 TERMINATED
 
-
-
 However, PH5-A establishes a critical separation:
 
 Relationship Status ≠ Authority Validity
 
 For example:
 
-relationship historically exists
-+
+relationship historically exists +
 parent Authority revoked
 
 means the historical Relationship remains real, but its delegated Authority may no longer be constitutionally valid for current execution.
@@ -737,7 +680,6 @@ by itself SHALL NEVER prove current authorization.
 
 POL Authority validity remains decisive.
 
-
 ---
 
 21. Revocation
@@ -745,10 +687,10 @@ POL Authority validity remains decisive.
 POL says:
 
 revocation
-    ↓
+↓
 Authority ceases immediately
 
-and loss of parent Authority invalidates dependent Delegations. 
+and loss of parent Authority invalidates dependent Delegations.
 
 PH5-A therefore establishes:
 
@@ -756,20 +698,17 @@ PH5-A-11 — Revocation Precedence
 
 > No Relationship lifecycle state, cache, traversal projection, stale registry entry, or prior Attestation may preserve current delegated Authority after constitutionally effective revocation.
 
-
-
 The historical relationship remains queryable.
 
 Current authority does not.
 
 The exact WS lifecycle transition corresponding to POL revocation remains for CLOSURE-02 / lifecycle alignment; PH5-A does not invent it.
 
-
 ---
 
 22. Supersession
 
-WS requires Relationship semantic changes to create a new relationship through supersession; predicates and relationships are not mutated in place. Supersession chains are linear. 
+WS requires Relationship semantic changes to create a new relationship through supersession; predicates and relationships are not mutated in place. Supersession chains are linear.
 
 Therefore changing:
 
@@ -783,13 +722,11 @@ materially different scope;
 
 constitutional grant identity;
 
-
 cannot rewrite the existing grant.
 
 A new Delegation Grant SHALL be created where constitutional meaning changes.
 
 This preserves history.
-
 
 ---
 
@@ -809,20 +746,17 @@ Instead:
 
 > The Delegation Grant SHALL bind to an authoritative, typed Authority scope defined by its governing Authority contract or source artifact.
 
-
-
-For role-based delegation, WS already places scope on the Authority Anchor rather than ASSIGNED_ROLE. 
+For role-based delegation, WS already places scope on the Authority Anchor rather than ASSIGNED_ROLE.
 
 For direct Delegation Grant, PH5-A establishes the same separation principle, without asserting that the physical owner must literally be WS Authority Anchor:
 
 Relationship
-    identifies transfer
+identifies transfer
 
 Authority state/source
-    defines constitutional scope
+defines constitutional scope
 
 The relationship SHALL NOT invent its own parallel scope language.
-
 
 ---
 
@@ -848,7 +782,6 @@ Direct Delegation Grant SHALL NOT create or require a Role Type solely to satisf
 
 Role-based grants continue to use ASSIGNED_ROLE.
 
-
 ---
 
 25. No Governed Subject field
@@ -856,7 +789,7 @@ Role-based grants continue to use ASSIGNED_ROLE.
 The persistent grant records:
 
 Delegator
-      ↓
+↓
 Delegate
 
 It does not universally answer:
@@ -875,7 +808,6 @@ to the universal Delegation Grant solely for RI convenience.
 
 A governing instrument may naturally identify represented entities, but that does not alter the universal relationship endpoint semantics.
 
-
 ---
 
 26. No Action field
@@ -891,11 +823,10 @@ Requested Action remains a separate execution coordinate under REC-01D.
 Thus:
 
 Delegation Grant
-    ≠
+≠
 Requested Action
 
 This prevents persistent authority state from being polluted with execution transport semantics.
-
 
 ---
 
@@ -913,8 +844,7 @@ REC-01C already establishes:
 
 Capability ≠ Delegation
 
-and the Actor/agency basis must remain independently established. 
-
+and the Actor/agency basis must remain independently established.
 
 ---
 
@@ -938,8 +868,7 @@ tenant consent;
 
 audit trail;
 
-valid Intent Contract. 
-
+valid Intent Contract.
 
 Therefore:
 
@@ -949,14 +878,12 @@ A direct Delegation Grant crossing tenant boundaries SHALL NOT bypass WS-03C's c
 
 Both must hold:
 
-POL-valid Delegation
-+
+POL-valid Delegation +
 WS-valid cross-tenant relationship admission
 
 Otherwise:
 
 REJECT
-
 
 ---
 
@@ -965,13 +892,10 @@ REJECT
 WS establishes:
 
 Current-state query
-    → Active Relationship Index
+→ Active Relationship Index
 
 Historical query
-    → Relationship Registry
-      + Supersession Index
-
-
+→ Relationship Registry + Supersession Index
 
 Delegation Grant inherits this.
 
@@ -989,7 +913,6 @@ whether it is constitutionally usable now
 
 This distinction will be central to CLOSURE-02.
 
-
 ---
 
 30. Governance Layer primacy
@@ -1004,7 +927,7 @@ for navigation.
 
 But that projection cannot carry the complete constitutional authority truth.
 
-WS explicitly makes Traversal derived and non-authoritative. 
+WS explicitly makes Traversal derived and non-authoritative.
 
 Therefore:
 
@@ -1013,7 +936,6 @@ PH5-A-14 — No Traversal Authorization
 A graph edge encountered during traversal SHALL NOT by itself authorize an execution.
 
 Runtime/Application must resolve the governed Reified Relationship and its required Authority state.
-
 
 ---
 
@@ -1088,35 +1010,34 @@ NOT OWNED HERE
 Policy authorization:
 NOT OWNED HERE
 
-
 ---
 
 32. WS-04B Pattern proposal
 
-WS-04B requires every relationship to conform to an approved Pattern Registry entry, and unapproved relationships are rejected. The pattern schema includes source type, predicate, target type, constitutional tier, evidence requirement, authority requirement, specificity, status, rationale and admission time. 
+WS-04B requires every relationship to conform to an approved Pattern Registry entry, and unapproved relationships are rejected. The pattern schema includes source type, predicate, target type, constitutional tier, evidence requirement, authority requirement, specificity, status, rationale and admission time.
 
 The PH5-A pattern proposal is therefore:
 
 source_cluster_type:
-  Subject semantic class
+Subject semantic class
 
 predicate_id:
-  DELEGATES_AUTHORITY_TO
+DELEGATES_AUTHORITY_TO
 
 target_cluster_type:
-  Subject semantic class
+Subject semantic class
 
 constitutional_tier:
-  REIFIED
+REIFIED
 
 evidence_required:
-  MANDATORY
+MANDATORY
 
 authority_required:
-  true
+true
 
 status:
-  PROPOSED
+PROPOSED
 
 Deliberately not invented
 
@@ -1132,7 +1053,6 @@ This is a Registry compilation/admission detail to resolve from the canonical Re
 
 It does not block the semantic Relationship contract.
 
-
 ---
 
 33. Predicate Registry status
@@ -1145,7 +1065,7 @@ ACTIVE
 DEPRECATED
 RETIRED
 
-and ACTIVE predicates become immutable. 
+and ACTIVE predicates become immutable.
 
 Therefore this packet establishes:
 
@@ -1158,25 +1078,22 @@ status = PROPOSED
 They SHALL NOT become ACTIVE before:
 
 PH5-A contract closure
-      ↓
+↓
 PH5-B lineage closure
-      ↓
+↓
 PH5-C Agency Binding
-      ↓
+↓
 PH5-D proof card
-      ↓
+↓
 PH5-E adversarial simulation
-      ↓
+↓
 Council ratification
-      ↓
+↓
 WS admission
 
 This respects WS-04B's mandatory:
 
-> Proposal → Impact Analysis → Constitutional Review → Simulation → Ratification → Admission. 
-
-
-
+> Proposal → Impact Analysis → Constitutional Review → Simulation → Ratification → Admission.
 
 ---
 
@@ -1185,16 +1102,17 @@ This respects WS-04B's mandatory:
 This is a permanent boundary.
 
 ROLE-BASED DELEGATION
-        ↓
+↓
 ASSIGNED_ROLE
-+ Authority Anchor
 
-WS already provides that exact constitutional mechanism. 
+- Authority Anchor
+
+WS already provides that exact constitutional mechanism.
 
 Whereas:
 
 DIRECT / MANDATE DELEGATION
-        ↓
+↓
 DELEGATES_AUTHORITY_TO
 Reified Relationship
 
@@ -1206,18 +1124,14 @@ PH5-A-15 — Single Representation of One Grant
 
 > One constitutional Delegation SHALL have one authoritative grant representation appropriate to its form.
 
-
-
 No shadow duplication such as:
 
-ASSIGNED_ROLE
-+
+ASSIGNED_ROLE +
 DELEGATES_AUTHORITY_TO
 
 for the exact same Authority transfer merely for convenience.
 
 If both relationships legitimately exist, they must describe distinct constitutional facts.
-
 
 ---
 
@@ -1226,9 +1140,9 @@ If both relationships legitimately exist, they must describe distinct constituti
 Example A — One-time signature mandate
 
 Acme Corp
-    │
-    │ DELEGATES_AUTHORITY_TO
-    ▼
+│
+│ DELEGATES_AUTHORITY_TO
+▼
 Alice
 
 Authority basis:
@@ -1245,15 +1159,14 @@ Validity:
 
 No synthetic Role Type required.
 
-
 ---
 
 Example B — Power of attorney
 
 Human A
-   │
-   │ DELEGATES_AUTHORITY_TO
-   ▼
+│
+│ DELEGATES_AUTHORITY_TO
+▼
 Human B
 
 Authority/evidence basis:
@@ -1268,15 +1181,14 @@ Action
 Target
 Policy
 
-
 ---
 
 Example C — B2B logistics mandate
 
 Manufacturer
-      │
-      │ DELEGATES_AUTHORITY_TO
-      ▼
+│
+│ DELEGATES_AUTHORITY_TO
+▼
 3PL
 
 Possible authority scope:
@@ -1287,7 +1199,6 @@ within Territory Y
 during period T
 
 Because this may cross tenant boundaries, WS cross-tenant admission rules also apply.
-
 
 ---
 
@@ -1300,7 +1211,6 @@ Procurement Manager
 with Authority Anchor.
 
 No direct Delegation Grant is added merely because DELEGATION-001 exists.
-
 
 ---
 
@@ -1332,7 +1242,6 @@ scope = Record<string, unknown>
 latest matching delegation
 
 All conflict with earlier reconciliation or source ownership.
-
 
 ---
 
@@ -1404,7 +1313,6 @@ DLG-A16 — No Duplicate Grant Representation
 
 The same constitutional Authority transfer SHALL not simultaneously be represented as direct Delegation Grant and Role Assignment without distinct governing meaning.
 
-
 ---
 
 38. What PH5-A closes
@@ -1424,9 +1332,6 @@ CLOSED
 The answer is:
 
 > Direct/non-role Delegation is represented as an Authority-family Tier-2 Reified Relationship between Subjects under WS governance.
-
-
-
 
 ---
 
@@ -1472,7 +1377,6 @@ G. specificity_level
 
 The source corpus exposes the field but does not provide sufficient authoritative value semantics in this audit. It SHALL remain unresolved rather than invented.
 
-
 ---
 
 40. PH5-A current determination
@@ -1481,79 +1385,79 @@ DELEGATION-001-PH5-A
 DELEGATION GRANT RELATIONSHIP CONTRACT
 
 STATUS:
-  CONTRACT SYNTHESIS COMPLETE
-  PREDICATE NOT YET ADMITTED
+CONTRACT SYNTHESIS COMPLETE
+PREDICATE NOT YET ADMITTED
 
 SEMANTIC CONSTRUCT:
-  DELEGATION GRANT
+DELEGATION GRANT
 
 CONSTITUTIONAL FORM:
-  TIER-2 REIFIED RELATIONSHIP
+TIER-2 REIFIED RELATIONSHIP
 
 FAMILY:
-  AUTHORITY
+AUTHORITY
 
 SOURCE:
-  SUBJECT / DELEGATOR
+SUBJECT / DELEGATOR
 
 TARGET:
-  SUBJECT / DELEGATE
+SUBJECT / DELEGATE
 
 FORWARD PREDICATE:
-  DELEGATES_AUTHORITY_TO
+DELEGATES_AUTHORITY_TO
 
 INVERSE:
-  RECEIVES_DELEGATED_AUTHORITY_FROM
+RECEIVES_DELEGATED_AUTHORITY_FROM
 
 TEMPORAL:
-  EFFECTIVE-DATED
-  OR EVENT-BOUND
-  PERMANENT PROHIBITED
+EFFECTIVE-DATED
+OR EVENT-BOUND
+PERMANENT PROHIBITED
 
 CARDINALITY:
-  MANY-TO-MANY
-  POINT-IN-TIME
-  MANY-TO-MANY
-  LIFETIME
+MANY-TO-MANY
+POINT-IN-TIME
+MANY-TO-MANY
+LIFETIME
 
 EVIDENCE:
-  MANDATORY
+MANDATORY
 
 AUTHORITY:
-  REQUIRED
+REQUIRED
 
 PROVENANCE:
-  MANDATORY
+MANDATORY
 
 RELATIONSHIP IDENTITY:
-  UUIDv7 / WS-04B
+UUIDv7 / WS-04B
 
 LIFECYCLE:
-  WS REIFIED RELATIONSHIP LIFECYCLE
+WS REIFIED RELATIONSHIP LIFECYCLE
 
 ROLE TYPE:
-  NOT REQUIRED
+NOT REQUIRED
 
 GOVERNED SUBJECT:
-  NOT OWNED BY GRANT
+NOT OWNED BY GRANT
 
 REQUESTED ACTION:
-  NOT OWNED BY GRANT
+NOT OWNED BY GRANT
 
 AUTHORIZATION:
-  NOT PRODUCED BY GRANT
+NOT PRODUCED BY GRANT
 
 ASSIGNED_ROLE:
-  PRESERVED FOR ROLE-BASED DELEGATION
+PRESERVED FOR ROLE-BASED DELEGATION
 
 DLG-GAP-01:
-  CLOSED AT CONTRACT-ARCHITECTURE LEVEL
+CLOSED AT CONTRACT-ARCHITECTURE LEVEL
 
 IMPLEMENTATION AUTHORITY:
-  NONE
+NONE
 
 NEXT:
-  DELEGATION-001-PH5-B
-  DELEGATION PARENT & LINEAGE CONTRACT
+DELEGATION-001-PH5-B
+DELEGATION PARENT & LINEAGE CONTRACT
 
 The next packet is now narrowly defined: PH5-B must tell us how one authoritative grant derives from another without creating a second lineage object, including parent binding, attenuation, subdelegation permission, cycles, revocation cascade, and historical reconstruction.

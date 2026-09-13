@@ -1,20 +1,20 @@
 # ZQE-PLAN — First QR Vertical Slice Roadmap
 
-| Field | Value |
-| :--- | :--- |
-| **Version** | `0.2` |
-| **Status** | APPROVED |
-| **Lifecycle** | ACTIVE |
-| **Program** | `ZII — Zyppi Interaction Infrastructure` |
-| **Engine** | `ZQE — Zyppi QR Engine` |
-| **Authority Class** | Roadmap / Build Order |
-| **Higher Authority** | `ZII-001 v1.0` |
-| **Depends On** | `ZII-000 v1.0` · `ZII-001 v1.0` |
-| **Informed By** | `ZII-002 Draft` · `ZII-PREP-F` |
-| **Supersedes** | `ZQE-PLAN v0.1 Draft` |
-| **Repository** | `aly-samy/zyppi.me` |
+| Field                        | Value                                                         |
+| :--------------------------- | :------------------------------------------------------------ |
+| **Version**                  | `0.2`                                                         |
+| **Status**                   | APPROVED                                                      |
+| **Lifecycle**                | ACTIVE                                                        |
+| **Program**                  | `ZII — Zyppi Interaction Infrastructure`                      |
+| **Engine**                   | `ZQE — Zyppi QR Engine`                                       |
+| **Authority Class**          | Roadmap / Build Order                                         |
+| **Higher Authority**         | `ZII-001 v1.0`                                                |
+| **Depends On**               | `ZII-000 v1.0` · `ZII-001 v1.0`                               |
+| **Informed By**              | `ZII-002 Draft` · `ZII-PREP-F`                                |
+| **Supersedes**               | `ZQE-PLAN v0.1 Draft`                                         |
+| **Repository**               | `aly-samy/zyppi.me`                                           |
 | **Implementation Authority** | NONE by itself — implementation requires bounded AMS mandates |
-| **Effective Date** | 23 August 2026 |
+| **Effective Date**           | 23 August 2026                                                |
 
 ---
 
@@ -27,6 +27,7 @@ ZQE-PLAN defines the shortest disciplined path from the current ZII architectura
 The roadmap exists to move ZQE from architectural theory into engineering evidence without first requiring completion of the entire future ZII or ZQE documentation corpus.
 
 It governs:
+
 - execution sequence;
 - milestone boundaries;
 - parallel work;
@@ -143,6 +144,7 @@ They do not reproduce the normative source.
 ### 5.2 AI Implementation Boundary
 
 AI coding agents MAY use:
+
 - authorized ZQE specifications;
 - public technical material;
 - project-created test vectors;
@@ -261,6 +263,7 @@ HELLO ZYPPI
 ```
 
 **Purpose:**
+
 - basic construction;
 - fast debugging;
 - simple visual/manual verification.
@@ -272,15 +275,17 @@ https://id.gs1.org/01/09520123456788
 ```
 
 **Purpose:**
+
 - prove carriage of a realistic GS1 Digital Link URI;
 - prove interoperability using commercially meaningful input;
 - prove that ZQE can carry GS1 material without owning GS1 semantics.
 
 For ZQE this remains:
 
-> *opaque caller-supplied payload*
+> _opaque caller-supplied payload_
 
 ZQE SHALL NOT:
+
 - parse the GTIN;
 - validate GS1 semantics;
 - resolve the URI;
@@ -292,6 +297,7 @@ ZQE SHALL NOT:
 Payload C SHALL be the largest valid Byte-mode payload supported by the exact frozen FQR-1 Version/ECC combination.
 
 **Purpose:**
+
 - prove success exactly at the supported capacity boundary.
 
 ### Payload D — Capacity Overflow
@@ -303,6 +309,7 @@ Payload C + one additional byte
 ```
 
 **Expected result:**
+
 - deterministic rejection
 - No silent truncation.
 - No automatic profile mutation.
@@ -313,6 +320,7 @@ Payload C + one additional byte
 A deterministic non-trivial payload safely inside the supported capacity range.
 
 **Purpose:**
+
 - avoid overfitting to smoke input;
 - avoid overfitting to the GS1 URI;
 - exercise normal non-boundary behavior.
@@ -386,6 +394,7 @@ ZQE package admission
 
 ZQE SHALL NOT create a second production repository to bypass RGT.
 A temporary independent `qr-core` repository would create:
+
 - shadow package authority;
 - shadow CI;
 - duplicate history;
@@ -404,6 +413,7 @@ Standards-defined algorithm investigation MAY begin before package admission.
 This track exists so RGT does not unnecessarily block technical learning.
 
 **Permitted outputs include:**
+
 - disposable bitstream probes;
 - GF arithmetic experiments;
 - Reed-Solomon experiments;
@@ -531,6 +541,7 @@ These are hard M00 exit requirements.
 ### 15.3 Freeze Payload Corpus
 
 M00 SHALL produce exact frozen values for Payloads:
+
 - A
 - B
 - C
@@ -550,6 +561,7 @@ This roadmap does not predetermine the selected numerical policy.
 ### 15.5 Normative Verification Procedure
 
 M00 SHALL establish:
+
 - who performs standards verification;
 - where verification records live;
 - how standards-sensitive decisions are referenced;
@@ -579,6 +591,7 @@ The ZQE roadmap SHALL NOT create a parallel global context-loading table.
 ### 15.7 Harness Definition
 
 M00 SHALL freeze:
+
 - strict-verifier role;
 - fast independent decoder;
 - mobile acceptance decoder;
@@ -589,6 +602,7 @@ M00 SHALL freeze:
 ### M00 Exit Gate
 
 M00 passes only when:
+
 - no FQR standards-sensitive architectural parameter remains undefined;
 - no engineer/AI needs to guess a normative requirement;
 - the test payload corpus is frozen;
@@ -634,6 +648,7 @@ The initial target is:
 > `qr-core` → no production workspace dependencies
 
 `qr-core` SHALL NOT depend in production on:
+
 - CAW;
 - domain;
 - contracts;
@@ -650,6 +665,7 @@ External dependencies, if any, require explicit justification under CEngS.
 ### M01 Exit Gate
 
 The scaffold SHALL:
+
 - compile;
 - typecheck;
 - run tests;
@@ -673,6 +689,7 @@ Implement the standards-sensitive primitives required for the frozen FQR-1 slice
 ### 17.1 Bitstream Construction
 
 Implement applicable FQR-1 behavior for:
+
 - mode indicator;
 - byte count;
 - payload bytes;
@@ -720,6 +737,7 @@ for the frozen scope.
 CEngS-101 requires property testing for critical algorithms. This milestone therefore SHALL include both example-based and generated tests.
 
 **Required classes include:**
+
 - unit tests;
 - boundary tests;
 - known-vector tests where legally/technically available;
@@ -783,6 +801,7 @@ Construct the complete native QR matrix from the encoded codeword stream.
 ### Required Scope
 
 Implement, as applicable to the frozen profile:
+
 - function patterns;
 - reserved modules;
 - data traversal;
@@ -796,6 +815,7 @@ Implement, as applicable to the frozen profile:
 ### 19.1 Mask Determinism
 
 Given identical:
+
 - payload
 - profile
 - version
@@ -817,6 +837,7 @@ QrSymbol
 ```
 
 The minimum public concept is expected to include enough information to faithfully reproduce the QR matrix, such as:
+
 - version
 - size
 - ECC
@@ -835,6 +856,7 @@ It SHALL NOT simply call encoder helper functions and re-report their output.
 Its purpose is to catch defects that forgiving external scanners may tolerate.
 
 **Where feasible for the frozen scope it should verify:**
+
 - matrix dimensions;
 - function/reserved-module placement;
 - module assignment completeness;
@@ -846,7 +868,7 @@ Its purpose is to catch defects that forgiving external scanners may tolerate.
 
 The verifier is:
 
-> *test infrastructure*
+> _test infrastructure_
 
 not a production ZQE decoder.
 
@@ -873,6 +895,7 @@ Generated tests SHALL include boundary-adjacent payload lengths.
 ### M03 Exit Gate
 
 M03 passes when:
+
 - every frozen valid fixture yields a deterministic `QrSymbol`;
 - Payload D fails cleanly;
 - the strict verifier accepts valid ZQE matrices;
@@ -892,6 +915,7 @@ Two separate negative-control classes are required.
 A deliberately invalid matrix/artifact SHALL be rejected by the strict structural verifier.
 
 **Purpose:**
+
 - prove the verifier is not a rubber stamp.
 
 ### 22.2 Non-Decodable Image Control
@@ -928,6 +952,7 @@ SVG
 ```
 
 The renderer SHALL NOT recalculate:
+
 - QR encoding;
 - ECC;
 - placement;
@@ -942,6 +967,7 @@ It consumes the artifact.
 For FQR-1 the SVG renderer SHALL use integer-based geometry.
 
 **Required properties:**
+
 - integer module coordinates;
 - integer quiet-zone units;
 - integer viewBox geometry;
@@ -964,6 +990,7 @@ same SVG bytes
 ### M04 Exit Gate
 
 At M04:
+
 - The first visible ZQE QR exists.
 - It is not yet FQR-1.
 - External proof remains required.
@@ -996,6 +1023,7 @@ Prove that a non-ZQE decoder can recover exact payload material from pristine ZQ
 
 The normal fast verification path SHALL use an independent ZXing-C++-based decoder environment or equivalent approved independent implementation.
 Where WASM is used, it may execute in:
+
 - Node;
 - browser;
 - equivalent supported runtime.
@@ -1037,6 +1065,7 @@ No normalization is permitted when comparing the payload.
 
 The fast decode gate is suitable for the normal development/PR feedback loop.
 It SHOULD remain:
+
 - deterministic;
 - headless;
 - reasonably fast;
@@ -1064,22 +1093,29 @@ Starting from canonical test images, the harness SHALL generate deterministic tr
 The initial corpus covers:
 
 ### 29.1 Scale / Frame Occupancy
+
 QR presented at multiple bounded image sizes.
 
 ### 29.2 Rotation
+
 Multiple deterministic orientations/rotations.
 
 ### 29.3 Perspective
+
 Controlled projective distortion approximating angled camera capture.
 
 ### 29.4 Blur
+
 Bounded optical/focus blur.
 
 ### 29.5 Brightness / Contrast
+
 Deterministic illumination and contrast variation.
 
 ### 29.6 Resampling / Compression
+
 Bounded imaging artifacts representative of:
+
 - screenshot processing;
 - resizing;
 - messaging;
@@ -1112,6 +1148,7 @@ It SHALL NOT replace the frozen acceptance corpus.
 
 M06 SHALL include an independent mobile QR decoder environment such as ML Kit on Android.
 This test MAY run:
+
 - manually;
 - in dedicated CI;
 - in scheduled CI;
@@ -1150,6 +1187,7 @@ It is a bounded real-world spot check proving that the pipeline has crossed from
 ### 32.1 Physical Evidence Record
 
 Record:
+
 - ZQE commit SHA;
 - source artifact hash;
 - payload;
@@ -1169,22 +1207,22 @@ No claim of universal physical robustness follows from one spot check.
 
 At minimum:
 
-| Fixture / Gate | Strict Verifier | Fast Independent Decoder | Mobile Decoder |
-| :--- | :---: | :---: | :---: |
-| Smoke pristine | PASS | PASS | PASS |
-| GS1 showcase pristine | PASS | PASS | PASS |
-| Capacity boundary pristine | PASS | PASS | PASS |
-| General interior pristine | PASS | PASS | PASS |
-| Capacity overflow | REJECT before symbol | N/A | N/A |
-| Structural invalid control | FAIL | Not authoritative | Not authoritative |
-| Non-QR control | N/A | NO QR | NO QR |
-| Scale baseline | N/A | PASS | PASS |
-| Rotation baseline | N/A | PASS | PASS |
-| Perspective baseline | N/A | PASS | PASS |
-| Blur baseline | N/A | PASS | PASS |
-| Contrast baseline | N/A | PASS | PASS |
-| Compression baseline | N/A | PASS | PASS |
-| Physical printed showcase | N/A | optional | PASS |
+| Fixture / Gate             |   Strict Verifier    | Fast Independent Decoder |  Mobile Decoder   |
+| :------------------------- | :------------------: | :----------------------: | :---------------: |
+| Smoke pristine             |         PASS         |           PASS           |       PASS        |
+| GS1 showcase pristine      |         PASS         |           PASS           |       PASS        |
+| Capacity boundary pristine |         PASS         |           PASS           |       PASS        |
+| General interior pristine  |         PASS         |           PASS           |       PASS        |
+| Capacity overflow          | REJECT before symbol |           N/A            |        N/A        |
+| Structural invalid control |         FAIL         |    Not authoritative     | Not authoritative |
+| Non-QR control             |         N/A          |          NO QR           |       NO QR       |
+| Scale baseline             |         N/A          |           PASS           |       PASS        |
+| Rotation baseline          |         N/A          |           PASS           |       PASS        |
+| Perspective baseline       |         N/A          |           PASS           |       PASS        |
+| Blur baseline              |         N/A          |           PASS           |       PASS        |
+| Contrast baseline          |         N/A          |           PASS           |       PASS        |
+| Compression baseline       |         N/A          |           PASS           |       PASS        |
+| Physical printed showcase  |         N/A          |         optional         |       PASS        |
 
 The exact simulation severity values SHALL be frozen before M06 execution.
 They SHALL represent a reasonable baseline, not intentionally extreme torture conditions.
@@ -1264,6 +1302,7 @@ This turns the ZII mechanism/meaning separation into executable evidence.
 ## 36. What FQR-1 Does Not Prove
 
 FQR-1 SHALL NOT be represented as proof of:
+
 - full ISO/IEC 18004 implementation;
 - all QR versions;
 - all ECC levels;
@@ -1287,7 +1326,7 @@ FQR-1 SHALL NOT be represented as proof of:
 
 FQR-1 proves:
 
-> *ZQE can independently construct a deterministic standards-valid QR within its declared narrow scope and demonstrate interoperability through structural, software, mobile, simulated, and bounded physical evidence.*
+> _ZQE can independently construct a deterministic standards-valid QR within its declared narrow scope and demonstrate interoperability through structural, software, mobile, simulated, and bounded physical evidence._
 
 ---
 
@@ -1337,18 +1376,18 @@ It does not block non-production standards investigation or verifier development
 
 ## 38. Milestone Board
 
-| Milestone | Objective | Size | Canonical Result |
-| :--- | :--- | :---: | :--- |
-| **ZQE-M00** | Freeze FQR contract | S | Minimal implementable ZQE-001 |
-| **Parallel RGT** | Lawful repo governance | external | Package admission possible |
-| **Math Probe Track** | Retire algorithm uncertainty | S/M | Non-production evidence |
-| **Verification Track** | Build trusted test harness | S/M | Independent verifier ready |
-| **ZQE-M01** | Admit `qr-core` | S | Lawful package scaffold |
-| **ZQE-M02** | Build codeword/ECC pipeline | M | Deterministic complete codeword stream |
-| **ZQE-M03** | Build QR matrix | L | Strictly verified `QrSymbol` |
-| **ZQE-M04** | Render SVG | S | First visible deterministic QR |
-| **ZQE-M05** | External software decode | M | Exact payload recovered |
-| **ZQE-M06** | Real-world acceptance | M | FQR-1 |
+| Milestone              | Objective                    |   Size   | Canonical Result                       |
+| :--------------------- | :--------------------------- | :------: | :------------------------------------- |
+| **ZQE-M00**            | Freeze FQR contract          |    S     | Minimal implementable ZQE-001          |
+| **Parallel RGT**       | Lawful repo governance       | external | Package admission possible             |
+| **Math Probe Track**   | Retire algorithm uncertainty |   S/M    | Non-production evidence                |
+| **Verification Track** | Build trusted test harness   |   S/M    | Independent verifier ready             |
+| **ZQE-M01**            | Admit `qr-core`              |    S     | Lawful package scaffold                |
+| **ZQE-M02**            | Build codeword/ECC pipeline  |    M     | Deterministic complete codeword stream |
+| **ZQE-M03**            | Build QR matrix              |    L     | Strictly verified `QrSymbol`           |
+| **ZQE-M04**            | Render SVG                   |    S     | First visible deterministic QR         |
+| **ZQE-M05**            | External software decode     |    M     | Exact payload recovered                |
+| **ZQE-M06**            | Real-world acceptance        |    M     | FQR-1                                  |
 
 Sizes are relative planning estimates.
 They are not calendar commitments.
@@ -1378,6 +1417,7 @@ temporary execution responsibility
 ## 40. Dates
 
 This roadmap intentionally does not invent milestone completion dates before:
+
 - M00 activation;
 - RGT state is known;
 - DRIs are assigned.
@@ -1393,6 +1433,7 @@ FQR-1 closure SHALL include a short:
 > **FQR-1 Lessons Record**
 
 It answers:
+
 - What assumptions were confirmed?
 - What assumptions were wrong?
 - Which rules were QR-specific?
@@ -1476,7 +1517,7 @@ At that point:
 
 and Zyppi may state:
 
-> *ZQE has generated and independently proven its first real-world QR Code.*
+> _ZQE has generated and independently proven its first real-world QR Code._
 
 ---
 
@@ -1484,6 +1525,7 @@ and Zyppi may state:
 
 ZQE-PLAN is intentionally an active engineering roadmap rather than a constitutional charter.
 Therefore:
+
 - individual implementation work SHALL be authorized through bounded mandates;
 - milestone details MAY evolve as engineering evidence emerges;
 - scope expansion requires explicit approval;
@@ -1493,7 +1535,7 @@ Therefore:
 
 The roadmap follows:
 
-> *architecture before irreversible decisions; evidence before unnecessary abstraction.*
+> _architecture before irreversible decisions; evidence before unnecessary abstraction._
 
 ---
 
@@ -1535,7 +1577,7 @@ recover the exact original payload
 
 The endpoint is deliberately tangible:
 
-> *A QR Code generated by Zyppi's own QR engine, carrying a real commercially relevant payload, recognized by software Zyppi did not write, surviving realistic image conditions, printed into the physical world, and successfully scanned back into the exact original data.*
+> _A QR Code generated by Zyppi's own QR engine, carrying a real commercially relevant payload, recognized by software Zyppi did not write, surviving realistic image conditions, printed into the physical world, and successfully scanned back into the exact original data._
 
 **That is FQR-1.**
 
@@ -1543,18 +1585,19 @@ The endpoint is deliberately tangible:
 
 ## 46. Approval Record
 
-| Field | Value |
-| :--- | :--- |
-| **Decision** | APPROVE |
-| **Document** | ZQE-PLAN — First QR Vertical Slice Roadmap |
-| **Version** | 0.2 |
-| **Status** | APPROVED |
-| **Lifecycle** | ACTIVE |
-| **Authority Class** | Roadmap / Build Order |
-| **Implementation Authority** | NONE by itself |
-| **Effective Date** | 23 August 2026 |
+| Field                        | Value                                      |
+| :--------------------------- | :----------------------------------------- |
+| **Decision**                 | APPROVE                                    |
+| **Document**                 | ZQE-PLAN — First QR Vertical Slice Roadmap |
+| **Version**                  | 0.2                                        |
+| **Status**                   | APPROVED                                   |
+| **Lifecycle**                | ACTIVE                                     |
+| **Authority Class**          | Roadmap / Build Order                      |
+| **Implementation Authority** | NONE by itself                             |
+| **Effective Date**           | 23 August 2026                             |
 
 **Effective upon approval:**
+
 - ZQE-PLAN v0.1 is superseded;
 - FQR-1 becomes the active near-term ZQE engineering objective;
 - ZQE-M00 becomes the first executable planning gate;

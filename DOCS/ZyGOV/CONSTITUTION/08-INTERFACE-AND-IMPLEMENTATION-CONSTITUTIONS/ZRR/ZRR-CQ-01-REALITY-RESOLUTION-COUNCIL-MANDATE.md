@@ -1,4 +1,5 @@
 # ZRR-CQ-01 — Reality Resolution Infrastructure
+
 ## Independent Council Reconnaissance Mandate
 
 **Authority:** Chair, Zyppi Constitutional Council  
@@ -364,24 +365,24 @@ delegated namespace → multi-provider resolver → typed owner-native records
 
 For every alternative evaluate:
 
-| Dimension | Required Evaluation |
-|---|---|
-| Conceptual simplicity | |
-| First implementation speed | |
-| Long-term scalability | |
-| Twenty-year durability | |
-| Billion-reference viability | |
-| Constitutional cleanliness | |
-| Federation potential | |
-| GS1 compatibility | |
-| Custom-domain fit | |
-| ZII independence | |
-| ZYAPI developer experience | |
-| Security / abuse exposure | |
-| Operational complexity | |
-| Monetization potential | |
-| Vendor dependence | |
-| Migration risk | |
+| Dimension                   | Required Evaluation |
+| --------------------------- | ------------------- |
+| Conceptual simplicity       |                     |
+| First implementation speed  |                     |
+| Long-term scalability       |                     |
+| Twenty-year durability      |                     |
+| Billion-reference viability |                     |
+| Constitutional cleanliness  |                     |
+| Federation potential        |                     |
+| GS1 compatibility           |                     |
+| Custom-domain fit           |                     |
+| ZII independence            |                     |
+| ZYAPI developer experience  |                     |
+| Security / abuse exposure   |                     |
+| Operational complexity      |                     |
+| Monetization potential      |                     |
+| Vendor dependence           |                     |
+| Migration risk              |                     |
 
 Then select one preferred architecture.
 
@@ -1208,18 +1209,22 @@ Avoid one name carrying four different responsibilities.
 Each reviewer shall return exactly these major sections:
 
 ## 1. Executive Verdict
+
 Maximum 12 lines.
 
 ## 2. The Problem Zyppi Is Actually Solving
+
 Independent formulation.
 
 ## 3. DNS Analogy
+
 - worth borrowing;
 - reject;
 - missing;
 - better analogy if any.
 
 ## 4. Critique of `ZRR-NS-001`
+
 - Keep
 - Change
 - Reject
@@ -1227,75 +1232,99 @@ Independent formulation.
 - Dangerous at scale
 
 ## 5. Three or More Architectural Alternatives
+
 Explicit comparison table.
 
 ## 6. Preferred Architecture
+
 Include a clear diagram.
 
 ## 7. Constitutional Ownership Boundary
+
 What it owns / consumes / references / must never decide.
 
 ## 8. Addressing & Namespace Model
+
 Including external standards and customer domains.
 
 ## 9. Core Data Model
+
 Minimal entities/types only.
 
 ## 10. Resolution Lifecycle
+
 Request → result.
 
 ## 11. Control Plane
+
 Create/change/delegate/retire lifecycle.
 
 ## 12. Serving / Edge Architecture
+
 Including failure and propagation.
 
 ## 13. Custom-Domain Architecture
+
 Technical + commercial.
 
 ## 14. Federation / Delegation
+
 Now vs future.
 
 ## 15. GS1 Relationship
+
 Exact separation.
 
 ## 16. ZII / ZQE / zTOUCH / Zync / ZPI Relationship
+
 Keep/change/retire.
 
 ## 17. Security & Abuse Model
+
 Top threats + structural mitigations.
 
 ## 18. API / SDK / MCP Experience
+
 Human + agent use.
 
 ## 19. Monetization
+
 Commodity vs differentiated value.
 
 ## 20. Twenty-Year Test
+
 PASS / FAIL + reasoning.
 
 ## 21. Billion-Reference Test
+
 Fatal V1 choices + safe abstractions.
 
 ## 22. NOW / NEXT / LATER / MAYBE / REJECT
+
 Architecture sequence.
 
 ## 23. Irreversible Decisions
+
 Freeze-before-first-route list.
 
 ## 24. First Vertical Slice
+
 Exact recommendation.
 
 ## 25. Top Five Risks
+
 Ranked.
 
 ## 26. Top Five Opportunities
+
 Ranked.
 
 ## 27. Questions the Chair Has Not Asked
+
 Minimum 7.
 
 ## 28. Final Recommendation
+
 One decisive architecture recommendation.
 
 ---

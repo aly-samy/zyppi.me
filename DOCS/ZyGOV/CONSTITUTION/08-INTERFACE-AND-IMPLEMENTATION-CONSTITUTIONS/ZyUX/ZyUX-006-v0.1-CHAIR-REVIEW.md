@@ -2771,18 +2771,23 @@ Review:
 # 183. Relationship to Other ZyUX Documents
 
 ## `ZyUX-001`
+
 Owns entry, authentication, credential linking, and front-door recovery boundary.
 
 ## `ZyUX-002`
+
 Owns organization, delegation, scope, relationship states, and authority relationships.
 
 ## `ZyUX-003`
+
 Owns how active/historical contexts appear or disappear after lifecycle changes.
 
 ## `ZyUX-004`
+
 Owns explanation/proof of historical Authority, Standing, Evidence, and Receipt.
 
 ## `ZyUX-005`
+
 Owns host connection lifecycle, migration, removal, and Host-Native continuity.
 
 `ZyUX-006` owns the **temporal continuity and change experience across all ZyUX surfaces**.
@@ -2868,63 +2873,83 @@ Before ratification, Council should disposition:
 # 187. Proposed Acceptance Invariants
 
 ### AX-006-01 — Employment End Does Not Delete Identity
+
 Ending Company A access does not erase Ahmed.
 
 ### AX-006-02 — Unrelated Contexts Survive
+
 Company A termination does not affect Company B, personal, or freelance contexts.
 
 ### AX-006-03 — Future Capability Ends
+
 Revoked Standing prevents new Company A actions.
 
 ### AX-006-04 — Historical Attribution Survives
+
 Past valid actions remain attributed to Ahmed.
 
 ### AX-006-05 — Historical Data Access Is Separately Governed
+
 Attribution does not imply indefinite access to company data.
 
 ### AX-006-06 — Current Structure Does Not Rewrite History
+
 Department/leadership changes preserve historical organizational context.
 
 ### AX-006-07 — Credential Loss Does Not Create New Identity
+
 Recovery reconnects legitimate access to existing Identity.
 
 ### AX-006-08 — No Universal Recovery Master
+
 Support/admin recovery cannot bypass governance universally.
 
 ### AX-006-09 — Recovery Is Scoped
+
 Recovered Subject receives only legitimate contexts.
 
 ### AX-006-10 — Reused Email Does Not Reassign Historical Subject
+
 Credential reuse cannot overwrite historical identity attribution.
 
 ### AX-006-11 — Organization Survives Administrator Departure
+
 Organization identity/history do not depend on one human admin.
 
 ### AX-006-12 — Host Removal Stops Future Integration
+
 Disconnected host cannot continue authorized reads/writes.
 
 ### AX-006-13 — Host Removal Preserves Historical Receipt
+
 Historical governed proof remains according to retention.
 
 ### AX-006-14 — Ownership Transfer Does Not Transfer Delegated Authority
+
 Heirs/buyers do not automatically receive office/employee/admin Authority.
 
 ### AX-006-15 — Death Does Not Delete Identity
+
 Life-state changes current participation, not historical existence.
 
 ### AX-006-16 — Heir Acts as Self
+
 Successor/representative does not authenticate as deceased Subject.
 
 ### AX-006-17 — Historical View Is Clearly Historical
+
 Users cannot mistake historical state for current operational state.
 
 ### AX-006-18 — Recovery Does Not Leak Context
+
 Recovery does not reveal unrelated employers/assets/relationships.
 
 ### AX-006-19 — Suspension Is Distinct From Termination
+
 Temporary states are not rendered as permanent end.
 
 ### AX-006-20 — Service Failure Is Not Lifecycle Change
+
 Outage does not become revocation/termination.
 
 ---
