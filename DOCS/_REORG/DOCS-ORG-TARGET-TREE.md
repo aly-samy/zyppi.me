@@ -64,7 +64,9 @@ DOCS/
 # 3. Fact vs. Target vs. Unresolved Decisions
 
 ## 3.1 Current Repository Fact
+
 The current repository contains 461 physical files distributed across 7 major trees:
+
 - `DOCS/CAW` (187 files)
 - `DOCS/CEngS-v2` (15 files)
 - `DOCS/Commerce-Atlas` (12 files)
@@ -74,7 +76,9 @@ The current repository contains 461 physical files distributed across 7 major tr
 - `DOCS/` root (2 files: `ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md`, `README.md`)
 
 ## 3.2 Proposed Target Structure
+
 Under the proposed taxonomy, all files are grouped into 9 clean top-level directories:
+
 - `DOCS/00-START-HERE/`
 - `DOCS/CONSTITUTION/`
 - `DOCS/GOVERNANCE/`
@@ -86,7 +90,9 @@ Under the proposed taxonomy, all files are grouped into 9 clean top-level direct
 - `DOCS/ARCHIVE/`
 
 ## 3.3 Unresolved Chair Decisions
+
 The following architectural mappings are marked provisional pending Chair confirmation:
+
 1. **CEngS Placement:** Placed in `DOCS/GOVERNANCE/ENGINEERING/` (Sprint S11).
 2. **Commerce Atlas Placement:** Placed in `DOCS/CONSTITUTION/06-DOMAIN-CONSTITUTIONS/COMMERCE-ATLAS/` (Sprint S11).
 3. **CAW Program Execution:** Placed in `DOCS/PROGRAMS/CAW/` (Sprints S12, S13A, S13B).
@@ -96,22 +102,22 @@ The following architectural mappings are marked provisional pending Chair confir
 
 # 4. Major Tree Mapping Matrix
 
-| Current Directory | Target Directory | Primary Sprint | Rationale |
-| --- | --- | --- | --- |
-| `DOCS/ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md` | `DOCS/CONSTITUTION/01-FOUNDATION/` | `S01` | Governing master brand succession declaration ZUSD-001 |
-| `DOCS/ZyGOV/CONSTITUTION/01-FOUNDATION/` | `DOCS/CONSTITUTION/01-FOUNDATION/` | `S01` | Foundation constitutional layer |
-| `DOCS/ZyGOV/CONSTITUTION/02-REALITY-CONSTITUTION/` | `DOCS/CONSTITUTION/02-REALITY-CONSTITUTION/` | `S02` | Reality Model (ZRM) specs |
-| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/` | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/` | `S03`..`S06` | Primary constitutional families |
-| `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/` | `DOCS/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/` | `S07` | Secondary constructs |
-| `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/` | `DOCS/CONSTITUTION/05-DOMAIN-COMPOSITION/` | `S08A` | Domain Composition (Z-PROF) |
-| `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/` | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/` | `S09`, `S10` | Interface & Engine specifications |
-| `DOCS/CEngS-v2/` | `DOCS/GOVERNANCE/ENGINEERING/` | `S11` | CEngS v2.0 Engineering Governance |
-| `DOCS/Commerce-Atlas/` | `DOCS/CONSTITUTION/06-DOMAIN-CONSTITUTIONS/COMMERCE-ATLAS/` | `S11` | Domain Constitutions |
-| `DOCS/ZII/` | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/` | `S10` | ZII/ZQE implementation constitution |
-| `DOCS/M08.5/` | `DOCS/PROGRAMS/ZPROF-M08.5/` | `S08B` | Z-PROF M08.5 deliverables |
-| `DOCS/CAW/Core/` | `DOCS/PROGRAMS/CAW/CORE/` | `S12` | Commerce Atlas Wedge Core |
-| `DOCS/CAW/AMS/` & `M01-M08` | `DOCS/PROGRAMS/CAW/AMS/` | `S13A`, `S13B` | CAW AMS Milestones |
-| `DOCS/CAW/CCP/` | `DOCS/EVIDENCE/CCP-RECEIPTS/` | `S13C` | Capability Closure Program Receipts |
+| Current Directory                                                        | Target Directory                                                       | Primary Sprint | Rationale                                              |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------- | -------------- | ------------------------------------------------------ |
+| `DOCS/ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md`                        | `DOCS/CONSTITUTION/01-FOUNDATION/`                                     | `S01`          | Governing master brand succession declaration ZUSD-001 |
+| `DOCS/ZyGOV/CONSTITUTION/01-FOUNDATION/`                                 | `DOCS/CONSTITUTION/01-FOUNDATION/`                                     | `S01`          | Foundation constitutional layer                        |
+| `DOCS/ZyGOV/CONSTITUTION/02-REALITY-CONSTITUTION/`                       | `DOCS/CONSTITUTION/02-REALITY-CONSTITUTION/`                           | `S02`          | Reality Model (ZRM) specs                              |
+| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                    | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                        | `S03`..`S06`   | Primary constitutional families                        |
+| `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`        | `DOCS/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`            | `S07`          | Secondary constructs                                   |
+| `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/`                         | `DOCS/CONSTITUTION/05-DOMAIN-COMPOSITION/`                             | `S08A`         | Domain Composition (Z-PROF)                            |
+| `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/` | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/`     | `S09`, `S10`   | Interface & Engine specifications                      |
+| `DOCS/CEngS-v2/`                                                         | `DOCS/GOVERNANCE/ENGINEERING/`                                         | `S11`          | CEngS v2.0 Engineering Governance                      |
+| `DOCS/Commerce-Atlas/`                                                   | `DOCS/CONSTITUTION/06-DOMAIN-CONSTITUTIONS/COMMERCE-ATLAS/`            | `S11`          | Domain Constitutions                                   |
+| `DOCS/ZII/`                                                              | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/` | `S10`          | ZII/ZQE implementation constitution                    |
+| `DOCS/M08.5/`                                                            | `DOCS/PROGRAMS/ZPROF-M08.5/`                                           | `S08B`         | Z-PROF M08.5 deliverables                              |
+| `DOCS/CAW/Core/`                                                         | `DOCS/PROGRAMS/CAW/CORE/`                                              | `S12`          | Commerce Atlas Wedge Core                              |
+| `DOCS/CAW/AMS/` & `M01-M08`                                              | `DOCS/PROGRAMS/CAW/AMS/`                                               | `S13A`, `S13B` | CAW AMS Milestones                                     |
+| `DOCS/CAW/CCP/`                                                          | `DOCS/EVIDENCE/CCP-RECEIPTS/`                                          | `S13C`         | Capability Closure Program Receipts                    |
 
 ---
 
