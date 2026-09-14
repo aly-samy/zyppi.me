@@ -8,9 +8,9 @@
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Document ID         |                                                                                                                                                                          |
 | Constitutional URI  |                                                                                                                                                                          |
-| Canonical Name      | UNFICT_PRD_v5.1                                                                                                                                                           |
-| Document Family     | Unfict Constitutional Corpus                                                                                                                                              |
-| Title               | Unfict Product Requirements Document (PRD)                                                                                                                                |
+| Canonical Name      | UNFICT_PRD_v5.1                                                                                                                                                          |
+| Document Family     | Unfict Constitutional Corpus                                                                                                                                             |
+| Title               | Unfict Product Requirements Document (PRD)                                                                                                                               |
 | Version             | 5.0                                                                                                                                                                      |
 | Status              | Draft — Proposed for Ratification                                                                                                                                        |
 | Classification      | Capability Constitution                                                                                                                                                  |
@@ -28,7 +28,7 @@
 | Depends On          | NORTH-STAR-v8.0.md, FOUNDING-PRINCIPLES-v6.0.md                                                                                                                          |
 | Required By         | To Be Resolved During Repository Dependency Mapping                                                                                                                      |
 | Related Documents   | To Be Resolved During Repository Dependency Mapping                                                                                                                      |
-| Supersedes          | ZYPPI_PRD_v4.1.0                                                                                                                                                           |
+| Supersedes          | ZYPPI_PRD_v4.1.0                                                                                                                                                         |
 | Superseded By       | To Be Resolved During Repository Dependency Mapping                                                                                                                      |
 | Authority Scope     | Needs Ratification                                                                                                                                                       |
 | Amendment Policy    | Constitutional Amendment Required                                                                                                                                        |
@@ -36,7 +36,7 @@
 | Keywords            | Product, Execution, Subject, Object, Place, Event, Evidence, Routing, Trust, Capabilities, Platform, Infrastructure, Strategy                                            |
 | Defines             | Product Thesis, Identity Layer, Routing Layer, Event Layer, Trust Layer, Capability Layer, Execution Layer, Acquisition Products, Retention Products, Expansion Products |
 | Amendment Class     | Primitive Reconciliation — see 00-RECONCILIATION-NOTE.md §8                                                                                                              |
-| Change Log          | Version 5.0: Adopte Unfict Instead of Zyppi as a brand name                  |
+| Change Log          | Version 5.0: Adopte Unfict Instead of Zyppi as a brand name                                                                                                              |
 | Constitutional Hash | Reserved                                                                                                                                                                 |
 | UUID                | Reserved                                                                                                                                                                 |
 
