@@ -12,171 +12,113 @@
 
 # 1. Executive Summary & Repository Baseline
 
-Sprint 00 has completed a comprehensive, filesystem-level and metadata-level reconnaissance of the repository's `DOCS/` corpus.
+Sprint 00 has completed a comprehensive, non-mutating reconnaissance of the repository's `DOCS/` corpus.
 
-## Baseline Statistics
+## Baseline Statistics & Mandatory Invariants
 
 - **Baseline Git HEAD SHA:** `2e954df5eeb0f10392e17841c8678a3deafc8591`
 - **Physical Files Discovered (`record_type = FILE`):** 461
-- **Referenced-Missing Artifacts (`record_type = REFERENCED_MISSING`):** 24
-- **Total Master Register Records:** 485
-- **Exact Duplicate SHA256 Groups:** 6 groups (12 files)
+- **Referenced-Missing Artifacts (`record_type = REFERENCED_MISSING`):** 28
+- **Total Master Register Records:** 489
 - **Unique Physical SHA256 Hashes:** 455
-
-All 461 physical files and 24 referenced-missing artifacts have been inventoried, classified, mapped to the proposed target directory architecture, and assigned to a specific future reorganization sprint (S01–S15).
-
----
-
-# 2. Directories Inspected
-
-The reconnaissance inspected every directory and file under `DOCS/**`:
-
-| Directory Tree           | File Count | Primary Classification / Role                                                          |
-| ------------------------ | ---------: | -------------------------------------------------------------------------------------- |
-| `DOCS/` (root)           |          2 | Succession Declaration (ZUSD-001) & Corpus README                                      |
-| `DOCS/CAW`               |        187 | Commerce Atlas Wedge Core, AMS Milestones M01–M08.5, CCP Receipts                      |
-| `DOCS/CEngS-v2`          |         15 | Engineering Constitution, Governance Rules, Standards v2.0                             |
-| `DOCS/Commerce-Atlas`    |         12 | Commerce Atlas Charter & Domain Workshop Papers                                        |
-| `DOCS/M08.5`             |          3 | Z-PROF Profile Architecture & Contract Specs                                           |
-| `DOCS/ZII`               |         25 | Integrated Architecture Program Charter & ZQE QR Engine Specs                          |
-| `DOCS/ZyGOV`             |        217 | Constitutional Layers 01–08 (Foundation, ZRM, Families, Secondary, Z-PROF, Interfaces) |
-| **Total Physical Files** |    **461** |                                                                                        |
+- **Exact Duplicate SHA256 Hash Groups:** 5 byte-identical duplicate groups (5 redundant files)
+- **Target Path Collisions:** 0 (100% unique target paths)
 
 ---
 
-# 3. Classification Breakdown
+# 2. Top-Level Physical Enumeration
 
-Every register record was assigned one of the authorized canonical-state labels:
+The baseline physical enumeration at `2e954df5eeb0f10392e17841c8678a3deafc8591` establishes:
+
+| Top-Level Directory                                           | Physical File Count |
+| ------------------------------------------------------------- | ------------------: |
+| `DOCS/CAW`                                                    |                 196 |
+| `DOCS/CEngS-v2`                                               |                  15 |
+| `DOCS/Commerce-Atlas`                                         |                  11 |
+| `DOCS/M08.5`                                                  |                   3 |
+| `DOCS/ZII`                                                    |                  11 |
+| `DOCS/ZyGOV`                                                  |                 224 |
+| `DOCS/ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md` (root file) |                   1 |
+| **Total Physical Files**                                      |             **461** |
+
+---
+
+# 3. Canonical-State Distribution
+
+Every record in the register was assigned one of the authorized canonical-state labels:
 
 | Canonical State          | Physical Files (`FILE`) | Referenced Missing (`REFERENCED_MISSING`) | Total Records |
 | ------------------------ | ----------------------: | ----------------------------------------: | ------------: |
-| `CANONICAL-ACTIVE`       |                     184 |                                         0 |           184 |
-| `CANONICAL-HISTORICAL`   |                      14 |                                         0 |            14 |
-| `SUPERSEDED`             |                      12 |                                         0 |            12 |
-| `DRAFT`                  |                      42 |                                         0 |            42 |
-| `GOVERNANCE`             |                      22 |                                         0 |            22 |
-| `EVIDENCE`               |                     108 |                                         0 |           108 |
-| `IMPLEMENTATION`         |                      62 |                                         0 |            62 |
-| `EXPLORATORY`            |                      11 |                                         0 |            11 |
-| `GENERATED-PACK`         |                       0 |                                         0 |             0 |
-| `DUPLICATE`              |                       6 |                                         0 |             6 |
-| `REFERENCED-MISSING`     |                       0 |                                        24 |            24 |
-| `UNKNOWN-REQUIRES-CHAIR` |                       0 |                                         0 |             0 |
-| **Total**                |                 **461** |                                    **24** |       **485** |
+| `CANONICAL-ACTIVE`       |                     199 |                                         0 |           199 |
+| `DRAFT`                  |                      39 |                                         0 |            39 |
+| `DUPLICATE`              |                       5 |                                         0 |             5 |
+| `EVIDENCE`               |                      70 |                                         0 |            70 |
+| `EXPLORATORY`            |                       2 |                                         0 |             2 |
+| `GENERATED-PACK`         |                       4 |                                         0 |             4 |
+| `GOVERNANCE`             |                      11 |                                         0 |            11 |
+| `IMPLEMENTATION`         |                     117 |                                         0 |           117 |
+| `REFERENCED-MISSING`     |                       0 |                                        28 |            28 |
+| `SUPERSEDED`             |                       3 |                                         0 |             3 |
+| `UNKNOWN-REQUIRES-CHAIR` |                      11 |                                         0 |            11 |
+| **Total**                |                 **461** |                                    **28** |       **489** |
 
 ---
 
-# 4. Exact Duplicates Analysis
+# 4. Exact Duplicate Groups Analysis
 
-The reconnaissance identified 6 exact duplicate SHA256 hash groups (12 files total):
+1. **CEngS Documentation Standard:** `DOCS/CEngS-v2/CEngS-105-Documentation-Standard-1.md` is an exact byte-identical copy of `DOCS/CEngS-v2/CEngS-105-Documentation-Standard.md` (SHA256 `df66efef11d603eef5cd2ef975eaae1d41bcbf8b6256ff99eeef7c7a38753239`).
+2. **Z-PROF D5 Revision 2:** `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R2.md` is a byte-identical duplicate of `DOCS/CAW/M08.5/Z-PROF-D5-R2.md` (SHA256 `c42d7721ccdd715e45c4aa0fe1f148d42d3ad2ef3be5b072049d5ef06efedda9`).
+3. **Z-PROF D5 Revision 3:** `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R3.md` is a byte-identical duplicate of `DOCS/CAW/M08.5/Z-PROF-D5-R3.md` (SHA256 `555356e0e457f9edb6b856dcbb42ce91238eb76fbe652077983ea1c9b60997ee`).
+4. **ZQE Plan Ratification Record:** `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` is a byte-identical duplicate of `DOCS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` (SHA256 `8e0b0aa2ad23c5ce17e4fcfccfce3f773cd7c644d6dbbc38f65cc947dd8f5661`).
+5. **Marketing 005:** `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005 (1).md` is a byte-identical duplicate of `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005.md` (SHA256 `4eff676d72f0bc333c1f20108dbddf2f01fbd00fb953538bdac7636e16f73dbd`).
 
-### Group 1: Empty Files (0 bytes, SHA256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`)
-
-- `DOCS/CAW/AMS/AMS-0309.md` (Primary candidate)
-- `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/ZQE/ZQE-M00-SRR-v1.0-CLOSED-PASS.md` (Duplicate)
-- **Recommendation:** Both are empty 0-byte placeholders. Mark for review/cleanup in S14.
-
-### Group 2: Z-PROF D5 Revision 2 (33,055 bytes, SHA256 `c42d7721ccdd715e45c4aa0fe1f148d42d3ad2ef3be5b072049d5ef06efedda9`)
-
-- `DOCS/CAW/M08.5/Z-PROF-D5-R2.md` (Primary candidate)
-- `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R2.md` (Duplicate)
-- **Recommendation:** Consolidate in S08B / S14.
-
-### Group 3: Z-PROF D5 Revision 3 (32,188 bytes, SHA256 `555356e0e457f9edb6b856dcbb42ce91238eb76fbe652077983ea1c9b60997ee`)
-
-- `DOCS/CAW/M08.5/Z-PROF-D5-R3.md` (Primary candidate)
-- `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R3.md` (Duplicate)
-- **Recommendation:** Consolidate in S08B / S14.
-
-### Group 4: CEngS Documentation Standard (1,195 bytes, SHA256 `df66efef11d603eef5cd2ef975eaae1d41bcbf8b6256ff99eeef7c7a38753239`)
-
-- `DOCS/CEngS-v2/CEngS-105-Documentation-Standard-1.md` (Duplicate)
-- `DOCS/CEngS-v2/CEngS-105-Documentation-Standard.md` (Primary candidate)
-- **Recommendation:** Deprecate `-1.md` copy in S11.
-
-### Group 5: ZQE Plan Ratification Record (2,392 bytes, SHA256 `8e0b0aa2ad23c5ce17e4fcfccfce3f773cd7c644d6dbbc38f65cc947dd8f5661`)
-
-- `DOCS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` (Primary candidate)
-- `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` (Duplicate)
-- **Recommendation:** Consolidate in S10.
-
-### Group 6: Marketing 005 (40,681 bytes, SHA256 `4eff676d72f0bc333c1f20108dbddf2f01fbd00fb953538bdac7636e16f73dbd`)
-
-- `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005 (1).md` (Duplicate)
-- `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005.md` (Primary candidate)
-- **Recommendation:** Deprecate `(1).md` artifact in S07.
+Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-M00-SRR-v1.0-CLOSED-PASS.md`) share SHA256 `e3b0c442...` as unmaterialized placeholders but are treated as distinct non-duplicate records.
 
 ---
 
-# 5. Parallel Locations & Cross-Tree Family Collisions
+# 5. Missing-Reference (`REFERENCED_MISSING`) Summary
 
-Reconnaissance revealed significant cross-location representation of several major semantic families:
+28 explicit document references were found in text that do not exist under `DOCS/**`:
 
-1. **Z-PROF / Domain Composition:** Coexists in `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/`, `DOCS/M08.5/`, and `DOCS/CAW/M08.5/`.
-2. **ZII / ZQE QR Engine:** Coexists in `DOCS/ZII/ZQE/` and `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/ZQE/`.
-3. **Engineering Standards (CEngS):** Coexists in `DOCS/CEngS-v2/` and embedded inside `DOCS/CAW/` navigation indices.
-4. **Commerce Atlas:** Coexists in `DOCS/Commerce-Atlas/` (workshop specs) and `DOCS/CAW/` (execution wedge).
-
----
-
-# 6. Missing References (`REFERENCED-MISSING`) Summary
-
-24 explicit document references were found in header/body text that do not correspond to any physical file in `DOCS/**`:
-
-1. **`ZQE-DEC-001` through `ZQE-DEC-010`**: 10 ZQE decision records referenced in ZQE QR Engineering Manual.
-2. **`ZQE-000`, `ZQE-002` through `ZQE-006`**: 6 ZQE specification parts referenced in ZII Navigation Index.
-3. **`ZRM-002A`, `ZRM-002B`, `ZRM-002C`, `ZRM-008`**: 4 ZRM sub-specifications referenced in ZRM-002 and ZRM-007.
-4. **`ZT-002`, `ZT-003`, `ZT-004`**: 3 Zyppi Translation framework specifications referenced in ARM-001.
-5. **`ZYPPI-GS1-MARKET-ENTRY-STRATEGY`**: Marketing strategy document referenced in Marketing Plan.
-
-None of these missing documents were reconstructed or fabricated during S00.
+1. `OWNERSHIP-001` (Ownership Constitution)
+2. `Evidence Constitution` (Evidence Domain Constitution)
+3. `BRAND-001 v2.1` & `BRAND-001 v3.0` (Brand Standard revisions)
+4. `ZQE-DEC-001` through `ZQE-DEC-010` (10 ZQE decision records)
+5. `ZQE-000`, `ZQE-002` through `ZQE-006` (6 ZQE engine specs)
+6. `ZRM-002A`, `ZRM-002B`, `ZRM-002C`, `ZRM-008` (4 ZRM sub-specs)
+7. `ZT-002`, `ZT-003`, `ZT-004` (3 ZT framework specs)
+8. `ZYPPI-GS1-MARKET-ENTRY-STRATEGY` (Marketing strategy)
 
 ---
 
-# 7. Proposed Sprint Allocations & Recommended Subdivisions
+# 6. FILE Semantic Sprint Allocation
 
-| Sprint | Target Family / Scope                                 | File Count | Recommended Subdivisions                                                                                          |
-| ------ | ----------------------------------------------------- | ---------: | ----------------------------------------------------------------------------------------------------------------- |
-| `S01`  | Foundation & Brand Succession                         |         11 | Direct allocation                                                                                                 |
-| `S02`  | Reality Model (ZRM)                                   |         12 | Direct allocation                                                                                                 |
-| `S03`  | World Structure                                       |          8 | Direct allocation                                                                                                 |
-| `S04`  | POL / SEC / RSN                                       |         15 | Direct allocation                                                                                                 |
-| `S05`  | PRJ / RI                                              |         14 | Direct allocation                                                                                                 |
-| `S06`  | SIOS / ARM / ECONO / CMM                              |         20 | Direct allocation                                                                                                 |
-| `S07`  | Secondary Constructs (Binding, Marketing, Delegation) |         54 | Direct allocation                                                                                                 |
-| `S08`  | Z-PROF & Domain Composition                           |         26 | **Subdivided:** `S08A` Core Spec (14), `S08B` M08.5 Program (12)                                                  |
-| `S09`  | Interface Constitutions A (ZyUX, DJ, ZRR, ZYAPI, ZT)  |         32 | Direct allocation                                                                                                 |
-| `S10`  | ZII / ZQE Implementation Constitution                 |         31 | Direct allocation                                                                                                 |
-| `S11`  | CEngS v2.0 & Commerce Atlas                           |         27 | Direct allocation                                                                                                 |
-| `S12`  | CAW Core Specifications                               |         18 | Direct allocation                                                                                                 |
-| `S13`  | CAW Governance, AMS Milestones & CCP Receipts         |        169 | **Subdivided:** `S13A` M01–M04 (52), `S13B` M05–M08.5 (58), `S13C` CCP Receipts (17), `S13D` Evidence/Audits (42) |
-| `S14`  | Reports, Exploratory, Archive & Duplicates            |         28 | Direct allocation                                                                                                 |
-| `S15`  | Global Closure & Final Verification                   |          0 | Final validation sweep                                                                                            |
-
----
-
-# 8. High-Risk Migration Moves
-
-1. **`DOCS/ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md` -> `DOCS/CONSTITUTION/01-FOUNDATION/`:** Governing master brand succession declaration ZUSD-001.
-2. **`DOCS/ZyGOV/CONSTITUTION/02-REALITY-CONSTITUTION/ZRM/` -> `DOCS/CONSTITUTION/02-REALITY-CONSTITUTION/`:** Core Reality law.
-3. **`DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/` -> `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`:** Primary constitutional families.
-4. **`DOCS/CEngS-v2/` -> `DOCS/GOVERNANCE/ENGINEERING/`:** Active CEngS v2.0 engineering constitution and standards.
+| Sprint                   | Semantic Scope                                                 | Physical File Count |
+| ------------------------ | -------------------------------------------------------------- | ------------------: |
+| `S01`                    | Foundation & Brand Succession                                  |                  19 |
+| `S02`                    | Reality Model (ZRM)                                            |                   9 |
+| `S03`                    | World Structure                                                |                  84 |
+| `S04`                    | POL / SEC / RSN Families                                       |                   0 |
+| `S05`                    | PRJ / RI Families                                              |                   0 |
+| `S06`                    | SIOS / ARM / ECONO / CMM Families                              |                   0 |
+| `S07`                    | Secondary Constructs (Binding, Delegation, Marketing)          |                  42 |
+| `S08A`                   | Z-PROF Core Specs                                              |                   9 |
+| `S08B`                   | Z-PROF M08.5 Program Deliverables                              |                   3 |
+| `S09`                    | Interface Constitutions A (ZyUX, DJ, ZRR, ZYAPI, ZT, DEV-ARCH) |                  31 |
+| `S10`                    | ZII / ZQE Implementation Constitution                          |                  30 |
+| `S11`                    | CEngS v2.0 & Commerce Domain                                   |                  23 |
+| `S12`                    | CAW Core Specifications                                        |                  20 |
+| `S13A`                   | CAW AMS Milestones M01–M04                                     |                   9 |
+| `S13B`                   | CAW AMS Milestones M05–M08.5                                   |                 149 |
+| `S13C`                   | CCP Receipts & Compliance Reports                              |                  17 |
+| `S14`                    | Reports, Exploratory, Archive & Packs                          |                  16 |
+| **Total Physical Files** |                                                                |             **461** |
 
 ---
 
-# 9. Unresolved Chair Questions
+# 7. Confirmation of Non-Mutation
 
-Before S01 execution begins, the Chair is requested to confirm:
-
-1. Approval of proposed target directory taxonomy in `DOCS-ORG-TARGET-TREE.md`.
-2. Approval of proposed sprint subdivisions (`S08A/B`, `S13A/B/C/D`).
-3. Confirmation of disposition strategy for exact duplicate hash groups.
-
----
-
-# 10. Confirmation of Non-Mutation
-
-It is explicitly declared that during Sprint 00:
+It is explicitly declared that during Sprint 00 / S00-R1:
 
 - **Zero** existing files beneath `DOCS/**` were moved;
 - **Zero** existing files were renamed;
@@ -184,11 +126,4 @@ It is explicitly declared that during Sprint 00:
 - **Zero** existing document contents were edited;
 - **Zero** source code, test, or configuration files outside `DOCS/_REORG/` were modified.
 
-The repository working tree contains only the four authorized S00 report artifacts beneath `DOCS/_REORG/`:
-
-1. `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.md`
-2. `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.csv`
-3. `DOCS/_REORG/DOCS-ORG-TARGET-TREE.md`
-4. `DOCS/_REORG/DOCS-ORG-S00-REPORT.md`
-
-**Sprint 00 is COMPLETE and READY FOR CHAIR REVIEW.**
+The repository working tree contains only the four authorized report artifacts beneath `DOCS/_REORG/`.
