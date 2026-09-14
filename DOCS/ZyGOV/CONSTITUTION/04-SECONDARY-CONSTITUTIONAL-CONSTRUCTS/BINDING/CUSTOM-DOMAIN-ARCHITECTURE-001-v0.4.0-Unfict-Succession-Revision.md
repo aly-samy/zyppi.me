@@ -1,4 +1,5 @@
 # CUSTOM-DOMAIN-ARCHITECTURE-001
+
 ## Unfict Customer-Controlled Namespace Architecture
 
 **Document ID:** `CUSTOM-DOMAIN-ARCHITECTURE-001`  

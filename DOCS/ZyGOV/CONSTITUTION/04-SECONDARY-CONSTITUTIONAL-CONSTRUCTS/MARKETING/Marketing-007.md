@@ -1,4 +1,5 @@
 # Marketing-007
+
 # Zyppi Competitive Intelligence & Market Attack Protocol
 
 ## Constitutional Protocol for Competitive Reconnaissance, Strategic Stress Testing, Hypothesis Attack, Alternative Analysis & Decision Outcomes
@@ -1266,12 +1267,15 @@ Market reality remains required.
 Evaluate:
 
 ## Horizontal
+
 Does adoption bring more participants?
 
 ## Vertical
+
 Does use enable deeper Zyppi?
 
 ## Temporal
+
 Does history become more valuable?
 
 A strong candidate should ideally compound in at least one meaningful dimension.
@@ -1328,30 +1332,30 @@ It needs a credible role.
 
 A Standard attack SHOULD evaluate at least:
 
-| Dimension | Core Question |
-|---|---|
-| Problem | Is the pain real? |
-| Urgency | Why act now? |
-| Alternative | What happens without Zyppi? |
-| Direct competition | Who sells the outcome? |
-| Adjacent competition | Who owns the workflow? |
-| Standards | Is the primitive commoditizing? |
-| Open source | Can the customer self-host? |
-| Cloud primitives | Can generic infrastructure replace it? |
-| Whole-system outcome | Does Zyppi compress the stack? |
-| Buyer | Who uses, pays, approves? |
-| Buyer bridge | Can value cross buying centers? |
-| WTP | Will they pay Zyppi? |
-| Revenue density | Can the unit produce meaningful economics? |
-| Human burden | How much scarce attention? |
-| COGS | Can it scale? |
-| Distribution | How does it spread? |
-| Adoption friction | How hard to start? |
-| Positioning | Can buyer understand immediately? |
-| Reuse | What Zyppi primitive gets stronger? |
-| Feature Gravity | What unwanted business does it pull us into? |
-| Compounding | What accumulates? |
-| North Star | Does it preserve future optionality? |
+| Dimension            | Core Question                                |
+| -------------------- | -------------------------------------------- |
+| Problem              | Is the pain real?                            |
+| Urgency              | Why act now?                                 |
+| Alternative          | What happens without Zyppi?                  |
+| Direct competition   | Who sells the outcome?                       |
+| Adjacent competition | Who owns the workflow?                       |
+| Standards            | Is the primitive commoditizing?              |
+| Open source          | Can the customer self-host?                  |
+| Cloud primitives     | Can generic infrastructure replace it?       |
+| Whole-system outcome | Does Zyppi compress the stack?               |
+| Buyer                | Who uses, pays, approves?                    |
+| Buyer bridge         | Can value cross buying centers?              |
+| WTP                  | Will they pay Zyppi?                         |
+| Revenue density      | Can the unit produce meaningful economics?   |
+| Human burden         | How much scarce attention?                   |
+| COGS                 | Can it scale?                                |
+| Distribution         | How does it spread?                          |
+| Adoption friction    | How hard to start?                           |
+| Positioning          | Can buyer understand immediately?            |
+| Reuse                | What Zyppi primitive gets stronger?          |
+| Feature Gravity      | What unwanted business does it pull us into? |
+| Compounding          | What accumulates?                            |
+| North Star           | Does it preserve future optionality?         |
 
 ---
 

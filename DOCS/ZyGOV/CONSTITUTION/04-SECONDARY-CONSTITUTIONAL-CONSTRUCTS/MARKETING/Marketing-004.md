@@ -1,4 +1,5 @@
 # Marketing-004
+
 # Zyppi Adoption, Activation & Economic Deepening Doctrine
 
 ## Constitutional Doctrine for Participation, Activation, Retention, Economic Leverage, Expansion & Compounding
@@ -1105,11 +1106,11 @@ A market program SHOULD be able to describe its compounding profile.
 
 Example:
 
-| Dimension | Weak | Moderate | Strong |
-|---|---|---|---|
-| Horizontal | Few participants | Repeat acquisition | Embedded distribution |
-| Vertical | One capability | Multiple layers | Trust/execution depth |
-| Temporal | Little history | Useful history | Critical operational continuity |
+| Dimension  | Weak             | Moderate           | Strong                          |
+| ---------- | ---------------- | ------------------ | ------------------------------- |
+| Horizontal | Few participants | Repeat acquisition | Embedded distribution           |
+| Vertical   | One capability   | Multiple layers    | Trust/execution depth           |
+| Temporal   | Little history   | Useful history     | Critical operational continuity |
 
 A program need not be strong in all dimensions initially.
 
@@ -1528,18 +1529,23 @@ Activation should be measured behaviorally.
 A participant may contribute through different roles:
 
 ## Distribution Role
+
 Brings more participants.
 
 ## Revenue Role
+
 Generates paid consumption.
 
 ## Infrastructure Role
+
 Exercises and hardens the platform.
 
 ## Learning Role
+
 Generates valuable product evidence.
 
 ## Network Role
+
 Increases value to others.
 
 A participant may have one or several roles.

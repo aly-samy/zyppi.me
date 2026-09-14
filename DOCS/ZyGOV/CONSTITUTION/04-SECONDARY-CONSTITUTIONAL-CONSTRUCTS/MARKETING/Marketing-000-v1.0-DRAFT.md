@@ -1,4 +1,5 @@
 # Marketing-000
+
 # Zyppi Marketing Constitutional Branch
 
 ## Foundation, Authority, Scope, Evidence Discipline & Document Family Charter
@@ -900,6 +901,7 @@ It does not silently ratify the contents of future child documents.
 ---
 
 ## `Marketing-000.md`
+
 ### Marketing Constitutional Branch
 
 **Purpose:**  
@@ -910,6 +912,7 @@ Foundation, authority, hierarchy, scope, evidence discipline, constitutional law
 ---
 
 ## `Marketing-001.md`
+
 ### Market Truth, Evidence & Validation Doctrine
 
 **Purpose:**  
@@ -931,6 +934,7 @@ Operationalize market evidence discipline.
 ---
 
 ## `Marketing-002.md`
+
 ### Market Entry & Trojan Horse Doctrine
 
 **Purpose:**  
@@ -951,6 +955,7 @@ Define how Zyppi chooses and governs its first market-entry mechanisms.
 ---
 
 ## `Marketing-003.md`
+
 ### Product-System Positioning & Differentiation
 
 **Purpose:**  
@@ -969,6 +974,7 @@ Define how Zyppi evaluates competitive differentiation without feature-subtracti
 ---
 
 ## `Marketing-004.md`
+
 ### Adoption, Activation & Economic Deepening
 
 **Purpose:**  
@@ -989,6 +995,7 @@ Define the progression from participation into increasing Zyppi value.
 ---
 
 ## `Marketing-005.md`
+
 ### Free Participation, Standards & Market-Capture Doctrine
 
 **Purpose:**  
@@ -1011,6 +1018,7 @@ Constitutionalize the boundary between free participation and paid emergent valu
 ---
 
 ## `Marketing-006.md`
+
 ### ECU Commercial Interface & Pricing Doctrine
 
 **Purpose:**  
@@ -1034,6 +1042,7 @@ Define how Marketing packages and communicates ECU-based consumption without red
 ---
 
 ## `Marketing-007.md`
+
 ### Commerce / GS1 Market Entry Strategy
 
 **Purpose:**  
@@ -1055,6 +1064,7 @@ Constitutionalize the current first commerce application strategy without redefi
 ---
 
 ## `Marketing-008.md`
+
 ### Competitive Intelligence & Market Attack Protocol
 
 **Purpose:**  
@@ -1078,6 +1088,7 @@ Define the repeatable method for attacking Zyppi market hypotheses.
 ---
 
 ## `Marketing-009.md`
+
 ### Buyer, Segment & Job Architecture
 
 **Purpose:**  
@@ -1099,6 +1110,7 @@ Define how Zyppi identifies the user, buyer, economic buyer, operator, developer
 ---
 
 ## `Marketing-010.md`
+
 ### Distribution & Ecosystem Go-to-Market Architecture
 
 **Purpose:**  
@@ -1125,6 +1137,7 @@ Define distribution as infrastructure.
 ---
 
 ## `Marketing-011.md`
+
 ### Bootstrap Utility Engine
 
 **Purpose:**  
@@ -1150,6 +1163,7 @@ This document SHALL NOT redefine Zyppi as a utility company.
 ---
 
 ## `Marketing-012.md`
+
 ### Market Validation, Experiments & Decision Gates
 
 **Purpose:**  
@@ -1173,6 +1187,7 @@ Define how Zyppi converts hypotheses into evidence.
 ---
 
 ## `Marketing-013.md`
+
 ### Marketing Metrics & Compounding Health
 
 **Purpose:**  
@@ -1200,6 +1215,7 @@ Define the metrics that determine whether market entry is actually strengthening
 ---
 
 ## `Marketing-014.md`
+
 ### Claims, Messaging & Market Communication Doctrine
 
 **Purpose:**  
@@ -1222,6 +1238,7 @@ Govern how Zyppi communicates to customers, developers, partners, investors, gov
 ---
 
 ## `Marketing-015.md`
+
 ### Domain Expansion & Market Replication Doctrine
 
 **Purpose:**  

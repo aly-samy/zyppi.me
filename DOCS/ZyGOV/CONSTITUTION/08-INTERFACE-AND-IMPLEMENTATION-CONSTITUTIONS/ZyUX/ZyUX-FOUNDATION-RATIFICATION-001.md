@@ -1,4 +1,5 @@
 # ZyUX-FOUNDATION-RATIFICATION-001
+
 ## Ratification & Brand-Succession Closure Receipt — Unfict Experience Architecture Foundation
 
 **Receipt ID:** `ZyUX-FOUNDATION-RATIFICATION-001`  
@@ -8,7 +9,7 @@
 **Active Master Brand:** **Unfict — Reality Sync**  
 **Brand Lineage:** `Zyppi → Unfict`  
 **Brand Authority:** `ZUSD-001` · `BRAND-001 v3.0`  
-**Locking Authority:** Chair  
+**Locking Authority:** Chair
 
 ---
 

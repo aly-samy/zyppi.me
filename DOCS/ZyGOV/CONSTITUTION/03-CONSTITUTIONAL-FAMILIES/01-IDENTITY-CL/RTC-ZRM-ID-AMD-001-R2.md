@@ -113,29 +113,29 @@ They remain historical but are removed from the active constitutional interpreta
 
 # 4. Ecosystem Compatibility Matrix
 
-| Ecosystem Area | Result | Final Disposition |
-|---|---|---|
-| `NORTH STAR v7.0 — Zyppi — Reality Sync` | PASS / HISTORICAL TITLE PRESERVED | Continuing governing authority under ZUSD-001 until separately amended or superseded. |
-| ZRM Master Blueprint v3.0 | PASS | Primary semantic parent. |
-| ZRM-000 v1.0 | PASS | Primary terminology authority. |
-| ZRM-001 v1.0 | PASS | Reality independence preserved. |
-| WS-00A | PASS / RELEASE GATE | Requires SR-001, annotations, SIA, ACV, Manifest and new release before active supersession. |
-| SR-001 | UPDATE REQUIRED | New entries begin after current SR-014. |
-| RTC-ZRM-003A-R3 | SUPERSESSION REQUIRED | TH-003, TH-030, TH-018 dependency, registry guarantees, and closing principle must be annotated. |
-| ARM-001 | FOLLOW-UP REQUIRED | Stale CL-05 / “Zyppi identity (zID)” language remains for later Corpus Reconciliation; not a blocker to this amendment. |
-| ARM-P-001 | FOLLOW-UP REQUIRED | “zID remains the sole canonical identity” must later become canonical-address terminology. |
-| PRJ-001 / PRJ-002 | COMPATIBLE WITH FOLLOW-UP | `source_zid` remains usable; its canonical-address meaning will be re-derived under ZID. |
-| SEC-001 / DJ-007 | COMPATIBLE WITH FOLLOW-UP | “unique zID” can remain a consumer requirement; it must not be read as ZRM Identity ownership. |
-| POL | PASS | Authorization/Authority remain separate from Identity structure. |
-| RI / SDK / compiler | PASS WITH NAMESPACE DISCIPLINE | Qualified technical terms such as Artifact Identity/cryptographic identity are technical identifiers and do not redefine ZRM constitutional Identity. |
-| What is Zyppi? v4.0 | DRAFT FOLLOW-UP | Product-facing “persistent identity” wording should be harmonized after ZID re-derivation; non-blocking because the document is a Council Synthesis Draft. |
-| MARKET-REALITY-001 | DRAFT FOLLOW-UP | Product/market identity wording remains strategic shorthand pending ratification; no authority over ZRM. |
-| July SIOS corpus | LEGACY / RECONCILIATION REQUIRED IF RE-ADMITTED | “Identity emerges from observation” conflicts with the ratified relational term; it is not current repository authority and shall not regain normative status unreconciled. |
-| ZRM-000 v1.1 draft successor | QUARANTINED | Its Semantic Projection Identity definition must be reconciled before any future ratification. |
-| Consolidated ZRM-002 v2.0 draft | RE-DERIVE | Must conform to this amendment before ratification. |
-| ZRM-003B draft dependencies | CASCADE AUDIT | ID-T01/ID-T02/ST-T04/RM-G01/INV-RM01 must be source-verified/re-derived before promotion. |
-| ZID-001 v0.95 / old CRA | HELD / SUPERSEDED AS DRAFT DIRECTION | Must be re-derived as Canonical Reality Addressing. |
-| Native V2 / AMS-0861-C | REMAINS BLOCKED | Re-entry waits for ZID re-derivation, Corpus Reconciliation, Binding Foundation, and Packet B repair. |
+| Ecosystem Area                           | Result                                          | Final Disposition                                                                                                                                                           |
+| ---------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NORTH STAR v7.0 — Zyppi — Reality Sync` | PASS / HISTORICAL TITLE PRESERVED               | Continuing governing authority under ZUSD-001 until separately amended or superseded.                                                                                       |
+| ZRM Master Blueprint v3.0                | PASS                                            | Primary semantic parent.                                                                                                                                                    |
+| ZRM-000 v1.0                             | PASS                                            | Primary terminology authority.                                                                                                                                              |
+| ZRM-001 v1.0                             | PASS                                            | Reality independence preserved.                                                                                                                                             |
+| WS-00A                                   | PASS / RELEASE GATE                             | Requires SR-001, annotations, SIA, ACV, Manifest and new release before active supersession.                                                                                |
+| SR-001                                   | UPDATE REQUIRED                                 | New entries begin after current SR-014.                                                                                                                                     |
+| RTC-ZRM-003A-R3                          | SUPERSESSION REQUIRED                           | TH-003, TH-030, TH-018 dependency, registry guarantees, and closing principle must be annotated.                                                                            |
+| ARM-001                                  | FOLLOW-UP REQUIRED                              | Stale CL-05 / “Zyppi identity (zID)” language remains for later Corpus Reconciliation; not a blocker to this amendment.                                                     |
+| ARM-P-001                                | FOLLOW-UP REQUIRED                              | “zID remains the sole canonical identity” must later become canonical-address terminology.                                                                                  |
+| PRJ-001 / PRJ-002                        | COMPATIBLE WITH FOLLOW-UP                       | `source_zid` remains usable; its canonical-address meaning will be re-derived under ZID.                                                                                    |
+| SEC-001 / DJ-007                         | COMPATIBLE WITH FOLLOW-UP                       | “unique zID” can remain a consumer requirement; it must not be read as ZRM Identity ownership.                                                                              |
+| POL                                      | PASS                                            | Authorization/Authority remain separate from Identity structure.                                                                                                            |
+| RI / SDK / compiler                      | PASS WITH NAMESPACE DISCIPLINE                  | Qualified technical terms such as Artifact Identity/cryptographic identity are technical identifiers and do not redefine ZRM constitutional Identity.                       |
+| What is Zyppi? v4.0                      | DRAFT FOLLOW-UP                                 | Product-facing “persistent identity” wording should be harmonized after ZID re-derivation; non-blocking because the document is a Council Synthesis Draft.                  |
+| MARKET-REALITY-001                       | DRAFT FOLLOW-UP                                 | Product/market identity wording remains strategic shorthand pending ratification; no authority over ZRM.                                                                    |
+| July SIOS corpus                         | LEGACY / RECONCILIATION REQUIRED IF RE-ADMITTED | “Identity emerges from observation” conflicts with the ratified relational term; it is not current repository authority and shall not regain normative status unreconciled. |
+| ZRM-000 v1.1 draft successor             | QUARANTINED                                     | Its Semantic Projection Identity definition must be reconciled before any future ratification.                                                                              |
+| Consolidated ZRM-002 v2.0 draft          | RE-DERIVE                                       | Must conform to this amendment before ratification.                                                                                                                         |
+| ZRM-003B draft dependencies              | CASCADE AUDIT                                   | ID-T01/ID-T02/ST-T04/RM-G01/INV-RM01 must be source-verified/re-derived before promotion.                                                                                   |
+| ZID-001 v0.95 / old CRA                  | HELD / SUPERSEDED AS DRAFT DIRECTION            | Must be re-derived as Canonical Reality Addressing.                                                                                                                         |
+| Native V2 / AMS-0861-C                   | REMAINS BLOCKED                                 | Re-entry waits for ZID re-derivation, Corpus Reconciliation, Binding Foundation, and Packet B repair.                                                                       |
 
 ---
 
@@ -189,17 +189,17 @@ Ratification does not create new Identity Mathematics theorems.
 
 # 7. Final Finding Log Additions
 
-| ID | Finding | Disposition |
-|---|---|---|
-| F-190 | Final ecosystem review of ZRM-ID-AMD-001 passes. | CONFIRMED |
-| F-191 | TH-018 loses active corollary authority when TH-003 is superseded. | REQUIRED |
-| F-192 | After supersession, RTC-ZRM-003A-R3 contributes no active Identity Mathematics theorem until re-derivation. | CONFIRMED |
-| F-193 | North Star v7.0 is semantically compatible with the relational Identity repair. | CONFIRMED |
-| F-194 | What-is-Zyppi v4 / MARKET-REALITY identity language is strategic/draft shorthand requiring later terminology harmonization, not a blocker. | CONFIRMED |
-| F-195 | ARM/ARM-P contain active zID-as-identity wording requiring later Corpus Reconciliation. | CONFIRMED FOLLOW-UP |
-| F-196 | PRJ/SEC/DJ can remain downstream consumers once zID is re-derived as canonical addressing. | CONFIRMED DIRECTION |
-| F-197 | WS-00A requires SR-001 + annotations + SIA + ACV + Manifest + release before the amendment supersedes the sealed active baseline. | CONFIRMED |
-| F-198 | Ratification and constitutional activation are distinct; ratification is complete, release activation remains pending. | CONFIRMED |
+| ID    | Finding                                                                                                                                    | Disposition         |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| F-190 | Final ecosystem review of ZRM-ID-AMD-001 passes.                                                                                           | CONFIRMED           |
+| F-191 | TH-018 loses active corollary authority when TH-003 is superseded.                                                                         | REQUIRED            |
+| F-192 | After supersession, RTC-ZRM-003A-R3 contributes no active Identity Mathematics theorem until re-derivation.                                | CONFIRMED           |
+| F-193 | North Star v7.0 is semantically compatible with the relational Identity repair.                                                            | CONFIRMED           |
+| F-194 | What-is-Zyppi v4 / MARKET-REALITY identity language is strategic/draft shorthand requiring later terminology harmonization, not a blocker. | CONFIRMED           |
+| F-195 | ARM/ARM-P contain active zID-as-identity wording requiring later Corpus Reconciliation.                                                    | CONFIRMED FOLLOW-UP |
+| F-196 | PRJ/SEC/DJ can remain downstream consumers once zID is re-derived as canonical addressing.                                                 | CONFIRMED DIRECTION |
+| F-197 | WS-00A requires SR-001 + annotations + SIA + ACV + Manifest + release before the amendment supersedes the sealed active baseline.          | CONFIRMED           |
+| F-198 | Ratification and constitutional activation are distinct; ratification is complete, release activation remains pending.                     | CONFIRMED           |
 
 ---
 

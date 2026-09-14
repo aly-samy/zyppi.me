@@ -1,4 +1,5 @@
 # EDGE-RESOLUTION-GATEWAY-001
+
 ## Unfict Edge Resolution Gateway — Ingress & Response Adaptation Profile
 
 **Document ID:** `EDGE-RESOLUTION-GATEWAY-001`  

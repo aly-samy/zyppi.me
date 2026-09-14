@@ -12,7 +12,7 @@
 **Classification:** Horizontal Experience Doctrine  
 **Normative Level:** Experience Doctrine / Product Architecture  
 **Parent Authority:** `ZyUX-000 v1.0`  
-**Coordinates With:** Authority · Standing · Policy · Security · Privacy · ZYAPI · Host-Native doctrine · ZRR capability discovery  
+**Coordinates With:** Authority · Standing · Policy · Security · Privacy · ZYAPI · Host-Native doctrine · ZRR capability discovery
 
 ---
 
@@ -21,7 +21,6 @@
 This document is an **Unfict-era** ratified document. The canonical `ZyUX-*` identifier is retained to preserve citation, governance, repository, and historical continuity. Legacy documents are cited by their actual historical titles. In active prose, **Unfict** is the master brand.
 
 Brand succession does not alter constitutional meaning. No business, epistemic, Authority, Standing, Policy, Trust, Evidence, Runtime, Receipt, API, or historical semantics are changed merely because the public master brand changed.
-
 
 # 0. Scope
 
@@ -246,6 +245,5 @@ For this document:
 - `MAY` expresses permission;
 - examples, diagrams, journey sketches, and candidate labels are informative unless a binding clause expressly incorporates them;
 - this document governs **experience projection** only and SHALL NOT silently acquire semantics owned by another constitutional authority.
-
 
 **End of `ZyUX-003 v1.0 — RATIFIED — FINAL`**

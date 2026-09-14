@@ -1,4 +1,5 @@
 # Marketing-005
+
 # Zyppi Free Participation, Standards & Market-Capture Doctrine
 
 ## Constitutional Doctrine for Open Standards, Foundational Access, Strategic Subsidy, Fair Use, Market Capture & the Boundary to Paid Emergent Value

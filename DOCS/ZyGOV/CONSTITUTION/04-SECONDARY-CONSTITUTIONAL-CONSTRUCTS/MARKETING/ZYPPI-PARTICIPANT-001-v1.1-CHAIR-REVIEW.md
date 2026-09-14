@@ -105,18 +105,18 @@ These categories SHALL NOT be collapsed.
 
 Not everything with Identity has an account.
 
-| Reality Constituent | Illustrative Classification | Identity May Exist? | Account Required? |
-|---|---|---:|---:|
-| Ahmed | Subject | Yes | May have access contexts |
-| Company X | Subject / organization under governing ontology | Yes | No human-style account required |
-| Mimi the cat | Subject where governing ontology treats animals as Subject | Yes | No |
-| Lemon Tree #344 | Subject where governing ontology treats plants as Subject | Yes | No |
-| Autonomous AI Agent | Subject | Yes | Machine access may exist |
-| Car | Object | Yes | No |
-| Product Unit #882 | Object | Yes | No |
-| Camera | Object unless constitutionally autonomous | Yes | No |
-| Apartment / warehouse zone | Place and/or Object depending represented aspect | Yes where needed | No |
-| Evidence record | Evidence | Yes where governed/needed | No |
+| Reality Constituent        | Illustrative Classification                                |       Identity May Exist? |               Account Required? |
+| -------------------------- | ---------------------------------------------------------- | ------------------------: | ------------------------------: |
+| Ahmed                      | Subject                                                    |                       Yes |        May have access contexts |
+| Company X                  | Subject / organization under governing ontology            |                       Yes | No human-style account required |
+| Mimi the cat               | Subject where governing ontology treats animals as Subject |                       Yes |                              No |
+| Lemon Tree #344            | Subject where governing ontology treats plants as Subject  |                       Yes |                              No |
+| Autonomous AI Agent        | Subject                                                    |                       Yes |        Machine access may exist |
+| Car                        | Object                                                     |                       Yes |                              No |
+| Product Unit #882          | Object                                                     |                       Yes |                              No |
+| Camera                     | Object unless constitutionally autonomous                  |                       Yes |                              No |
+| Apartment / warehouse zone | Place and/or Object depending represented aspect           |          Yes where needed |                              No |
+| Evidence record            | Evidence                                                   | Yes where governed/needed |                              No |
 
 This table is illustrative and SHALL NOT force Identity onto every constituent of Reality.
 
@@ -779,17 +779,17 @@ Consumer/personal examples SHOULD NOT be used in enterprise messaging merely bec
 
 The universal model sits beneath marketing and UX personas.
 
-| Archetype | Core Job | Typical Surface |
-|---|---|---|
-| Technical Implementer | Integrate a reliable capability quickly | SDK / API / docs |
-| Operational User | Know what to do with an item/case | Host-Native UI |
-| Governance / Compliance | Ensure decisions follow rules and remain defensible | Governance / Host-Native |
-| Host / System Owner | Control what Zyppi reads/writes and under what authority | Existing host + connection controls |
-| Organizational Administrator | Govern access, sources, delegation, and configuration | Zyppi control plane |
-| Economic Buyer / Executive | Understand risk, adoption, and value | Reports / summaries |
-| Auditor / External Authority | Reconstruct what happened within lawful scope | Audit / Receipt view |
-| AI Agent / Application | Discover and invoke authorized capability | MCP / API |
-| Public Observer | Obtain public information without account friction | Public resolution surface |
+| Archetype                    | Core Job                                                 | Typical Surface                     |
+| ---------------------------- | -------------------------------------------------------- | ----------------------------------- |
+| Technical Implementer        | Integrate a reliable capability quickly                  | SDK / API / docs                    |
+| Operational User             | Know what to do with an item/case                        | Host-Native UI                      |
+| Governance / Compliance      | Ensure decisions follow rules and remain defensible      | Governance / Host-Native            |
+| Host / System Owner          | Control what Zyppi reads/writes and under what authority | Existing host + connection controls |
+| Organizational Administrator | Govern access, sources, delegation, and configuration    | Zyppi control plane                 |
+| Economic Buyer / Executive   | Understand risk, adoption, and value                     | Reports / summaries                 |
+| Auditor / External Authority | Reconstruct what happened within lawful scope            | Audit / Receipt view                |
+| AI Agent / Application       | Discover and invoke authorized capability                | MCP / API                           |
+| Public Observer              | Obtain public information without account friction       | Public resolution surface           |
 
 ---
 
@@ -977,51 +977,67 @@ Before ratification, Council should close or disposition:
 # 28. Proposed Governing Laws
 
 ### P-01 — Subject Before Account
+
 > **A Subject is not their account, employer, role, credential, relationship, ownership, or current Authority.**
 
 ### P-02 — Canonical Identity
+
 > **Where sufficient Evidence establishes referent equivalence, Zyppi SHALL converge toward one canonical Identity representation rather than knowingly preserve duplicate canonical identities for the same referent.**
 
 ### P-03 — No Identity Guessing
+
 > **Identity equivalence SHALL NOT be silently inferred where Evidence is insufficient or conflicting.**
 
 ### P-04 — Authentication Independence
+
 > **Credentials may change without changing canonical Identity.**
 
 ### P-05 — Scope Sovereignty
+
 > **Every organization governs its legitimate organizational scope without owning the canonical Identity of the Subjects who participate within it.**
 
 ### P-06 — Bidirectional Scope Isolation
+
 > **A relationship exposes only the information, controls, and capabilities legitimately within its scope, in both directions.**
 
 ### P-07 — Delegation Conservation
+
 > **A participant may delegate only Authority it legitimately holds and is permitted to delegate, and only within bounded scope.**
 
 ### P-08 — Authority Discontinuity
+
 > **Identity may persist while Authority, Standing, roles, and relationships begin, change, expire, or terminate.**
 
 ### P-09 — Historical Integrity
+
 > **Current organizational change SHALL NOT rewrite historical attribution.**
 
 ### P-10 — Non-Inheritance of Delegated Authority
+
 > **Inheritable property or economic rights do not automatically transfer personal, office, employment, or delegated Authority.**
 
 ### P-11 — Contextual Capability Disclosure
+
 > **Zyppi SHOULD expose only the controls and information relevant to the Subject's current Job, relationship, Standing, Authority, and context.**
 
 ### P-12 — Invisible Complexity
+
 > **Constitutional rigor belongs underneath the experience; the user receives understandable Jobs, actions, reasons, and proof.**
 
 ### P-13 — Existing IAM Coexistence
+
 > **Zyppi SHALL integrate with legitimate enterprise IAM rather than require replacement merely to participate.**
 
 ### P-14 — Canonical Does Not Mean Co-Mingled
+
 > **Canonical Identity SHALL NOT imply universal data co-location, visibility, retention, or disclosure.**
 
 ### P-15 — Federation Is Additive
+
 > **Federation may compound value but SHALL NOT be required for legitimate Day-1 utility.**
 
 ### P-16 — Universal Architecture, Narrow GTM
+
 > **Architectural applicability across domains SHALL NOT authorize simultaneous market expansion across those domains.**
 
 ---

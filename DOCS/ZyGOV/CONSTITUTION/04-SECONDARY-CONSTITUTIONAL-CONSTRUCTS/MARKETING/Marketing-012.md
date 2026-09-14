@@ -1,4 +1,5 @@
 # Marketing-012
+
 # Zyppi Marketing Metrics & Compounding Health Doctrine
 
 ## Constitutional Doctrine for Market Measurement, Metric Integrity, State-Based Health, Cohorts, Economics, Distribution, Compounding & Strategic Scorekeeping
@@ -196,6 +197,7 @@ The most important metrics change as Zyppi matures.
 Conceptually:
 
 ## Baby
+
 - activation;
 - qualified adoption;
 - retention;
@@ -205,6 +207,7 @@ Conceptually:
 - channel viability.
 
 ## Grow
+
 - retained cohorts;
 - expansion;
 - recurring ECU;
@@ -212,12 +215,14 @@ Conceptually:
 - margins.
 
 ## Compete
+
 - product-system depth;
 - switching behavior;
 - enterprise dependency;
 - ecosystem participation.
 
 ## Dominate
+
 - governed executions;
 - cross-domain participation;
 - network utility;
@@ -232,18 +237,23 @@ A Dominate-stage metric SHALL not distract Baby-stage execution.
 The Marketing branch recognizes five classes.
 
 ## M0 — Activity Metric
+
 What happened?
 
 ## M1 — State Metric
+
 What participant state was reached?
 
 ## M2 — Value Metric
+
 Did meaningful value occur?
 
 ## M3 — Economic / Compounding Metric
+
 Did value deepen or create durable economics?
 
 ## M4 — Strategic Power Metric
+
 Did dependence, ecosystem, or market power emerge?
 
 Higher classes generally carry more strategic meaning.
@@ -1161,12 +1171,15 @@ The metric becomes a risk only when Zyppi assumes this proves broader-market val
 The Marketing branch recognizes three compounding families.
 
 ## Horizontal
+
 More participants / integrations / objects.
 
 ## Vertical
+
 Deeper capability use.
 
 ## Temporal
+
 Increasing value from history and continuity.
 
 These SHALL remain distinct.
@@ -1604,12 +1617,15 @@ Experiment dashboards SHOULD display:
 Metrics should be classified by horizon where useful.
 
 ## Leading
+
 Early signal of future behavior.
 
 ## Current
+
 Present market health.
 
 ## Lagging
+
 Outcome known only later.
 
 A leading metric SHALL not be presented as the lagging outcome itself.
@@ -1809,12 +1825,15 @@ They SHOULD not become walls of activity metrics.
 A useful dashboard may have:
 
 ## Layer 1 — Executive Health
+
 Few critical metrics.
 
 ## Layer 2 — Market / Product
+
 Activation, retention, distribution, economics.
 
 ## Layer 3 — Operational Diagnostics
+
 Requests, latency, errors.
 
 This preserves cognitive clarity.
@@ -1947,33 +1966,43 @@ They SHALL not become Baby-stage vanity goals.
 # 123. Constitutional Anti-Patterns
 
 ## Anti-Pattern 1 — Vanity Leadership
+
 Using traffic, scans, or signups as primary proof of market success.
 
 ## Anti-Pattern 2 — Metric Drift
+
 Changing definitions silently.
 
 ## Anti-Pattern 3 — Denominator Engineering
+
 Manipulating eligibility to improve conversion.
 
 ## Anti-Pattern 4 — Cumulative Growth Theater
+
 Using ever-growing lifetime totals to hide weak current health.
 
 ## Anti-Pattern 5 — Revenue Masking
+
 Letting bootstrap revenue hide core-market weakness.
 
 ## Anti-Pattern 6 — Free Conversion Obsession
+
 Treating every free participant as failed if they never pay.
 
 ## Anti-Pattern 7 — One-Metric Company
+
 Allowing one number to hide retention, economics, or human burden.
 
 ## Anti-Pattern 8 — Telemetry as Truth
+
 Converting system observations into unsupported Reality claims.
 
 ## Anti-Pattern 9 — Dashboard Bureaucracy
+
 Collecting metrics that do not change decisions.
 
 ## Anti-Pattern 10 — Premature Moat Metrics
+
 Using scale proxies as evidence of defensibility.
 
 ---
@@ -1995,71 +2024,93 @@ Zyppi SHALL validate the relevant buying-cycle and memory conditions in its own 
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Activity metrics SHALL remain distinct from participant-state and value metrics.
 
 ## Invariant 2
+
 Metric precision SHALL not upgrade evidence grade.
 
 ## Invariant 3
+
 Every strategic metric SHOULD have an explicit definition, population, time window, and source.
 
 ## Invariant 4
+
 Activation SHALL be defined behaviorally and product-specifically.
 
 ## Invariant 5
+
 Retention SHALL measure continued meaningful value, not account existence.
 
 ## Invariant 6
+
 Expansion SHALL identify the dimension that actually deepened.
 
 ## Invariant 7
+
 Distribution SHALL be measured through qualified activation and retention, not traffic alone.
 
 ## Invariant 8
+
 Free participation SHALL be measured for strategic value and cost, not only paid conversion.
 
 ## Invariant 9
+
 Bootstrap and core-market metrics SHALL remain distinguishable.
 
 ## Invariant 10
+
 Horizontal, vertical, and temporal compounding SHALL remain separate metric families.
 
 ## Invariant 11
+
 Governed execution metrics SHALL not be manufactured before real governed execution exists.
 
 ## Invariant 12
+
 Metric definitions SHALL not silently drift.
 
 ## Invariant 13
+
 Numerators and denominators SHALL not be manipulated to improve appearance.
 
 ## Invariant 14
+
 Critical metrics SHOULD have guardrails where gaming or false success is plausible.
 
 ## Invariant 15
+
 Telemetry SHALL not be presented as Evidence beyond what it supports.
 
 ## Invariant 16
+
 A time-bounded North Star Metric SHALL not redefine the constitutional North Star.
 
 ## Invariant 17
+
 Metric governance SHALL remain lightweight and decision-oriented.
 
 ## Invariant 18
+
 Future domains SHALL define their own operational metrics while preserving the same metric-integrity doctrine.
 
 ---
 
 ## Invariant 19
+
 Immediate activation metrics SHALL not be the sole measure of market health where a material share of qualified B2B buyers is predictably out-of-market.
 
 ## Invariant 20
+
 Mental Availability MAY be measured as a leading market-memory condition but SHALL not substitute for E3/E4 product validation.
 
 ## Invariant 21
+
 Programs with material external activation dependencies MAY use an Incubation state and SHALL distinguish that state from activation and churn.
 
 ## Invariant 22
+
 Where external dependencies are material, Zyppi-controlled TTFV SHOULD remain distinguishable from external incubation time.
 
 # 125. Strategic Plan Requirements

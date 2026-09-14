@@ -1,4 +1,5 @@
 # Marketing-003
+
 # Zyppi Product-System Positioning & Differentiation Doctrine
 
 ## Constitutional Doctrine for Positioning, Competitive Meaning, System-Level Differentiation, Moat Discipline & Category Expression
@@ -1376,22 +1377,22 @@ A material product or market program SHOULD answer:
 
 Suggested evaluation:
 
-| Dimension | Evaluation Question |
-|---|---|
-| Outcome | Does Zyppi produce a better complete outcome? |
-| Simplicity | Does Zyppi reduce complexity? |
-| Integration | Does Zyppi compress integrations? |
-| Time | Does Zyppi reduce deployment/operation time? |
-| Risk | Does Zyppi reduce meaningful risk? |
-| Trust | Does Zyppi improve verifiable confidence? |
-| Explainability | Can decisions/actions be explained better? |
-| Continuity | Does Zyppi preserve valuable history/context? |
-| Cost | Is total cost meaningfully better? |
-| Portability | Can customers remain interoperable? |
-| Compounding | Does value accumulate through use? |
+| Dimension      | Evaluation Question                                    |
+| -------------- | ------------------------------------------------------ |
+| Outcome        | Does Zyppi produce a better complete outcome?          |
+| Simplicity     | Does Zyppi reduce complexity?                          |
+| Integration    | Does Zyppi compress integrations?                      |
+| Time           | Does Zyppi reduce deployment/operation time?           |
+| Risk           | Does Zyppi reduce meaningful risk?                     |
+| Trust          | Does Zyppi improve verifiable confidence?              |
+| Explainability | Can decisions/actions be explained better?             |
+| Continuity     | Does Zyppi preserve valuable history/context?          |
+| Cost           | Is total cost meaningfully better?                     |
+| Portability    | Can customers remain interoperable?                    |
+| Compounding    | Does value accumulate through use?                     |
 | Switching Cost | Does replacement become harder for legitimate reasons? |
-| Distribution | Does the system spread more effectively? |
-| Evidence | What validates the differentiation? |
+| Distribution   | Does the system spread more effectively?               |
+| Evidence       | What validates the differentiation?                    |
 
 ---
 
@@ -1400,24 +1401,31 @@ Suggested evaluation:
 A positioning thesis may receive:
 
 ## STRONG
+
 Clear product-system differentiation supported by evidence.
 
 ## VALID
+
 Meaningful differentiation exists but remains copyable.
 
 ## ENTRY-ONLY
+
 Useful acquisition differentiation but weak long-term defensibility.
 
 ## COMMODITY
+
 Capability should not carry positioning.
 
 ## REWORK
+
 Value exists but positioning is wrong.
 
 ## REJECT
+
 The claimed differentiation is not supported.
 
 ## HOLD
+
 Evidence insufficient.
 
 ---

@@ -1,4 +1,5 @@
 # ADDRESSING-001
+
 ## Unfict Public Addressing, Namespace & Resolution Governance
 
 **Document ID:** `ADDRESSING-001`  
@@ -99,7 +100,6 @@ No corrective finding grants implementation, repository mutation, DNS mutation o
 
 ---
 
-
 # 0B. v0.3.2 ZRM Alignment Correction
 
 `v0.3.2` performs two narrow constitutional corrections identified during cross-document reconciliation with the current ZRM Identity amendment work and the re-derived custom-domain specifications.
@@ -156,7 +156,6 @@ These corrections do not reopen PH1–PH4 architecture.
 They remove terminology that could otherwise cause ZRM and ZRR semantic ownership to collapse into one another.
 
 ---
-
 
 # 0C. v0.3.3 Blocker-Closure Correction
 
@@ -349,25 +348,25 @@ ZRR supplies and owns the generic Resolution architecture.
 
 The ownership boundary is:
 
-| Concern | ADDRESSING-001 | ZRR / Other Owner |
-|---|---|---|
-| Registrable roots / public origins | **Owns governance** | Consumes |
-| Namespace classes | **Owns** | Consumes |
-| Public Namespace Registry | **Owns** | Consumes |
-| Namespace Binding admission/lifecycle | **Owns** | Consumes |
-| Address Family Registry / public family label allocation | **Owns allocation governance** | Consumes |
-| Family-native grammar/normalization semantics | **Does not own** | External standard / legacy ZPI / proper family owner |
-| Public Address Binding Key / handoff boundary | **Owns boundary definition** | Consumes |
-| HTTP-origin, redirect, cache and public-disclosure constraints | **Owns Internet-binding constraints** | ZRR must conform at public interface |
-| Persistent public-address lifecycle / non-reassignment | **Owns** | ZRR represents/serves applicable state |
-| Resolution State | **Does not define or own** | **ZRR owns** |
-| Resolution records / resource relationships | **Does not define or own** | **ZRR owns** |
-| Resource discovery | **Does not define or own** | **ZRR owns** |
-| Resource selection / defaults / matching | **Does not define or own** | **ZRR owns**, constrained by applicable family/semantic owners |
-| Resolution Broker / Dispatcher | **Does not define or own** | **ZRR owns** |
-| Resolution read-model / publication mechanics | **Does not define or own** | **ZRR owns** |
-| Domain interpretation | **Does not own** | Z-PROF / Application / proper Domain owner |
-| Trust / Policy / Evidence / Execution | **Does not own** | SEC / POL / Evidence / RI |
+| Concern                                                        | ADDRESSING-001                        | ZRR / Other Owner                                              |
+| -------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| Registrable roots / public origins                             | **Owns governance**                   | Consumes                                                       |
+| Namespace classes                                              | **Owns**                              | Consumes                                                       |
+| Public Namespace Registry                                      | **Owns**                              | Consumes                                                       |
+| Namespace Binding admission/lifecycle                          | **Owns**                              | Consumes                                                       |
+| Address Family Registry / public family label allocation       | **Owns allocation governance**        | Consumes                                                       |
+| Family-native grammar/normalization semantics                  | **Does not own**                      | External standard / legacy ZPI / proper family owner           |
+| Public Address Binding Key / handoff boundary                  | **Owns boundary definition**          | Consumes                                                       |
+| HTTP-origin, redirect, cache and public-disclosure constraints | **Owns Internet-binding constraints** | ZRR must conform at public interface                           |
+| Persistent public-address lifecycle / non-reassignment         | **Owns**                              | ZRR represents/serves applicable state                         |
+| Resolution State                                               | **Does not define or own**            | **ZRR owns**                                                   |
+| Resolution records / resource relationships                    | **Does not define or own**            | **ZRR owns**                                                   |
+| Resource discovery                                             | **Does not define or own**            | **ZRR owns**                                                   |
+| Resource selection / defaults / matching                       | **Does not define or own**            | **ZRR owns**, constrained by applicable family/semantic owners |
+| Resolution Broker / Dispatcher                                 | **Does not define or own**            | **ZRR owns**                                                   |
+| Resolution read-model / publication mechanics                  | **Does not define or own**            | **ZRR owns**                                                   |
+| Domain interpretation                                          | **Does not own**                      | Z-PROF / Application / proper Domain owner                     |
+| Trust / Policy / Evidence / Execution                          | **Does not own**                      | SEC / POL / Evidence / RI                                      |
 
 The public handoff is conceptually:
 
@@ -1312,20 +1311,20 @@ It SHALL be retained only according to the legacy/defensive migration plan and S
 
 # 38. Initial Unfict Public-Service Topology
 
-| Origin / root | Class | Decision |
-|---|---|---|
-| `unfict.com` | P0/P2 | **SELECTED** canonical institutional/public root |
-| `www.unfict.com` | Alias | **SELECTED** redirect-only compatibility |
-| `id.unfict.com` | P1 | **SELECTED / NOT ACTIVATED** |
-| `api.unfict.com` | P2 | **SELECTED** production API |
-| `docs.unfict.com` | P2 | **SELECTED** documentation |
-| `console.unfict.com` | P2 | **SELECTED CANDIDATE** control plane |
-| `status.unfict.com` | P2 | **SELECTED** status |
-| `sandbox.api.unfict.com` | P2 non-prod | **RESERVED** |
-| `unfi.cc` | P0 compact | **SELECTED STRATEGIC COMPACT ROOT / NOT ACTIVATED** |
-| `zyppi.me` | Legacy P0 | **RETAIN / DEFENSIVE / REDIRECT / NO NEW P1 ISSUANCE** |
-| `zpi.to` | Legacy P0 | **RETAIN / DEFENSIVE / NO NEW ISSUANCE** |
-| `zyppi.org` | Legacy P0 | **DEFENSIVE RETENTION IF CONTROLLED / REASONABLE** |
+| Origin / root            | Class       | Decision                                               |
+| ------------------------ | ----------- | ------------------------------------------------------ |
+| `unfict.com`             | P0/P2       | **SELECTED** canonical institutional/public root       |
+| `www.unfict.com`         | Alias       | **SELECTED** redirect-only compatibility               |
+| `id.unfict.com`          | P1          | **SELECTED / NOT ACTIVATED**                           |
+| `api.unfict.com`         | P2          | **SELECTED** production API                            |
+| `docs.unfict.com`        | P2          | **SELECTED** documentation                             |
+| `console.unfict.com`     | P2          | **SELECTED CANDIDATE** control plane                   |
+| `status.unfict.com`      | P2          | **SELECTED** status                                    |
+| `sandbox.api.unfict.com` | P2 non-prod | **RESERVED**                                           |
+| `unfi.cc`                | P0 compact  | **SELECTED STRATEGIC COMPACT ROOT / NOT ACTIVATED**    |
+| `zyppi.me`               | Legacy P0   | **RETAIN / DEFENSIVE / REDIRECT / NO NEW P1 ISSUANCE** |
+| `zpi.to`                 | Legacy P0   | **RETAIN / DEFENSIVE / NO NEW ISSUANCE**               |
+| `zyppi.org`              | Legacy P0   | **DEFENSIVE RETENTION IF CONTROLLED / REASONABLE**     |
 
 The selected topology is forward-looking Unfict namespace governance.
 
@@ -3607,61 +3606,61 @@ Where governance is absent, the Agent must return the ambiguity.
 
 # 163. Canonical Decision Matrix
 
-| Concern | Unfict Succession Decision |
-|---|---|
-| Canonical institutional root | `unfict.com` |
-| Legacy institutional root | `zyppi.me` — retained / defensive / redirect / historical |
-| `www` | `www.unfict.com` redirect-only compatibility alias |
-| Long-form first-party P1 origin | `id.unfict.com` — **SELECTED / NOT ACTIVATED** |
-| Legacy pre-activation P1 selection | `id.zyppi.me` — **SUPERSEDED BEFORE ISSUANCE** |
-| Meaning of `id` hostname label | Persistent addressing / Resource Resolution origin; **not ZRM Identity owner** |
-| Public Address and Identifier relationship | A Public Address **MAY instantiate a Representation/Identifier**; roles remain non-interchangeable |
-| ZRM Semantic Resolution | **ZRM + applicable Evidence owner** |
-| ZRR Resource Resolution | **ZRR-owned** |
-| ZRR Resolution success proves ZRM Identity | **REJECTED** |
-| P1 grammar strategy | Explicit Address Family on multi-family origin |
-| First family | `gs1` |
-| First-party GS1 root | `id.unfict.com/gs1/...` |
-| GS1 Resolver `resolverRoot` | `https://id.unfict.com/gs1` |
-| `/zpi/` | **LEGACY RESERVED / NOT ACTIVE / NO FORWARD COMMITMENT** |
-| `unfi.cc` | **SELECTED STRATEGIC COMPACT ROOT / NOT ACTIVATED** |
-| `zpi.to` | **LEGACY RESERVED / DEFENSIVE / NO NEW ISSUANCE** |
-| Compact token grammar | **NOT YET RATIFIED** |
-| Long-form ↔ compact representation relationship | Same governed persistent-reference architecture; exact cardinality/terminology deferred to compact profile |
-| API origin | `api.unfict.com` |
-| Documentation origin | `docs.unfict.com` |
-| Control plane | `console.unfict.com` selected candidate |
-| Status | `status.unfict.com` |
-| Domain-specific hostname explosion | Rejected |
-| Customer custom domains | Foundational P4 namespaces |
-| Customer URI portability | Required where customer owns namespace |
-| Public address binding key | Namespace Binding + family-normalized reference |
-| Public Resolution Handoff | ADDRESSING boundary before ZRR mechanics |
-| Resolution State / records / discovery / selection | **ZRR-owned** |
-| Global naked token key | Rejected |
-| Generic shortener on compact root | Rejected |
-| Redirect-only Resolution ontology | Rejected |
-| Sacred redirect fast path | Required public operational invariant |
-| Hidden AI selector | Rejected |
-| Single Capability Semantic Owner | Required |
-| External URL = internal Capability | Rejected |
-| Generic server-side external fetch | Rejected |
-| Mutable GET/HEAD destination may use 302 | Allowed only where profile deliberately permits |
-| Method-preserving temporary redirect | `307` required where preservation is needed |
-| Mutable destination as permanent redirect | Rejected |
-| Permanent P1 URI replacement | Elevated change control + explicit cache policy |
-| Persistent address reassignment | Prohibited |
-| Persistent compact token reassignment | Prohibited |
-| Tombstone | Optional representation, not lifecycle state |
-| Persistence as universal retention basis | Rejected |
-| Anti-Reuse Reservation | Minimum lawful mechanism; Privacy/Legal approves construction |
-| Successor referent rewrites predecessor | Rejected |
-| Operator transfer without address change | Allowed |
-| Dual authoritative writers during transfer | Rejected |
-| P1 Living Will | Required before activation |
-| Minimum Continuity Service | Required architectural direction |
-| New P1 issuance during stewardship distress | Prohibited |
-| Successor inherits semantic sovereignty | Rejected |
+| Concern                                            | Unfict Succession Decision                                                                                 |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Canonical institutional root                       | `unfict.com`                                                                                               |
+| Legacy institutional root                          | `zyppi.me` — retained / defensive / redirect / historical                                                  |
+| `www`                                              | `www.unfict.com` redirect-only compatibility alias                                                         |
+| Long-form first-party P1 origin                    | `id.unfict.com` — **SELECTED / NOT ACTIVATED**                                                             |
+| Legacy pre-activation P1 selection                 | `id.zyppi.me` — **SUPERSEDED BEFORE ISSUANCE**                                                             |
+| Meaning of `id` hostname label                     | Persistent addressing / Resource Resolution origin; **not ZRM Identity owner**                             |
+| Public Address and Identifier relationship         | A Public Address **MAY instantiate a Representation/Identifier**; roles remain non-interchangeable         |
+| ZRM Semantic Resolution                            | **ZRM + applicable Evidence owner**                                                                        |
+| ZRR Resource Resolution                            | **ZRR-owned**                                                                                              |
+| ZRR Resolution success proves ZRM Identity         | **REJECTED**                                                                                               |
+| P1 grammar strategy                                | Explicit Address Family on multi-family origin                                                             |
+| First family                                       | `gs1`                                                                                                      |
+| First-party GS1 root                               | `id.unfict.com/gs1/...`                                                                                    |
+| GS1 Resolver `resolverRoot`                        | `https://id.unfict.com/gs1`                                                                                |
+| `/zpi/`                                            | **LEGACY RESERVED / NOT ACTIVE / NO FORWARD COMMITMENT**                                                   |
+| `unfi.cc`                                          | **SELECTED STRATEGIC COMPACT ROOT / NOT ACTIVATED**                                                        |
+| `zpi.to`                                           | **LEGACY RESERVED / DEFENSIVE / NO NEW ISSUANCE**                                                          |
+| Compact token grammar                              | **NOT YET RATIFIED**                                                                                       |
+| Long-form ↔ compact representation relationship    | Same governed persistent-reference architecture; exact cardinality/terminology deferred to compact profile |
+| API origin                                         | `api.unfict.com`                                                                                           |
+| Documentation origin                               | `docs.unfict.com`                                                                                          |
+| Control plane                                      | `console.unfict.com` selected candidate                                                                    |
+| Status                                             | `status.unfict.com`                                                                                        |
+| Domain-specific hostname explosion                 | Rejected                                                                                                   |
+| Customer custom domains                            | Foundational P4 namespaces                                                                                 |
+| Customer URI portability                           | Required where customer owns namespace                                                                     |
+| Public address binding key                         | Namespace Binding + family-normalized reference                                                            |
+| Public Resolution Handoff                          | ADDRESSING boundary before ZRR mechanics                                                                   |
+| Resolution State / records / discovery / selection | **ZRR-owned**                                                                                              |
+| Global naked token key                             | Rejected                                                                                                   |
+| Generic shortener on compact root                  | Rejected                                                                                                   |
+| Redirect-only Resolution ontology                  | Rejected                                                                                                   |
+| Sacred redirect fast path                          | Required public operational invariant                                                                      |
+| Hidden AI selector                                 | Rejected                                                                                                   |
+| Single Capability Semantic Owner                   | Required                                                                                                   |
+| External URL = internal Capability                 | Rejected                                                                                                   |
+| Generic server-side external fetch                 | Rejected                                                                                                   |
+| Mutable GET/HEAD destination may use 302           | Allowed only where profile deliberately permits                                                            |
+| Method-preserving temporary redirect               | `307` required where preservation is needed                                                                |
+| Mutable destination as permanent redirect          | Rejected                                                                                                   |
+| Permanent P1 URI replacement                       | Elevated change control + explicit cache policy                                                            |
+| Persistent address reassignment                    | Prohibited                                                                                                 |
+| Persistent compact token reassignment              | Prohibited                                                                                                 |
+| Tombstone                                          | Optional representation, not lifecycle state                                                               |
+| Persistence as universal retention basis           | Rejected                                                                                                   |
+| Anti-Reuse Reservation                             | Minimum lawful mechanism; Privacy/Legal approves construction                                              |
+| Successor referent rewrites predecessor            | Rejected                                                                                                   |
+| Operator transfer without address change           | Allowed                                                                                                    |
+| Dual authoritative writers during transfer         | Rejected                                                                                                   |
+| P1 Living Will                                     | Required before activation                                                                                 |
+| Minimum Continuity Service                         | Required architectural direction                                                                           |
+| New P1 issuance during stewardship distress        | Prohibited                                                                                                 |
+| Successor inherits semantic sovereignty            | Rejected                                                                                                   |
 
 ---
 
@@ -4096,4 +4095,3 @@ Or as one sentence:
 ## End of ADDRESSING-001 v0.4.0
 
 ---
-

@@ -167,6 +167,5 @@ It SHALL NOT be treated as active until its entries are merged into canonical `c
 
 **Status:** `RATIFIED UPDATE PACKAGE`
 
-
 **Succession Ratification Date:** `14 September 2026`  
 **Status:** `RATIFIED — UNFICT SUCCESSION EDITION`

@@ -1,4 +1,5 @@
 # Marketing-006
+
 # Zyppi ECU Commercial Interface & Pricing Doctrine
 
 ## Constitutional Doctrine for Market-Facing ECU Consumption, Commercial Pricing, Fairness, Predictability, Subsidy, Settlement & Enterprise Economic Interfaces
@@ -1366,12 +1367,15 @@ The extent to which customers see "ECU" directly is a market-interface decision.
 Possible approaches:
 
 ## Direct
+
 Customer sees ECU prominently.
 
 ## Hybrid
+
 Customer sees product units and ECU detail.
 
 ## Abstracted
+
 Customer sees simple usage while ECU remains underlying accounting.
 
 The Constitution does not mandate one interface.

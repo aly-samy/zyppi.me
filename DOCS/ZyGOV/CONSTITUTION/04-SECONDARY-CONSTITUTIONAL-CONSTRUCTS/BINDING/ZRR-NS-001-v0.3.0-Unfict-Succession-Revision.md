@@ -1,4 +1,5 @@
 # ZRR-NS-001
+
 ## Unfict Routing North Star — Resource Resolution Governance
 
 **Document ID:** `ZRR-NS-001`  
@@ -164,27 +165,27 @@ The governing law is:
 
 The formal boundary is:
 
-| Concern | ADDRESSING | ZRR |
-|---|---|---|
-| Registrable roots / public origins | **Owns** | Consumes |
-| Namespace classes | **Owns** | Consumes |
-| Public Namespace Registry | **Owns** | Consumes |
-| `NamespaceBinding` admission/lifecycle | **Owns** | Consumes |
-| Address Family label allocation | **Owns** | Consumes |
-| Family grammar / normalization | External/family owner | Consumes normalized form |
-| Public Resolution Handoff semantic envelope | **Owns** | Consumes |
-| `ZRR-PRIC` versioned technical contract | Constrains semantic envelope | **Owns** |
-| HTTP origin/security/redirect/cache safety constraints | **Owns** | Must conform |
-| Cacheability intent / semantic invalidation triggers | Constrains | **Owns or family profile owns** |
-| Persistent public-address non-reassignment | **Owns** | Must preserve in serving behavior |
-| Resolution State | Does not own | **Owns** |
-| Resource relationships | Does not own | **Owns generic model** |
-| Discovery | Does not own | **Owns** |
-| Selection/default/matching mechanics | Does not own | **Owns**, subject to family rules |
-| Resolution Broker / Dispatcher | Does not own | **Owns** |
-| Published serving/read model | Does not own | **Owns** |
-| Domain/standard semantic judgment | Proper owner | Does not own |
-| Trust / Policy / Evidence / execution | Proper owners | Does not own |
+| Concern                                                | ADDRESSING                   | ZRR                               |
+| ------------------------------------------------------ | ---------------------------- | --------------------------------- |
+| Registrable roots / public origins                     | **Owns**                     | Consumes                          |
+| Namespace classes                                      | **Owns**                     | Consumes                          |
+| Public Namespace Registry                              | **Owns**                     | Consumes                          |
+| `NamespaceBinding` admission/lifecycle                 | **Owns**                     | Consumes                          |
+| Address Family label allocation                        | **Owns**                     | Consumes                          |
+| Family grammar / normalization                         | External/family owner        | Consumes normalized form          |
+| Public Resolution Handoff semantic envelope            | **Owns**                     | Consumes                          |
+| `ZRR-PRIC` versioned technical contract                | Constrains semantic envelope | **Owns**                          |
+| HTTP origin/security/redirect/cache safety constraints | **Owns**                     | Must conform                      |
+| Cacheability intent / semantic invalidation triggers   | Constrains                   | **Owns or family profile owns**   |
+| Persistent public-address non-reassignment             | **Owns**                     | Must preserve in serving behavior |
+| Resolution State                                       | Does not own                 | **Owns**                          |
+| Resource relationships                                 | Does not own                 | **Owns generic model**            |
+| Discovery                                              | Does not own                 | **Owns**                          |
+| Selection/default/matching mechanics                   | Does not own                 | **Owns**, subject to family rules |
+| Resolution Broker / Dispatcher                         | Does not own                 | **Owns**                          |
+| Published serving/read model                           | Does not own                 | **Owns**                          |
+| Domain/standard semantic judgment                      | Proper owner                 | Does not own                      |
+| Trust / Policy / Evidence / execution                  | Proper owners                | Does not own                      |
 
 Shared tie-break rule:
 

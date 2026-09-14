@@ -1,4 +1,5 @@
 # Marketing-000
+
 # Zyppi Marketing Constitutional Branch
 
 ## Foundation, Authority, Temporal Separation & Document Family Charter
@@ -610,21 +611,27 @@ The Constitution should change only when its governing principles are no longer 
 # 12. Marketing Evidence Ladder
 
 ## E0 — Unsupported
+
 Assertion or speculation.
 
 ## E1 — Logical / Architectural
+
 Supported by coherent reasoning or modeling.
 
 ## E2 — External Evidence
+
 Supported by credible external evidence.
 
 ## E2+ — Triangulated External Evidence
+
 Supported by multiple materially independent sources.
 
 ## E3 — Zyppi User / Pilot / Customer Evidence
+
 Observed real Zyppi market behavior.
 
 ## E4 — Repeated Zyppi Evidence
+
 Repeated and sufficiently consistent evidence across multiple real cases.
 
 No planning horizon may upgrade evidence merely because the plan is important.
@@ -853,67 +860,99 @@ The Marketing constitutional branch SHALL avoid embedding current GS1/Commerce t
 The proposed constitutional family is:
 
 ## `Marketing-000.md`
+
 ### Marketing Constitutional Branch
+
 Foundation, hierarchy, temporal separation, evidence discipline, family governance.
 
 ## `Marketing-001.md`
+
 ### Market Truth, Evidence & Validation Doctrine
+
 Evidence ladder, source discipline, simulation boundary, hypothesis graduation.
 
 ## `Marketing-002.md`
+
 ### Market Entry & Trojan Horse Doctrine
+
 Universal principles for choosing entry wedges across any domain.
 
 ## `Marketing-003.md`
+
 ### Product-System Positioning & Differentiation Doctrine
+
 Feature vs system vs moat, whole-system comparison, positioning discipline.
 
 ## `Marketing-004.md`
+
 ### Adoption, Activation & Economic Deepening Doctrine
+
 Participation → activation → leverage → expansion principles.
 
 ## `Marketing-005.md`
+
 ### Free Participation, Standards & Market-Capture Doctrine
+
 Universal boundary between foundational participation and monetized emergent value.
 
 ## `Marketing-006.md`
+
 ### ECU Commercial Interface & Pricing Doctrine
+
 How market-facing pricing interfaces with ZEA without redefining ECU economics.
 
 ## `Marketing-007.md`
+
 ### Competitive Intelligence & Market Attack Protocol
+
 Repeatable competitive/research attack method.
 
 ## `Marketing-008.md`
+
 ### Buyer, Segment & Job Architecture
+
 Universal buyer/user/actor segmentation principles.
 
 ## `Marketing-009.md`
+
 ### Distribution & Ecosystem Go-to-Market Doctrine
+
 Developer, partner, integration, embedded and ecosystem distribution principles.
 
 ## `Marketing-010.md`
+
 ### Bootstrap Economics & Adjacent Utility Guardrails
+
 Constitutional rules governing temporary/adjacent bootstrap revenue without defining specific utilities.
 
 ## `Marketing-011.md`
+
 ### Market Validation, Experiments & Decision Gates
+
 Experiment design, E3/E4 graduation, go/no-go criteria.
 
 ## `Marketing-012.md`
+
 ### Marketing Metrics & Compounding Health
+
 Participation, activation, economic depth, retention, market power, human-cost and compounding metrics.
 
 ## `Marketing-013.md`
+
 ### Claims, Messaging & Market Communication Doctrine
+
 Category, claims, evidence-backed communication and North Star fidelity.
 
 ## `Marketing-014.md`
+
 ### Domain Expansion & Market Replication Doctrine
+
 How Zyppi moves from one application/domain to another without fragmenting the platform.
 
 ## `Marketing-015.md`
+
 ### Strategic Horizon Governance
+
 How 1-, 3-, and 5-year Marketing plans are created, revised, evaluated, superseded, and kept subordinate to the North Star.
 
 ---
@@ -923,6 +962,7 @@ How 1-, 3-, and 5-year Marketing plans are created, revised, evaluated, supersed
 After the constitutional foundation is ratified, current strategy should be captured separately.
 
 ## `Marketing-PLAN-1Y-001.md`
+
 ### Establishing Market Entry & Survival Plan
 
 Likely scope:
@@ -942,6 +982,7 @@ This plan may consume most current attention without defining Zyppi's universal 
 ---
 
 ## `Marketing-PLAN-3Y-001.md`
+
 ### Commerce Deepening & Platform Expansion Plan
 
 Likely scope:
@@ -961,6 +1002,7 @@ This plan should remain adaptive.
 ---
 
 ## `Marketing-PLAN-5Y-001.md`
+
 ### Multi-Domain Reality Sync Expansion Plan
 
 Likely scope:
@@ -1053,15 +1095,19 @@ This prevents a temporary survival mechanism from becoming constitutional baggag
 # 21. Ratification Classes
 
 ## Class A — Constitutional Doctrine
+
 Requires Chair ratification.
 
 ## Class B — Strategic Plans
+
 Chair-approved strategic instruments; time-bounded and revisable.
 
 ## Class C — Programs
+
 Authorized operational initiatives.
 
 ## Class D — Experiments
+
 Non-doctrinal hypotheses under test.
 
 Promotion between classes SHALL be explicit.

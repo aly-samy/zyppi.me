@@ -1,4 +1,5 @@
 # Marketing-PLAN-3Y-001
+
 # Zyppi 3-Year Growth, Host-Native Expansion & Commerce Spine Plan
 
 ## Conditional Strategic Plan for Commerce Deepening, DPP Expansion, Host-Native Adoption, Trusted Product Action, Interoperability & Domain-2 Readiness
@@ -1782,34 +1783,40 @@ This is closer to Zyppi's enduring economic thesis than generic SaaS feature pri
 The 3-year metric stack SHOULD include:
 
 ## Adoption
+
 - retained production organizations;
 - Host-Native installs;
 - migration burden;
 - time to additional capability.
 
 ## DPP
+
 - activated passports / qualifying objects;
 - retained lifecycle connections;
 - source-system reliability;
 - relevant buyer activation.
 
 ## Compounding
+
 - capabilities per retained account;
 - existing-account expansion;
 - host integrations reused across capabilities.
 
 ## Economics
+
 - recurring ECU / paid leverage;
 - account expansion;
 - contribution margin;
 - human revenue density.
 
 ## Consequence
+
 - governed decisions;
 - repeat governed execution;
 - useful Proof / Receipts.
 
 ## Expansion
+
 - D2 evidence grade;
 - domain experiment readiness.
 
@@ -1849,18 +1856,23 @@ It SHALL not become a premature vanity metric in Year 1.
 The plan uses five macro gates.
 
 ## G1 — Commerce Establishment
+
 Retained Year-1 market evidence.
 
 ## G2 — Host-Native Proof
+
 At least one integration materially lowers adoption burden.
 
 ## G3 — DPP Proof
+
 Real retained DPP value and buyer evidence.
 
 ## G4 — Consequence Proof
+
 Real governed product decision / execution with economic value.
 
 ## G5 — Domain-2 Permission
+
 Evidence supports a materially distinct experiment.
 
 The calendar cannot substitute for any gate.
@@ -2007,12 +2019,15 @@ Exact resource percentages SHALL be reviewed annually.
 The directional priority is:
 
 ## Year 1
+
 Commerce establishment dominates.
 
 ## Year 2
+
 Commerce + DPP + Host-Native integration dominate.
 
 ## Year 3
+
 Retained Commerce / DPP + consequential workflows dominate, with a bounded Domain-2 option budget.
 
 No future-domain work should consume major resources before G5.
@@ -2252,61 +2267,73 @@ This remains a future distribution advantage, not a separate product thesis.
 # 120. Three-Year Risk Register
 
 ## R1 — Commerce Never Establishes
+
 Later phases are unsupported.
 
 **Response:** re-rate rather than escape.
 
 ## R2 — DPP Becomes Commodity CMS
+
 Zyppi loses differentiation.
 
 **Response:** projection / Evidence / lifecycle boundary.
 
 ## R3 — EPCIS Data Gravity
+
 Zyppi becomes event warehouse.
 
 **Response:** reference / adapter / selective state.
 
 ## R4 — Multi-Party Network Burden
+
 Supplier / logistics onboarding becomes massive.
 
 **Response:** existing systems / standards first.
 
 ## R5 — Host Integration Explosion
+
 Too many connectors consume engineering.
 
 **Response:** prove reusable fabric before breadth.
 
 ## R6 — Multi-Buyer Sales Fragmentation
+
 Every capability needs new enterprise motion.
 
 **Response:** Host-Native account expansion + explicit Buyer Bridges.
 
 ## R7 — Titan Bundling
+
 SAP / Shopify / ERP vendors bundle commodity features.
 
 **Response:** cross-system Trust / execution depth.
 
 ## R8 — Regulatory Fear Marketing
+
 DPP urgency is overstated.
 
 **Response:** product-category-specific claims.
 
 ## R9 — Government Procurement Gravity
+
 Trade work pulls Zyppi into public-sector systems.
 
 **Response:** interoperability through existing platforms / brokers first.
 
 ## R10 — Consequence Reliability
+
 Zyppi reaches high-stakes action before operational readiness.
 
 **Response:** CAG-1.
 
 ## R11 — Healthcare Fascination
+
 Domain-2 excitement distracts from Commerce.
 
 **Response:** option budget + D2 gate.
 
 ## R12 — Migration Promise Overreach
+
 "One click" promise becomes false.
 
 **Response:** near-zero migration objective, evidence-bound claims.

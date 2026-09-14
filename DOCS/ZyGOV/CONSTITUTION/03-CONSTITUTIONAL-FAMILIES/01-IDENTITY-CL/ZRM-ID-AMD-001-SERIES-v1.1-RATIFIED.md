@@ -57,12 +57,12 @@ The 11 September artifacts remain historically valid and SHALL NOT be rewritten.
 
 # 3. Current Ratified Series
 
-| Artifact | Current Edition | Status | Function |
-|---|---|---|---|
-| Identity Reconciliation Amendment | `ZRM-ID-AMD-001 v1.1` | RATIFIED — LOCKED | Active Unfict-era amendment edition |
-| Ratification / Continuity Record | `RTC-ZRM-ID-AMD-001-R2` | FINAL CONSTITUTIONAL RATIFICATION | Ratifies v1.1 under succession continuity |
-| SR-001 Update Package | `SR-001-ZRM-ID-AMD-001 v1.1` | RATIFIED — PENDING CANONICAL MERGE/RELEASE | Carries unchanged SR-015…SR-022 |
-| Release Companion | `ZRM-ID-AMD-001-RELEASE-02` | RATIFIED RELEASE COMPANION | Activation, annotations, SIA, ACV, Manifest sequence |
+| Artifact                          | Current Edition              | Status                                     | Function                                             |
+| --------------------------------- | ---------------------------- | ------------------------------------------ | ---------------------------------------------------- |
+| Identity Reconciliation Amendment | `ZRM-ID-AMD-001 v1.1`        | RATIFIED — LOCKED                          | Active Unfict-era amendment edition                  |
+| Ratification / Continuity Record  | `RTC-ZRM-ID-AMD-001-R2`      | FINAL CONSTITUTIONAL RATIFICATION          | Ratifies v1.1 under succession continuity            |
+| SR-001 Update Package             | `SR-001-ZRM-ID-AMD-001 v1.1` | RATIFIED — PENDING CANONICAL MERGE/RELEASE | Carries unchanged SR-015…SR-022                      |
+| Release Companion                 | `ZRM-ID-AMD-001-RELEASE-02`  | RATIFIED RELEASE COMPANION                 | Activation, annotations, SIA, ACV, Manifest sequence |
 
 ---
 

@@ -1,4 +1,5 @@
 # Marketing-015
+
 # Zyppi Strategic Horizon Governance
 
 ## Constitutional Doctrine for 1-Year, 3-Year & 5-Year Marketing Plans, Strategic Re-Rating, Horizon Separation, Scenario Discipline & Constitutional Continuity
@@ -412,12 +413,15 @@ The language SHOULD become more conditional as the horizon extends.
 Examples:
 
 ## 1Y
+
 "We intend to establish..."
 
 ## 3Y
+
 "If evidence supports the current thesis, Zyppi may expand..."
 
 ## 5Y
+
 "The strategic direction is toward..."
 
 This protects credibility.
@@ -446,15 +450,19 @@ This helps distinguish intent from commitment.
 Plans MAY classify priorities:
 
 ## P0 — Existential
+
 Required for survival or fundamental validation.
 
 ## P1 — Strategic
+
 Material to current horizon.
 
 ## P2 — Expansion
+
 Important after P0/P1 evidence.
 
 ## P3 — Option
+
 Preserve capability or monitor.
 
 P2/P3 SHALL not starve P0 during Baby.
@@ -1673,33 +1681,43 @@ Operational decisions SHOULD escalate when they:
 # 127. Strategic Horizon Anti-Patterns
 
 ## Anti-Pattern 1 — Plan as Constitution
+
 Treating current tactics as permanent law.
 
 ## Anti-Pattern 2 — Constitution as Roadmap
+
 Using durable doctrine as feature scheduling.
 
 ## Anti-Pattern 3 — Calendar Certainty
+
 Assuming the market will obey dates.
 
 ## Anti-Pattern 4 — Future-as-Commitment
+
 Treating five-year scenarios as promised products.
 
 ## Anti-Pattern 5 — Plan Rewrite
+
 Erasing prior beliefs after evidence changes.
 
 ## Anti-Pattern 6 — Horizon Leakage
+
 Letting Dominate-stage priorities consume Baby resources.
 
 ## Anti-Pattern 7 — Strategy by Inertia
+
 Continuing because it was once approved.
 
 ## Anti-Pattern 8 — Escape Planning
+
 Adding future domains to avoid present weakness.
 
 ## Anti-Pattern 9 — Milestone Theater
+
 Shipping work instead of achieving market states.
 
 ## Anti-Pattern 10 — Funding as Validation
+
 Treating capital raised as proof of market truth.
 
 ---
@@ -1709,65 +1727,85 @@ Treating capital raised as proof of market truth.
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 The Constitution defines durable law; strategic plans define time-bounded intent.
 
 ## Invariant 2
+
 Plan approval SHALL not upgrade evidence grade.
 
 ## Invariant 3
+
 The farther the horizon, the lower the justified tactical precision.
 
 ## Invariant 4
+
 Calendar dates SHALL not override market evidence.
 
 ## Invariant 5
+
 Material plan assumptions SHOULD carry visible evidence status.
 
 ## Invariant 6
+
 Scenarios, forecasts, aspirations, and commitments SHALL remain distinguishable.
 
 ## Invariant 7
+
 Plans MAY change rapidly without constitutional amendment.
 
 ## Invariant 8
+
 Constitutional amendment requires evidence that a governing principle itself needs revision.
 
 ## Invariant 9
+
 Historical plans SHALL remain preserved rather than rewritten to fit later outcomes.
 
 ## Invariant 10
+
 Baby-stage resources SHOULD prioritize survival, activation, evidence, distribution, and reusable core infrastructure.
 
 ## Invariant 11
+
 Future optionality SHOULD be preserved architecturally without requiring premature product implementation.
 
 ## Invariant 12
+
 Capability readiness and market readiness SHALL remain distinct.
 
 ## Invariant 13
+
 Long-range metrics SHALL not become Baby-stage vanity targets.
 
 ## Invariant 14
+
 Domain expansion timing SHALL remain evidence-gated rather than calendar-gated.
 
 ## Invariant 15
+
 Funding may accelerate validated opportunity but SHALL not serve as market validation.
 
 ## Invariant 16
+
 Human attention SHALL be treated as a strategic resource in horizon planning.
 
 ## Invariant 17
+
 Operational teams SHOULD retain freedom to iterate within constitutional boundaries.
 
 ## Invariant 18
+
 The North Star SHALL remain above every time-bounded plan.
 
 ---
 
 ## Invariant 19
+
 The 1-year plan SHALL remain a living, branching control surface rather than a fixed contract that manufactures certainty.
 
 ## Invariant 20
+
 Planning governance SHALL preserve strategic memory without requiring teams to maintain unnecessary compliance artifacts.
 
 # 129. Strategic Plan Governance Template

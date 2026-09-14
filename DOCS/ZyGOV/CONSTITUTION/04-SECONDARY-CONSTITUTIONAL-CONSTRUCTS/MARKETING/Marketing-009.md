@@ -1,4 +1,5 @@
 # Marketing-009
+
 # Zyppi Distribution & Ecosystem Go-to-Market Doctrine
 
 ## Constitutional Doctrine for Distribution Architecture, Developer Adoption, Embedded Channels, Partners, Integrations, Physical Footprint & Go-to-Market Scaling
@@ -263,24 +264,31 @@ It SHALL remain visible as a risk.
 The Marketing branch recognizes several general distribution modes.
 
 ## 10.1 Product-Led
+
 The product itself creates discovery and adoption.
 
 ## 10.2 Developer-Led
+
 Developers discover and integrate Zyppi directly.
 
 ## 10.3 Partner-Led
+
 Third parties distribute or embed Zyppi.
 
 ## 10.4 Sales-Led
+
 Human sales activity drives adoption.
 
 ## 10.5 Embedded
+
 Zyppi is built into another product or workflow.
 
 ## 10.6 Physical
+
 A real-world carrier or object creates the interaction surface.
 
 ## 10.7 Marketplace-Led
+
 A platform marketplace creates discovery and procurement.
 
 A program may combine several modes.
@@ -1690,57 +1698,75 @@ Distribution SHALL not precede buyer definition.
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Distribution is an architectural capability, not merely promotion.
 
 ## Invariant 2
+
 Awareness ≠ Discovery ≠ Acquisition ≠ Activation ≠ Retention.
 
 ## Invariant 3
+
 Distribution channels SHALL match the actual buyer and Job-To-Be-Done.
 
 ## Invariant 4
+
 A channel is strategically stronger when it reduces friction and creates durable embedded distribution.
 
 ## Invariant 5
+
 Developer interfaces may function as distribution infrastructure.
 
 ## Invariant 6
+
 An integration is not a distribution asset until it produces real discovery, adoption, or embedded use.
 
 ## Invariant 7
+
 Partner distribution requires explicit incentive alignment.
 
 ## Invariant 8
+
 Physical references may become persistent distribution surfaces while remaining distinct from identity.
 
 ## Invariant 9
+
 Direct sales is valid where buying-center complexity justifies it, but SHALL not define low-friction entry by default.
 
 ## Invariant 10
+
 Channel quality SHALL be judged by qualified activation, retention, economics, and human burden—not traffic alone.
 
 ## Invariant 11
+
 Single-channel dependency SHALL remain visible as strategic risk.
 
 ## Invariant 12
+
 Distribution loops and ecosystem effects SHALL not be claimed until they actually close.
 
 ## Invariant 13
+
 Embedded distribution may be strategically valuable even when Zyppi brand visibility is low.
 
 ## Invariant 14
+
 Free access may strengthen distribution but is not itself a distribution strategy.
 
 ## Invariant 15
+
 Channel economics must fit revenue density and customer lifetime value.
 
 ## Invariant 16
+
 Market programs SHOULD prefer fewer strong channels over broad channel proliferation during Baby.
 
 ## Invariant 17
+
 Distribution governance SHALL remain lightweight enough not to delay real market tests.
 
 ## Invariant 18
+
 Future domains SHALL identify their own distribution architecture rather than inherit Commerce assumptions.
 
 ---
@@ -1776,21 +1802,27 @@ If this sentence cannot be completed, distribution architecture is immature.
 Programs SHOULD seek evidence of:
 
 ## Gate D1 — Discovery
+
 Qualified buyer reaches Zyppi.
 
 ## Gate D2 — Acquisition
+
 Buyer begins legitimate participation.
 
 ## Gate D3 — Activation
+
 Buyer receives first value.
 
 ## Gate D4 — Repeatability
+
 Channel continues producing qualified activations.
 
 ## Gate D5 — Economics
+
 Acquisition effort is sustainable.
 
 ## Gate D6 — Compounding
+
 Use increases future distribution capacity where expected.
 
 Exact metrics belong to `Marketing-011` and `Marketing-012`.

@@ -881,23 +881,23 @@ The question must be resolved under Representation lifecycle / semantic-resoluti
 
 # 26. Handoff Matrix
 
-| Constitutional concern | Immediate disposition | Future owner / vehicle |
-|---|---|---|
-| Reality constituent existence | Preserved | ZRM Reality |
-| Constituent distinctness | Preserved by AM-ID-006 | ZRM; mathematics only if separately necessary |
-| Continuity under representational change | Preserved by AM-ID-007 | ZRM |
-| Identity relationship meaning | By reference to ZRM-000 / Master Blueprint | ZRM ontology |
-| Identity relationship cardinality from constituent side | Established by this Amendment upon ratification: `0..N` | This Amendment / ZRM ontology |
-| Raw Representation ambiguity/conflict | Preserved | ZRM semantic resolution |
-| Representation→Reality factual resolution | Deferred | ZRM semantic resolution |
-| Evidence sufficiency | Deferred | Evidence owner / ZRM resolution composition |
-| Canonical platform-address uniqueness | Deferred | future ZID |
-| Canonical-address convergence | Deferred | future ZID |
-| Authorization to mutate governed canonical state | Deferred | POL |
-| Trust | Unchanged | SEC |
-| Projection | Unchanged | PRJ |
-| Execution | Unchanged | RI / Runtime |
-| Cross-sovereign address settlement | Deferred | FED |
+| Constitutional concern                                  | Immediate disposition                                   | Future owner / vehicle                        |
+| ------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------- |
+| Reality constituent existence                           | Preserved                                               | ZRM Reality                                   |
+| Constituent distinctness                                | Preserved by AM-ID-006                                  | ZRM; mathematics only if separately necessary |
+| Continuity under representational change                | Preserved by AM-ID-007                                  | ZRM                                           |
+| Identity relationship meaning                           | By reference to ZRM-000 / Master Blueprint              | ZRM ontology                                  |
+| Identity relationship cardinality from constituent side | Established by this Amendment upon ratification: `0..N` | This Amendment / ZRM ontology                 |
+| Raw Representation ambiguity/conflict                   | Preserved                                               | ZRM semantic resolution                       |
+| Representation→Reality factual resolution               | Deferred                                                | ZRM semantic resolution                       |
+| Evidence sufficiency                                    | Deferred                                                | Evidence owner / ZRM resolution composition   |
+| Canonical platform-address uniqueness                   | Deferred                                                | future ZID                                    |
+| Canonical-address convergence                           | Deferred                                                | future ZID                                    |
+| Authorization to mutate governed canonical state        | Deferred                                                | POL                                           |
+| Trust                                                   | Unchanged                                               | SEC                                           |
+| Projection                                              | Unchanged                                               | PRJ                                           |
+| Execution                                               | Unchanged                                               | RI / Runtime                                  |
+| Cross-sovereign address settlement                      | Deferred                                                | FED                                           |
 
 ---
 
@@ -1027,16 +1027,16 @@ Upon ratification, SR-001 shall register every active frozen clause actually dep
 
 Known primary targets include:
 
-| Source | Target | Disposition |
-|---|---|---|
-| `RTC-ZRM-003A-R3` §5 | TH-003 registry admission | Active theorem authority superseded by §20 |
-| `RTC-ZRM-003A-R3` §5 | TH-030 registry admission | Active theorem authority superseded by §21 |
-| `RTC-ZRM-003A-R3` §6 TH-003 | exactly one immutable identity; one-to-one mapping | Superseded by §20 |
-| `RTC-ZRM-003A-R3` §6 TH-030 | indivisible identity object | Superseded by §21 |
-| `RTC-ZRM-003A-R3` §7 TH-018 | non-transferability derived solely from TH-003 | Active corollary authority superseded by §21A |
-| `RTC-ZRM-003A-R3` §10 | final Identity Mathematics registry contains TH-003/TH-030 | Active registry view superseded by §21B |
-| `RTC-ZRM-003A-R3` §11 | unique/immutable/indivisible/merge/split guarantees | Active guarantees superseded by §21B |
-| `RTC-ZRM-003A-R3` §15 | “Identity distinguishes. Identity never changes. Identity cannot be divided.” | Active principle superseded by §21B |
+| Source                      | Target                                                                        | Disposition                                   |
+| --------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------- |
+| `RTC-ZRM-003A-R3` §5        | TH-003 registry admission                                                     | Active theorem authority superseded by §20    |
+| `RTC-ZRM-003A-R3` §5        | TH-030 registry admission                                                     | Active theorem authority superseded by §21    |
+| `RTC-ZRM-003A-R3` §6 TH-003 | exactly one immutable identity; one-to-one mapping                            | Superseded by §20                             |
+| `RTC-ZRM-003A-R3` §6 TH-030 | indivisible identity object                                                   | Superseded by §21                             |
+| `RTC-ZRM-003A-R3` §7 TH-018 | non-transferability derived solely from TH-003                                | Active corollary authority superseded by §21A |
+| `RTC-ZRM-003A-R3` §10       | final Identity Mathematics registry contains TH-003/TH-030                    | Active registry view superseded by §21B       |
+| `RTC-ZRM-003A-R3` §11       | unique/immutable/indivisible/merge/split guarantees                           | Active guarantees superseded by §21B          |
+| `RTC-ZRM-003A-R3` §15       | “Identity distinguishes. Identity never changes. Identity cannot be divided.” | Active principle superseded by §21B           |
 
 The Council review mentioned possible aliases such as:
 
@@ -1240,26 +1240,26 @@ AMS-0861-C re-entry
 
 Council shall require `PASS` for all:
 
-| Test | Question |
-|---|---|
-| RT-01 | Does the Amendment derive from the actual ratified Master Blueprint and ZRM-000 v1.0? |
-| RT-02 | Does Reality exist independently of Representation? |
-| RT-03 | Is Identity treated as the ZRM-defined Reality/entity↔Representation relationship? |
-| RT-04 | Is the intrinsic Identity-wrapper model explicitly rejected? |
-| RT-05 | Does each Identity relationship instance have one Representation and one Reality/entity endpoint? |
-| RT-06 | Is `0..N` limited to constituent participation in Identity relationships? |
-| RT-07 | Does the Amendment avoid a universal raw-Representation uniqueness assumption? |
-| RT-08 | Is constituent distinctness preserved without creating a new object? |
+| Test  | Question                                                                                           |
+| ----- | -------------------------------------------------------------------------------------------------- |
+| RT-01 | Does the Amendment derive from the actual ratified Master Blueprint and ZRM-000 v1.0?              |
+| RT-02 | Does Reality exist independently of Representation?                                                |
+| RT-03 | Is Identity treated as the ZRM-defined Reality/entity↔Representation relationship?                 |
+| RT-04 | Is the intrinsic Identity-wrapper model explicitly rejected?                                       |
+| RT-05 | Does each Identity relationship instance have one Representation and one Reality/entity endpoint?  |
+| RT-06 | Is `0..N` limited to constituent participation in Identity relationships?                          |
+| RT-07 | Does the Amendment avoid a universal raw-Representation uniqueness assumption?                     |
+| RT-08 | Is constituent distinctness preserved without creating a new object?                               |
 | RT-09 | Is continuity under representational change preserved without claiming Reality state immutability? |
-| RT-10 | Are conflicting/false Representations still representable? |
-| RT-11 | Are TH-003/TH-030 historically preserved? |
-| RT-12 | Does the Amendment avoid silently renaming them into other theorems? |
-| RT-13 | Does the Amendment refrain from inventing replacement mathematics? |
-| RT-14 | Is generic semantic resolution kept outside ZID? |
-| RT-15 | Is zID explicitly deferred? |
-| RT-16 | Is dark Reality distinguished from current representational addressability? |
-| RT-17 | Are owner boundaries preserved? |
-| RT-18 | Can frozen-law evolution be performed through WS-00A/SR-001 without historical rewrite? |
+| RT-10 | Are conflicting/false Representations still representable?                                         |
+| RT-11 | Are TH-003/TH-030 historically preserved?                                                          |
+| RT-12 | Does the Amendment avoid silently renaming them into other theorems?                               |
+| RT-13 | Does the Amendment refrain from inventing replacement mathematics?                                 |
+| RT-14 | Is generic semantic resolution kept outside ZID?                                                   |
+| RT-15 | Is zID explicitly deferred?                                                                        |
+| RT-16 | Is dark Reality distinguished from current representational addressability?                        |
+| RT-17 | Are owner boundaries preserved?                                                                    |
+| RT-18 | Can frozen-law evolution be performed through WS-00A/SR-001 without historical rewrite?            |
 
 Any `FAIL` with constitutional significance blocks ratification.
 

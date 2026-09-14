@@ -1,4 +1,5 @@
 # Marketing-PLAN-1Y-001
+
 # Zyppi 1-Year Establishing Market Entry & Survival Plan
 
 ## Time-Bounded Strategic Plan for Commerce / GS1 Market Establishment, Evidence Generation, Distribution, Economic Deepening & Bootstrap Survival
@@ -174,24 +175,24 @@ It is not by itself a durable moat.
 
 The plan begins with the following thesis map.
 
-| Strategic Claim | Current Grade | Current Role |
-|---|---:|---|
-| GS1 / 2D transition creates a meaningful implementation window | E2+ | PRESERVE |
-| Basic standards parsing / resolution is commoditizing | E2+ | PRESERVE as doorway; DEMOTE as moat |
-| Free foundational GS1 capability may reduce adoption friction | E2 / E2+ | PROVISIONAL PASS |
-| Persistent identity / contextual resolution can leave durable footprint | E1 / E2 | PROVISIONAL |
-| Developers / technical implementers may be the lowest-friction entry users | E1 / E2 | PRIMARY BUYER HYPOTHESIS |
-| The entry user may differ from deeper economic buyer | E2 conceptual / E1 Zyppi-specific | PRESERVE |
-| Interaction history / signals can create activation value | E1 / E2 | PRESERVE |
-| Interaction Intelligence alone is strong enough as first paid product | E1 / E2 attack | DEMOTED |
-| Simple operational decisioning alone carries strong pricing power | E1 / E2 attack | DEMOTED |
-| Higher willingness to pay may emerge around consequence, Trust, workflow, governance, execution | E1 / E2 | HIGH-PRIORITY HYPOTHESIS |
-| Hook / State / Link / Monitor-type utilities can support low-touch bootstrap economics | E2 competitor-market evidence | PROVISIONAL |
-| A specific Zyppi Bootstrap Utility will convert and retain | E0 / E1 | UNVALIDATED |
-| Mental Availability matters in long-cycle B2B buying | E2 external framework | PRESERVE |
-| Specific Commerce Category Entry Points for Zyppi | E1 | VALIDATE |
-| Zyppi has demonstrated Commerce PMF | E0 | FALSE / NOT CLAIMABLE |
-| Zyppi has demonstrated a moat | E0 | FALSE / NOT CLAIMABLE |
+| Strategic Claim                                                                                 |                     Current Grade | Current Role                        |
+| ----------------------------------------------------------------------------------------------- | --------------------------------: | ----------------------------------- |
+| GS1 / 2D transition creates a meaningful implementation window                                  |                               E2+ | PRESERVE                            |
+| Basic standards parsing / resolution is commoditizing                                           |                               E2+ | PRESERVE as doorway; DEMOTE as moat |
+| Free foundational GS1 capability may reduce adoption friction                                   |                          E2 / E2+ | PROVISIONAL PASS                    |
+| Persistent identity / contextual resolution can leave durable footprint                         |                           E1 / E2 | PROVISIONAL                         |
+| Developers / technical implementers may be the lowest-friction entry users                      |                           E1 / E2 | PRIMARY BUYER HYPOTHESIS            |
+| The entry user may differ from deeper economic buyer                                            | E2 conceptual / E1 Zyppi-specific | PRESERVE                            |
+| Interaction history / signals can create activation value                                       |                           E1 / E2 | PRESERVE                            |
+| Interaction Intelligence alone is strong enough as first paid product                           |                    E1 / E2 attack | DEMOTED                             |
+| Simple operational decisioning alone carries strong pricing power                               |                    E1 / E2 attack | DEMOTED                             |
+| Higher willingness to pay may emerge around consequence, Trust, workflow, governance, execution |                           E1 / E2 | HIGH-PRIORITY HYPOTHESIS            |
+| Hook / State / Link / Monitor-type utilities can support low-touch bootstrap economics          |     E2 competitor-market evidence | PROVISIONAL                         |
+| A specific Zyppi Bootstrap Utility will convert and retain                                      |                           E0 / E1 | UNVALIDATED                         |
+| Mental Availability matters in long-cycle B2B buying                                            |             E2 external framework | PRESERVE                            |
+| Specific Commerce Category Entry Points for Zyppi                                               |                                E1 | VALIDATE                            |
+| Zyppi has demonstrated Commerce PMF                                                             |                                E0 | FALSE / NOT CLAIMABLE               |
+| Zyppi has demonstrated a moat                                                                   |                                E0 | FALSE / NOT CLAIMABLE               |
 
 ---
 
@@ -1813,21 +1814,26 @@ If funding becomes available after strong activation evidence:
 The plan begins with known strategic debts:
 
 ## Experiment Debt
+
 - no Zyppi E3 Commerce activation;
 - no Zyppi E3 Commerce WTP;
 - no Zyppi E3 BUE payment.
 
 ## Buyer Debt
+
 - no validated economic buyer;
 - Buyer Bridge unproven.
 
 ## Distribution Debt
+
 - no repeatable channel.
 
 ## Economic Debt
+
 - deeper paid boundary unvalidated.
 
 ## Mental Availability Debt
+
 - CEP map unvalidated for Zyppi.
 
 These are P0 / P1 learning priorities.

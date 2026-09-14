@@ -1,4 +1,5 @@
 # Marketing-014
+
 # Zyppi Domain Expansion & Market Replication Doctrine
 
 ## Constitutional Doctrine for New-Domain Entry, Strategic Replication, Capability Reuse, Expansion Gates, Market Permission & Anti-Fragmentation
@@ -452,18 +453,23 @@ Higher reuse generally strengthens expansion.
 Reuse SHOULD be assessed at several levels.
 
 ## R0 — Cosmetic Reuse
+
 Brand or UI only.
 
 ## R1 — Infrastructure Reuse
+
 Auth, billing, hosting, monitoring.
 
 ## R2 — Capability Reuse
+
 Resolver, events, policy, state, Trust, execution.
 
 ## R3 — Constitutional Reuse
+
 Same canonical semantics and governance.
 
 ## R4 — Cross-Domain Compounding
+
 Value created in one domain strengthens another.
 
 True platform replication becomes more credible as reuse moves upward.
@@ -638,18 +644,23 @@ This connects to `Marketing-011`.
 A candidate domain may occupy one of five states.
 
 ## P0 — Observe
+
 Research only.
 
 ## P1 — Explore
+
 Limited reconnaissance and interviews.
 
 ## P2 — Experiment
+
 Small reversible product/market test.
 
 ## P3 — Establish
+
 Authorized focused entry program.
 
 ## P4 — Scale
+
 Repeatable market evidence supports significant investment.
 
 Movement between states SHALL be evidence-based.
@@ -1665,20 +1676,20 @@ The record should preserve the classification without slowing reversible learnin
 
 A program MAY evaluate:
 
-| Dimension | Core Question |
-|---|---|
-| Problem | Is the Job real? |
-| Buyer | Who acts and pays? |
-| Urgency | Why now? |
-| Reuse | What Zyppi capability transfers? |
-| Semantics | Can canonical meaning remain intact? |
-| Distribution | How will Zyppi enter? |
-| Economics | Can the market sustain the model? |
-| Human Burden | Can the team support it? |
-| Compounding | Does this strengthen the platform? |
-| Fragmentation | Does this create a second system? |
-| Opportunity Cost | What does it delay? |
-| Evidence | What grade supports entry? |
+| Dimension        | Core Question                        |
+| ---------------- | ------------------------------------ |
+| Problem          | Is the Job real?                     |
+| Buyer            | Who acts and pays?                   |
+| Urgency          | Why now?                             |
+| Reuse            | What Zyppi capability transfers?     |
+| Semantics        | Can canonical meaning remain intact? |
+| Distribution     | How will Zyppi enter?                |
+| Economics        | Can the market sustain the model?    |
+| Human Burden     | Can the team support it?             |
+| Compounding      | Does this strengthen the platform?   |
+| Fragmentation    | Does this create a second system?    |
+| Opportunity Cost | What does it delay?                  |
+| Evidence         | What grade supports entry?           |
 
 A score SHALL not override a fatal constitutional conflict.
 
@@ -1794,65 +1805,85 @@ Universal claims remain evidence-bound.
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Architecture creates expansion option value; market evidence creates expansion permission.
 
 ## Invariant 2
+
 Application expansion, segment expansion, market expansion, and domain expansion SHALL remain distinct.
 
 ## Invariant 3
+
 Bootstrap utility proliferation SHALL not be mistaken for multi-domain platform validation.
 
 ## Invariant 4
+
 A new domain SHALL not inherit Commerce buyers, pricing, activation, distribution, or semantics automatically.
 
 ## Invariant 5
+
 Canonical Zyppi concepts SHALL not be silently redefined to fit a domain.
 
 ## Invariant 6
+
 New domains SHOULD reuse constitutional capabilities rather than create parallel systems.
 
 ## Invariant 7
+
 Infrastructure reuse alone SHALL not be treated as universal platform proof.
 
 ## Invariant 8
+
 Material domain entry SHALL require a real problem, buyer, distribution path, economics, and acceptable human burden.
 
 ## Invariant 9
+
 Expansion SHALL not be used to escape unresolved weakness in the establishing market.
 
 ## Invariant 10
+
 A second domain is a platform-validation event, not proof of universality.
 
 ## Invariant 11
+
 Cross-domain compounding SHALL not be claimed until one domain demonstrably increases value in another.
 
 ## Invariant 12
+
 Domain-specific market language MAY vary while canonical meaning remains stable.
 
 ## Invariant 13
+
 High architecture reuse SHALL not override weak market evidence.
 
 ## Invariant 14
+
 High market attractiveness SHALL not automatically override constitutional fragmentation.
 
 ## Invariant 15
+
 Domain expansion SHALL remain subject to explicit opportunity-cost review.
 
 ## Invariant 16
+
 Failed domain experiments SHALL remain preserved as strategic evidence.
 
 ## Invariant 17
+
 Repeated cross-domain failure MAY constitute evidence against the universality thesis and SHALL not be ignored.
 
 ## Invariant 18
+
 Future expansion SHALL proceed through staged permission—Observe, Explore, Experiment, Establish, Scale—rather than assumption.
 
 ---
 
 ## Invariant 19
+
 The term Domain is a governed strategic classification and SHALL not be used to bypass application, segment, market, or expansion gates.
 
 ## Invariant 20
+
 Domain classification governance SHALL remain lightweight for Observe/Explore work and SHALL scale only with strategic consequence.
 
 # 130. Strategic Plan Requirements
@@ -1887,27 +1918,35 @@ If this cannot be stated clearly, domain-entry maturity is insufficient.
 Before scaling a domain, programs SHOULD seek evidence of:
 
 ## Gate R1 — Problem
+
 Real domain problem exists.
 
 ## Gate R2 — Buyer
+
 Reachable actor can adopt or purchase.
 
 ## Gate R3 — Capability Reuse
+
 Core Zyppi capability materially transfers.
 
 ## Gate R4 — Semantic Integrity
+
 Canonical constructs remain coherent.
 
 ## Gate R5 — Activation
+
 Real external domain use occurs.
 
 ## Gate R6 — Retention / Economics
+
 Value persists sustainably.
 
 ## Gate R7 — Replication
+
 The domain is served without disproportionate new platform complexity.
 
 ## Gate R8 — Cross-Domain Compounding
+
 Only where claimed: one domain strengthens another.
 
 ---

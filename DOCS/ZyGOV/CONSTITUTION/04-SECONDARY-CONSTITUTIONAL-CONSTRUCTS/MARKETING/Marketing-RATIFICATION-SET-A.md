@@ -1,4 +1,5 @@
 # Marketing-RATIFICATION-SET-A
+
 # Core Marketing Constitution — Set A Ratification Record
 
 **Status:** **RATIFIED**  

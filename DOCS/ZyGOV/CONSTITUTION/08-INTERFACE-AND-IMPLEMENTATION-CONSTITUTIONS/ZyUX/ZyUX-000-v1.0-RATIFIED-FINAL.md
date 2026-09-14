@@ -13,7 +13,7 @@
 **Normative Level:** Master Doctrine / Series Authority  
 **Governing Authority:** `NORTH STAR v7.0 — Zyppi — Reality Sync` (historical canonical title; continuing authority under `ZUSD-001`)  
 **Coordinates With:** ZRM · Z-PROF · ZYAPI · Authority · Standing · Policy · Evidence · Trust · Security · Privacy · Retention · RI / Runtime · Receipts · ADDRESSING · ZRR  
-**Supersedes for active ZyUX doctrine:** ZyUX v0.1–v0.3 review/correction drafts  
+**Supersedes for active ZyUX doctrine:** ZyUX v0.1–v0.3 review/correction drafts
 
 ---
 
@@ -22,7 +22,6 @@
 This document is an **Unfict-era** ratified document. The canonical `ZyUX-*` identifier is retained to preserve citation, governance, repository, and historical continuity. Legacy documents are cited by their actual historical titles. In active prose, **Unfict** is the master brand.
 
 Brand succession does not alter constitutional meaning. No business, epistemic, Authority, Standing, Policy, Trust, Evidence, Runtime, Receipt, API, or historical semantics are changed merely because the public master brand changed.
-
 
 # 0. Purpose and Constitutional Position
 
@@ -55,7 +54,6 @@ Identity cardinality, Identity relationship topology, referent resolution, Repre
 `ZRM-ID-AMD-001 v0.9.1` may inform future alignment but, while it remains draft, this series SHALL NOT treat it as active law. Ratification of this series does not ratify that amendment.
 
 Accordingly, ZyUX speaks normatively about **Subject continuity, authentication/access continuity, current relationships, current Authority/Standing, disclosure, and historical attribution** without inventing Identity lifecycle law.
-
 
 # 1. Experience Vocabulary
 
@@ -364,6 +362,5 @@ For this document:
 - `MAY` expresses permission;
 - examples, diagrams, journey sketches, and candidate labels are informative unless a binding clause expressly incorporates them;
 - this document governs **experience projection** only and SHALL NOT silently acquire semantics owned by another constitutional authority.
-
 
 **End of `ZyUX-000 v1.0 — RATIFIED — FINAL`**

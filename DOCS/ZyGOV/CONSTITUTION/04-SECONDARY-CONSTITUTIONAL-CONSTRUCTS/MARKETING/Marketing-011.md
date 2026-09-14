@@ -1,4 +1,5 @@
 # Marketing-011
+
 # Zyppi Market Validation, Experiments & Decision Gates
 
 ## Constitutional Doctrine for Real-Market Testing, Experiment Design, Evidence Graduation, Kill Criteria, Decision Gates & Strategic Learning
@@ -234,30 +235,39 @@ Evidence scope SHALL remain bounded.
 The Marketing branch recognizes distinct validation classes.
 
 ## V1 — Problem Validation
+
 Does the problem exist for real actors?
 
 ## V2 — Solution Validation
+
 Does the proposed solution help?
 
 ## V3 — Adoption Validation
+
 Will participants begin real use?
 
 ## V4 — Value Validation
+
 Do participants receive meaningful value?
 
 ## V5 — Economic Validation
+
 Will participants pay or create sufficient economic value?
 
 ## V6 — Retention Validation
+
 Does value persist?
 
 ## V7 — Expansion Validation
+
 Does deeper value repeat or broaden?
 
 ## V8 — Distribution Validation
+
 Can qualified participants be acquired repeatedly?
 
 ## V9 — Moat / Dependence Validation
+
 Does accumulated value create resistance to substitution?
 
 One class SHALL NOT be assumed from another.
@@ -518,24 +528,31 @@ The smallest useful test is preferred.
 The Marketing branch supports progressively more expensive tests.
 
 ## Level X0 — Desk Validation
+
 Research only.
 
 ## Level X1 — Message Test
+
 Landing page, ad, waitlist.
 
 ## Level X2 — Behavior Test
+
 Signup, API request, configuration.
 
 ## Level X3 — Value Test
+
 Real utility or workflow.
 
 ## Level X4 — Payment Test
+
 Real economic commitment.
 
 ## Level X5 — Retention Test
+
 Repeated use/payment.
 
 ## Level X6 — Expansion Test
+
 Deeper or broader adoption.
 
 Experiments SHOULD escalate only as prior risk is reduced.
@@ -936,30 +953,39 @@ Decision Gates prevent endless experimentation without strategic consequence.
 The Marketing branch recognizes:
 
 ## Gate G0 — Research Gate
+
 Enough E2 evidence to justify a real test?
 
 ## Gate G1 — Problem Gate
+
 Problem exists strongly enough?
 
 ## Gate G2 — Adoption Gate
+
 Will users start?
 
 ## Gate G3 — Value Gate
+
 Do users receive value?
 
 ## Gate G4 — Economic Gate
+
 Will expected economic participation occur?
 
 ## Gate G5 — Retention Gate
+
 Does value persist?
 
 ## Gate G6 — Scale Gate
+
 Can distribution and economics repeat?
 
 ## Gate G7 — Expansion Gate
+
 Can deeper value or new buyers emerge?
 
 ## Gate G8 — Defensibility Gate
+
 Does dependence begin to emerge?
 
 Not every program must pass all gates.
@@ -1089,12 +1115,15 @@ Partner logos are not distribution validation.
 Every experiment SHOULD designate:
 
 ## Primary Metric
+
 The behavior most directly tied to the hypothesis.
 
 ## Secondary Metrics
+
 Useful context.
 
 ## Guardrail Metrics
+
 Signals that prevent false success.
 
 Example:
@@ -1715,68 +1744,89 @@ Trust execution WTP
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Research ≠ Experiment ≠ Validation.
 
 ## Invariant 2
+
 Every meaningful experiment SHALL be capable of changing a decision.
 
 ## Invariant 3
+
 Success and failure conditions SHOULD be defined before results.
 
 ## Invariant 4
+
 Null and negative results SHALL be preserved.
 
 ## Invariant 5
+
 Validation is claim-specific and SHALL not exceed the experiment's scope.
 
 ## Invariant 6
+
 Problem, solution, adoption, value, economic, retention, expansion, distribution, and moat validation SHALL remain distinct.
 
 ## Invariant 7
+
 E3 requires real Zyppi market behavior.
 
 ## Invariant 8
+
 E4 requires repeated Zyppi evidence.
 
 ## Invariant 9
+
 The smallest decision-relevant experiment is preferred.
 
 ## Invariant 10
+
 Irreversible commitments require stronger prior evidence than reversible experiments.
 
 ## Invariant 11
+
 A failed hypothesis may be preserved in a different strategic role.
 
 ## Invariant 12
+
 Scaling requires stronger evidence than launching.
 
 ## Invariant 13
+
 Experiment metrics SHALL prioritize behavior over vanity activity.
 
 ## Invariant 14
+
 Experiment ethics SHALL preserve Evidence, Trust, Authority, and consequence boundaries.
 
 ## Invariant 15
+
 Experiment governance SHALL remain lightweight.
 
 ## Invariant 16
+
 Repeated failure of the same core assumption SHALL trigger rework or termination.
 
 ## Invariant 17
+
 Evidence may be promoted or demoted as Reality changes.
 
 ## Invariant 18
+
 No future domain may skip real validation because the platform architecture is universal.
 
 ---
 
 ## Invariant 19
+
 Experiment timeboxes SHALL distinguish Zyppi-controlled learning velocity from external physical, procurement, regulatory, or organizational lead time.
 
 ## Invariant 20
+
 High-consequence institutional experiments SHALL preserve buyer credibility and SHALL NOT depend on materially deceptive fake availability or commercial inconsistency.
 
 ## Invariant 21
+
 Low-consequence experiment logging SHALL not require Council sign-off by default.
 
 # 110. Strategic Plan Requirements

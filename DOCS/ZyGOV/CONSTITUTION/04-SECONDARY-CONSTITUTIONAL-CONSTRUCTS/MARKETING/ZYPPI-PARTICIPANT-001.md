@@ -51,12 +51,12 @@ The central governing question for every participant, in every domain:
 
 For any interaction, Zyppi must be able to separately answer:
 
-| Question | Meaning |
-|---|---|
-| **Who uses?** | Who directly interacts with Zyppi? |
-| **Who benefits?** | Whose work becomes easier or safer? |
-| **Who decides?** | Who grants authority or approves use? |
-| **Who pays?** | Who owns the economic justification? |
+| Question             | Meaning                                           |
+| -------------------- | ------------------------------------------------- |
+| **Who uses?**        | Who directly interacts with Zyppi?                |
+| **Who benefits?**    | Whose work becomes easier or safer?               |
+| **Who decides?**     | Who grants authority or approves use?             |
+| **Who pays?**        | Who owns the economic justification?              |
 | **Who is affected?** | Who or what is subject to the resulting decision? |
 
 One person may occupy several of these roles. They are never assumed to be the same person by default (e.g., a developer who integrates ≠ the compliance officer who sets requirements ≠ the CFO who approves budget ≠ the customer affected by the outcome).
@@ -142,7 +142,7 @@ No privilege appears lower in the delegation graph than what was actually grante
 
 ## 6.3 Authority Is Not a Fixed Org Chart
 
-Organizations, departments, and leadership are **time-bounded structures**, not permanent trees. Departments merge, split, dissolve, or get renamed; leadership changes. Structural mutation changes the *current* structure — it must never rewrite what structure legitimately existed at a past valid time.
+Organizations, departments, and leadership are **time-bounded structures**, not permanent trees. Departments merge, split, dissolve, or get renamed; leadership changes. Structural mutation changes the _current_ structure — it must never rewrite what structure legitimately existed at a past valid time.
 
 ## 6.4 Ownership ≠ Authority ≠ Standing ≠ Role
 
@@ -170,9 +170,9 @@ These rules exist because people, organizations, and authority all change over t
 1. **Identity Persistence** — A participant's canonical Identity persists across employers, roles, geography, authentication methods, and life state.
 2. **Temporal Organizational Structure** — Org/department/leadership mutation (merge, split, dissolve, leadership change) changes current structure without rewriting historical attribution.
 3. **Non-Inheritance of Delegated Authority** — Inheritable rights (property, shares, custody) may transfer through lawful succession; personal, employment, office, or delegated authority does not, unless explicitly re-granted by a governing authority.
-4. **Delegation Revocability Without History Rewrite** — Ending a relationship revokes *future* capability; it does not undo the validity of actions legitimately taken while the delegation was active.
+4. **Delegation Revocability Without History Rewrite** — Ending a relationship revokes _future_ capability; it does not undo the validity of actions legitimately taken while the delegation was active.
 5. **Authentication Independence** — Adding, rotating, suspending, or revoking a credential (email, phone, SSO) never changes the canonical Identity behind it.
-6. **Historical Attribution Without Perpetual Access** — What someone *did* remains permanently attributable to them; what they can still *see* about it is governed separately by current disclosure/retention policy.
+6. **Historical Attribution Without Perpetual Access** — What someone _did_ remains permanently attributable to them; what they can still _see_ about it is governed separately by current disclosure/retention policy.
 7. **Life-State Transition (e.g., Death)** — A life-state change (backed by accumulating Evidence, not a single click) suspends active participation and authority, and may trigger succession for inheritable relationships — but it never erases Identity or rewrites history.
 
 > **Zyppi preserves continuity of Identity while allowing discontinuity of Authority.**
@@ -189,17 +189,17 @@ Throughout this: Company A never sees his cat or Company B; his cat ownership is
 
 These are useful lenses for marketing and UX, layered **on top of** the universal participant model above — not a replacement for it.
 
-| Family | Job | Primary Surface |
-|---|---|---|
-| Technical Implementer (dev/SI/agency) | "Give me a reliable capability I can integrate quickly" | SDK / API / docs |
-| Operational User (warehouse, service, ops) | "Tell me what to do with this item/case" | Host-Native UI |
-| Governance/Compliance User | "Ensure decisions follow rules and can be defended later" | Host-Native + governance console |
-| Host / System Owner (ERP, PIM, WMS admin) | "What are you reading/writing in my system, under what authority?" | Their own system + connection permissions |
-| Organizational Administrator | "Configure Zyppi safely across my org" | Zyppi control plane |
-| Economic Buyer / Executive | "What is this doing for my org, why keep paying?" | Report/dashboard |
-| Auditor / External Authority | "Show me what happened and why, without over-access" | Audit/Receipt portal |
-| AI Agent / Application | "Discover what I'm allowed to do and execute it" | MCP/API |
-| Public Observer | "What is this, can I trust it?" (no account needed) | Public scan/resolution surface |
+| Family                                     | Job                                                                | Primary Surface                           |
+| ------------------------------------------ | ------------------------------------------------------------------ | ----------------------------------------- |
+| Technical Implementer (dev/SI/agency)      | "Give me a reliable capability I can integrate quickly"            | SDK / API / docs                          |
+| Operational User (warehouse, service, ops) | "Tell me what to do with this item/case"                           | Host-Native UI                            |
+| Governance/Compliance User                 | "Ensure decisions follow rules and can be defended later"          | Host-Native + governance console          |
+| Host / System Owner (ERP, PIM, WMS admin)  | "What are you reading/writing in my system, under what authority?" | Their own system + connection permissions |
+| Organizational Administrator               | "Configure Zyppi safely across my org"                             | Zyppi control plane                       |
+| Economic Buyer / Executive                 | "What is this doing for my org, why keep paying?"                  | Report/dashboard                          |
+| Auditor / External Authority               | "Show me what happened and why, without over-access"               | Audit/Receipt portal                      |
+| AI Agent / Application                     | "Discover what I'm allowed to do and execute it"                   | MCP/API                                   |
+| Public Observer                            | "What is this, can I trust it?" (no account needed)                | Public scan/resolution surface            |
 
 ### Anti-Personas (protect the thin-layer thesis)
 
@@ -287,16 +287,16 @@ Kept intentionally varied to prevent the model from silently re-collapsing into 
 
 # 12. Control Entitlement Matrix (Illustrative — Not Final)
 
-| Control | Developer | Ops | Compliance | Admin | Executive | Auditor | Agent |
-|---|---|---|---|---|---|---|---|
-| Invoke capability | ✓ | via host | maybe | ✓ | — | — | ✓ |
-| Connect source | limited | — | — | ✓ | — | — | — |
-| Edit policy | — | — | ✓ | scoped | — | — | — |
-| Override decision | — | scoped | scoped | governed | — | — | — |
-| View Evidence | scoped | relevant | ✓ | ✓ | summarized | scoped | machine-scoped |
-| View Receipt | ✓ | ✓ | ✓ | ✓ | summarized | ✓ | ✓ |
-| Manage users | — | — | — | ✓ | — | — | — |
-| View economics | usage | — | risk | usage | ✓ | audit only | — |
+| Control           | Developer | Ops      | Compliance | Admin    | Executive  | Auditor    | Agent          |
+| ----------------- | --------- | -------- | ---------- | -------- | ---------- | ---------- | -------------- |
+| Invoke capability | ✓         | via host | maybe      | ✓        | —          | —          | ✓              |
+| Connect source    | limited   | —        | —          | ✓        | —          | —          | —              |
+| Edit policy       | —         | —        | ✓          | scoped   | —          | —          | —              |
+| Override decision | —         | scoped   | scoped     | governed | —          | —          | —              |
+| View Evidence     | scoped    | relevant | ✓          | ✓        | summarized | scoped     | machine-scoped |
+| View Receipt      | ✓         | ✓        | ✓          | ✓        | summarized | ✓          | ✓              |
+| Manage users      | —         | —        | —          | ✓        | —          | —          | —              |
+| View economics    | usage     | —        | risk       | usage    | ✓          | audit only | —              |
 
 Values are illustrative placeholders for future UI-permission design, not commitments.
 

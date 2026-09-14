@@ -1,4 +1,5 @@
 # ZYPPI-REALITY-VALIDATION-001
+
 # Distributed Reality, Edge Decision & Empirical Validation Doctrine
 
 ## Authoritative Strategic Doctrine for Defining the Zyppi Pain, Preserving the Thin-Layer Thesis, and Validating Reality Before Belief
@@ -758,7 +759,7 @@ W3C PROV defines provenance as information about entities, activities, and peopl
 **Does Not Prove:** that Zyppi is needed.
 
 **Source:**  
-W3C, *PROV-Overview*, 2013.  
+W3C, _PROV-Overview_, 2013.  
 https://www.w3.org/TR/prov-overview/
 
 ---
@@ -772,7 +773,7 @@ GS1 EPCIS exists to capture and share interoperable visibility information acros
 **Does Not Prove:** that Zyppi should replace EPCIS or own all event data.
 
 **Source:**  
-GS1, *EPCIS & CBV*.  
+GS1, _EPCIS & CBV_.  
 https://www.gs1.org/standards/epcis
 
 ---
@@ -786,7 +787,7 @@ DeHoratius and Raman examined nearly 370,000 inventory records across 37 stores 
 **Does Not Prove:** that every industry has the same rate or that Zyppi solves inventory accuracy.
 
 **Source:**  
-DeHoratius, N. & Raman, A. (2008), *Inventory Record Inaccuracy: An Empirical Analysis*, Management Science 54(4):627–641.  
+DeHoratius, N. & Raman, A. (2008), _Inventory Record Inaccuracy: An Empirical Analysis_, Management Science 54(4):627–641.  
 https://doi.org/10.1287/mnsc.1070.0789
 
 ---
@@ -800,7 +801,7 @@ A later peer-reviewed study using more than 5.25 million inventory items across 
 **Does Not Prove:** that a generalized Trust layer is the optimal remedy.
 
 **Source:**  
-Shabani, A., Maroti, G., de Leeuw, S., Dullaert, W. (2021), *Inventory record inaccuracy and store-level performance*, International Journal of Production Economics 235, 108111.  
+Shabani, A., Maroti, G., de Leeuw, S., Dullaert, W. (2021), _Inventory record inaccuracy and store-level performance_, International Journal of Production Economics 235, 108111.  
 https://doi.org/10.1016/j.ijpe.2021.108111
 
 ---
@@ -814,10 +815,10 @@ FDA reports that outbreak source identification can be slowed by lack of records
 **Does Not Prove:** that Zyppi should become a food traceability platform.
 
 **Sources:**  
-FDA, *CORE 2023 Annual Report*.  
+FDA, _CORE 2023 Annual Report_.  
 https://www.fda.gov/food/outbreaks-foodborne-illness/core-2023-annual-report
 
-FDA, *Tracking and Tracing of Food*.  
+FDA, _Tracking and Tracing of Food_.  
 https://www.fda.gov/food/new-era-smarter-food-safety/tracking-and-tracing-food
 
 ---
@@ -835,7 +836,7 @@ The underlying rules require access controls, data authentication, reliability, 
 **Does Not Prove:** Zyppi demand or differentiation.
 
 **Sources:**  
-European Commission, *The DPP Registry*.  
+European Commission, _The DPP Registry_.  
 https://single-market-economy.ec.europa.eu/single-market/digital-product-passport/dpp-registry_en
 
 Regulation (EU) 2024/1781, EUR-Lex.  
@@ -852,7 +853,7 @@ NIST supply-chain risk guidance describes provenance as recording origin, change
 **Does Not Prove:** Zyppi's particular model.
 
 **Source:**  
-NIST SP 800-161, *Supply Chain Risk Management Practices*.  
+NIST SP 800-161, _Supply Chain Risk Management Practices_.  
 https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-161.pdf
 
 ---
@@ -882,10 +883,10 @@ AWS similarly notes centralized ESB complexity, bottlenecks, latency, specialize
 **Strategic Relevance:** Zyppi must remain a bounded federated decision layer, not recreate the ESB.
 
 **Sources:**  
-IBM, *What Is an Enterprise Service Bus (ESB)?*  
+IBM, _What Is an Enterprise Service Bus (ESB)?_  
 https://www.ibm.com/think/topics/esb
 
-AWS, *What is an Enterprise Service Bus?*  
+AWS, _What is an Enterprise Service Bus?_  
 https://aws.amazon.com/what-is/enterprise-service-bus/
 
 ---
@@ -899,7 +900,7 @@ A 32-month ethnographic MDM study found numerous challenges in bridging organiza
 **Strategic Relevance:** Zyppi SHALL preserve legitimate boundaries rather than assume one canonical “golden record” should replace them.
 
 **Source:**  
-Vilminko-Heikkinen, R. & Pekkola, S. (2017), *Master data management and its organizational implementation*, Journal of Enterprise Information Management 30(3):454–475.  
+Vilminko-Heikkinen, R. & Pekkola, S. (2017), _Master data management and its organizational implementation_, Journal of Enterprise Information Management 30(3):454–475.  
 https://doi.org/10.1108/JEIM-07-2015-0070
 
 ---
@@ -913,7 +914,7 @@ OECD's 2025 analysis estimates counterfeit and pirated goods represented up to 2
 **Does Not Prove:** that Zyppi can detect counterfeit goods, or that provenance alone proves authenticity.
 
 **Source:**  
-OECD, *Mapping Global Trade in Fakes 2025*.  
+OECD, _Mapping Global Trade in Fakes 2025_.  
 https://www.oecd.org/en/publications/mapping-global-trade-in-fakes-2025_94d3b29f-en.html
 
 ---
@@ -2197,19 +2198,19 @@ Ratification SHALL NOT:
 
 # Appendix A — Evidence Seed Register
 
-| ID | Evidence | Source Class | What It Establishes | What It Does NOT Establish |
-|---|---|---|---|---|
-| EB-01 | W3C PROV: provenance supports quality/reliability/trust assessments | Official Standard | Provenance problem exists | Zyppi demand |
-| EB-02 | GS1 EPCIS: interoperable what/when/where/why/how across supply chain | Standard | Distributed event visibility need | Zyppi as event warehouse |
-| EB-03 | 65% of ~370k inventory records inaccurate in one empirical retailer study | Peer-reviewed | Digital vs physical mismatch can be severe | Universal 65% rate |
-| EB-04 | 5.25m-item / 81-store study links record inaccuracy to operations/performance | Peer-reviewed | Operational consequence | Zyppi remedy |
-| EB-05 | FDA cites missing records and non-harmonized data slowing outbreak tracing | Regulator | Cross-party traceability edge is consequential | Zyppi food platform |
-| EB-06 | EU DPP is decentralized; data remains operator responsibility | Regulator / Law | Federation is compatible with regulation | DPP PMF for Zyppi |
-| EB-07 | NIST provenance guidance links origin/change history to supply-chain risk | Government Standard | Provenance has risk value | Zyppi model |
-| EB-08 | NIST AI RMF requires validity/reliability/accountability/transparency | Government Framework | Automated actions need trust governance | Zyppi AI demand |
-| EB-09 | IBM/AWS document centralized ESB bottleneck risks | Industry Technical | Central integration can fail | All ESBs fail |
-| EB-10 | 32-month MDM study finds ownership/alignment/governance challenges | Peer-reviewed | Organizational boundaries matter | Federation always wins |
-| EB-11 | OECD estimates counterfeit trade at material global/EU scale | Intergovernmental Research | Trust/authenticity exposure is economically significant | Zyppi detects counterfeits |
+| ID    | Evidence                                                                      | Source Class               | What It Establishes                                     | What It Does NOT Establish |
+| ----- | ----------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------- | -------------------------- |
+| EB-01 | W3C PROV: provenance supports quality/reliability/trust assessments           | Official Standard          | Provenance problem exists                               | Zyppi demand               |
+| EB-02 | GS1 EPCIS: interoperable what/when/where/why/how across supply chain          | Standard                   | Distributed event visibility need                       | Zyppi as event warehouse   |
+| EB-03 | 65% of ~370k inventory records inaccurate in one empirical retailer study     | Peer-reviewed              | Digital vs physical mismatch can be severe              | Universal 65% rate         |
+| EB-04 | 5.25m-item / 81-store study links record inaccuracy to operations/performance | Peer-reviewed              | Operational consequence                                 | Zyppi remedy               |
+| EB-05 | FDA cites missing records and non-harmonized data slowing outbreak tracing    | Regulator                  | Cross-party traceability edge is consequential          | Zyppi food platform        |
+| EB-06 | EU DPP is decentralized; data remains operator responsibility                 | Regulator / Law            | Federation is compatible with regulation                | DPP PMF for Zyppi          |
+| EB-07 | NIST provenance guidance links origin/change history to supply-chain risk     | Government Standard        | Provenance has risk value                               | Zyppi model                |
+| EB-08 | NIST AI RMF requires validity/reliability/accountability/transparency         | Government Framework       | Automated actions need trust governance                 | Zyppi AI demand            |
+| EB-09 | IBM/AWS document centralized ESB bottleneck risks                             | Industry Technical         | Central integration can fail                            | All ESBs fail              |
+| EB-10 | 32-month MDM study finds ownership/alignment/governance challenges            | Peer-reviewed              | Organizational boundaries matter                        | Federation always wins     |
+| EB-11 | OECD estimates counterfeit trade at material global/EU scale                  | Intergovernmental Research | Trust/authenticity exposure is economically significant | Zyppi detects counterfeits |
 
 ---
 

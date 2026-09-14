@@ -1,4 +1,5 @@
 # Marketing-013
+
 # Zyppi Claims, Messaging & Market Communication Doctrine
 
 ## Constitutional Doctrine for Evidence-Bound Claims, Buyer Messaging, Positioning Expression, Trust Language, Comparative Communication, Investor Narrative & AI-Assisted Market Speech
@@ -264,15 +265,19 @@ They SHALL not be silently converted into current-state claims.
 The Marketing branch recognizes four communication layers.
 
 ## Layer C1 — Immediate Job
+
 What problem is solved now?
 
 ## Layer C2 — Product-System Value
+
 Why is the coherent Zyppi solution better?
 
 ## Layer C3 — Platform Expansion
+
 What deeper capability becomes possible?
 
 ## Layer C4 — North Star
+
 What long-term system is Zyppi intended to become?
 
 The intended audience determines how many layers should be exposed.
@@ -1860,15 +1865,19 @@ Before approving a market message, ask:
 Programs MAY classify claims by consequence.
 
 ## Q0 — Low Consequence
+
 Simple descriptive copy.
 
 ## Q1 — Commercial
+
 Price, feature, performance.
 
 ## Q2 — Strategic
+
 Market, differentiation, traction.
 
 ## Q3 — Consequential
+
 Trust, verification, compliance, security, execution.
 
 Higher classes SHOULD receive stronger review.
@@ -1895,39 +1904,51 @@ The exact approval workflow remains operational.
 # 132. Communication Anti-Patterns
 
 ## Anti-Pattern 1 — Architecture Dump
+
 Explaining the Constitution before the Job.
 
 ## Anti-Pattern 2 — Future-as-Present
+
 Marketing planned capabilities as available.
 
 ## Anti-Pattern 3 — Evidence Inflation
+
 Using stronger language than evidence supports.
 
 ## Anti-Pattern 4 — Trust Washing
+
 Using Trust as vague branding without underlying process.
 
 ## Anti-Pattern 5 — AI Washing
+
 Using AI terminology as empty differentiation.
 
 ## Anti-Pattern 6 — Standards Capture
+
 Implying an open standard requires Zyppi.
 
 ## Anti-Pattern 7 — Regulation Fear
+
 Overstating legal urgency to create demand.
 
 ## Anti-Pattern 8 — Moat Theater
+
 Claiming defensibility from architecture alone.
 
 ## Anti-Pattern 9 — Metric Theater
+
 Using vanity activity as traction.
 
 ## Anti-Pattern 10 — Investor Scenario Mutation
+
 Presenting an upside scenario as forecast.
 
 ## Anti-Pattern 11 — Competitor Straw Man
+
 Comparing Zyppi against an artificially weak alternative.
 
 ## Anti-Pattern 12 — Universal Message
+
 Using one abstract platform message for every buyer.
 
 ---
@@ -1937,68 +1958,89 @@ Using one abstract platform message for every buyer.
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Market claims SHALL not exceed their supporting evidence.
 
 ## Invariant 2
+
 Buyer-facing simplicity MAY compress expression but SHALL not distort meaning.
 
 ## Invariant 3
+
 Entry-stage messaging SHALL prioritize the buyer's immediate Job over universal platform breadth.
 
 ## Invariant 4
+
 Current capability, planned capability, thesis, and scenario SHALL remain distinguishable.
 
 ## Invariant 5
+
 Trust, Evidence, verification, Standing, Authority, execution, Proof, and Receipt SHALL retain their constitutional meanings in market communication.
 
 ## Invariant 6
+
 Telemetry SHALL not be marketed as proof of physical Reality beyond its evidence scope.
 
 ## Invariant 7
+
 AI usage alone SHALL not be treated as differentiation.
 
 ## Invariant 8
+
 Standards or regulations SHALL not be represented as requiring Zyppi unless authoritative evidence supports that claim.
 
 ## Invariant 9
+
 Competitor comparisons SHALL use coherent and current evidence.
 
 ## Invariant 10
+
 Moat, network effect, infrastructure status, and ecosystem claims SHALL remain evidence-bound.
 
 ## Invariant 11
+
 Pricing communication SHALL remain understandable and predictable without requiring buyers to understand the full economic Constitution.
 
 ## Invariant 12
+
 Investor materials SHALL separate current evidence from future thesis and scenarios.
 
 ## Invariant 13
+
 AI-generated marketing SHALL follow identical truth standards to human-generated marketing.
 
 ## Invariant 14
+
 Material false or misleading public claims SHOULD be corrected rather than silently preserved.
 
 ## Invariant 15
+
 Repetition SHALL not transform a hypothesis into fact.
 
 ## Invariant 16
+
 Communication governance SHALL remain proportionate to claim consequence and SHALL not become a publishing bureaucracy.
 
 ## Invariant 17
+
 Bootstrap products SHALL communicate their immediate utility without redefining Zyppi.
 
 ## Invariant 18
+
 Future domains SHALL preserve the same claim-integrity doctrine while using domain-specific buyer language.
 
 ---
 
 ## Invariant 19
+
 Long-cycle B2B communication MAY build Mental Availability among qualified out-of-market buyers and SHALL not be judged solely by immediate activation.
 
 ## Invariant 20
+
 Brand-building communication SHALL remain distinct from E3 product validation.
 
 ## Invariant 21
+
 Low-consequence copy iteration SHALL not require Council pre-approval by default; claim review SHALL scale with consequence.
 
 # 134. Strategic Plan Requirements

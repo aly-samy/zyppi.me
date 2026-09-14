@@ -12,7 +12,7 @@
 **Classification:** Horizontal Experience Doctrine  
 **Normative Level:** Experience Doctrine / Product Architecture  
 **Parent Authority:** `ZyUX-000 v1.0`  
-**Coordinates With:** operative Identity authority · Evidence · Authority · Standing · Policy · Security · Privacy · enterprise IAM · ZYAPI  
+**Coordinates With:** operative Identity authority · Evidence · Authority · Standing · Policy · Security · Privacy · enterprise IAM · ZYAPI
 
 ---
 
@@ -21,7 +21,6 @@
 This document is an **Unfict-era** ratified document. The canonical `ZyUX-*` identifier is retained to preserve citation, governance, repository, and historical continuity. Legacy documents are cited by their actual historical titles. In active prose, **Unfict** is the master brand.
 
 Brand succession does not alter constitutional meaning. No business, epistemic, Authority, Standing, Policy, Trust, Evidence, Runtime, Receipt, API, or historical semantics are changed merely because the public master brand changed.
-
 
 # 0. Scope
 
@@ -40,7 +39,6 @@ Identity cardinality, Identity relationship topology, referent resolution, Repre
 `ZRM-ID-AMD-001 v0.9.1` may inform future alignment but, while it remains draft, this series SHALL NOT treat it as active law. Ratification of this series does not ratify that amendment.
 
 Accordingly, ZyUX speaks normatively about **Subject continuity, authentication/access continuity, current relationships, current Authority/Standing, disclosure, and historical attribution** without inventing Identity lifecycle law.
-
 
 # 1. Core Distinctions
 
@@ -286,6 +284,5 @@ For this document:
 - `MAY` expresses permission;
 - examples, diagrams, journey sketches, and candidate labels are informative unless a binding clause expressly incorporates them;
 - this document governs **experience projection** only and SHALL NOT silently acquire semantics owned by another constitutional authority.
-
 
 **End of `ZyUX-001 v1.0 — RATIFIED — FINAL`**

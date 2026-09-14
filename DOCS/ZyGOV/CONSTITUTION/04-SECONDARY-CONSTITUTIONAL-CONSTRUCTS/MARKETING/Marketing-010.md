@@ -1,4 +1,5 @@
 # Marketing-010
+
 # Zyppi Bootstrap Economics & Adjacent Utility Guardrails
 
 ## Constitutional Doctrine for Early-Stage Survival Revenue, Infrastructure-Native Utilities, Human-Efficiency, Feature-Gravity Protection & Strategic Separation
@@ -1057,18 +1058,23 @@ Brand architecture belongs to Brand governance, but Marketing SHALL track this r
 A Bootstrap Utility may eventually be:
 
 ## Retained
+
 It remains commercially healthy.
 
 ## Absorbed
+
 Its capability becomes part of the core platform.
 
 ## Repositioned
+
 Its market role changes.
 
 ## Sold / Separated
+
 Where strategically appropriate.
 
 ## Retired
+
 It no longer justifies cost.
 
 The Constitution SHALL not require permanent operation.
@@ -1578,17 +1584,20 @@ This prevents one engine's metrics from hiding weakness in another.
 Examples:
 
 ## Core Adoption
+
 - active identities;
 - activation;
 - distribution.
 
 ## Bootstrap
+
 - MRR;
 - paying users;
 - support hours;
 - gross margin.
 
 ## High-Leverage
+
 - workflow/Trust/execution adoption.
 
 Specific metrics belong to `Marketing-012`.
@@ -1634,33 +1643,43 @@ Domain expansion is governed by `Marketing-014`.
 The following are constitutionally discouraged or prohibited.
 
 ## Anti-Pattern 1 — Revenue Panic
+
 Damaging the core acquisition wedge to manufacture immediate cash.
 
 ## Anti-Pattern 2 — Random Micro-SaaS
+
 Building unrelated tools because they appear easy to monetize.
 
 ## Anti-Pattern 3 — Human-Heavy Bootstrap
+
 Using founder time as the hidden cost of low-margin revenue.
 
 ## Anti-Pattern 4 — Feature Gravity
+
 Allowing a thin infrastructure utility to become a full vertical SaaS.
 
 ## Anti-Pattern 5 — Portfolio Explosion
+
 Launching many small tools before one proves economic/operational fit.
 
 ## Anti-Pattern 6 — Revenue Theater
+
 Presenting small utility revenue as proof of core platform validation.
 
 ## Anti-Pattern 7 — Utility Imprisonment
+
 Allowing a successful utility to redefine Zyppi.
 
 ## Anti-Pattern 8 — No Reuse
+
 Investing in adjacent products with weak infrastructure carryover.
 
 ## Anti-Pattern 9 — Bootstrap Forever
+
 Maintaining obsolete utilities because they once helped survival.
 
 ## Anti-Pattern 10 — Services Disguised as Product
+
 Calling founder-heavy implementation a scalable utility business.
 
 ---
@@ -1670,57 +1689,75 @@ Calling founder-heavy implementation a scalable utility business.
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Core Adoption Engine ≠ Bootstrap Cash Engine ≠ High-Leverage Revenue Engine.
 
 ## Invariant 2
+
 Temporary survival economics SHALL not corrupt the permanent market-entry doctrine.
 
 ## Invariant 3
+
 Bootstrap utilities SHALL not redefine Zyppi's constitutional identity.
 
 ## Invariant 4
+
 Infrastructure-native utilities are preferred over unrelated micro-SaaS.
 
 ## Invariant 5
+
 Human attention is a first-class bootstrap economic constraint.
 
 ## Invariant 6
+
 Self-service, low-support activation is strongly preferred during Baby.
 
 ## Invariant 7
+
 A preferred bootstrap utility should ideally produce both cash and reusable platform value.
 
 ## Invariant 8
+
 Feature Gravity SHALL be monitored before and after utility launch.
 
 ## Invariant 9
+
 A utility does not need to convert into the core Commerce market to be valid.
 
 ## Invariant 10
+
 Bootstrap revenue does not validate core-market demand.
 
 ## Invariant 11
+
 Core-market adoption does not validate bootstrap willingness to pay.
 
 ## Invariant 12
+
 Specific utility candidates remain program-level hypotheses until validated.
 
 ## Invariant 13
+
 Utility portfolios SHALL favor shared primitives over unrelated SKU proliferation.
 
 ## Invariant 14
+
 Services revenue and scalable utility revenue SHALL remain distinguishable.
 
 ## Invariant 15
+
 Bootstrap products SHALL be allowed to be retired, absorbed, repositioned, or separated when evidence changes.
 
 ## Invariant 16
+
 Bootstrap success SHALL be evaluated against opportunity cost and strategic distraction.
 
 ## Invariant 17
+
 Specific Bootstrap Utility economics remain subordinate to `ZEA-001` and `Marketing-006`.
 
 ## Invariant 18
+
 Future bootstrap mechanisms SHALL preserve the same separation between survival economics and universal North Star identity.
 
 ---
@@ -1769,24 +1806,31 @@ Kill Condition
 Programs SHOULD seek evidence of:
 
 ## Gate U1 — Utility
+
 Real users receive immediate value.
 
 ## Gate U2 — Self-Service
+
 Users activate without substantial human assistance.
 
 ## Gate U3 — Payment
+
 Real users pay.
 
 ## Gate U4 — Retention
+
 Paid/active use repeats.
 
 ## Gate U5 — Margin
+
 Unit economics remain healthy.
 
 ## Gate U6 — Reuse
+
 Infrastructure carryover is demonstrated.
 
 ## Gate U7 — Low Drag
+
 Support and roadmap burden remain bounded.
 
 ---

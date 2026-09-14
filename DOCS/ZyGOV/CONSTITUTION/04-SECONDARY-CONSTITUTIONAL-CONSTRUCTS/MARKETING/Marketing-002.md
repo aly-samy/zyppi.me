@@ -1,4 +1,5 @@
 # Marketing-002
+
 # Zyppi Market Entry & Trojan Horse Doctrine
 
 ## Constitutional Doctrine for Establishing Markets, Entry Wedges, Focus, Compounding & Strategic Progression
@@ -948,23 +949,23 @@ Current strategic plans SHOULD evaluate candidate wedges against a common scorec
 
 Suggested dimensions:
 
-| Dimension | Question |
-|---|---|
-| User utility | Is the benefit immediate and understandable? |
-| Adoption friction | Can adoption occur quickly? |
-| Human burden | Can it operate self-service? |
-| Marginal COGS | Can Zyppi afford aggressive adoption? |
-| Distribution | Can the wedge spread efficiently? |
-| Competition | How strong are coherent alternatives? |
-| Commodity pressure | Is the capability becoming expected/free? |
-| Durable footprint | What remains after use? |
-| Horizontal compounding | Does participation expand the network? |
-| Vertical compounding | Does it expose deeper capabilities? |
-| Temporal compounding | Does history become more valuable? |
-| Infrastructure reuse | Does it harden reusable Zyppi primitives? |
-| Feature Gravity | Will it pull Zyppi into an adjacent SaaS category? |
-| Revenue compatibility | Can it coexist with ZEA? |
-| Future-domain reuse | Can the underlying capability survive beyond the first market? |
+| Dimension              | Question                                                       |
+| ---------------------- | -------------------------------------------------------------- |
+| User utility           | Is the benefit immediate and understandable?                   |
+| Adoption friction      | Can adoption occur quickly?                                    |
+| Human burden           | Can it operate self-service?                                   |
+| Marginal COGS          | Can Zyppi afford aggressive adoption?                          |
+| Distribution           | Can the wedge spread efficiently?                              |
+| Competition            | How strong are coherent alternatives?                          |
+| Commodity pressure     | Is the capability becoming expected/free?                      |
+| Durable footprint      | What remains after use?                                        |
+| Horizontal compounding | Does participation expand the network?                         |
+| Vertical compounding   | Does it expose deeper capabilities?                            |
+| Temporal compounding   | Does history become more valuable?                             |
+| Infrastructure reuse   | Does it harden reusable Zyppi primitives?                      |
+| Feature Gravity        | Will it pull Zyppi into an adjacent SaaS category?             |
+| Revenue compatibility  | Can it coexist with ZEA?                                       |
+| Future-domain reuse    | Can the underlying capability survive beyond the first market? |
 
 The scorecard guides decisions.
 
@@ -977,24 +978,31 @@ It does not mechanically determine them.
 After attack and evidence review, a candidate may receive:
 
 ## ESTABLISH
+
 Adopt as the current primary market-entry wedge.
 
 ## SUPPORT
+
 Use as a secondary distribution or activation surface.
 
 ## PRESERVE
+
 Keep the capability but not as the primary entry.
 
 ## DEMOTE
+
 Move it to a supporting layer.
 
 ## REWORK
+
 Modify the value proposition, scope, buyer, or economic model.
 
 ## REJECT
+
 Do not rely on it under current evidence.
 
 ## HOLD
+
 Insufficient evidence.
 
 These outcomes SHALL remain auditable under `Marketing-001`.

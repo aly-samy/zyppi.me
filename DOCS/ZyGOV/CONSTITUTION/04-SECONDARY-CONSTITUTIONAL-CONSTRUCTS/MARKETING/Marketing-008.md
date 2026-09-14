@@ -1,4 +1,5 @@
 # Marketing-008
+
 # Zyppi Buyer, Segment & Job Architecture
 
 ## Constitutional Doctrine for Buyer Reality, Jobs-To-Be-Done, Segment Qualification, Buying Centers, Buyer Bridges & Market Prioritization
@@ -201,27 +202,35 @@ The Marketing branch recognizes the following roles.
 One person may occupy more than one role.
 
 ## 6.1 User
+
 The person who directly uses or operates the Zyppi capability.
 
 ## 6.2 Technical Buyer
+
 The actor responsible for determining whether Zyppi is technically acceptable.
 
 ## 6.3 Economic Buyer
+
 The actor with authority over the budget or commercial commitment.
 
 ## 6.4 Operational Buyer
+
 The actor accountable for the operational problem or workflow.
 
 ## 6.5 Approver
+
 An actor whose consent is required.
 
 ## 6.6 Blocker
+
 An actor capable of preventing adoption.
 
 ## 6.7 Champion
+
 An actor who actively advocates for Zyppi inside the organization.
 
 ## 6.8 Beneficiary
+
 An actor who receives value without necessarily using or purchasing Zyppi.
 
 ---
@@ -273,15 +282,19 @@ It may be complex for enterprise execution.
 A market program SHOULD classify buying-center complexity.
 
 ## BC0 — Individual
+
 One actor can decide and act.
 
 ## BC1 — Small Team
+
 A user may require one manager or technical approver.
 
 ## BC2 — Cross-Functional
+
 Multiple functions influence the decision.
 
 ## BC3 — Enterprise Governance
+
 Procurement, security, legal, operations, risk, and executive sponsorship may be required.
 
 Higher complexity increases sales cycle, implementation friction, human-resource burden, and evidence requirements.
@@ -560,20 +573,20 @@ A candidate segment SHOULD be evaluated across:
 
 A plan MAY use:
 
-| Dimension | Core Question |
-|---|---|
-| Pain | Is the problem meaningful? |
-| Urgency | Why act now? |
-| Buyer | Who controls the decision? |
-| Budget | Does a relevant budget exist? |
-| Access | Can Zyppi reach the buyer? |
-| Alternative | What is used today? |
-| Friction | How hard is adoption? |
-| WTP | Is payment plausible/evidenced? |
-| Reuse | Does Zyppi already possess the capability? |
-| Support | How much human effort? |
-| Expansion | Can value deepen? |
-| Compounding | What durable asset remains? |
+| Dimension   | Core Question                              |
+| ----------- | ------------------------------------------ |
+| Pain        | Is the problem meaningful?                 |
+| Urgency     | Why act now?                               |
+| Buyer       | Who controls the decision?                 |
+| Budget      | Does a relevant budget exist?              |
+| Access      | Can Zyppi reach the buyer?                 |
+| Alternative | What is used today?                        |
+| Friction    | How hard is adoption?                      |
+| WTP         | Is payment plausible/evidenced?            |
+| Reuse       | Does Zyppi already possess the capability? |
+| Support     | How much human effort?                     |
+| Expansion   | Can value deepen?                          |
+| Compounding | What durable asset remains?                |
 
 A score SHALL NOT override a fatal buyer problem.
 
@@ -628,15 +641,19 @@ Expansion should not be assumed solely because market size is attractive.
 A Market Program SHOULD distinguish:
 
 ## Core Job
+
 The primary progress sought.
 
 ## Supporting Jobs
+
 Adjacent tasks required to achieve the core job.
 
 ## Emotional Job
+
 How the actor wants to feel.
 
 ## Social / Organizational Job
+
 How the actor wants to be perceived or evaluated.
 
 For infrastructure markets, functional and organizational jobs often dominate.
@@ -1073,18 +1090,23 @@ Participation in an ecosystem does not imply standards-body revenue.
 Programs MAY classify urgency:
 
 ## U0 — No Trigger
+
 Interesting but optional.
 
 ## U1 — Improvement
+
 Useful efficiency.
 
 ## U2 — Operational Need
+
 Clear pain with near-term action.
 
 ## U3 — External Pressure
+
 Customer, channel, audit, or regulation creates deadline.
 
 ## U4 — Critical
+
 Material risk or inability to operate.
 
 The classification guides prioritization.
@@ -1677,57 +1699,75 @@ Distribution channels SHALL be matched to the actual buyer and adoption motion d
 The following are proposed as ratifiable invariants.
 
 ## Invariant 1
+
 Market ≠ Segment ≠ Buyer ≠ User.
 
 ## Invariant 2
+
 A buyer exists only where problem ownership, authority, urgency, and access to resources are sufficiently real.
 
 ## Invariant 3
+
 Every market expression SHALL lead with a specific buyer Job-To-Be-Done.
 
 ## Invariant 4
+
 The universal North Star SHALL not replace entry-stage buyer specificity.
 
 ## Invariant 5
+
 User, technical buyer, economic buyer, approver, blocker, champion, and beneficiary SHALL remain distinguishable.
 
 ## Invariant 6
+
 Capability progression SHALL not be mistaken for a linear buyer journey.
 
 ## Invariant 7
+
 Where buyers change across depth, a Buyer Bridge SHALL be identified rather than assumed.
 
 ## Invariant 8
+
 Pain does not automatically imply budget.
 
 ## Invariant 9
+
 Budget does not automatically imply urgency.
 
 ## Invariant 10
+
 Regulatory or standards pressure does not automatically identify the payer.
 
 ## Invariant 11
+
 Company size and domain labels alone are insufficient segmentation.
 
 ## Invariant 12
+
 A segment should be coherent in Job, buying process, urgency, and alternative.
 
 ## Invariant 13
+
 A beachhead segment is a strategic focus, not constitutional identity.
 
 ## Invariant 14
+
 The entry buyer may differ from the expansion buyer.
 
 ## Invariant 15
+
 Developer-led adoption SHALL not be assumed to produce enterprise purchase without an evidenced Buyer Bridge.
 
 ## Invariant 16
+
 Buyer-facing language may simplify architecture but SHALL preserve truth.
 
 ## Invariant 17
+
 Buyer hypotheses remain evidence-bound under `Marketing-001`.
 
 ## Invariant 18
+
 Future domains SHALL identify their own buyers and jobs rather than inherit Commerce assumptions.
 
 ---
@@ -1767,21 +1807,27 @@ If the program cannot complete that sentence clearly, buyer architecture is not 
 Before scaling a segment, programs SHOULD seek evidence of:
 
 ## Gate B1 — Problem
+
 Real actor experiences the problem.
 
 ## Gate B2 — Adoption
+
 Actor can adopt the solution.
 
 ## Gate B3 — Authority
+
 Buying path is viable.
 
 ## Gate B4 — Payment
+
 Real economic participation occurs where expected.
 
 ## Gate B5 — Retention
+
 Value persists.
 
 ## Gate B6 — Expansion
+
 Buyer Bridge/deeper value repeats where strategically important.
 
 Exact metrics belong to `Marketing-011` and `Marketing-012`.
