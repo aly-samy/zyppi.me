@@ -22,7 +22,9 @@ Sprint 00 has completed a comprehensive, non-mutating reconnaissance of the repo
 - **Total Master Register Records:** 489
 - **Unique Physical SHA256 Hashes:** 455
 - **Exact Duplicate SHA256 Hash Groups:** 5 byte-identical duplicate groups (5 redundant files)
-- **Target Path Collisions:** 0 (100% unique target paths)
+- **Shared-Empty-Placeholder Hash Groups:** 1 group (2 zero-byte files)
+- **Final Target Path Collisions:** 0 (100% unique target paths)
+- **Unresolved Semantic/Path Collisions:** 1 (ZQE-PLAN.md parallel collision set to N/A target path pending S10 reconciliation)
 
 ---
 
@@ -49,14 +51,15 @@ Every record in the register was assigned one of the authorized canonical-state 
 
 | Canonical State          | Physical Files (`FILE`) | Referenced Missing (`REFERENCED_MISSING`) | Total Records |
 | ------------------------ | ----------------------: | ----------------------------------------: | ------------: |
-| `CANONICAL-ACTIVE`       |                     107 |                                         0 |           107 |
-| `DRAFT`                  |                      92 |                                         0 |            92 |
+| `CANONICAL-ACTIVE`       |                     100 |                                         0 |           100 |
+| `CANONICAL-HISTORICAL`   |                       0 |                                         0 |             0 |
+| `DRAFT`                  |                      99 |                                         0 |            99 |
 | `DUPLICATE`              |                       5 |                                         0 |             5 |
-| `EVIDENCE`               |                      75 |                                         0 |            75 |
+| `EVIDENCE`               |                      71 |                                         0 |            71 |
 | `EXPLORATORY`            |                       2 |                                         0 |             2 |
 | `GENERATED-PACK`         |                       4 |                                         0 |             4 |
-| `GOVERNANCE`             |                      15 |                                         0 |            15 |
-| `IMPLEMENTATION`         |                     117 |                                         0 |           117 |
+| `GOVERNANCE`             |                      21 |                                         0 |            21 |
+| `IMPLEMENTATION`         |                     115 |                                         0 |           115 |
 | `REFERENCED-MISSING`     |                       0 |                                        28 |            28 |
 | `SUPERSEDED`             |                       3 |                                         0 |             3 |
 | `UNKNOWN-REQUIRES-CHAIR` |                      41 |                                         0 |            41 |
@@ -103,22 +106,53 @@ Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-
 | `S06`                    | SIOS (07-SIOS) + ARM (10-ARM) + ECONO (11-ECONO) + CMM (12-CMM) Families |                  22 |
 | `S07`                    | Secondary Constructs (Binding, Delegation, Marketing)                    |                  42 |
 | `S08A`                   | Z-PROF Core Specs                                                        |                   9 |
-| `S08B`                   | Z-PROF M08.5 Program Deliverables                                        |                   3 |
+| `S08B`                   | Z-PROF M08.5 Program Deliverables & Parallel Copies                      |                  39 |
 | `S09`                    | Interface Constitutions A (ZyUX, DJ, ZRR, ZYAPI, ZT, DEV-ARCH)           |                  31 |
 | `S10`                    | ZII / ZQE Implementation Constitution                                    |                  30 |
 | `S11`                    | CEngS v2.0 & Commerce Domain                                             |                  23 |
-| `S12`                    | CAW Core Specifications                                                  |                  20 |
+| `S12`                    | CAW Core Specifications                                                  |                  19 |
 | `S13A`                   | CAW AMS Milestones M01–M04                                               |                   9 |
-| `S13B`                   | CAW AMS Milestones M05–M08.5                                             |                 149 |
+| `S13B`                   | CAW AMS Milestones M05–M08.5                                             |                 113 |
 | `S13C`                   | CCP Receipts & Compliance Reports                                        |                  17 |
-| `S14`                    | Reports, Exploratory, Archive & OS Metadata Cleanup                      |                  20 |
+| `S14`                    | Reports, Exploratory, Archive & OS Metadata Cleanup                      |                  21 |
 | **Total Physical Files** |                                                                          |             **461** |
 
 ---
 
-# 7. Confirmation of Non-Mutation
+# 7. Permanent Control-Plane Validation Receipt
 
-It is explicitly declared that during Sprint 00 / S00-R2:
+```text
+================================================================================
+                    DOCS-ORG-S00-R3 VALIDATION RECEIPT
+================================================================================
+Physical FILE Count                              : 461
+REFERENCED_MISSING Count                         : 28
+Total Register Records                           : 489
+Markdown / CSV Record Parity                     : PASSED (100% Equal)
+Valid 64-Hex SHA256 Count                        : 461 / 461
+Valid Size Bytes Count                           : 461 / 461
+Unique Current-Path Count                        : 461 / 461
+Repeated-Hash Group Count                        : 6
+Semantic Duplicate Group Count                   : 5
+Shared-Empty-Placeholder Group Count             : 1
+Unresolved Semantic / Path Collision Count       : 1 (ZQE-PLAN.md)
+Supersession Forward-Link Count                  : 41
+Supersession Inverse-Link Count                  : 1
+DRAFT Records Targeting Final Constitution       : 0
+UNKNOWN Records Targeting Final Constitution     : 0
+EVIDENCE Records Targeting Final Constitution   : 0
+EXPLORATORY Records Targeting REPORTS            : 0
+OS Metadata Records With Migration Target        : 0
+Routine Duplicates With Archive Target           : 0
+Unresolved Chair-Decision Count                  : 4
+================================================================================
+```
+
+---
+
+# 8. Confirmation of Non-Mutation
+
+It is explicitly declared that during Sprint 00 / S00-R3:
 
 - **Zero** existing files beneath `DOCS/**` were moved;
 - **Zero** existing files were renamed;

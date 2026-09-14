@@ -28,7 +28,7 @@ DOCS/
 │   ├── 03-CONSTITUTIONAL-FAMILIES/     # Primary Families (Preserving Canonical Family Identifiers):
 │   │   ├── 01-IDENTITY-CL/             # Identity & Constitutional Ledger Family (S02)
 │   │   ├── 02-WS/                      # World Structure Family (S03)
-│   │   ├── [03-POSITION-GAP]/          # Explicit Topology Gap (Pending Evidence Constitution)
+│   │   # 03 — intentionally unmaterialized; Evidence Constitution referenced but missing
 │   │   ├── 04-POL/                     # Policy Determination Family (S04)
 │   │   ├── 05-SEC/                     # Trust & Evidence Family (S04)
 │   │   ├── 06-RSN/                     # Reasoning & Epistemic Family (S04)
@@ -73,8 +73,8 @@ DOCS/
 │   ├── CEngS/                          # CEngS full-series generated bundles
 │   └── ZII/                            # ZII full-series generated bundles
 │
-├── ARCHIVE/                            # Preserved Historical Records & Cleanup Targets
-│   └── CLEANUP/                        # OS Metadata & Cleanup Artifacts
+├── ARCHIVE/                            # Preserved Historical Records
+│   └── HISTORICAL/                     # Legitimate preserved historical records
 │
 └── _REORG/                             # S00 Migration Control Plane (Authoritative Reports)
     ├── DOCS-ORG-MASTER-REGISTER.md
@@ -138,12 +138,12 @@ The following architectural mappings are marked provisional pending Chair confir
 | `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/07-SIOS/`, `10-ARM/`, `11-ECONO/`, `12-CMM/` | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                        | `S06`          | SIOS, ARM, ECONO, CMM Families                         |
 | `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`                                | `DOCS/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`            | `S07`          | Secondary constructs                                   |
 | `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/`                                                 | `DOCS/CONSTITUTION/05-DOMAIN-COMPOSITION/`                             | `S08A`         | Domain Composition (Z-PROF)                            |
+| `DOCS/M08.5/` & `DOCS/CAW/M08.5/`                                                                | `DOCS/PROGRAMS/ZPROF-M08.5/`                                           | `S08B`         | Z-PROF M08.5 deliverables & parallel copies            |
 | `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/`                         | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/`     | `S09`, `S10`   | Interface & Engine specifications                      |
 | `DOCS/CEngS-v2/CEngS-001...`                                                                     | `DOCS/CONSTITUTION/08-.../ENGINEERING/CEngS/`                          | `S11`          | CEngS-001 Engineering Constitution                     |
 | `DOCS/CEngS-v2/CEngS-002...`                                                                     | `DOCS/GOVERNANCE/ENGINEERING/`                                         | `S11`          | CEngS v2.0 Engineering Governance Standards            |
 | `DOCS/Commerce-Atlas/`                                                                           | `DOCS/CONSTITUTION/06-DOMAIN-CONSTITUTIONS/COMMERCE/`                  | `S11`          | Commerce Domain Constitutions                          |
 | `DOCS/ZII/`                                                                                      | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/` | `S10`          | ZII/ZQE implementation constitution                    |
-| `DOCS/M08.5/`                                                                                    | `DOCS/PROGRAMS/ZPROF-M08.5/`                                           | `S08B`         | Z-PROF M08.5 deliverables                              |
 | `DOCS/CAW/Core/`                                                                                 | `DOCS/PROGRAMS/CAW/CORE/`                                              | `S12`          | Commerce Atlas Wedge Core                              |
 | `DOCS/CAW/AMS/` & `M01-M08`                                                                      | `DOCS/PROGRAMS/CAW/AMS/`                                               | `S13A`, `S13B` | CAW AMS Milestones                                     |
 | `DOCS/CAW/CCP/`                                                                                  | `DOCS/EVIDENCE/CCP-RECEIPTS/`                                          | `S13C`         | Capability Closure Program Receipts                    |
