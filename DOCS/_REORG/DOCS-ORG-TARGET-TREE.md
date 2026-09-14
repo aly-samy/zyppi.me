@@ -25,16 +25,19 @@ DOCS/
 ├── CONSTITUTION/                       # Normative constitutional specifications
 │   ├── 01-FOUNDATION/                  # Declaration & Master Brand (e.g. ZUSD-001)
 │   ├── 02-REALITY-CONSTITUTION/        # Reality Model & Core Law (e.g. ZRM-000..007)
-│   ├── 03-CONSTITUTIONAL-FAMILIES/     # Primary Families (POL, SEC, RSN, PRJ, RI, SIOS, ARM, ECONO, CMM)
-│   │   ├── 01-POL/                     # Policy Determination Family (S04)
-│   │   ├── 02-SEC/                     # Trust & Evidence Family (S04)
-│   │   ├── 03-RSN/                     # Reasoning & Epistemic Family (S04)
-│   │   ├── 04-PRJ/                     # Projection Materialization Family (S05)
-│   │   ├── 05-RI/                      # Runtime Execution Integration Family (S05)
-│   │   ├── 06-SIOS/                    # SIOS Translation Family (S06)
-│   │   ├── 07-ARM/                     # Asset Reality Model Family (S06)
-│   │   ├── 08-ECONO/                   # Economic Architecture Family (S06)
-│   │   └── 09-CMM/                     # Capability Maturity Model Family (S06)
+│   ├── 03-CONSTITUTIONAL-FAMILIES/     # Primary Families (Preserving Canonical Family Identifiers):
+│   │   ├── 01-IDENTITY-CL/             # Identity & Constitutional Ledger Family (S02)
+│   │   ├── 02-WS/                      # World Structure Family (S03)
+│   │   ├── [03-POSITION-GAP]/          # Explicit Topology Gap (Pending Evidence Constitution)
+│   │   ├── 04-POL/                     # Policy Determination Family (S04)
+│   │   ├── 05-SEC/                     # Trust & Evidence Family (S04)
+│   │   ├── 06-RSN/                     # Reasoning & Epistemic Family (S04)
+│   │   ├── 07-SIOS/                    # SIOS Translation Family (S06)
+│   │   ├── 08-PRJ/                     # Projection Materialization Family (S05)
+│   │   ├── 09-RI/                      # Runtime Execution Integration Family (S05)
+│   │   ├── 10-ARM/                     # Asset Reality Model Family (S06)
+│   │   ├── 11-ECONO/                   # Economic Architecture Family (S06)
+│   │   └── 12-CMM/                     # Capability Maturity Model Family (S06)
 │   ├── 04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/ # Secondary constructs (BINDING, DELEGATION, MARKETING)
 │   ├── 05-DOMAIN-COMPOSITION/          # Domain Composition (Z-PROF Profile Architecture)
 │   ├── 06-DOMAIN-CONSTITUTIONS/        # Domain Constitutions
@@ -57,7 +60,9 @@ DOCS/
 │
 ├── EVIDENCE/                           # Verifiable Receipts, Audits, & Compliance Reports
 │   ├── CCP-RECEIPTS/                   # Capability Closure Program (CCP) Receipts
-│   └── MILESTONE-AUDITS/               # Formal Verification Reports & EVR Reports
+│   ├── ZII/                            # ZII/ZQE Program Evidence & SRR Records
+│   ├── ZPROF-M08.5/                    # Z-PROF M08.5 EVR & Audit Evidence
+│   └── CAW/                            # CAW Milestone Evidence & Audits
 │
 ├── REPORTS/                            # Executive Reports, State-of-Union, & Context Papers
 │
@@ -68,8 +73,8 @@ DOCS/
 │   ├── CEngS/                          # CEngS full-series generated bundles
 │   └── ZII/                            # ZII full-series generated bundles
 │
-├── ARCHIVE/                            # Preserved Historical Records & Consolidation Targets
-│   └── DUPLICATES/                     # Consolidated Exact Byte-Identical Redundant Duplicates
+├── ARCHIVE/                            # Preserved Historical Records & Cleanup Targets
+│   └── CLEANUP/                        # OS Metadata & Cleanup Artifacts
 │
 └── _REORG/                             # S00 Migration Control Plane (Authoritative Reports)
     ├── DOCS-ORG-MASTER-REGISTER.md
@@ -121,20 +126,24 @@ The following architectural mappings are marked provisional pending Chair confir
 
 # 4. Major Tree Mapping Matrix
 
-| Current Directory                                                        | Target Directory                                                       | Primary Sprint | Rationale                                              |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------------------- | -------------- | ------------------------------------------------------ |
-| `DOCS/ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md`                        | `DOCS/CONSTITUTION/01-FOUNDATION/`                                     | `S01`          | Governing master brand succession declaration ZUSD-001 |
-| `DOCS/ZyGOV/CONSTITUTION/01-FOUNDATION/`                                 | `DOCS/CONSTITUTION/01-FOUNDATION/`                                     | `S01`          | Foundation constitutional layer                        |
-| `DOCS/ZyGOV/CONSTITUTION/02-REALITY-CONSTITUTION/`                       | `DOCS/CONSTITUTION/02-REALITY-CONSTITUTION/`                           | `S02`          | Reality Model (ZRM) specs                              |
-| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                    | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                        | `S03`..`S06`   | Primary constitutional families                        |
-| `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`        | `DOCS/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`            | `S07`          | Secondary constructs                                   |
-| `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/`                         | `DOCS/CONSTITUTION/05-DOMAIN-COMPOSITION/`                             | `S08A`         | Domain Composition (Z-PROF)                            |
-| `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/` | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/`     | `S09`, `S10`   | Interface & Engine specifications                      |
-| `DOCS/CEngS-v2/CEngS-001...`                                             | `DOCS/CONSTITUTION/08-.../ENGINEERING/CEngS/`                          | `S11`          | CEngS-001 Engineering Constitution                     |
-| `DOCS/CEngS-v2/CEngS-002...`                                             | `DOCS/GOVERNANCE/ENGINEERING/`                                         | `S11`          | CEngS v2.0 Engineering Governance Standards            |
-| `DOCS/Commerce-Atlas/`                                                   | `DOCS/CONSTITUTION/06-DOMAIN-CONSTITUTIONS/COMMERCE/`                  | `S11`          | Commerce Domain Constitutions                          |
-| `DOCS/ZII/`                                                              | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/` | `S10`          | ZII/ZQE implementation constitution                    |
-| `DOCS/M08.5/`                                                            | `DOCS/PROGRAMS/ZPROF-M08.5/`                                           | `S08B`         | Z-PROF M08.5 deliverables                              |
-| `DOCS/CAW/Core/`                                                         | `DOCS/PROGRAMS/CAW/CORE/`                                              | `S12`          | Commerce Atlas Wedge Core                              |
-| `DOCS/CAW/AMS/` & `M01-M08`                                              | `DOCS/PROGRAMS/CAW/AMS/`                                               | `S13A`, `S13B` | CAW AMS Milestones                                     |
-| `DOCS/CAW/CCP/`                                                          | `DOCS/EVIDENCE/CCP-RECEIPTS/`                                          | `S13C`         | Capability Closure Program Receipts                    |
+| Current Directory                                                                                | Target Directory                                                       | Primary Sprint | Rationale                                              |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | -------------- | ------------------------------------------------------ |
+| `DOCS/ZYPPI-UNFICT-SUCCESSION-DECLARATION-001.md`                                                | `DOCS/CONSTITUTION/01-FOUNDATION/`                                     | `S01`          | Governing master brand succession declaration ZUSD-001 |
+| `DOCS/ZyGOV/CONSTITUTION/01-FOUNDATION/`                                                         | `DOCS/CONSTITUTION/01-FOUNDATION/`                                     | `S01`          | Foundation constitutional layer                        |
+| `DOCS/ZyGOV/CONSTITUTION/02-REALITY-CONSTITUTION/`                                               | `DOCS/CONSTITUTION/02-REALITY-CONSTITUTION/`                           | `S02`          | Reality Model (ZRM) specs                              |
+| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/01-IDENTITY-CL/`                             | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/01-IDENTITY-CL/`         | `S02`          | Identity & Constitutional Ledger                       |
+| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/02-WS/`                                      | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/02-WS/`                  | `S03`          | World Structure Family                                 |
+| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/04-POL/`, `05-SEC/`, `06-RSN/`               | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                        | `S04`          | POL, SEC, RSN Families                                 |
+| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/08-PRJ/`, `09-RI/`                           | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                        | `S05`          | PRJ & RI Families                                      |
+| `DOCS/ZyGOV/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/07-SIOS/`, `10-ARM/`, `11-ECONO/`, `12-CMM/` | `DOCS/CONSTITUTION/03-CONSTITUTIONAL-FAMILIES/`                        | `S06`          | SIOS, ARM, ECONO, CMM Families                         |
+| `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`                                | `DOCS/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/`            | `S07`          | Secondary constructs                                   |
+| `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/`                                                 | `DOCS/CONSTITUTION/05-DOMAIN-COMPOSITION/`                             | `S08A`         | Domain Composition (Z-PROF)                            |
+| `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/`                         | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/`     | `S09`, `S10`   | Interface & Engine specifications                      |
+| `DOCS/CEngS-v2/CEngS-001...`                                                                     | `DOCS/CONSTITUTION/08-.../ENGINEERING/CEngS/`                          | `S11`          | CEngS-001 Engineering Constitution                     |
+| `DOCS/CEngS-v2/CEngS-002...`                                                                     | `DOCS/GOVERNANCE/ENGINEERING/`                                         | `S11`          | CEngS v2.0 Engineering Governance Standards            |
+| `DOCS/Commerce-Atlas/`                                                                           | `DOCS/CONSTITUTION/06-DOMAIN-CONSTITUTIONS/COMMERCE/`                  | `S11`          | Commerce Domain Constitutions                          |
+| `DOCS/ZII/`                                                                                      | `DOCS/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/` | `S10`          | ZII/ZQE implementation constitution                    |
+| `DOCS/M08.5/`                                                                                    | `DOCS/PROGRAMS/ZPROF-M08.5/`                                           | `S08B`         | Z-PROF M08.5 deliverables                              |
+| `DOCS/CAW/Core/`                                                                                 | `DOCS/PROGRAMS/CAW/CORE/`                                              | `S12`          | Commerce Atlas Wedge Core                              |
+| `DOCS/CAW/AMS/` & `M01-M08`                                                                      | `DOCS/PROGRAMS/CAW/AMS/`                                               | `S13A`, `S13B` | CAW AMS Milestones                                     |
+| `DOCS/CAW/CCP/`                                                                                  | `DOCS/EVIDENCE/CCP-RECEIPTS/`                                          | `S13C`         | Capability Closure Program Receipts                    |

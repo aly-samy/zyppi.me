@@ -49,17 +49,17 @@ Every record in the register was assigned one of the authorized canonical-state 
 
 | Canonical State          | Physical Files (`FILE`) | Referenced Missing (`REFERENCED_MISSING`) | Total Records |
 | ------------------------ | ----------------------: | ----------------------------------------: | ------------: |
-| `CANONICAL-ACTIVE`       |                     199 |                                         0 |           199 |
-| `DRAFT`                  |                      39 |                                         0 |            39 |
+| `CANONICAL-ACTIVE`       |                     107 |                                         0 |           107 |
+| `DRAFT`                  |                      92 |                                         0 |            92 |
 | `DUPLICATE`              |                       5 |                                         0 |             5 |
-| `EVIDENCE`               |                      70 |                                         0 |            70 |
+| `EVIDENCE`               |                      75 |                                         0 |            75 |
 | `EXPLORATORY`            |                       2 |                                         0 |             2 |
 | `GENERATED-PACK`         |                       4 |                                         0 |             4 |
-| `GOVERNANCE`             |                      11 |                                         0 |            11 |
+| `GOVERNANCE`             |                      15 |                                         0 |            15 |
 | `IMPLEMENTATION`         |                     117 |                                         0 |           117 |
 | `REFERENCED-MISSING`     |                       0 |                                        28 |            28 |
 | `SUPERSEDED`             |                       3 |                                         0 |             3 |
-| `UNKNOWN-REQUIRES-CHAIR` |                      11 |                                         0 |            11 |
+| `UNKNOWN-REQUIRES-CHAIR` |                      41 |                                         0 |            41 |
 | **Total**                |                 **461** |                                    **28** |       **489** |
 
 ---
@@ -93,32 +93,32 @@ Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-
 
 # 6. FILE Semantic Sprint Allocation
 
-| Sprint                   | Semantic Scope                                                 | Physical File Count |
-| ------------------------ | -------------------------------------------------------------- | ------------------: |
-| `S01`                    | Foundation & Brand Succession                                  |                  19 |
-| `S02`                    | Reality Model (ZRM)                                            |                   9 |
-| `S03`                    | World Structure                                                |                  84 |
-| `S04`                    | POL / SEC / RSN Families                                       |                   0 |
-| `S05`                    | PRJ / RI Families                                              |                   0 |
-| `S06`                    | SIOS / ARM / ECONO / CMM Families                              |                   0 |
-| `S07`                    | Secondary Constructs (Binding, Delegation, Marketing)          |                  42 |
-| `S08A`                   | Z-PROF Core Specs                                              |                   9 |
-| `S08B`                   | Z-PROF M08.5 Program Deliverables                              |                   3 |
-| `S09`                    | Interface Constitutions A (ZyUX, DJ, ZRR, ZYAPI, ZT, DEV-ARCH) |                  31 |
-| `S10`                    | ZII / ZQE Implementation Constitution                          |                  30 |
-| `S11`                    | CEngS v2.0 & Commerce Domain                                   |                  23 |
-| `S12`                    | CAW Core Specifications                                        |                  20 |
-| `S13A`                   | CAW AMS Milestones M01–M04                                     |                   9 |
-| `S13B`                   | CAW AMS Milestones M05–M08.5                                   |                 149 |
-| `S13C`                   | CCP Receipts & Compliance Reports                              |                  17 |
-| `S14`                    | Reports, Exploratory, Archive & Packs                          |                  16 |
-| **Total Physical Files** |                                                                |             **461** |
+| Sprint                   | Semantic Scope                                                           | Physical File Count |
+| ------------------------ | ------------------------------------------------------------------------ | ------------------: |
+| `S01`                    | Foundation & Brand Succession                                            |                  17 |
+| `S02`                    | Reality Model (ZRM) + Identity / CL Family                               |                  14 |
+| `S03`                    | World Structure Family (02-WS) only                                      |                  29 |
+| `S04`                    | POL (04-POL) + SEC (05-SEC) + RSN (06-RSN) Families                      |                  11 |
+| `S05`                    | PRJ (08-PRJ) + RI (09-RI) Families                                       |                  15 |
+| `S06`                    | SIOS (07-SIOS) + ARM (10-ARM) + ECONO (11-ECONO) + CMM (12-CMM) Families |                  22 |
+| `S07`                    | Secondary Constructs (Binding, Delegation, Marketing)                    |                  42 |
+| `S08A`                   | Z-PROF Core Specs                                                        |                   9 |
+| `S08B`                   | Z-PROF M08.5 Program Deliverables                                        |                   3 |
+| `S09`                    | Interface Constitutions A (ZyUX, DJ, ZRR, ZYAPI, ZT, DEV-ARCH)           |                  31 |
+| `S10`                    | ZII / ZQE Implementation Constitution                                    |                  30 |
+| `S11`                    | CEngS v2.0 & Commerce Domain                                             |                  23 |
+| `S12`                    | CAW Core Specifications                                                  |                  20 |
+| `S13A`                   | CAW AMS Milestones M01–M04                                               |                   9 |
+| `S13B`                   | CAW AMS Milestones M05–M08.5                                             |                 149 |
+| `S13C`                   | CCP Receipts & Compliance Reports                                        |                  17 |
+| `S14`                    | Reports, Exploratory, Archive & OS Metadata Cleanup                      |                  20 |
+| **Total Physical Files** |                                                                          |             **461** |
 
 ---
 
 # 7. Confirmation of Non-Mutation
 
-It is explicitly declared that during Sprint 00 / S00-R1:
+It is explicitly declared that during Sprint 00 / S00-R2:
 
 - **Zero** existing files beneath `DOCS/**` were moved;
 - **Zero** existing files were renamed;
