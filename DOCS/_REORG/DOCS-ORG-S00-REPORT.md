@@ -54,12 +54,12 @@ Every record in the register was assigned one of the authorized canonical-state 
 | ------------------------ | ----------------------: | ----------------------------------------: | ------------: |
 | `CANONICAL-ACTIVE`       |                      99 |                                         0 |            99 |
 | `CANONICAL-HISTORICAL`   |                       0 |                                         0 |             0 |
-| `DRAFT`                  |                      98 |                                         0 |            98 |
+| `DRAFT`                  |                      97 |                                         0 |            97 |
 | `DUPLICATE`              |                       5 |                                         0 |             5 |
 | `EVIDENCE`               |                      71 |                                         0 |            71 |
 | `EXPLORATORY`            |                       2 |                                         0 |             2 |
 | `GENERATED-PACK`         |                       4 |                                         0 |             4 |
-| `GOVERNANCE`             |                      21 |                                         0 |            21 |
+| `GOVERNANCE`             |                      22 |                                         0 |            22 |
 | `IMPLEMENTATION`         |                     115 |                                         0 |           115 |
 | `REFERENCED-MISSING`     |                       0 |                                        28 |            28 |
 | `SUPERSEDED`             |                       5 |                                         0 |             5 |
@@ -124,7 +124,7 @@ Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-
 
 ```text
 ================================================================================
-                    DOCS-ORG-S00-R4 VALIDATION RECEIPT
+                    DOCS-ORG-S00-R5 VALIDATION RECEIPT
 ================================================================================
 Physical FILE Count                              : 461
 REFERENCED_MISSING Count                         : 28
@@ -137,9 +137,10 @@ Repeated-Hash Group Count                        : 6
 Semantic Duplicate Group Count                   : 5
 Shared-Empty-Placeholder Group Count             : 1
 Unresolved Semantic / Path Collision Count       : 1 (ZQE-PLAN.md)
-Supersedes Count                                 : 43
-Superseded_By Count                              : 3
-Resolved Physical Supersession Pairs             : 5
+Supersedes Non-N/A Record Count                  : 40
+Superseded_By Non-N/A Record Count               : 3
+SUPERSEDED Canonical-State Record Count          : 5
+Resolved Bidirectional Physical Supersession Pairs: 3
 DRAFT -> Constitution Target Count               : 0
 UNKNOWN -> Constitution Target Count             : 0
 EVIDENCE -> Constitution Target Count           : 0
@@ -154,7 +155,7 @@ Unresolved Chair-Decision Count                  : 4
 
 # 8. Confirmation of Non-Mutation
 
-It is explicitly declared that during Sprint 00 / S00-R4:
+It is explicitly declared that during Sprint 00 / S00-R5:
 
 - **Zero** existing files beneath `DOCS/**` were moved;
 - **Zero** existing files were renamed;

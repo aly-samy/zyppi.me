@@ -52,6 +52,7 @@ DOCS/
 │
 ├── GOVERNANCE/                         # Operational & Engineering Governance
 │   ├── ENGINEERING/                    # Engineering Governance Standards (CEngS-002..105, Checklists)
+│   ├── MARKETING/                      # Marketing Branch Charters & Governance Plans (Marketing-PLAN-1Y-001)
 │   └── CONSTITUTIONAL-DEVELOPMENT/     # Ratification support, workshop records, & candidate drafts
 │
 ├── PROGRAMS/                           # Active & Historical Program Execution Tracks
@@ -73,8 +74,14 @@ DOCS/
 │   ├── CEngS/                          # CEngS full-series generated bundles
 │   └── ZII/                            # ZII full-series generated bundles
 │
-└── ARCHIVE/                            # Preserved Historical Records
-    └── HISTORICAL/                     # Legitimate preserved historical records
+├── ARCHIVE/                            # Preserved Historical Records
+│   └── HISTORICAL/                     # Legitimate preserved historical records
+│
+└── _REORG/                             # Temporary migration control plane; retained through S15 and dispositioned only by Global Closure
+    ├── DOCS-ORG-MASTER-REGISTER.md
+    ├── DOCS-ORG-MASTER-REGISTER.csv
+    ├── DOCS-ORG-TARGET-TREE.md
+    └── DOCS-ORG-S00-REPORT.md
 ```
 
 ---
@@ -106,6 +113,8 @@ Under the proposed taxonomy, all files are grouped into 9 clean top-level direct
 - `DOCS/EXPLORATORY/`
 - `DOCS/PACKS/`
 - `DOCS/ARCHIVE/`
+
+Note: `DOCS/_REORG/` serves as the temporary migration control plane, retained through S15 and dispositioned only by Global Closure.
 
 ## 3.3 Unresolved Chair Decisions
 
