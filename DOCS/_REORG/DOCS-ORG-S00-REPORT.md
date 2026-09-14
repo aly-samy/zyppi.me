@@ -21,7 +21,8 @@ Sprint 00 has completed a comprehensive, non-mutating reconnaissance of the repo
 - **Referenced-Missing Artifacts (`record_type = REFERENCED_MISSING`):** 28
 - **Total Master Register Records:** 489
 - **Unique Physical SHA256 Hashes:** 455
-- **Exact Duplicate SHA256 Hash Groups:** 5 byte-identical duplicate groups (5 redundant files)
+- **Repeated-Hash Groups:** 6 groups
+- **Semantic Duplicate Groups:** 5 groups (2 same-directory redundant copies, 3 cross-tree duplicate groups)
 - **Shared-Empty-Placeholder Hash Groups:** 1 group (2 zero-byte files)
 - **Final Target Path Collisions:** 0 (100% unique target paths)
 - **Unresolved Semantic/Path Collisions:** 1 (ZQE-PLAN.md parallel collision set to N/A target path pending S10 reconciliation)
@@ -51,9 +52,9 @@ Every record in the register was assigned one of the authorized canonical-state 
 
 | Canonical State          | Physical Files (`FILE`) | Referenced Missing (`REFERENCED_MISSING`) | Total Records |
 | ------------------------ | ----------------------: | ----------------------------------------: | ------------: |
-| `CANONICAL-ACTIVE`       |                     100 |                                         0 |           100 |
+| `CANONICAL-ACTIVE`       |                      99 |                                         0 |            99 |
 | `CANONICAL-HISTORICAL`   |                       0 |                                         0 |             0 |
-| `DRAFT`                  |                      99 |                                         0 |            99 |
+| `DRAFT`                  |                      98 |                                         0 |            98 |
 | `DUPLICATE`              |                       5 |                                         0 |             5 |
 | `EVIDENCE`               |                      71 |                                         0 |            71 |
 | `EXPLORATORY`            |                       2 |                                         0 |             2 |
@@ -61,19 +62,19 @@ Every record in the register was assigned one of the authorized canonical-state 
 | `GOVERNANCE`             |                      21 |                                         0 |            21 |
 | `IMPLEMENTATION`         |                     115 |                                         0 |           115 |
 | `REFERENCED-MISSING`     |                       0 |                                        28 |            28 |
-| `SUPERSEDED`             |                       3 |                                         0 |             3 |
+| `SUPERSEDED`             |                       5 |                                         0 |             5 |
 | `UNKNOWN-REQUIRES-CHAIR` |                      41 |                                         0 |            41 |
 | **Total**                |                 **461** |                                    **28** |       **489** |
 
 ---
 
-# 4. Exact Duplicate Groups Analysis
+# 4. Exact Duplicate Groups Analysis (Programmatically Derived From Register)
 
-1. **CEngS Documentation Standard:** `DOCS/CEngS-v2/CEngS-105-Documentation-Standard-1.md` is an exact byte-identical copy of `DOCS/CEngS-v2/CEngS-105-Documentation-Standard.md` (SHA256 `df66efef11d603eef5cd2ef975eaae1d41bcbf8b6256ff99eeef7c7a38753239`).
-2. **Z-PROF D5 Revision 2:** `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R2.md` is a byte-identical duplicate of `DOCS/CAW/M08.5/Z-PROF-D5-R2.md` (SHA256 `c42d7721ccdd715e45c4aa0fe1f148d42d3ad2ef3be5b072049d5ef06efedda9`).
-3. **Z-PROF D5 Revision 3:** `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R3.md` is a byte-identical duplicate of `DOCS/CAW/M08.5/Z-PROF-D5-R3.md` (SHA256 `555356e0e457f9edb6b856dcbb42ce91238eb76fbe652077983ea1c9b60997ee`).
-4. **ZQE Plan Ratification Record:** `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` is a byte-identical duplicate of `DOCS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` (SHA256 `8e0b0aa2ad23c5ce17e4fcfccfce3f773cd7c644d6dbbc38f65cc947dd8f5661`).
-5. **Marketing 005:** `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005 (1).md` is a byte-identical duplicate of `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005.md` (SHA256 `4eff676d72f0bc333c1f20108dbddf2f01fbd00fb953538bdac7636e16f73dbd`).
+1. **CEngS Documentation Standard:** `DOCS/CEngS-v2/CEngS-105-Documentation-Standard-1.md` is an exact byte-identical copy of `DOCS/CEngS-v2/CEngS-105-Documentation-Standard.md` (SHA256 `df66efef11d6593fa8e380a168d6eb2270eddf33763a06d79dcdfe48452d7dda`).
+2. **Z-PROF D5 Revision 2 (Cross-Tree):** `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R2.md` is a byte-identical duplicate of `DOCS/CAW/M08.5/Z-PROF-D5-R2.md` (SHA256 `c42d7721ccdd2c859cd72f663d1e31d4746857624e62f82c9f366e8c69d1fc6d`). Assigned to `S08B` with action `HOLD_DUPLICATE_PENDING_S08B_PRIMARY_SOURCE_DETERMINATION`.
+3. **Z-PROF D5 Revision 3 (Cross-Tree):** `DOCS/ZyGOV/CONSTITUTION/05-DOMAIN-COMPOSITION/Z-PROF/Z-PROF-D5-R3.md` is a byte-identical duplicate of `DOCS/CAW/M08.5/Z-PROF-D5-R3.md` (SHA256 `555356e0e45724743bcc9b658141e8643b6ee65d48d5b96746f29ec9fd861e88`). Assigned to `S08B` with action `HOLD_DUPLICATE_PENDING_S08B_PRIMARY_SOURCE_DETERMINATION`.
+4. **ZQE Plan Ratification Record (Cross-Tree):** `DOCS/ZyGOV/CONSTITUTION/08-INTERFACE-AND-IMPLEMENTATION-CONSTITUTIONS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` is a byte-identical duplicate of `DOCS/ZII/ZQE/ZQE-PLAN-v0.2-RATIFICATION-RECORD.md` (SHA256 `8e0b0aa2ad23b68fe3c579037cbb3604ed407eae730586062f4197bfcee88441`). Assigned to `S10` with action `HOLD_DUPLICATE_PENDING_S10_PRIMARY_SOURCE_DETERMINATION`.
+5. **Marketing 005:** `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005 (1).md` is a byte-identical duplicate of `DOCS/ZyGOV/CONSTITUTION/04-SECONDARY-CONSTITUTIONAL-CONSTRUCTS/MARKETING/Marketing-005.md` (SHA256 `4eff676d72f0f3eaf640ce553087083d4b214cee27d692183c2cc6f3e5372f91`). Assigned to `S14` cleanup.
 
 Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-M00-SRR-v1.0-CLOSED-PASS.md`) share SHA256 `e3b0c442...` as unmaterialized placeholders but are treated as distinct non-duplicate records.
 
@@ -98,7 +99,7 @@ Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-
 
 | Sprint                   | Semantic Scope                                                           | Physical File Count |
 | ------------------------ | ------------------------------------------------------------------------ | ------------------: |
-| `S01`                    | Foundation & Brand Succession                                            |                  17 |
+| `S01`                    | Foundation & Brand Succession                                            |                  15 |
 | `S02`                    | Reality Model (ZRM) + Identity / CL Family                               |                  14 |
 | `S03`                    | World Structure Family (02-WS) only                                      |                  29 |
 | `S04`                    | POL (04-POL) + SEC (05-SEC) + RSN (06-RSN) Families                      |                  11 |
@@ -106,15 +107,15 @@ Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-
 | `S06`                    | SIOS (07-SIOS) + ARM (10-ARM) + ECONO (11-ECONO) + CMM (12-CMM) Families |                  22 |
 | `S07`                    | Secondary Constructs (Binding, Delegation, Marketing)                    |                  42 |
 | `S08A`                   | Z-PROF Core Specs                                                        |                   9 |
-| `S08B`                   | Z-PROF M08.5 Program Deliverables & Parallel Copies                      |                  39 |
+| `S08B`                   | Z-PROF M08.5 Program Deliverables & Parallel Copies                      |                  41 |
 | `S09`                    | Interface Constitutions A (ZyUX, DJ, ZRR, ZYAPI, ZT, DEV-ARCH)           |                  31 |
-| `S10`                    | ZII / ZQE Implementation Constitution                                    |                  30 |
+| `S10`                    | ZII / ZQE Implementation Constitution                                    |                  31 |
 | `S11`                    | CEngS v2.0 & Commerce Domain                                             |                  23 |
 | `S12`                    | CAW Core Specifications                                                  |                  19 |
 | `S13A`                   | CAW AMS Milestones M01–M04                                               |                   9 |
 | `S13B`                   | CAW AMS Milestones M05–M08.5                                             |                 113 |
 | `S13C`                   | CCP Receipts & Compliance Reports                                        |                  17 |
-| `S14`                    | Reports, Exploratory, Archive & OS Metadata Cleanup                      |                  21 |
+| `S14`                    | Reports, Exploratory, Archive & OS Metadata Cleanup                      |                  20 |
 | **Total Physical Files** |                                                                          |             **461** |
 
 ---
@@ -123,12 +124,12 @@ Note: Zero-byte empty files (`DOCS/CAW/AMS/AMS-0309.md` and `DOCS/ZyGOV/.../ZQE-
 
 ```text
 ================================================================================
-                    DOCS-ORG-S00-R3 VALIDATION RECEIPT
+                    DOCS-ORG-S00-R4 VALIDATION RECEIPT
 ================================================================================
 Physical FILE Count                              : 461
 REFERENCED_MISSING Count                         : 28
 Total Register Records                           : 489
-Markdown / CSV Record Parity                     : PASSED (100% Equal)
+Full-Field Markdown / CSV Schema Parity          : PASSED (100% Equal, 25 columns)
 Valid 64-Hex SHA256 Count                        : 461 / 461
 Valid Size Bytes Count                           : 461 / 461
 Unique Current-Path Count                        : 461 / 461
@@ -136,14 +137,15 @@ Repeated-Hash Group Count                        : 6
 Semantic Duplicate Group Count                   : 5
 Shared-Empty-Placeholder Group Count             : 1
 Unresolved Semantic / Path Collision Count       : 1 (ZQE-PLAN.md)
-Supersession Forward-Link Count                  : 41
-Supersession Inverse-Link Count                  : 1
-DRAFT Records Targeting Final Constitution       : 0
-UNKNOWN Records Targeting Final Constitution     : 0
-EVIDENCE Records Targeting Final Constitution   : 0
-EXPLORATORY Records Targeting REPORTS            : 0
-OS Metadata Records With Migration Target        : 0
-Routine Duplicates With Archive Target           : 0
+Supersedes Count                                 : 43
+Superseded_By Count                              : 3
+Resolved Physical Supersession Pairs             : 5
+DRAFT -> Constitution Target Count               : 0
+UNKNOWN -> Constitution Target Count             : 0
+EVIDENCE -> Constitution Target Count           : 0
+EXPLORATORY -> REPORTS Target Count              : 0
+OS Metadata Migration-Target Count               : 0
+Cross-Tree Duplicates Prematurely Authorized     : 0
 Unresolved Chair-Decision Count                  : 4
 ================================================================================
 ```
@@ -152,7 +154,7 @@ Unresolved Chair-Decision Count                  : 4
 
 # 8. Confirmation of Non-Mutation
 
-It is explicitly declared that during Sprint 00 / S00-R3:
+It is explicitly declared that during Sprint 00 / S00-R4:
 
 - **Zero** existing files beneath `DOCS/**` were moved;
 - **Zero** existing files were renamed;

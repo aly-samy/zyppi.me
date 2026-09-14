@@ -73,14 +73,8 @@ DOCS/
 │   ├── CEngS/                          # CEngS full-series generated bundles
 │   └── ZII/                            # ZII full-series generated bundles
 │
-├── ARCHIVE/                            # Preserved Historical Records
-│   └── HISTORICAL/                     # Legitimate preserved historical records
-│
-└── _REORG/                             # S00 Migration Control Plane (Authoritative Reports)
-    ├── DOCS-ORG-MASTER-REGISTER.md
-    ├── DOCS-ORG-MASTER-REGISTER.csv
-    ├── DOCS-ORG-TARGET-TREE.md
-    └── DOCS-ORG-S00-REPORT.md
+└── ARCHIVE/                            # Preserved Historical Records
+    └── HISTORICAL/                     # Legitimate preserved historical records
 ```
 
 ---
