@@ -8,8 +8,8 @@
 **Repository:** `aly-samy/zyppi.me`
 **Starting Baseline `main` HEAD:** `ec8f9f844a103876b861b27e4c0cfe1e1a207330`
 **Internal Workspace Branch:** `jules-2231564512655673891-63e89383`
-**Submitted Branch:** `docs/s08a-zprof-core-migration`
-**Pull Request:** PR #152
+**Submitted Branch:** `docs/s08a-zprof-core-migration-2231564512655673891`
+**Pull Request:** PR #151
 **Final Outcome:** `OUTCOME A — S08A COMPLETE`
 
 ---
