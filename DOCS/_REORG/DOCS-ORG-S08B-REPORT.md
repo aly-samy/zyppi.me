@@ -7,7 +7,8 @@
 **Execution Date:** 17 September 2026
 **Repository:** `aly-samy/zyppi.me`
 **Starting Baseline `main` HEAD:** `6014354e6d4fb576c92dfda7bd4cbe11e6bf3a46`
-**Submitted Branch:** `docs/s08b-zprof-m08.5-reconciliation`
+**Internal Workspace Branch:** `jules-16329340082001167339-60b50933`
+**Submitted Branch:** `docs/s08b-zprof-m08.5-reconciliation-16329340082001167339`
 **Pull Request:** PR #152
 **Final Outcome:** `OUTCOME A — S08B COMPLETE`
 
