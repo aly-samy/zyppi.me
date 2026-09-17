@@ -7,7 +7,9 @@
 **Execution Date:** 17 September 2026
 **Repository:** `aly-samy/zyppi.me`
 **Starting Baseline `main` HEAD:** `08b02dd7db0783895b376e49397cda1327604bea`
-**Submitted Branch:** `docs/s06-sios-arm-econo-cmm-migration`
+**Internal Workspace Branch:** `docs/s06-sios-arm-econo-cmm-migration`
+**Submitted Branch:** `docs/s06-sios-arm-econo-cmm-migration-10319549873224396612`
+**Pull Request:** PR #149
 **Final Outcome:** `OUTCOME A — S06 COMPLETE`
 
 ---
