@@ -8,7 +8,9 @@
 **Repository:** `aly-samy/zyppi.me`
 **Execution Date:** 2026-09-17
 **Starting Baseline `main` HEAD:** `f6f446ba67d73a67a0341db21c52306b74cf41f6`
-**Execution Branch:** `jules-8211307370410906604-848713f2`
+**Internal Workspace Branch:** `jules-8211307370410906604-848713f2`
+**Submitted PR Branch:** `docs-s05-prj-ri-semantic-migration` (`docs-s05-prj-ri-semantic-migration-8211307370410906604`)
+**Pull Request:** PR #147
 **Outcome Status:** `OUTCOME A — S05 COMPLETE`
 **Final Return Status:** `S05 COMPLETE — READY FOR CHAIR CLOSURE REVIEW`
 
@@ -24,7 +26,8 @@
 
 2. **Repository Baseline:**
    - Observed starting `main` HEAD: `f6f446ba67d73a67a0341db21c52306b74cf41f6`.
-   - Execution branch: `jules-8211307370410906604-848713f2`.
+   - Internal workspace branch: `jules-8211307370410906604-848713f2`.
+   - Submitted GitHub PR branch: `docs-s05-prj-ri-semantic-migration` (PR #147).
    - Working tree state prior to migration: 100% clean.
 
 ---
@@ -110,11 +113,22 @@ Both `UNKNOWN-REQUIRES-CHAIR` artifacts remain physically untouched in their ori
 
 ---
 
-## 8. Protected-Scope Verification
+## 8. Protected-Scope Verification & Execution Exception Disclosure
 
 - **Control-Plane Artifacts:** `S00` through `S04` reports, Master Register (`csv`/`md`), and Target Tree verified 100% unchanged.
 - **S06+ Artifacts Moved:** 0
-- **Semantic / Source Formatting Edits:** 0
+- **Committed Semantic / Source Formatting Edits:** 0
+
+### Protected-Scope Execution Exception Disclosure
+
+During validation/formatting activity prior to initial submission, transient working-tree modifications were detected in four out-of-scope files:
+
+- `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase.html`
+- `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase-metadata.json`
+- `packages/testing/replay/receipts/latest.json`
+- `tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json`
+
+All four files were fully restored to their baseline content (`git restore`) prior to commit. The committed Git state confirms zero out-of-scope modifications exist in the S05 PR diff. This disclosure is recorded for provenance and audit completeness.
 
 ---
 
@@ -132,6 +146,8 @@ Both `UNKNOWN-REQUIRES-CHAIR` artifacts remain physically untouched in their ori
 ## 10. Final Submission State
 
 - **Starting `main` HEAD:** `f6f446ba67d73a67a0341db21c52306b74cf41f6`
-- **Execution Branch:** `jules-8211307370410906604-848713f2`
+- **Internal Workspace Branch:** `jules-8211307370410906604-848713f2`
+- **Submitted PR Branch:** `docs-s05-prj-ri-semantic-migration` (`docs-s05-prj-ri-semantic-migration-8211307370410906604`)
+- **Pull Request:** PR #147
 - **Outcome:** `OUTCOME A — S05 COMPLETE`
 - **Final Return Status:** `S05 COMPLETE — READY FOR CHAIR CLOSURE REVIEW`
