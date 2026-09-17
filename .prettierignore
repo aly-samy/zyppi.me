@@ -4,3 +4,6 @@ build/
 coverage/
 *.tsbuildinfo
 packages/domain/benchmarks/receipts/latest.json
+DOCS/ZyGOV/
+DOCS/ZII/ZQE/evidence/fqr1/
+tools/zqe/mobile/android/app/src/androidTest/assets/

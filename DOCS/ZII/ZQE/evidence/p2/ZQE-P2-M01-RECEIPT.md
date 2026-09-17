@@ -12,6 +12,7 @@
 ---
 
 ## 1. Baseline Context
+
 - **Mandate ID:** `AMS-ZQE-P2-M01-TYPE-FOUNDATION-01`
 - **Initial main HEAD SHA:** `42bf4864e5b73a77191ddeadfa97a0a751ad97d1`
 - **Working Tree:** Clean pre-change baseline
@@ -22,14 +23,16 @@
 ---
 
 ## 2. Production Changes
-| Path | Change | Why Required |
-|---|---|---|
+
+| Path                                | Change                                                                                                                          | Why Required                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `packages/qr-core/src/m03/types.ts` | Introduced `export type QrEcc = "L" \| "M" \| "Q" \| "H";`; generalized `version`, `size`, and `errorCorrection` on `QrSymbol`. | Establish generalized QR technical type foundation representing future Model 2 Versions 1–40 and ECC L/M/Q/H. |
-| `packages/qr-core/src/index.ts` | Re-exported `QrEcc` from `./m03/types.js`. | Expose canonical `QrEcc` type on public package boundary of `@zyppi/qr-core`. |
+| `packages/qr-core/src/index.ts`     | Re-exported `QrEcc` from `./m03/types.js`.                                                                                      | Expose canonical `QrEcc` type on public package boundary of `@zyppi/qr-core`.                                 |
 
 ---
 
 ## 3. Public Type Surface Audit
+
 ```text
 QrEcc: "L" | "M" | "Q" | "H"
 QrMask: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
@@ -43,6 +46,7 @@ ZqeProfileId: "zqe/fqr1"
 ---
 
 ## 4. Behavioral Non-Expansion Audit
+
 - **Supported production profile(s):** `"zqe/fqr1"` ONLY
 - **Compiler Version output:** `3` ONLY
 - **Compiler ECC output:** `"M"` ONLY
@@ -53,13 +57,14 @@ ZqeProfileId: "zqe/fqr1"
 ---
 
 ## 5. FQR-1 Compatibility Verification
-| Fixture | Pre-change Identity | Post-change Identity | Result |
-|---|---|---|---|
-| **Fixture A** (Payload length 0) | Mask 3, 29×29, ECC M | Mask 3, 29×29, ECC M | PASS (Identical) |
-| **Fixture B** (Payload length 11) | Mask 5, 29×29, ECC M | Mask 5, 29×29, ECC M | PASS (Identical) |
-| **Fixture C** (Payload length 42) | Mask 6, 29×29, ECC M | Mask 6, 29×29, ECC M | PASS (Identical) |
+
+| Fixture                           | Pre-change Identity              | Post-change Identity             | Result           |
+| --------------------------------- | -------------------------------- | -------------------------------- | ---------------- |
+| **Fixture A** (Payload length 0)  | Mask 3, 29×29, ECC M             | Mask 3, 29×29, ECC M             | PASS (Identical) |
+| **Fixture B** (Payload length 11) | Mask 5, 29×29, ECC M             | Mask 5, 29×29, ECC M             | PASS (Identical) |
+| **Fixture C** (Payload length 42) | Mask 6, 29×29, ECC M             | Mask 6, 29×29, ECC M             | PASS (Identical) |
 | **Fixture D** (Payload length 43) | Deterministic capacity rejection | Deterministic capacity rejection | PASS (Identical) |
-| **Fixture E** (Payload length 20) | Mask 1, 29×29, ECC M | Mask 1, 29×29, ECC M | PASS (Identical) |
+| **Fixture E** (Payload length 20) | Mask 1, 29×29, ECC M             | Mask 1, 29×29, ECC M             | PASS (Identical) |
 
 - **Matrix Identies / Hashes:** Byte-identical across all fixtures.
 - **Canonical SVG Hashes:** Byte-identical across all rendered SVGs.
@@ -69,18 +74,20 @@ ZqeProfileId: "zqe/fqr1"
 ---
 
 ## 6. Test Evidence & Results
-| Command / Gate | Result | Exact Detail |
-|---|---|---|
-| `pnpm exec vitest run packages/qr-core/test/m01.test.ts` | PASS | 7/7 unit & type-representability tests pass |
-| `pnpm exec vitest run packages/qr-core packages/qr-svg tools/zqe` | PASS | 85/85 tests pass across 8 files |
-| `pnpm governance:validate` | PASS | Runtime purity, package boundary, dependency graph, domain isolation, and governance tests pass |
-| `pnpm lint` | PASS | Zero ESLint errors |
-| `pnpm format:check` | PASS | Target modified files formatted properly |
-| `pnpm exec tsc -b` | PASS | Clean TypeScript compilation across all projects |
+
+| Command / Gate                                                    | Result | Exact Detail                                                                                    |
+| ----------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| `pnpm exec vitest run packages/qr-core/test/m01.test.ts`          | PASS   | 7/7 unit & type-representability tests pass                                                     |
+| `pnpm exec vitest run packages/qr-core packages/qr-svg tools/zqe` | PASS   | 85/85 tests pass across 8 files                                                                 |
+| `pnpm governance:validate`                                        | PASS   | Runtime purity, package boundary, dependency graph, domain isolation, and governance tests pass |
+| `pnpm lint`                                                       | PASS   | Zero ESLint errors                                                                              |
+| `pnpm format:check`                                               | PASS   | Target modified files formatted properly                                                        |
+| `pnpm exec tsc -b`                                                | PASS   | Clean TypeScript compilation across all projects                                                |
 
 ---
 
 ## 7. Dependency & Governance Audit
+
 - **`@zyppi/qr-core` production dependencies:** `NONE` (Workspace dependencies: 0)
 - **`@zyppi/qr-svg` production dependencies:** `[@zyppi/qr-core]` ONLY
 - **Package boundary:** Verified via `node tools/verify-package-boundary.mjs`
@@ -90,6 +97,7 @@ ZqeProfileId: "zqe/fqr1"
 ---
 
 ## 8. Final Scope Audit
+
 - **Unauthorized files changed:** 0
 - **Unauthorized behavioral expansion:** NONE
 - **Semantic dependencies introduced:** NONE
