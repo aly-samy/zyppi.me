@@ -7,7 +7,9 @@
 **Execution Date:** 17 September 2026
 **Repository:** `aly-samy/zyppi.me`
 **Starting Baseline `main` HEAD:** `b0252d9dcd41aa2dcc6d248255caf0a4ab0ebe8e`
-**Submitted Branch:** `jules-13916907058446722595-44000461`
+**Internal Workspace Branch:** `jules-13916907058446722595-44000461`
+**Submitted Branch:** `docs/s07-secondary-constructs-migration-13916907058446722595`
+**Pull Request:** PR #150
 **Final Outcome:** `OUTCOME A — S07 COMPLETE`
 
 ---
