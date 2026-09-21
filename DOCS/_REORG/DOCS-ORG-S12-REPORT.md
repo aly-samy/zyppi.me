@@ -10,8 +10,10 @@
 **Actual Starting Baseline HEAD:** `a8f50f85af48ff880dac68f9e3f908889d7b3555`
 **S11 Prerequisite Proof:** PR #155 merged into `main` at `a8f50f85af48ff880dac68f9e3f908889d7b3555`; `DOCS/_REORG/DOCS-ORG-S11-REPORT.md` records `OUTCOME A — S11 COMPLETE`
 **Internal Workspace Branch:** `jules-12395405114965161681-f9798a06`
-**Submitted GitHub Branch:** `docs/s12-caw-core-migration`
-**PR Number / Title:** PR pending / `docs: migrate S12 CAW core corpus`
+**Submitted GitHub Branch:** `docs/s12-caw-core-migration-12395405114965161681`
+**PR Number:** `#156`
+**PR URL:** `https://github.com/aly-samy/zyppi.me/pull/156`
+**Tested Head SHA:** `c61dd3823b0c57f6754b9bd9db08ee0fa98fd650`
 **Final Outcome:** `OUTCOME A — S12 COMPLETE`
 
 ---
@@ -21,6 +23,14 @@
 - **Work-Item ID:** `DOCS-ORG-S12-MANDATE-01`
 - **Starting Baseline Commit:** `a8f50f85af48ff880dac68f9e3f908889d7b3555`
 - **S11 Prerequisite Verification:** S11 PR #155 merge verified on `main` branch. Merged commit is `a8f50f85af48ff880dac68f9e3f908889d7b3555`. S11 execution report on `main` (`DOCS/_REORG/DOCS-ORG-S11-REPORT.md`) confirms `OUTCOME A — S11 COMPLETE`.
+- **Actual Input Versions Verified:**
+  - Node.js: `v20.19.0` (runner active `v22.22.1` with engine warning)
+  - pnpm: `10.30.3`
+  - TypeScript: `5.9.3`
+  - Vitest: `4.1.10`
+  - Prettier: `3.9.6`
+  - ESLint: `9.39.5`
+- **Execution Dependency Sequence:** S00 Master Register lifecycle classifications → S11 verified merge at `a8f50f85af48ff880dac68f9e3f908889d7b3555` → S12 preflight collision & hash check → 19 exact `git mv` renames → workspace quality gates execution & transient cleanup → report materialization & review.
 - **Governing Inputs Read:**
   1. `DOCS-ORG-S12-MANDATE-01`
   2. `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.csv` & `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.md`
@@ -41,11 +51,15 @@
 
 ---
 
-## 3. Lifecycle Classification Split
+## 3. Lifecycle Classification Split & Integrity Proofs
 
 - **CANONICAL-ACTIVE:** 17 files moved to `DOCS/PROGRAMS/CAW/CORE/`
 - **SUPERSEDED:** 2 files moved to `DOCS/ARCHIVE/CAW/`
 - **Total Physical Relocations:** 19 pure renames
+- **Blob, Byte Size & Mode Equality:** All 19 destination Git blobs, raw byte sizes, and file permissions (`100644`) equal their baseline sources byte-for-byte.
+- **Whole-Tree Comparison:** All 737 other tracked files in the repository remain 100% unchanged, including both immediate S14 exclusions (`CAW-Full-at-M03.md` and `_CAW-004-Repository-Map.md`) and all 139 nested files under `DOCS/CAW/`.
+- **Physical & Register Gap Proof:** Exactly zero missing physical S12 sources were encountered, zero S12 `REFERENCED_MISSING` records exist in S00, and zero duplicate removals or consolidations occurred.
+- **Source Path / Coarse Map Discrepancy:** The coarse target-tree diagram in S00 named a `DOCS/CAW/Core/` directory that did not physically exist at baseline. The exact register rows and physical files governed execution: sources were located directly under `DOCS/CAW/`.
 
 ---
 
@@ -94,33 +108,56 @@
 ## 6. Preflight & Integrity Verification Results
 
 - **Target Collision Preflight:** PASSED (All 19 destination target paths were absent prior to migration).
-- **Reference Integrity Scan:** PASSED (Read-only scan identified 92 legacy provenance references across historical specs, master registers, and Z-PROF evidence records; zero executable source code, config, or CI script dependencies were impacted or broken).
 - **CAW-001 Identity Preservation:** `DOCS/GOVERNANCE/ENGINEERING/CAW-001.md` (DRAFT, hash `cdd23e7b...`) and moved `DOCS/PROGRAMS/CAW/CORE/CAW-001-Wedge-Vision.md` (CANONICAL-ACTIVE, hash `ebb30bda...`) remain completely distinct without merging or identity confusion.
 - **OPEN-001 / RR Authority Preservation:** Kept as active program records without answering open questions or rerouting review records to evidence directories.
 - **Protected-Boundary Audit:** PASSED (Zero changes to S00 control plane, prior sprint reports, prior migrated corpus, S10 holds, 2 S14 exclusions, 139 nested CAW files, source code, tests, or workflows).
 
 ---
 
-## 7. Transient Drift Disclosure
+## 7. Reference Ledger & Dependency Analysis
 
-- **Observed Transient Drift:** Running test suites (`pnpm test` / `pnpm run ci`) generated transient showcase assets under `DOCS/ZII/ZQE/evidence/fqr1/` (`payload-b-showcase.svg`, `.html`, `-metadata.json`) via `tools/zqe/m06/showcase-print-helper.test.ts`, as well as transient modifications to `packages/testing/replay/receipts/latest.json` and `tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json`.
-- **Restoration Action Taken:** Un-tracked showcase files were removed and modified files were restored (`git checkout` / `git restore`) prior to commit.
-- **Final Protected-Scope Drift:** Zero.
+- **Counting Methodology:** A read-only repository-wide text scan across all tracked files for occurrences of S12 source paths (`DOCS/CAW/<filename>`) and individual S12 filenames (`CAW-000...` through `RR-CAW-011-001.md`) yielded exactly 92 reference matches.
+- **Exact Retained Stale-Reference Examples (per Mandate §8):**
+  - `DOCS/CAW/M05/M05-PLAN.md` references the legacy CAW-011 roadmap authority path (`DOCS/CAW/CAW-011-Build-Order.md`).
+  - `DOCS/CAW/AMS/AMS-0308.md` references legacy CAW-002 (`DOCS/CAW/CAW-002-System-Architecture.md`) and CAW-003 (`DOCS/CAW/CAW-003-Domain-Model.md`) paths.
+  - `DOCS/CAW/_CAW-004-Repository-Map.md` (S14 superseded record) points to legacy active CAW-004 path (`DOCS/CAW/CAW-004-Repository-Map.md`).
+  - `DOCS/EVIDENCE/ZPROF-M08.5/AMS-0856-EVR.md` records legacy CAW-011 and CAW-012 (`DOCS/CAW/CAW-012-AI-Mandates.md`) inspection paths.
+  - `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.csv` & `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.md` contain legacy source path entries for historical provenance tracking.
+- **Documentary vs. Executable Distinction:** All 92 matched references are historical documentary/provenance references. A scan across non-DOCS tracked files (source code, TypeScript files, JSON configs, GitHub Actions workflows) returned 0 matches, confirming zero active executable dependencies or build scripts were broken by the migration.
 
 ---
 
-## 8. Quality Gate Validation Results
+## 8. Transient Drift Disclosure
 
-1. `pnpm format:check` — PASSED
+- **Observed Transient Drift Paths:** Running test suites (`pnpm test` / `pnpm run ci`) generated transient showcase assets and modified local state files:
+  1. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase.svg`
+  2. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase.html`
+  3. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase-metadata.json`
+     (generated during unit testing by `tools/zqe/m06/showcase-print-helper.test.ts`)
+  4. `packages/testing/replay/receipts/latest.json`
+  5. `tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json`
+- **Restoration Action Taken:** Un-tracked showcase files were removed (`git rm -f` / `rm`) and modified files were restored (`git checkout` / `git restore`) prior to commit submission.
+- **Drift Statements:**
+  - Observed Transient Drift: Present during test execution.
+  - Final Protected-Scope Drift: Zero.
+
+---
+
+## 9. Quality Gate Validation Results & CI Evidence
+
+1. `pnpm format:check` — PASSED (100% formatted with Prettier)
 2. `pnpm lint` — PASSED
 3. `pnpm exec tsc -b` — PASSED
-4. `pnpm governance:validate` — PASSED
+4. `pnpm governance:validate` — PASSED (runtime purity, package boundaries, dependency graph validator, domain isolation, RGT governance tests all PASS)
 5. `pnpm test` (unit & static suite) — PASSED (61 test files, 1,636 tests green)
 6. `pnpm run ci` — PASSED
+7. **Accessible CI Evidence:**
+   - GitHub Actions Run #884: `https://github.com/aly-samy/zyppi.me/actions/runs/35568755281`
+   - Verified Tested Head SHA: `c61dd3823b0c57f6754b9bd9db08ee0fa98fd650`
 
 ---
 
-## 9. Final Path State Summary
+## 10. Final Path State Summary
 
 - **Moved Files:** 19 pure renames (`R100`)
 - **New Report File:** 1 (`DOCS/_REORG/DOCS-ORG-S12-REPORT.md`)
