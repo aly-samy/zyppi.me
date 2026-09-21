@@ -4,11 +4,11 @@
 **Mandate Date:** 17 September 2026
 **Authority:** Founder / Chair
 **Execution Agent:** Jules — Google AI Software Engineer
-**Execution Date:** 17 September 2026
+**Execution Date:** 21 September 2026
 **Repository:** `aly-samy/zyppi.me`
 **Starting Baseline `main` HEAD:** `16f9a37721178fffda0ec79f3b6beef164119cd9`
 **Internal Workspace Branch:** `jules-13247733442643878845-99520bcd`
-**Submitted Branch:** `docs/s09-interface-constitutions-a-migration`
+**Submitted Branch:** `docs/s09-interface-constitutions-a-migration-13247733442643878845`
 **Pull Request:** PR #153
 **Final Outcome:** `OUTCOME A — S09 COMPLETE`
 
@@ -159,7 +159,7 @@ The only newly authored artifact is `DOCS/_REORG/DOCS-ORG-S09-REPORT.md`.
 
 ---
 
-## 9. Validation Suite Execution
+## 9. Validation Suite Execution & Transient Drift Disclosure
 
 All workspace quality gates passed green:
 
@@ -172,7 +172,16 @@ pnpm test                # PASS (all test suites green)
 pnpm run ci              # PASS (CI pipeline green)
 ```
 
-Zero transient validation drift occurred.
+### Transient Validation Drift Disclosure
+
+During execution of the test suite (`pnpm test` / Vitest), test runner execution generated transient updates in four out-of-scope files:
+
+1. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase-metadata.json`
+2. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase.html`
+3. `packages/testing/replay/receipts/latest.json`
+4. `tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json`
+
+In accordance with execution rules, all four transient drift files were identified, verified as out-of-scope test artifacts, and restored via `git restore` exactly to their starting S09 baseline before commit and submission. Final protected-scope drift is zero.
 
 ---
 
