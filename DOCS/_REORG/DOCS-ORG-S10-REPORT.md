@@ -3,15 +3,16 @@
 ## Sprint S10 Execution Report — ZII / ZQE Corpus Migration, Collision Reconciliation & Missing-Artifact Ledger
 
 **Mandate ID:** `DOCS-ORG-S10-MANDATE-01`
+**Mandate Date:** 21 September 2026
 **Execution Date:** 21 September 2026
 **Execution Authority:** Founder / Chair
 **Execution Agent:** Jules — Google AI Software Engineer
 **Repository:** `aly-samy/zyppi.me`
 **Starting Baseline `main` Commit:** `50179843b59ce8737e18e1f9859e4dcdf3119c7c`
 **Internal Workspace Branch:** `jules-13872716720301850272-5099eb3f`
-**Submitted GitHub Branch:** `docs/s10-zii-zqe-reconciliation`
+**Submitted GitHub Branch:** `docs/s10-zii-zqe-reconciliation-13872716720301850272`
 **PR Title:** `docs: reconcile S10 ZII and ZQE corpus`
-**PR Number:** `N/A` (Pending pull request submission)
+**PR Number:** PR #154
 **Final Outcome:** `OUTCOME A — S10 COMPLETE`
 
 ---
@@ -223,16 +224,20 @@ Prior to executing moves, all 26 target destination paths were pre-checked. Zero
 
 A repository-wide read-only scan for relocated source paths confirmed:
 
-- Zero active code, test, script, or workflow dependencies reference the legacy S10 paths.
+- No **blocking** legacy-path dependency requiring code/config/script modification was found.
+- `tools/zqe/m06/showcase-print-helper.test.ts` provides the legacy output directory `DOCS/ZII/ZQE/evidence/fqr1` to `generateShowcasePrintHelper()`.
+- Validation execution therefore regenerated transient untracked showcase files under that legacy path during test execution.
+- Those files were removed under the explicit authorization of Section 15 of `DOCS-ORG-S10-MANDATE-01`.
+- No implementation or configuration change was required, and final protected-scope drift is zero.
 - References in historical control plane files (`DOCS-ORG-MASTER-REGISTER.csv`, `DOCS-ORG-MASTER-REGISTER.md`, `DOCS-ORG-S00-REPORT.md`) are historical provenance records preserved intentionally.
 
 ---
 
 ## 12. Transient Validation Drift Disclosure
 
-Validation execution (`pnpm test`, `pnpm run ci`) generated transient showcase output files under `DOCS/ZII/ZQE/evidence/fqr1/` (`payload-b-showcase-metadata.json`, `payload-b-showcase.html`, `payload-b-showcase.svg`) due to the test helper script `tools/zqe/m06/showcase-print-helper.ts`.
+Validation execution (`pnpm test`, `pnpm run ci`) executed `tools/zqe/m06/showcase-print-helper.test.ts`, which passes the legacy path `DOCS/ZII/ZQE/evidence/fqr1` to the helper `generateShowcasePrintHelper()` in `tools/zqe/m06/showcase-print-helper.ts`. This generated transient showcase output files (`payload-b-showcase-metadata.json`, `payload-b-showcase.html`, `payload-b-showcase.svg`) at that path.
 
-- **Identification:** The transiently generated files appeared under the old legacy path `DOCS/ZII/ZQE/evidence/fqr1/` as untracked files following test execution.
+- **Identification:** The transiently generated files appeared under the legacy path `DOCS/ZII/ZQE/evidence/fqr1/` as untracked files following test execution.
 - **Action Taken:** In strict compliance with Section 15 of `DOCS-ORG-S10-MANDATE-01`, all newly generated transient copies were removed prior to commit.
 - **Canonical Proof:** Verified that the canonical moved S10 evidence files at `DOCS/EVIDENCE/ZII/ZQE/` remained 100% hash-identical to their original S00 SHA256 hashes (`a77b2b8c...`, `0ef4fd26...`, `dd084fcd...`).
 
