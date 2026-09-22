@@ -9,11 +9,13 @@
 **Repository:** `aly-samy/zyppi.me`
 **Actual Starting Baseline HEAD:** `86914734e90da9f69384b4bca37f9e13b7602c21`
 **S13A Prerequisite Proof:** PR #157 merged into `main` at `86914734e90da9f69384b4bca37f9e13b7602c21` on 22 September 2026 at 06:06:14 UTC. Merged completion report `DOCS/_REORG/DOCS-ORG-S13A-REPORT.md` confirms `OUTCOME A — S13A COMPLETE`. Final submitted head `4ff713bc7e2b31a2086cb70f682b41e5c36301c8` and passing CI run `https://github.com/aly-samy/zyppi.me/actions/runs/35690640192` (CI Run #891) verified.
-**Internal Workspace Branch:** `docs/s13b-caw-ams-m05-m08-migration-jules`
-**Submitted GitHub Branch:** `docs/s13b-caw-ams-m05-m08-migration-jules`
+**Internal Workspace Branch:** `jules-15528084878292391598-b486f3a5`
+**Submitted GitHub Branch:** `docs/s13b-caw-ams-m05-m08-migration-jules-15528084878292391598`
 **PR Title:** `docs: migrate S13B CAW AMS and M05–M08 corpus`
-**PR Number & URL:** Pending PR publication
-**Final Outcome:** `OUTCOME B — S13B BLOCKED` (Physical 113-file migration completed with 100% byte/hash fidelity; local execution blocked on local PostgreSQL service requirement per Mandate §7 & §9)
+**PR Number & URL:** PR #158 (`https://github.com/aly-samy/zyppi.me/pull/158`)
+**Tested Head SHA:** `0a30f25de2e0ee6421f82f43e60a9d28ab2a9643`
+**Independently Verified Remote CI:** `https://github.com/aly-samy/zyppi.me/actions/runs/35704126910` (CI Run #894 — PASS)
+**Final Outcome:** `OUTCOME B — S13B BLOCKED` (Physical 113-file migration completed with 100% byte/hash/mode fidelity; local execution blocked on local PostgreSQL test service requirement per Mandate §7 & §9)
 
 ---
 
@@ -21,15 +23,19 @@
 
 - **Work-Item ID:** `DOCS-ORG-S13B-MANDATE-01`
 - **Starting Baseline Commit:** `86914734e90da9f69384b4bca37f9e13b7602c21`
-- **S13A Prerequisite Verification:** Verified PR #157 merge ancestry on `main`. The merge commit is `86914734e90da9f69384b4bca37f9e13b7602c21`. The merged S13A completion report (`DOCS/_REORG/DOCS-ORG-S13A-REPORT.md`) verifies `OUTCOME A — S13A COMPLETE`. Final predecessor CI run #891 (`https://github.com/aly-samy/zyppi.me/actions/runs/35690640192`) verified.
+- **S13A Prerequisite Verification:** Verified PR #157 merge ancestry on `main`. Merge commit is `86914734e90da9f69384b4bca37f9e13b7602c21`. Merged completion report `DOCS/_REORG/DOCS-ORG-S13A-REPORT.md` verifies `OUTCOME A — S13A COMPLETE`. Final predecessor CI run #891 (`https://github.com/aly-samy/zyppi.me/actions/runs/35690640192`) verified.
+- **Submission Metadata:**
+  - Internal Workspace Branch: `jules-15528084878292391598-b486f3a5`
+  - Actual Submitted GitHub Branch: `docs/s13b-caw-ams-m05-m08-migration-jules-15528084878292391598`
+  - Pull Request: `#158` (`https://github.com/aly-samy/zyppi.me/pull/158`)
 - **Actual Active Input Versions Verified:**
-  - Node.js: `v22.22.1` active in execution sandbox (emitting warning against pinned `v20.19.0`)
-  - pnpm: `10.30.3`
+  - Node.js: `v20.19.0` (remediated and activated via nvm in execution sandbox, matching pinned `v20.19.0`)
+  - pnpm: `10.30.3` (activated via corepack)
   - TypeScript: `5.9.3`
   - Vitest: `4.1.10`
   - Prettier: `3.9.6`
   - ESLint: `9.39.5`
-- **Execution Dependency Sequence:** S00 Master Register allocation → S13A merged & verified at `86914734e90da9f69384b4bca37f9e13b7602c21` → S13B preflight hash, size & collision check → 113 location-only `git mv` renames → workspace quality gates execution & transient drift cleanup → report materialization.
+- **Execution Dependency Sequence:** S00 Master Register allocation → S13A merged & verified at `86914734e90da9f69384b4bca37f9e13b7602c21` → S13B preflight hash, size & collision check → 113 location-only `git mv` renames → environment remediation → quality gates execution & transient drift cleanup → report materialization.
 - **Governing Inputs Read:**
   1. `DOCS-ORG-S13B-MANDATE-01`
   2. `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.csv` & `DOCS/_REORG/DOCS-ORG-MASTER-REGISTER.md`
@@ -59,7 +65,7 @@
 
 - **IMPLEMENTATION:** 92 files moved to `DOCS/PROGRAMS/CAW/`
 - **EVIDENCE:** 21 files moved to `DOCS/EVIDENCE/CAW/`
-- **Total Physical Relocations:** Exactly 113 pure renames (`R100`, 0 additions / 0 deletions in rename diff).
+- **Rename Proof (`git diff -M100%`):** Baseline-to-head diff contains precisely 113 pure renames (`R100`, similarity index 100%, numstats 0 additions / 0 deletions) plus 1 report addition.
 - **Blob, Byte Size & Mode Equality:** All 113 destination Git blobs, raw byte sizes, line endings, and file permissions (`100644`) equal their baseline sources byte-for-byte.
 - **Whole-Tree Comparison:** All 645 other tracked files in the repository remain 100% unchanged, including all 19 Appendix B protected legacy CAW files, prior sprint reports, control plane registers, source code, and tests.
 - **Zero-Byte Semantic File Preservation:** `DOCS/CAW/AMS/AMS-0309.md` (0 bytes, SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`) relocated unchanged to `DOCS/PROGRAMS/CAW/AMS/AMS-0309.md`. Its protected empty counterpart `DOCS/GOVERNANCE/INTERFACE/ZII/ZQE/ZQE-M00-SRR-v1.0-CLOSED-PASS.md` remains untouched.
@@ -251,36 +257,48 @@ The 19 protected legacy files under `DOCS/CAW/` listed in mandate Appendix B wer
 
 ## 7. Transient Drift Disclosure & Cleanup Log
 
-- **Observed Local Test Drift:** Running test suites during quality gate execution generated transient changes in 5 local worktree paths across two categories:
-  - _Category 1 (3 Untracked Showcase Outputs):_ `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase-metadata.json`, `payload-b-showcase.html`, `payload-b-showcase.svg` generated by `tools/zqe/m06/showcase-print-helper.test.ts`.
-  - _Category 2 (2 Modified Tracked Files):_ `packages/testing/replay/receipts/latest.json`, `tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json`.
-- **Cleanup Actions Executed:**
-  - Untracked showcase files removed via exact-path filesystem deletion (`rm -f`).
-  - Tracked state files restored via `git checkout HEAD --`.
-- **Drift Verification:**
-  - Observed Transient Drift: Present during local test execution.
-  - Final Protected-Scope Drift: **Zero**. `git status -s` confirms strictly 113 pure renames (`R100`) plus 1 new report file (`DOCS/_REORG/DOCS-ORG-S13B-REPORT.md`).
+- **Spelled-Out Transient Paths Observed:**
+  1. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase-metadata.json` (untracked file generated by `tools/zqe/m06/showcase-print-helper.test.ts`)
+  2. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase.html` (untracked file generated by `tools/zqe/m06/showcase-print-helper.test.ts`)
+  3. `DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase.svg` (untracked file generated by `tools/zqe/m06/showcase-print-helper.test.ts`)
+  4. `packages/testing/replay/receipts/latest.json` (modified tracked file during replay test execution)
+  5. `tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json` (modified tracked file during mobile fixture generator test)
+- **Exact Cleanup Commands Executed:**
+  - `rm -f DOCS/ZII/ZQE/evidence/fqr1/payload-b-showcase*`
+  - `git checkout HEAD -- packages/testing/replay/receipts/latest.json tools/zqe/mobile/android/app/src/androidTest/assets/manifest.json`
+- **Working-Tree Status vs. Rename Proof:**
+  - Working-tree `git status -s` after cleanup shows clean state with strictly 113 staged renames (`R`) and 1 new report addition (`A`).
+  - Baseline-to-head `git diff -M100% 86914734e90da9f69384b4bca37f9e13b7602c21..0a30f25de2e0ee6421f82f43e60a9d28ab2a9643` independently proves 100% rename similarity index across all 113 pairs with 0 additions and 0 deletions.
+  - Final Protected-Scope Drift: **Zero**.
 
 ---
 
-## 8. Quality Gate Validation & Local Environment Log
+## 8. Environment Remediation, Quality Gates & Local Status
 
-1. `pnpm format:check` — PASSED (Formatting clean across non-legacy codebase; legacy corpus formatting preserved verbatim)
-2. `pnpm lint` — PASSED (ESLint clean, 0 errors, 0 warnings)
-3. `pnpm exec tsc -b` — PASSED (TypeScript build clean across all packages and apps)
-4. `pnpm governance:validate` — PASSED (Runtime purity, package boundaries across 11 nodes, dependency graph validator, domain isolation, and 10 RGT governance tests all PASS)
-5. `pnpm test` (Local execution status & PostgreSQL service log):
-   - Unmodified `pnpm test` executes all Vitest suites. In the local sandbox container, local PostgreSQL daemon was unstarted (`pg_isready` not found, Docker OCI layer extraction restricted in sandbox).
-   - Executing unmodified `pnpm test` resulted in 15 PostgreSQL connection failures (`connect ECONNREFUSED 127.0.0.1:5432`) across 4 database integration files (`infra/src/test/schema.test.ts`, `infra/src/test/migration.test.ts`, `apps/api/src/registry/postgres-registry.integration.test.ts`, `apps/api/src/registry/seed/seed.test.ts`), while 1,643 non-database unit tests passed green across 63 test files.
-   - Attempted remediation: Checked `pg_isready` and `service postgresql` (uninstalled in sandbox); attempted `docker run --name zyppi-postgres -p 5432:5432 -d postgres:16` (failed due to overlayfs whiteout extraction permissions in rootless container).
-   - Per Mandate §7, §9, and explicit user instructions, running with test exclusions (`--exclude`) does not satisfy the required local `pnpm test` or `pnpm run ci`.
-   - Smallest missing requirement: Active local PostgreSQL service listening on `127.0.0.1:5432` with database/user/password `zyppi_test`.
-   - Per Mandate §9, since local PostgreSQL service cannot be started within the sandbox container restrictions, local validation is blocked on the test database requirement, resulting in `OUTCOME B — S13B BLOCKED`.
-6. `git diff --check` — PASSED (0 whitespace errors)
+- **Environment Remediation Attempts & Outcomes:**
+  - **Node.js Environment Remediation:** Activated `nvm` in execution environment and installed/activated Node `v20.19.0` (`nvm install 20.19.0 && nvm alias default 20.19.0 && nvm use 20.19.0`). Enabled `corepack` to ensure pnpm `10.30.3`. Verified active runtime: `node --version` -> `v20.19.0`, `pnpm --version` -> `10.30.3`. Node version mismatch blocker successfully resolved.
+  - **PostgreSQL Database Remediation:** Attempted `pg_isready` and `service postgresql` (uninstalled in sandbox image). Attempted `apt-get install` (failed: `Permission denied` on `/var/lib/apt/lists/lock` due to non-root sandbox execution). Attempted `docker run --name zyppi-postgres -p 5432:5432 -d postgres:16` (failed: `operation not permitted` on overlayfs whiteout tar extraction in rootless container runtime). Unstarted PostgreSQL test service blocker could not be remediated within sandbox container restrictions.
+- **Local Quality Gate Verification Commands:**
+  1. `pnpm format:check` — PASSED (Executed under Node v20.19.0; formatting clean across non-legacy codebase; legacy corpus formatting preserved verbatim)
+  2. `pnpm lint` — PASSED (Executed under Node v20.19.0; ESLint clean, 0 errors, 0 warnings)
+  3. `pnpm exec tsc -b` — PASSED (Executed under Node v20.19.0; TypeScript build clean across all 11 workspace packages/apps)
+  4. `pnpm governance:validate` — PASSED (Executed under Node v20.19.0; Runtime purity, package boundaries across 11 nodes, dependency graph validator, domain isolation, and 10 RGT governance tests all PASS)
+  5. `pnpm test` — FAILED (Executed unmodified under Node v20.19.0: 63 test files / 1,643 tests passed green, 4 integration test files / 15 tests failed due to local PostgreSQL `connect ECONNREFUSED 127.0.0.1:5432`)
+  6. `pnpm run ci` — **FAILED** (Explicit execution status: Failed at Step 5 `pnpm test` with exit code `1` due to local PostgreSQL connection refusal `connect ECONNREFUSED 127.0.0.1:5432`)
+  7. `git diff --check` — PASSED (0 whitespace errors)
+- **Local Execution Blocked Rationale:** Per Mandate §7, §9, and explicit user instructions, running with test exclusions (`--exclude`) is prohibited as a substitute for `pnpm test` or `pnpm run ci`. Smallest remaining requirement: Active local PostgreSQL service listening on `127.0.0.1:5432` with database/user/password `zyppi_test`. Therefore, local validation is blocked, requiring declaration of `OUTCOME B — S13B BLOCKED`.
 
 ---
 
-## 9. Final Patch State Summary
+## 9. Separately Recorded Remote CI Verification
+
+- **Tested Full Head SHA:** `0a30f25de2e0ee6421f82f43e60a9d28ab2a9643`
+- **Passing Remote GitHub Actions CI:** `https://github.com/aly-samy/zyppi.me/actions/runs/35704126910` (CI Run #894 — PASS)
+- **Remote Environment Verification:** Fully provisioned PostgreSQL 16 service on `127.0.0.1:5432`, Node `v20.19.0`, pnpm `10.30.3`. Executed all six quality gates (`format:check`, `lint`, `tsc -b`, `governance:validate`, `test`, `run ci`) 100% green.
+
+---
+
+## 10. Final Patch State Summary
 
 - **Moved Files:** 113 pure renames (`R100`)
 - **New File Added:** 1 (`DOCS/_REORG/DOCS-ORG-S13B-REPORT.md`)
